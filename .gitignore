@@ -1,0 +1,9 @@
+VERSION
+__pycache__
+*.pyc
+/.idea
+/docs/_build
+.coverage
+.cache
+.pytest_cache
+env
