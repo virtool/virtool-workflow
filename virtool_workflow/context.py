@@ -7,7 +7,9 @@ from.workflow import Workflow
 
 class State(Enum):
     WAITING = auto()
+    STARTUP = auto()
     RUNNING = auto()
+    CLEANUP = auto()
     FINISHED = auto()
 
 
