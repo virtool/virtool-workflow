@@ -1,11 +1,12 @@
 from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
+from .context import Context
 
-WorkflowStep = Callable[["Workflow", "Context"], Awaitable[Optional[str]]]
+WorkflowStep = Callable[["Workflow", Context], Awaitable[Optional[str]]]
 
 class Workflow:
-    
-    """A Workflow is a step-wise, long-running operation.
- 
+    """
+    A Workflow is a step-wise, long-running operation.
+
     A workflow is comprised of:
         1. a set of functions to be executed on startup (.on_startup)
         2. a set of step functions which will be executed in order (.steps)
@@ -25,7 +26,6 @@ class Workflow:
             **kwargs
     ):
         """
-        
         :param startup: An initial set of startup steps.
         :param cleanup: An initial set of cleanup steps.
         :param steps: An inital set of steps.

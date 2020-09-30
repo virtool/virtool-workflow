@@ -4,12 +4,11 @@ from .workflow import Workflow, WorkflowStep
 from .context import Context, UpdateListener, State
 
 class WorkflowError(Exception):
-
-    """An exception ocurring during the execution of a workflow"""
+    """An exception ocurring during the execution of a workflow."""
 
     def __init__(self, cause: Exception, workflow: Workflow, context: Context, *args, **kwargs):
         """
-        
+
         :param cause: The inital exception raised
         :param workflow: The workflow object being executed
         :param context: The execution context of the workflow being executed

@@ -24,8 +24,8 @@ async def step_1(wf, ctx):
 async def step_2(wf, ctx):
     wf.results["2"] = True
     assert ctx.current_step == 2
-    
-    
+
+
 async def test_execute():
     result = await execute.execute(test_workflow)
     assert result["start"]

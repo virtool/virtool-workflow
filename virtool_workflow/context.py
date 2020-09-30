@@ -1,7 +1,6 @@
 import asyncio
-from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import Callable, Sequence, Optional, MutableMapping, Awaitable, MutableSequence
+from typing import Callable, Optional, Awaitable
 
 class State(Enum):
     WAITING = auto()
@@ -16,14 +15,13 @@ StateListener = Callable[["Context"], Awaitable[None]]
 
 
 class Context:
+    """Execution context for a workflow.Workflow.
 
-    """
-    Execution context for a workflow.Workflow.
     Contains the current execution state and manages updates
     """
 
     def __init__(
-            self, 
+            self,
             on_update: Optional[UpdateListener] = None,
             on_state_change: Optional[StateListener] = None
     ):
