@@ -1,21 +1,25 @@
 from virtool_workflow import workflow, execute
-from copy import deepcopy 
+from copy import deepcopy
 
 test_workflow = workflow.Workflow()
+
 
 @test_workflow.startup
 async def startup(wf, ctx):
     wf.results["start"] = True
-    
+
+
 @test_workflow.cleanup
 async def cleanup(wf, ctx):
     wf.results["clean"] = True
-    
+
+
 @test_workflow.step
 async def step_1(wf, ctx):
     wf.results["1"] = True
     assert ctx.current_step == 1
-    
+
+
 @test_workflow.step
 async def step_2(wf, ctx):
     wf.results["2"] = True
@@ -31,11 +35,13 @@ async def test_execute():
     
 
 async def test_respond_errors():
-    wf = deepcopy(test_workflow) 
-    
+    wf = deepcopy(test_workflow)
+
+
     @wf.step
     async def throw_error(wf, ctx):
         raise Exception()
+
     
     async def handle_error(error: execute.WorkflowError):
         assert error.context.current_step == 3

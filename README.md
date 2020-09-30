@@ -39,7 +39,6 @@ pip install recommonmark
 To use sphinx rst [directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html) in a *markdown* file use the 
 `eval_rst` [code block](https://recommonmark.readthedocs.io/en/latest/auto_structify.html#embed-restructuredtext)
 
-
 #### Building the documentation
 
 ```shell script
