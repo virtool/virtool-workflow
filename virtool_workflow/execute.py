@@ -22,7 +22,7 @@ class WorkflowError(Exception):
 WorkflowErrorHandler = Callable[[WorkflowError], Awaitable[Optional[str]]]
 
 
-async def __run_step(step: WorkflowStep, wf: Workflow, ctx: Context, on_error: Optional[WorkflowErrorHandler] = None):
+async def _run_step(step: WorkflowStep, wf: Workflow, ctx: Context, on_error: Optional[WorkflowErrorHandler] = None):
     try:
         return await step(wf, ctx)
     except Exception as exception:
@@ -32,16 +32,16 @@ async def __run_step(step: WorkflowStep, wf: Workflow, ctx: Context, on_error: O
         else:
             raise error
         
-async def __run_steps(steps, wf, ctx, on_error=None, on_each=None):
+async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
     for step in steps:
         if on_each:
             await on_each(wf, ctx)
-        update = await __run_step(step, wf, ctx, on_error)
+        update = await _run_step(step, wf, ctx, on_error)
         if update:
             await ctx.send_update(update)
             
             
-async def __inc_step(_, ctx):
+async def _inc_step(_, ctx):
     ctx.current_step += 1
 
 
@@ -64,11 +64,11 @@ async def execute(
     ctx = Context(on_update=on_update, on_state_change=on_state_change)
 
     ctx.state = State.STARTUP
-    await __run_steps(wf.on_startup, wf, ctx, on_error=on_error)
+    await _run_steps(wf.on_startup, wf, ctx, on_error=on_error)
     ctx.state = State.RUNNING
-    await __run_steps(wf.steps, wf, ctx, on_each=__inc_step, on_error=on_error)
+    await _run_steps(wf.steps, wf, ctx, on_each=_inc_step, on_error=on_error)
     ctx.state = State.CLEANUP
-    await __run_steps(wf.on_cleanup, wf, ctx, on_error=on_error)
+    await _run_steps(wf.on_cleanup, wf, ctx, on_error=on_error)
     ctx.state = State.FINISHED
     
     return wf.results
