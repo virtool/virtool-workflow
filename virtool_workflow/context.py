@@ -10,7 +10,7 @@ class State(Enum):
     FINISHED = auto()
 
 
-UpdateListener = Callable[["WorkflowExecutionContext", str], Awaitable[None]]
+UpdateListener = Callable[["WorkflowExecutionContext", Optional[str]], Awaitable[None]]
 StateListener = Callable[["WorkflowExecutionContext"], Awaitable[None]]
 
 
@@ -35,6 +35,8 @@ class WorkflowExecutionContext:
         self.__on_state_change = [] if not on_state_change else [on_state_change]
 
         self.current_step = 0
+        self.progress = 0.0f
+        self.errors = []
 
     def on_state_change(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
         """
@@ -54,7 +56,7 @@ class WorkflowExecutionContext:
         """
         self.__on_update.append(action)
 
-    async def send_update(self, update: str):
+    async def send_update(self, update: Optional[str]):
         for on_update in self.__on_update:
             await on_update(self, update)
 
