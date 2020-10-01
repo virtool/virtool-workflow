@@ -1,1 +1,2 @@
-from virtool_workflow.workflow import Workflow, WorkflowStep
+from .workflow import Workflow, WorkflowStep
+from .context import WorkflowExecutionContext

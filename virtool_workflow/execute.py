@@ -1,12 +1,12 @@
 from typing import Awaitable, Callable, Optional
 
 from .workflow import Workflow, WorkflowStep
-from .context import Context, UpdateListener, State
+from .context import WorkflowExecutionContext, UpdateListener, State
 
 class WorkflowError(Exception):
     """An exception ocurring during the execution of a workflow."""
 
-    def __init__(self, cause: Exception, workflow: Workflow, context: Context, *args, **kwargs):
+    def __init__(self, cause: Exception, workflow: Workflow, context: WorkflowExecutionContext, *args, **kwargs):
         """
 
         :param cause: The inital exception raised
@@ -22,7 +22,7 @@ class WorkflowError(Exception):
 WorkflowErrorHandler = Callable[[WorkflowError], Awaitable[Optional[str]]]
 
 
-async def _run_step(step: WorkflowStep, wf: Workflow, ctx: Context, on_error: Optional[WorkflowErrorHandler] = None):
+async def _run_step(step: WorkflowStep, wf: Workflow, ctx: WorkflowExecutionContext, on_error: Optional[WorkflowErrorHandler] = None):
     try:
         return await step(wf, ctx)
     except Exception as exception:
@@ -61,7 +61,7 @@ async def execute(
     :raises WorkflowError: If any Exception occurs during execution it is caught and wrapped in
         a WorkflowError. The inital Exception is available by the `cause` attribute.
     """
-    ctx = Context(on_update=on_update, on_state_change=on_state_change)
+    ctx = WorkflowExecutionContext(on_update=on_update, on_state_change=on_state_change)
 
     ctx.state = State.STARTUP
     await _run_steps(wf.on_startup, wf, ctx, on_error=on_error)

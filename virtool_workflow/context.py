@@ -10,11 +10,11 @@ class State(Enum):
     FINISHED = auto()
 
 
-UpdateListener = Callable[["Context", str], Awaitable[None]]
-StateListener = Callable[["Context"], Awaitable[None]]
+UpdateListener = Callable[["WorkflowExecutionContext", str], Awaitable[None]]
+StateListener = Callable[["WorkflowExecutionContext"], Awaitable[None]]
 
 
-class Context:
+class WorkflowExecutionContext:
     """Execution context for a workflow.Workflow.
 
     Contains the current execution state and manages updates
@@ -36,20 +36,20 @@ class Context:
 
         self.current_step = 0
 
-    def on_state_change(self, action: Callable[["Context", str], Awaitable[None]]):
+    def on_state_change(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
         """
         register a callback function to receive updates about the Workflow state
 
-        :param action: async function to call when the WorkflowState changes. The current Context
+        :param action: async function to call when the WorkflowState changes. The current WorkflowExecutionContext
             is included as a parameter
         """
         self.__on_state_change.append(action)
 
-    def on_update(self, action: Callable[["Context", str], Awaitable[None]]):
+    def on_update(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
         """
         register a callback function to receive updates sent from the worflow via :func:`send_update`
 
-        :param action: async function to call when updates are received. The Context and update string are
+        :param action: async function to call when updates are received. The WorkflowExecutionContext and update string are
             included as parameters
         """
         self.__on_update.append(action)

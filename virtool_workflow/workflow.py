@@ -1,7 +1,7 @@
 from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
-from .context import Context
+from .context import WorkflowExecutionContext
 
-WorkflowStep = Callable[["Workflow", Context], Awaitable[Optional[str]]]
+WorkflowStep = Callable[["Workflow", WorkflowExecutionContext], Awaitable[Optional[str]]]
 
 class Workflow:
     """

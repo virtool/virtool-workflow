@@ -10,10 +10,12 @@ CLASSIFIERS = [
 
 PACKAGES = find_packages(exclude="tests")
 
+
 INSTALL_REQUIRES = [
     "virtool_core @ git+https://github.com/virtool/virtool-core",
     "click",
 ]
+
 
 SETUP_REQUIRES = [
     "pytest",
