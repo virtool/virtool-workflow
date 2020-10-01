@@ -25,9 +25,10 @@ async def send_update(job: Job, update: str):
             "$push": {
                 "status": {
                     "state": str(job.context.state),
-                    "stage": job.context.current_step,
+                    "stage": job.workflow.steps[job.context.current_step-1].__name__,
                     "error": job.error,
                     "progress": job.progress,
+                    "update": update
                     "timestamp": timestamp()
                 }
             }
