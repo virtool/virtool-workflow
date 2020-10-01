@@ -11,7 +11,8 @@ CLASSIFIERS = [
 PACKAGES = find_packages(exclude="tests")
 
 INSTALL_REQUIRES = [
-    git+https://github.com/virtool/virtool-core,
+    "git+https://github.com/virtool/virtool-core",
+    "click",
 ]
 
 SETUP_REQUIRES = [
