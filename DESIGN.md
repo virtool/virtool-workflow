@@ -30,16 +30,17 @@ User defined units of work.
   - paths
     - `/references/`
       - reference data
-      - currently use to variations on the reference
+      - currently use two variations on the reference
         - one built from 'default' isolates stored at `<data_path>/references/:id`
         - one built _ad hoc_ directly from the database based on OTU matches from an initial search against the above
-        - find a way to provide a way for developer to derive a `ad hoc` reference without touching the database
+        - find a way to provide a function for developers to derive `ad hoc` references without touching the database
     - `/subtractions/`
       - we will support multiple subtractions in future
       - provide paths to subtractions in environment
     - `/hmms/`
       - contains the profiles.hmm files used in NuVs
-      - download pr
+      - download profiles.hmm and run hmmbuild automatically
+      - provide path that can be passed directly to hmmer
     - `/reads/`
       - provide each prepped read file for the sample
       - provide paths
