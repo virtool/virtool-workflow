@@ -1,4 +1,4 @@
-from virtool_workflow import workflow, execute
+from virtool_workflow._workflow import execute, workflow
 from copy import deepcopy
 
 test_workflow = workflow.Workflow()
