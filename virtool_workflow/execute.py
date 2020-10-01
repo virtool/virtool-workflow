@@ -30,11 +30,12 @@ WorkflowErrorHandler = Callable[[WorkflowError], Awaitable[Optional[str]]]
 
 
 async def _run_step(step: WorkflowStep, wf: Workflow, ctx: WorkflowExecutionContext, on_error: Optional[WorkflowErrorHandler] = None):
+    ctx.error = None
     try:
         return await step(wf, ctx)
     except Exception as exception:
         error = WorkflowError(cause=exception, workflow=wf, context=ctx)
-        ctx.errors.append(error.traceback_data)
+        ctx.error = error.traceback_data
         if on_error:
             return await on_error(error)
         else:

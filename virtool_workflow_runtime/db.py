@@ -26,7 +26,7 @@ async def send_update(job: Job, update: str):
                 "status": {
                     "state": str(job.context.state),
                     "stage": job.workflow.steps[job.context.current_step-1].__name__,
-                    "error": job.error,
+                    "error": job.context.error,
                     "progress": job.progress,
                     "update": update
                     "timestamp": timestamp()

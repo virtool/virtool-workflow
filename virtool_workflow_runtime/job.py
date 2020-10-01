@@ -14,5 +14,3 @@ class Job:
     id: str
     workflow: Workflow
     context: WorkflowExecutionContext
-    progress: float = 0.0f
-    error: str
