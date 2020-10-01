@@ -2,6 +2,35 @@
 
 An SDK for developing new Virtool workflows.
 
+## Installation
+
+```shell script
+git clone https://github.com/virtool/virtool-workflow.git
+pip install .
+
+#  Or
+
+pip install git+https://github.com/virtool/virtool-workflow.git
+```
+
+This will install both the `virtool_workflow` library and the `workflow` command line utility.
+
+### Usage
+
+Create a **python** file containing an instance of `virtool_workflow.Workflow`.
+
+Execute the workflow using 
+
+```shell script
+workflow run -f my_workflow.py
+```
+
+Or if the file is named workflow.py
+
+```shell script
+workflow run 
+```
+
 ## Contributing
 
 ### Tests
