@@ -1,3 +1,4 @@
+import traceback
 from typing import Awaitable, Callable, Optional
 
 from .workflow import Workflow, WorkflowStep
@@ -16,6 +17,12 @@ class WorkflowError(Exception):
         self.cause = cause
         self.workflow = workflow
         self.context = context
+        exception, value, trace_info = sys.exc_info()
+        self.traceback_data = {
+            "type": self.cause.__name__,
+            "traceback": traceback.format_tb(trace_info, max_tb),
+            "details": [str(arg) for arg in value.args]
+        }
         super().__init__(str(cause))
 
 
@@ -27,6 +34,7 @@ async def _run_step(step: WorkflowStep, wf: Workflow, ctx: WorkflowExecutionCont
         return await step(wf, ctx)
     except Exception as exception:
         error = WorkflowError(cause=exception, workflow=wf, context=ctx)
+        ctx.errors.append(error.traceback_data)
         if on_error:
             return await on_error(error)
         else:
@@ -37,12 +45,12 @@ async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
         if on_each:
             await on_each(wf, ctx)
         update = await _run_step(step, wf, ctx, on_error)
-        if update:
-            await ctx.send_update(update)
+        await ctx.send_update(update)
             
             
-async def _inc_step(_, ctx):
+async def _inc_step(wf, ctx):
     ctx.current_step += 1
+    ctx.progress = float(ctx.current_step) / float(len(wf.steps))
 
 
 async def execute(
