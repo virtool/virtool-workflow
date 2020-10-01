@@ -11,7 +11,7 @@ CLASSIFIERS = [
 PACKAGES = find_packages(exclude="tests")
 
 INSTALL_REQUIRES = [
-    "git+https://github.com/virtool/virtool-core",
+    "virtool_core @ git+https://github.com/virtool/virtool-core",
     "click",
 ]
 
@@ -23,7 +23,7 @@ SETUP_REQUIRES = [
 
 ENTRY_POINTS = {
     "console_scripts": [
-        "virtool_worflow = virtool_workflow._runtime:cli_main",
+        "workflow = virtool_workflow_runtime:cli_main",
     ]
 }
 
@@ -33,11 +33,11 @@ setup(
     long_description=Path("README.md").read_text(),
     url="https://github.com/virtool/virtool-workflow",
     author=", ".join(AUTHORS),
-    lisense="MIT",
+    license="MIT",
     platforms="linux",
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
-    setup_requries=SETUP_REQUIRES,
+    setup_requires=SETUP_REQUIRES,
     python_requires=">=3.6",
-    package_dir="virtool_workflow",
+    entry_points=ENTRY_POINTS
 )
