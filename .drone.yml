@@ -5,5 +5,5 @@ steps:
     - name: test
       image: python:3.7-buster
       commands:
-          - pip install -qr requirements.txt
+          - pip install .
           - pytest -x --cov --cov-report xml
