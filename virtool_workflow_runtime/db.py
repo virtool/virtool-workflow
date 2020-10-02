@@ -12,13 +12,13 @@ DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
 
 
 class RuntimeDatabaseConnection:
-    """Send updates to the Virtool jobs database during the lifecycle of a running Workflow"""
+    """Send updates to the Virtool jobs database during the lifecycle of a running Workflow."""
 
     def __init__(self, workflow: Workflow, context: WorkflowExecutionContext):
         self.workflow = workflow
         self.context = context
 
-        self.db_connection_url = os.getenv(DATABASE_CONNECTION_URL_ENV,
+        self.db_connection_url = getenv(DATABASE_CONNECTION_URL_ENV,
                                            default=DATABASE_CONNECTION_URL_DEFAULT)
         self.client = AsyncIOMotorClient(self.db_connection_url)
         self.db = DB(self.client, enqueue_change=self._on_update)
@@ -28,7 +28,7 @@ class RuntimeDatabaseConnection:
 
 
     def _init_job_entry(self):
-        """Create a new Job document in the Virtool database"""
+        """Create a new Job document in the Virtool database."""
         pass
 
 
@@ -36,8 +36,8 @@ class RuntimeDatabaseConnection:
         pass
 
 
-    async def send_update(update: str):
-        _db.jobs.update_one({"_id": self.job.id}, {
+    async def send_update(self, update: str):
+        self.jobs.update_one({"_id": self.job.id}, {
                 "$set": {
                     "state": str(self.job.context.state)
                 },
@@ -47,8 +47,8 @@ class RuntimeDatabaseConnection:
                         "stage": self.job.workflow.steps[self.job.context.current_step-1].__name__,
                         "error": self.job.context.error,
                         "progress": self.job.progress,
-                        "update": update
-                        "timestamp": timestamp()
+                        "update": update,
+                        "timestamp": timestamp(),
                     }
                 }
             })

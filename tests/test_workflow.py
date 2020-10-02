@@ -1,5 +1,4 @@
-import pytest
-from virtool_workflow import execute, workflow
+from virtool_workflow import execute
 
 
 async def test_execute(test_workflow):
@@ -54,7 +53,7 @@ async def test_correct_traceback_data(test_workflow):
         assert_correct_traceback(error)
         on_error.called = True
 
-    result = await execute.execute(test_workflow, on_error=on_error)
+    await execute.execute(test_workflow, on_error=on_error)
 
     assert on_error.called
 

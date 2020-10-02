@@ -4,8 +4,7 @@ from virtool_workflow import WorkflowExecutionContext, Workflow
 
 @dataclass
 class Job:
-    """
-    A Virtool Job
+    """A Virtool Job
 
     :param id: The identifier used in this Job's database entry.
     :param workflow: The :class:`virtool_workflow.Workflow` being executied.
