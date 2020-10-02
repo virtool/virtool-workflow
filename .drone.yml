@@ -1,0 +1,10 @@
+kind: pipeline
+name: default
+
+steps:
+    - name: test
+      image: python:3.7-buster
+      commands:
+          - pip install .
+          - pip install pytest pytest-aiohttp pytest-asyncio pytest-coverage 
+          - pytest -x --cov --cov-report xml
