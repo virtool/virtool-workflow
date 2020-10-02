@@ -23,7 +23,8 @@ class WorkflowExecutionContext:
     def __init__(
             self,
             on_update: Optional[UpdateListener] = None,
-            on_state_change: Optional[StateListener] = None
+            on_state_change: Optional[StateListener] = None,
+            event_loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
     ):
         """
         :param on_update: Async callback function for workflow updates
@@ -37,6 +38,8 @@ class WorkflowExecutionContext:
         self.current_step = 0
         self.progress = 0.0
         self.error = None
+
+        self._loop = event_loop
 
     def on_state_change(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
         """
@@ -64,8 +67,7 @@ class WorkflowExecutionContext:
     def state(self) -> State:
         return self.__state
 
-    @state.setter
-    def state(self, new_state: State):
+    async def set_state(self, new_state: State):
         self.__state = new_state
-        tasks = [asyncio.create_task(on_state(self)) for on_state in self.__on_state_change]
-        asyncio.gather(*tasks)
+        for on_state in self.__on_state_change:
+            await on_state(self)

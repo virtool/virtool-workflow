@@ -82,13 +82,13 @@ async def execute(
     """
     ctx = WorkflowExecutionContext(on_update=on_update, on_state_change=on_state_change)
 
-    ctx.state = State.STARTUP
+    await ctx.set_state(State.STARTUP)
     await _run_steps(wf.on_startup, wf, ctx, on_error=on_error)
-    ctx.state = State.RUNNING
+    await ctx.set_state(State.RUNNING)
     await _run_steps(wf.steps, wf, ctx, on_each=_inc_step, on_error=on_error)
-    ctx.state = State.CLEANUP
+    await ctx.set_state(State.CLEANUP)
     await _run_steps(wf.on_cleanup, wf, ctx, on_error=on_error)
-    ctx.state = State.FINISHED
+    await ctx.set_state(State.FINISHED)
     
     return wf.results
 
