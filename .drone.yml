@@ -6,4 +6,5 @@ steps:
       image: python:3.7-buster
       commands:
           - pip install .
+          - pip install pytest
           - pytest -x --cov --cov-report xml
