@@ -29,4 +29,4 @@ def discover_workflow(path: Path) -> Workflow:
     :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
     """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
-    return next((attr for attr in dir(module) if isinstance(getattr(module, attr), Workflow)))
+    return next((getattr(module, attr) for attr in dir(module) if isinstance(getattr(module, attr), Workflow)))
