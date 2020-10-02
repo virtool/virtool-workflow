@@ -24,13 +24,6 @@ class RuntimeDatabaseConnection:
         self.db = DB(self.client, enqueue_change=self._on_update)
         self.jobs = self.db.jobs
 
-        self._init_job_entry()
-
-
-    def _init_job_entry(self):
-        """Create a new Job document in the Virtool database."""
-        pass
-
 
     async def _on_update(self, collection, operation, *ids):
         pass
