@@ -14,7 +14,7 @@ def cli(): pass
 @click.option("-f", default="workflow.py", help="python module conatianing an instance of `virtool_workflow.Workflow`")
 @cli.command()
 def run(f: str):
-    execute(discovery.discover_workflow(Path(f)))
+    await execute(discovery.discover_workflow(Path(f)))
 
 
 
