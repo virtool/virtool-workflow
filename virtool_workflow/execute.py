@@ -54,12 +54,12 @@ async def _run_step(step: WorkflowStep, wf: Workflow, ctx: WorkflowExecutionCont
 async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
     for step in steps:
         if on_each:
-            await on_each(wf, ctx)
+            on_each(wf, ctx)
         update = await _run_step(step, wf, ctx, on_error)
         await ctx.send_update(update)
             
             
-async def _inc_step(wf, ctx):
+def _inc_step(wf, ctx):
     ctx.current_step += 1
     ctx.progress = float(ctx.current_step) / float(len(wf.steps))
 
