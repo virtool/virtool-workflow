@@ -1,26 +1,36 @@
+import sys
 import traceback
 from typing import Awaitable, Callable, Optional
 
-from .workflow import Workflow, WorkflowStep
 from .context import WorkflowExecutionContext, UpdateListener, State
+from .workflow import Workflow, WorkflowStep
+
 
 class WorkflowError(Exception):
     """An exception ocurring during the execution of a workflow."""
 
-    def __init__(self, cause: Exception, workflow: Workflow, context: WorkflowExecutionContext, *args, **kwargs):
+    def __init__(
+            self,
+            cause: Exception,
+            workflow: Workflow,
+            context: WorkflowExecutionContext,
+            *args,
+            max_traceback_depth: int = 50,
+            **kwargs):
         """
 
         :param cause: The inital exception raised
         :param workflow: The workflow object being executed
         :param context: The execution context of the workflow being executed
+        :param max_traceback_depth: The maximum depth for the traceback data
         """
         self.cause = cause
         self.workflow = workflow
         self.context = context
         exception, value, trace_info = sys.exc_info()
         self.traceback_data = {
-            "type": self.cause.__name__,
-            "traceback": traceback.format_tb(trace_info, max_tb),
+            "type": exception.__name__,
+            "traceback": traceback.format_tb(trace_info, max_traceback_depth),
             "details": [str(arg) for arg in value.args]
         }
         super().__init__(str(cause))

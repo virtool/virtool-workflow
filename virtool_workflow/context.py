@@ -35,7 +35,7 @@ class WorkflowExecutionContext:
         self.__on_state_change = [] if not on_state_change else [on_state_change]
 
         self.current_step = 0
-        self.progress = 0.0f
+        self.progress = 0.0
         self.error = None
 
     def on_state_change(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
