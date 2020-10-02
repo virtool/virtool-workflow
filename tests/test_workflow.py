@@ -1,4 +1,5 @@
 from virtool_workflow import execute
+from virtool_workflow import Workflow
 
 
 async def test_execute(test_workflow):

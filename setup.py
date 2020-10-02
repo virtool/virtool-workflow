@@ -19,7 +19,8 @@ INSTALL_REQUIRES = [
 
 SETUP_REQUIRES = [
     "pytest",
-    "setuptools>=40.0",
+    "pytest-aiohttp",
+    "pytest-asyncio",
 ]
 
 
