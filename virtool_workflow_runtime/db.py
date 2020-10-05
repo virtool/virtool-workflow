@@ -1,6 +1,5 @@
 """Functions for accessing the Virtool database"""
 from os import getenv
-from functools import cached_property
 from virtool_core.db.core import DB
 from virtool_core.utils import timestamp
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -10,17 +9,23 @@ DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
 DATABASE_NAME = "virtool"
 
+global _db
 
-@cached_property
+
 def database(database_name=DATABASE_NAME):
-    client = AsyncIOMotorClient(getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT))
-    return DB(client[database_name], None)
+    global _db
+    try:
+        return _db
+    except NameError:
+        client = AsyncIOMotorClient(getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT))
+        _db = DB(client[database_name], None)
+        return _db
 
 
-def set_database_updates(job: Job, database_name=DATABASE_NAME) -> DB:
+def set_database_updates(job: Job, database_name=DATABASE_NAME):
 
     async def _send_update(_, update: str):
-        await database.jobs.update_one({"_id": job.id}, {
+        await database(database_name).jobs.update_one({"_id": job.id}, {
             "$set": {
                 "state": str(job.context.state)
             },
