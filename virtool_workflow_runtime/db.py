@@ -9,23 +9,16 @@ DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
 DATABASE_NAME = "virtool"
 
-global _db
+
+def connect(database_name=DATABASE_NAME):
+    client = AsyncIOMotorClient(getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT))
+    return DB(client[database_name], None)
 
 
-def database(database_name=DATABASE_NAME):
-    global _db
-    try:
-        return _db
-    except NameError:
-        client = AsyncIOMotorClient(getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT))
-        _db = DB(client[database_name], None)
-        return _db
-
-
-def set_database_updates(job: Job, database_name=DATABASE_NAME):
+def set_database_updates(job: Job, database: DB):
 
     async def _send_update(_, update: str):
-        await database(database_name).jobs.update_one({"_id": job.id}, {
+        await database.jobs.update_one({"_id": job.id}, {
             "$set": {
                 "state": str(job.context.state)
             },
