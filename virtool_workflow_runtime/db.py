@@ -4,6 +4,7 @@ from virtool_core.db.core import DB
 from virtool_core.utils import timestamp
 from virtool_workflow import Workflow, WorkflowExecutionContext
 from motor.motor_asyncio import AsyncIOMotorClient
+from .job import Job
 
 DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
@@ -12,21 +13,26 @@ DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
 class RuntimeDatabaseConnection:
     """Send updates to the Virtool jobs database during the lifecycle of a running Workflow."""
 
-    def __init__(self, workflow: Workflow, context: WorkflowExecutionContext):
+    def __init__(
+            self,
+            workflow: Workflow,
+            context: WorkflowExecutionContext,
+            job_id: str,
+            mongo_connection_string: str = getenv(DATABASE_CONNECTION_URL_ENV,
+                                                  default=DATABASE_CONNECTION_URL_DEFAULT)
+    ):
         self.workflow = workflow
         self.context = context
+        self.job = Job(job_id, workflow, context)
 
-        self.db_connection_url = getenv(DATABASE_CONNECTION_URL_ENV,
-                                        default=DATABASE_CONNECTION_URL_DEFAULT)
-        self.client = AsyncIOMotorClient(self.db_connection_url)
-        self.db = DB(self.client, enqueue_change=self._on_update)
+        self.client = AsyncIOMotorClient(mongo_connection_string)
+        self.db = DB(self.client, enqueue_change=None)
         self.jobs = self.db.jobs
 
-    async def _on_update(self, collection, operation, *ids):
-        pass
+        self.job.context.on_update(self.send_update)
 
     async def send_update(self, update: str):
-        self.jobs.update_one({"_id": self.job.id}, {
+        await self.jobs.update_one({"_id": self.job.id}, {
             "$set": {
                 "state": str(self.job.context.state)
             },
@@ -35,9 +41,10 @@ class RuntimeDatabaseConnection:
                     "state": str(self.job.context.state),
                     "stage": self.job.workflow.steps[self.job.context.current_step - 1].__name__,
                     "error": self.job.context.error,
-                    "progress": self.job.progress,
+                    "progress": self.job.context.progress,
                     "update": update,
                     "timestamp": timestamp(),
                 }
             }
         })
+
