@@ -8,44 +8,31 @@ from .job import Job
 
 DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
+DATABASE_NAME = "virtool"
 
-def connect_db_for_job(job: Job):
-    pass
 
-class RuntimeDatabaseConnection:
-    """Send updates to the Virtool jobs database during the lifecycle of a running Workflow."""
+def set_database_updates(job: Job, database_name=DATABASE_NAME) -> DB:
+    client = AsyncIOMotorClient(getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT))
+    db = DB(client[database_name], None)
 
-    def __init__(
-            self,
-            workflow: Workflow,
-            context: WorkflowExecutionContext,
-            job_id: str,
-            mongo_connection_string: str = getenv(DATABASE_CONNECTION_URL_ENV,
-                                                  default=DATABASE_CONNECTION_URL_DEFAULT)
-    ):
-        self.job = Job(job_id, workflow, context)
-
-        self.client = AsyncIOMotorClient(mongo_connection_string)
-        self.db = DB(self.client, enqueue_change=None)
-        self.jobs = self.db.jobs
-
-        self.job.context.on_update(self._send_update)
-
-    async def _send_update(self, context: WorkflowExecutionContext, update: str):
-        await self.jobs.update_one({"_id": self.job.id}, {
+    async def _send_update(_, update: str):
+        await db.jobs.update_one({"_id": job.id}, {
             "$set": {
-                "state": str(self.job.context.state)
+                "state": str(job.context.state)
             },
             "$push": {
                 "status": {
-                    "state": str(self.job.context.state),
-                    "stage": self.job.workflow.steps[self.job.context.current_step - 1].__name__,
-                    "error": self.job.context.error,
-                    "progress": self.job.context.progress,
+                    "state": str(job.context.state),
+                    "stage": job.workflow.steps[job.context.current_step - 1].__name__,
+                    "error": job.context.error,
+                    "progress": job.context.progress,
                     "update": update,
                     "timestamp": timestamp(),
                 }
             }
         })
+
+    job.context.on_update(_send_update)
+    return db
 
 

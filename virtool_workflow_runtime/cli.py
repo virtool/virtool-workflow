@@ -4,8 +4,7 @@ import uvloop
 from pathlib import Path
 
 from virtool_workflow.execute import execute
-from .db import connect_db_for_job
-from .job import Job
+from . import runtime
 
 from . import discovery
 
@@ -23,13 +22,11 @@ def cli():
     type=click.Path(exists=True),
     help="python module containing an instance of `virtool_workflow.Workflow`"
 )
-@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV, help="The virtool job ID")
+@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @cli.command()
 async def run(f: str, job_id: str):
-    workflow = discovery.discover_workflow(Path(f))
-    job = Job(job_id, workflow)
-    connect_db_for_job(job)
-    await execute(job.workflow, context=job.context)
+    workflow = discovery.discover_workflow(Path(f).absolute())
+    await runtime.execute(workflow, job_id=job_id)
 
 
 @click.option(

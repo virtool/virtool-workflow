@@ -1,5 +1,4 @@
 from virtool_workflow import execute
-from virtool_workflow import Workflow
 
 
 async def test_execute(test_workflow):
@@ -25,7 +24,6 @@ async def test_respond_errors(test_workflow):
     async def receive_updates(ctx, update):
         updates.append(update)
 
-
     await execute.execute(test_workflow, on_error=raise_exception, on_update=receive_updates)
     assert "Step 3 skipped due to internal error" in updates
 
@@ -38,12 +36,10 @@ async def test_correct_traceback_data(test_workflow):
     async def raise_exception(_, __):
         raise ValueError(arg1, arg2)
 
-
     def assert_correct_traceback(error):
         tb = error.traceback_data
         assert tb["type"] == "ValueError"
         assert arg1, arg2 in tb["details"]
-
 
     try:
         await execute.execute(test_workflow)

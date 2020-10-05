@@ -2,7 +2,7 @@ from pathlib import Path
 from importlib.util import spec_from_file_location, module_from_spec
 from types import ModuleType
 
-from virtool_workflow import Workflow, decorator_api
+from virtool_workflow import Workflow
 
 
 def _import_module_from_file(module_name: str, path: Path) -> ModuleType:
@@ -28,8 +28,5 @@ def discover_workflow(path: Path) -> Workflow:
     :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
     """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
-
-    if decorator_api.workflow:
-        return decorator_api.workflow
 
     return next((getattr(module, attr) for attr in dir(module) if isinstance(getattr(module, attr), Workflow)))

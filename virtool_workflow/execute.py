@@ -63,6 +63,7 @@ async def _run_step(
 async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
     for step in steps:
         if on_each:
+            print(on_each)
             on_each(wf, ctx)
         update = await _run_step(step, wf, ctx, on_error)
         await ctx.send_update(update)
@@ -75,7 +76,7 @@ def _inc_step(wf, ctx):
 
 async def execute(
         wf: Workflow,
-        context: WorkflowExecutionContext = WorkflowExecutionContext(),
+        context: WorkflowExecutionContext = None,
         on_update: Optional[UpdateListener] = None,
         on_state_change: Optional[UpdateListener] = None,
         on_error: Optional[WorkflowErrorHandler] = None
@@ -91,6 +92,8 @@ async def execute(
     :raises WorkflowError: If any Exception occurs during execution it is caught and wrapped in
         a WorkflowError. The initial Exception is available by the `cause` attribute.
     """
+    context = context if context else WorkflowExecutionContext()
+
     if on_update:
         context.on_update(on_update)
     if on_state_change:
