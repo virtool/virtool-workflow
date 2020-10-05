@@ -1,9 +1,9 @@
 from virtool_workflow.decorator_api import *
 
+
 @step
 async def _step(wf, ctx):
     wf.results["step"] = True
-
 
 
 @startup

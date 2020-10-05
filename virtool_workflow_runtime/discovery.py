@@ -14,8 +14,7 @@ def _import_module_from_file(module_name: str, path: Path) -> ModuleType:
     :returns: The loaded python module.
     """
     spec = spec_from_file_location(module_name, str(path.absolute()))
-    module = module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = spec.loader.load_module(module_from_spec(spec).__name__)
     return module
 
 
@@ -30,7 +29,7 @@ def discover_workflow(path: Path) -> Workflow:
     """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
 
-    if decorator_api._workflow:
-        return decorator_api._workflow
+    if decorator_api.workflow:
+        return decorator_api.workflow
 
     return next((getattr(module, attr) for attr in dir(module) if isinstance(getattr(module, attr), Workflow)))

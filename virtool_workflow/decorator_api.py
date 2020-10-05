@@ -4,16 +4,16 @@ from .execute import execute
 
 # Create a new workflow only if `workflow` is undefined (the first time the module is imported)
 try:
-    _workflow
+    workflow
 except NameError:
-    _workflow = Workflow()
+    workflow = Workflow()
 
-step = _workflow.step
-startup = _workflow.startup
-cleanup = _workflow.cleanup
+step = workflow.step
+startup = workflow.startup
+cleanup = workflow.cleanup
 
 async def execute_workflow(**kwargs):
-    return await execute(_workflow, **kwargs)
+    return await execute(workflow, **kwargs)
 
 
 
