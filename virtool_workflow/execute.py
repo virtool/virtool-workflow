@@ -14,9 +14,8 @@ class WorkflowError(Exception):
             cause: Exception,
             workflow: Workflow,
             context: WorkflowExecutionContext,
-            *args,
-            max_traceback_depth: int = 50,
-            **kwargs):
+            max_traceback_depth: int = 50
+    ):
         """
 
         :param cause: The initial exception raised
@@ -76,6 +75,7 @@ def _inc_step(wf, ctx):
 
 async def execute(
         wf: Workflow,
+        context: WorkflowExecutionContext = WorkflowExecutionContext(),
         on_update: Optional[UpdateListener] = None,
         on_state_change: Optional[UpdateListener] = None,
         on_error: Optional[WorkflowErrorHandler] = None
@@ -84,21 +84,24 @@ async def execute(
     Execute a Workflow.
     
     :param Workflow wf: the Workflow to execute
+    :param context: The WorkflowExecutionContext to start from
     :param on_update: An async function which is called when a step of the workflow provides an update
     :param on_state_change: An async function which is called when the WorkflowState changes
     :param on_error: An async function which is called upon any exception
     :raises WorkflowError: If any Exception occurs during execution it is caught and wrapped in
         a WorkflowError. The initial Exception is available by the `cause` attribute.
     """
-    ctx = WorkflowExecutionContext(on_update=on_update, on_state_change=on_state_change)
+    if on_update:
+        context.on_update(on_update)
+    if on_state_change:
+        context.on_state_change(on_state_change)
 
-    await ctx.set_state(State.STARTUP)
-    await _run_steps(wf.on_startup, wf, ctx, on_error=on_error)
-    await ctx.set_state(State.RUNNING)
-    await _run_steps(wf.steps, wf, ctx, on_each=_inc_step, on_error=on_error)
-    await ctx.set_state(State.CLEANUP)
-    await _run_steps(wf.on_cleanup, wf, ctx, on_error=on_error)
-    await ctx.set_state(State.FINISHED)
+    await context.set_state(State.STARTUP)
+    await _run_steps(wf.on_startup, wf, context, on_error=on_error)
+    await context.set_state(State.RUNNING)
+    await _run_steps(wf.steps, wf, context, on_each=_inc_step, on_error=on_error)
+    await context.set_state(State.CLEANUP)
+    await _run_steps(wf.on_cleanup, wf, context, on_error=on_error)
+    await context.set_state(State.FINISHED)
     
     return wf.results
-

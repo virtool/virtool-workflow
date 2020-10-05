@@ -12,4 +12,4 @@ class Job:
     """
     id: str
     workflow: Workflow
-    context: WorkflowExecutionContext
+    context: WorkflowExecutionContext = WorkflowExecutionContext()

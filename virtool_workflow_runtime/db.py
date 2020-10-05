@@ -9,6 +9,8 @@ from .job import Job
 DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
 
+def connect_db_for_job(job: Job):
+    pass
 
 class RuntimeDatabaseConnection:
     """Send updates to the Virtool jobs database during the lifecycle of a running Workflow."""
@@ -21,17 +23,15 @@ class RuntimeDatabaseConnection:
             mongo_connection_string: str = getenv(DATABASE_CONNECTION_URL_ENV,
                                                   default=DATABASE_CONNECTION_URL_DEFAULT)
     ):
-        self.workflow = workflow
-        self.context = context
         self.job = Job(job_id, workflow, context)
 
         self.client = AsyncIOMotorClient(mongo_connection_string)
         self.db = DB(self.client, enqueue_change=None)
         self.jobs = self.db.jobs
 
-        self.job.context.on_update(self.send_update)
+        self.job.context.on_update(self._send_update)
 
-    async def send_update(self, update: str):
+    async def _send_update(self, context: WorkflowExecutionContext, update: str):
         await self.jobs.update_one({"_id": self.job.id}, {
             "$set": {
                 "state": str(self.job.context.state)
@@ -47,4 +47,5 @@ class RuntimeDatabaseConnection:
                 }
             }
         })
+
 
