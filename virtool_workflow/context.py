@@ -2,6 +2,7 @@ import asyncio
 from enum import Enum, auto
 from typing import Callable, Optional, Awaitable
 
+
 class State(Enum):
     WAITING = auto()
     STARTUP = auto()
@@ -38,7 +39,6 @@ class WorkflowExecutionContext:
         self.progress = 0.0
         self.error = None
 
-
     def on_state_change(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
         """
         register a callback function to receive updates about the Workflow state
@@ -50,7 +50,7 @@ class WorkflowExecutionContext:
 
     def on_update(self, action: Callable[["WorkflowExecutionContext", str], Awaitable[None]]):
         """
-        register a callback function to receive updates sent from the worflow via :func:`send_update`
+        register a callback function to receive updates sent from the workflow via :func:`send_update`
 
         :param action: async function to call when updates are received. The WorkflowExecutionContext and update string are
             included as parameters

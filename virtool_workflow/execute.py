@@ -1,13 +1,13 @@
 import sys
 import traceback
-from typing import Awaitable, Callable, Optional
+from typing import Awaitable, Callable, Optional, Dict, Any
 
 from .context import WorkflowExecutionContext, UpdateListener, State
 from .workflow import Workflow, WorkflowStep
 
 
 class WorkflowError(Exception):
-    """An exception ocurring during the execution of a workflow."""
+    """An exception occurring during the execution of a workflow."""
 
     def __init__(
             self,
@@ -19,7 +19,7 @@ class WorkflowError(Exception):
             **kwargs):
         """
 
-        :param cause: The inital exception raised
+        :param cause: The initial exception raised
         :param workflow: The workflow object being executed
         :param context: The execution context of the workflow being executed
         :param max_traceback_depth: The maximum depth for the traceback data
@@ -27,19 +27,28 @@ class WorkflowError(Exception):
         self.cause = cause
         self.workflow = workflow
         self.context = context
+
         exception, value, trace_info = sys.exc_info()
+
         self.traceback_data = {
             "type": exception.__name__,
             "traceback": traceback.format_tb(trace_info, max_traceback_depth),
             "details": [str(arg) for arg in value.args]
         }
+
         super().__init__(str(cause))
 
 
 WorkflowErrorHandler = Callable[[WorkflowError], Awaitable[Optional[str]]]
+"""Handler function for when a :class:`WorkflowError` is raised during execution of a Workflow"""
 
 
-async def _run_step(step: WorkflowStep, wf: Workflow, ctx: WorkflowExecutionContext, on_error: Optional[WorkflowErrorHandler] = None):
+async def _run_step(
+        step: WorkflowStep,
+        wf: Workflow,
+        ctx: WorkflowExecutionContext,
+        on_error: Optional[WorkflowErrorHandler] = None
+):
     ctx.error = None
     try:
         return await step(wf, ctx)
@@ -50,7 +59,8 @@ async def _run_step(step: WorkflowStep, wf: Workflow, ctx: WorkflowExecutionCont
             return await on_error(error)
         else:
             raise error
-        
+
+
 async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
     for step in steps:
         if on_each:
@@ -69,7 +79,7 @@ async def execute(
         on_update: Optional[UpdateListener] = None,
         on_state_change: Optional[UpdateListener] = None,
         on_error: Optional[WorkflowErrorHandler] = None
-):
+) -> Dict[str, Any]:
     """
     Execute a Workflow.
     
@@ -78,7 +88,7 @@ async def execute(
     :param on_state_change: An async function which is called when the WorkflowState changes
     :param on_error: An async function which is called upon any exception
     :raises WorkflowError: If any Exception occurs during execution it is caught and wrapped in
-        a WorkflowError. The inital Exception is available by the `cause` attribute.
+        a WorkflowError. The initial Exception is available by the `cause` attribute.
     """
     ctx = WorkflowExecutionContext(on_update=on_update, on_state_change=on_state_change)
 
