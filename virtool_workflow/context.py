@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from typing import Callable, Optional, Coroutine, Any
+from types import SimpleNamespace
 
 
 class State(Enum):
@@ -14,7 +15,7 @@ UpdateListener = Callable[["WorkflowExecutionContext", Optional[str]], Coroutine
 StateListener = Callable[["WorkflowExecutionContext"], Coroutine[Any, Any, None]]
 
 
-class WorkflowExecutionContext:
+class WorkflowExecutionContext(SimpleNamespace):
     """Execution context for a workflow.Workflow.
 
     Contains the current execution state and manages updates
@@ -24,10 +25,12 @@ class WorkflowExecutionContext:
             self,
             on_update: Optional[UpdateListener] = None,
             on_state_change: Optional[StateListener] = None,
+            **kwargs,
     ):
         """
         :param on_update: Async callback function for workflow updates
         :param on_state_change: Async callback function for changes in WorkflowState
+        :param kwargs: Any other keyword arguments will be stored as instance attributes
         """
         self.__updates = []
         self.__on_update = [] if not on_update else [on_update]
@@ -37,6 +40,8 @@ class WorkflowExecutionContext:
         self.current_step = 0
         self.progress = 0.0
         self.error = None
+        
+        super(WorkflowExecutionContext, self).__init__(**kwargs)
 
     def on_state_change(self, action: StateListener):
         """
@@ -68,6 +73,3 @@ class WorkflowExecutionContext:
         self.__state = new_state
         for on_state in self.__on_state_change:
             await on_state(self)
-
-    def __setattr__(self, key, value):
-        self.key = value

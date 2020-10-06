@@ -7,12 +7,14 @@ def test_workflow():
     _test_workflow = workflow.Workflow()
 
     @_test_workflow.startup
-    async def startup(wf, _):
+    async def startup(wf, ctx):
         wf.results["start"] = True
+        ctx.important_variable = "IMPORTANT"
 
     @_test_workflow.cleanup
-    async def cleanup(wf, _):
+    async def cleanup(wf, ctx):
         wf.results["clean"] = True
+        assert ctx.important_variable == "IMPORTANT"
 
     @_test_workflow.step
     async def step_1(wf, ctx):
