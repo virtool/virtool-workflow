@@ -1,0 +1,26 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: ping
+    image: mongo:4.4
+    commands:
+      - sleep 5
+      - mongo --host mongo --eval "db.version()"
+
+
+  - name: test
+      image: python:3.7-buster
+      commands:
+          - export DATABASE_CONNECTION_URL="mongodb://mongo:27017"
+          - pip install .
+          - pip install pytest pytest-aiohttp pytest-asyncio pytest-coverage
+          - pytest -x --cov --cov-report xml
+
+
+services:
+  - name: mongo
+    image: mongo:4.4
+    command: [--nojournal]
+    ports:
+      - 27017
