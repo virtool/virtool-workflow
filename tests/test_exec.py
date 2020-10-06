@@ -1,6 +1,6 @@
-from virtool_workflow import run
+from virtool_workflow import execute
 
 
-def test_sh():
-    out, _ = run.sh("ls -la")
+async def test_sh():
+    out, _ = await execute.shell("ls")
     assert out

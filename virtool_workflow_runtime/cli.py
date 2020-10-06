@@ -3,7 +3,7 @@ import click
 import uvloop
 from pathlib import Path
 
-from virtool_workflow.execute import execute
+from virtool_workflow.execute_workflow import execute
 from . import runtime
 
 from . import discovery
