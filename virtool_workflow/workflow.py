@@ -2,6 +2,8 @@ from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
 from .context import WorkflowExecutionContext
 
 WorkflowStep = Callable[["Workflow", WorkflowExecutionContext], Awaitable[Optional[str]]]
+"""Async function representing a step in a Virtool Workflow."""
+
 
 class Workflow:
     """
@@ -28,7 +30,7 @@ class Workflow:
         """
         :param startup: An initial set of startup steps.
         :param cleanup: An initial set of cleanup steps.
-        :param steps: An inital set of steps.
+        :param steps: An initial set of steps.
         """
         obj = super().__new__(cls)
         obj.on_startup = []
