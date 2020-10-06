@@ -24,3 +24,4 @@ services:
     command: [--nojournal]
     ports:
       - 27017
+
