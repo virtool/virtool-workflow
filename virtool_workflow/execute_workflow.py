@@ -7,7 +7,10 @@ from .workflow import Workflow, WorkflowStep
 
 
 class WorkflowError(Exception):
-    """An exception occurring during the execution of a workflow."""
+    """
+
+    An exception occurring during the execution of a workflow.
+    """
 
     def __init__(
             self,

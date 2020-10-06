@@ -12,7 +12,7 @@ async def test_execute(test_workflow):
 async def test_respond_errors(test_workflow):
 
     @test_workflow.step
-    async def throw_error(wf, ctx):
+    async def throw_error(*_):
         raise Exception()
 
     async def raise_exception(error: execute_workflow.WorkflowError):
@@ -21,7 +21,7 @@ async def test_respond_errors(test_workflow):
 
     updates = []
     
-    async def receive_updates(ctx, update):
+    async def receive_updates(_, update):
         updates.append(update)
 
     await execute_workflow.execute(test_workflow, on_error=raise_exception, on_update=receive_updates)
@@ -36,8 +36,8 @@ async def test_correct_traceback_data(test_workflow):
     async def raise_exception(_, __):
         raise ValueError(arg1, arg2)
 
-    def assert_correct_traceback(error):
-        tb = error.traceback_data
+    def assert_correct_traceback(_error):
+        tb = _error.traceback_data
         assert tb["type"] == "ValueError"
         assert arg1, arg2 in tb["details"]
 
@@ -46,8 +46,8 @@ async def test_correct_traceback_data(test_workflow):
     except execute_workflow.WorkflowError as error:
         assert_correct_traceback(error)
 
-    async def on_error(error):
-        assert_correct_traceback(error)
+    async def on_error(_error):
+        assert_correct_traceback(_error)
         on_error.called = True
 
     await execute_workflow.execute(test_workflow, on_error=on_error)
@@ -73,7 +73,7 @@ async def test_correct_progress(test_workflow):
 
 async def test_on_update_called(test_workflow):
 
-    async def on_update(ctx, update):
+    async def on_update(*_):
         on_update.calls += 1
 
     async def on_state_change(ctx):

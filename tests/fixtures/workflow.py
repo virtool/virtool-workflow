@@ -7,11 +7,11 @@ def test_workflow():
     _test_workflow = workflow.Workflow()
 
     @_test_workflow.startup
-    async def startup(wf, ctx):
+    async def startup(wf, _):
         wf.results["start"] = True
 
     @_test_workflow.cleanup
-    async def cleanup(wf, ctx):
+    async def cleanup(wf, _):
         wf.results["clean"] = True
 
     @_test_workflow.step

@@ -1,4 +1,3 @@
-import asyncio
 from enum import Enum, auto
 from typing import Callable, Optional, Coroutine, Any
 
@@ -52,8 +51,8 @@ class WorkflowExecutionContext:
         """
         register a callback function to receive updates sent from the workflow via :func:`send_update`
 
-        :param action: async function to call when updates are received. The WorkflowExecutionContext and update string are
-            included as parameters
+        :param action: async function to call when updates are received. The WorkflowExecutionContext
+                       and update string are included as parameters.
         """
         self.__on_update.append(action)
 
