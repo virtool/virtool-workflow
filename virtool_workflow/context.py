@@ -68,3 +68,6 @@ class WorkflowExecutionContext:
         self.__state = new_state
         for on_state in self.__on_state_change:
             await on_state(self)
+
+    def __setattr__(self, key, value):
+        self.key = value
