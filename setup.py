@@ -13,8 +13,9 @@ PACKAGES = find_packages(exclude="tests")
 
 INSTALL_REQUIRES = [
     "virtool_core @ git+https://github.com/virtool/virtool-core",
-    "motor",
     "click",
+    "docker",
+    "motor",
     "uvloop",
 ]
 

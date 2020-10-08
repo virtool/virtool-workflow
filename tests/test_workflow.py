@@ -1,4 +1,4 @@
-from virtool_workflow import execute_workflow
+from virtool_workflow import execute_workflow, workflow, WorkflowExecutionContext
 
 
 async def test_execute(test_workflow):
@@ -76,7 +76,7 @@ async def test_on_update_called(test_workflow):
     async def on_update(*_):
         on_update.calls += 1
 
-    async def on_state_change(ctx):
+    async def on_state_change(_):
         on_state_change.calls += 1
 
     on_update.calls = 0
@@ -88,4 +88,19 @@ async def test_on_update_called(test_workflow):
     assert on_state_change.calls == 4
 
 
+async def test_coerce_signature():
+    workflow_ = workflow.Workflow()
+
+    @workflow_.step
+    def some_step():
+        pass
+
+    @workflow_.step
+    def context_step(context):
+        assert isinstance(context, WorkflowExecutionContext)
+
+    some_step()
+
+    await workflow_.steps[0](workflow_, WorkflowExecutionContext())
+    await workflow_.steps[1](workflow_, WorkflowExecutionContext())
 

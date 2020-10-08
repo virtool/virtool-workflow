@@ -4,7 +4,7 @@ from asyncio.subprocess import PIPE, Process
 from typing import Union, IO, Tuple
 
 
-async def subprocess(command: Union[str, list], **kwargs) -> Process:
+async def run_subprocess(command: Union[str, list], **kwargs) -> Process:
     """
     Execute a shell command as a subprocess
 
@@ -26,7 +26,7 @@ async def subprocess(command: Union[str, list], **kwargs) -> Process:
     return await asyncio.create_subprocess_exec(*command, **args)
 
 
-async def shell(
+async def run_shell_command(
         command: Union[str, list],
         stdin: Union[str, IO] = "",
         **kwargs,
@@ -41,8 +41,8 @@ async def shell(
     """
     stdin_is_str = isinstance(stdin, str)
 
-    proc = await (subprocess(command, **kwargs) if stdin_is_str
-                  else subprocess(command, stdin=stdin, **kwargs))
+    proc = await (run_subprocess(command, **kwargs) if stdin_is_str
+                  else run_subprocess(command, stdin=stdin, **kwargs))
     input_ = bytes(stdin, encoding="utf-8") if stdin_is_str else None
 
     out, err = await proc.communicate(input=input_)

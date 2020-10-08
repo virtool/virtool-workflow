@@ -1,8 +1,44 @@
+from inspect import signature, iscoroutinefunction
+from functools import wraps
 from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
 from .context import WorkflowExecutionContext
 
 WorkflowStep = Callable[["Workflow", WorkflowExecutionContext], Awaitable[Optional[str]]]
 """Async function representing a step in a Virtool Workflow."""
+
+
+def _coerce_signature_to_workflow_step(func: Callable):
+    """
+    Coerce the signature of a function to the signature of WorkflowStep
+
+    :param func: The function to coerce
+    :return: An equivalent async function with the signature of WorkflowStep
+    """
+
+    sig = signature(func)
+    n_params = len(sig.parameters)
+
+    if not iscoroutinefunction(func):
+        func_ = func
+
+        @wraps(func_)
+        async def async_func(*args, **kwargs):
+            return func_(*args, **kwargs)
+
+        func = async_func
+
+    if n_params == 1:
+        @wraps(func)
+        async def _func(_, context):
+            return await func(context)
+    elif n_params == 0:
+        @wraps(func)
+        async def _func(_, __):
+            return await func()
+    else:
+        _func = func
+
+    return _func
 
 
 class Workflow:
@@ -45,17 +81,20 @@ class Workflow:
             obj.steps.extend(steps)
         return obj
 
-    def startup(self, action: WorkflowStep):
+    def startup(self, action: Callable):
         """Decorator for adding a step to workflow startup."""
-        self.on_startup.append(action)
+        step = _coerce_signature_to_workflow_step(action)
+        self.on_startup.append(step)
         return action
 
-    def cleanup(self, action: WorkflowStep):
+    def cleanup(self, action: Callable):
         """Decorator for adding a step to workflow cleanup."""
-        self.on_cleanup.append(action)
+        step = _coerce_signature_to_workflow_step(action)
+        self.on_cleanup.append(step)
         return action
 
-    def step(self, step: WorkflowStep):
+    def step(self, step: Callable):
         """Decorator for adding a step to the workflow."""
-        self.steps.append(step)
+        step_ = _coerce_signature_to_workflow_step(step)
+        self.steps.append(step_)
         return step
