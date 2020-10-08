@@ -4,15 +4,15 @@ workflow = Workflow()
 
 
 @workflow.startup
-async def on_startup(*_):
+async def on_startup():
     return "Started up"
 
 
 @workflow.step
-async def step(*_):
+async def step():
     return "Step"
 
 
 @workflow.cleanup
-async def on_cleanup(*_):
+async def on_cleanup():
     return "Cleaned up"
