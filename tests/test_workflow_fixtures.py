@@ -1,5 +1,6 @@
 from virtool_workflow.workflow_fixture import *
 from inspect import signature
+from typing import Dict
 
 
 @workflow_fixture
@@ -62,3 +63,46 @@ async def test_preservation_and_injection_of_non_fixture_arguments():
 
     injected(arg1="arg1", other_param="param")
     injected("arg1", other_param="param")
+
+
+async def test_same_instance_is_used():
+
+    @workflow_fixture
+    def dictionary():
+        return {}
+
+    @WorkflowFixture.inject
+    def func1(dictionary: Dict[str, str]):
+        dictionary["item"] = "item"
+
+    @WorkflowFixture.inject
+    def func2(dictionary: Dict[str, str]):
+        assert dictionary["item"] == "item"
+        dictionary["item"] = "different item"
+
+    func1()
+    func2()
+
+    assert WorkflowFixture._instances["dictionary"]["item"] == "different item"
+
+
+def test_generator_fixtures_cleanup():
+
+    cleanup_executed = False
+
+    @workflow_fixture
+    def generator_fixture():
+        yield "FIXTURE"
+        nonlocal cleanup_executed
+        cleanup_executed = True
+
+    @WorkflowFixture.inject
+    def use_generator_fixture(generator_fixture):
+        assert generator_fixture == "FIXTURE"
+
+    assert len(WorkflowFixture._generators) == 1
+    WorkflowFixture.clean_instances()
+    assert len(WorkflowFixture._generators) == len(WorkflowFixture._instances) == 0
+
+    assert cleanup_executed
+
