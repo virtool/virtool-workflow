@@ -7,12 +7,13 @@ WorkflowStep = Callable[["Workflow", WorkflowExecutionContext], Awaitable[Option
 """Async function representing a step in a Virtool Workflow."""
 
 
-def _coerce_signature_to_workflow_step(func: Callable):
+def _coerce_to_async_function(func: Callable):
     """
-    Coerce the signature of a function to the signature of WorkflowStep
+    Wrap the provided function into an async function, if it is not
+    already an async function.
 
     :param func: The function to coerce
-    :return: An equivalent async function with the signature of WorkflowStep
+    :return: An equivalent async function
     """
 
     sig = signature(func)
@@ -27,18 +28,7 @@ def _coerce_signature_to_workflow_step(func: Callable):
 
         func = async_func
 
-    if n_params == 1:
-        @wraps(func)
-        async def _func(_, context):
-            return await func(context)
-    elif n_params == 0:
-        @wraps(func)
-        async def _func(_, __):
-            return await func()
-    else:
-        _func = func
-
-    return _func
+    return func
 
 
 class Workflow:
@@ -83,18 +73,18 @@ class Workflow:
 
     def startup(self, action: Callable):
         """Decorator for adding a step to workflow startup."""
-        step = _coerce_signature_to_workflow_step(action)
+        step = _coerce_to_async_function(action)
         self.on_startup.append(step)
         return action
 
     def cleanup(self, action: Callable):
         """Decorator for adding a step to workflow cleanup."""
-        step = _coerce_signature_to_workflow_step(action)
+        step = _coerce_to_async_function(action)
         self.on_cleanup.append(step)
         return action
 
     def step(self, step: Callable):
         """Decorator for adding a step to the workflow."""
-        step_ = _coerce_signature_to_workflow_step(step)
+        step_ = _coerce_to_async_function(step)
         self.steps.append(step_)
         return step

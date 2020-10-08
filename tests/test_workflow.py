@@ -1,4 +1,4 @@
-from virtool_workflow import execute_workflow, workflow, WorkflowExecutionContext
+from virtool_workflow import execute_workflow
 
 
 async def test_execute(test_workflow):
@@ -12,7 +12,7 @@ async def test_execute(test_workflow):
 async def test_respond_errors(test_workflow):
 
     @test_workflow.step
-    async def throw_error(*_):
+    async def throw_error():
         raise Exception()
 
     async def raise_exception(error: execute_workflow.WorkflowError):
@@ -29,11 +29,10 @@ async def test_respond_errors(test_workflow):
 
 
 async def test_correct_traceback_data(test_workflow):
-
     arg1, arg2 = "arg1", "arg2"
     
     @test_workflow.step
-    async def raise_exception(_, __):
+    async def raise_exception():
         raise ValueError(arg1, arg2)
 
     def assert_correct_traceback(_error):
@@ -45,14 +44,6 @@ async def test_correct_traceback_data(test_workflow):
         await execute_workflow.execute(test_workflow)
     except execute_workflow.WorkflowError as error:
         assert_correct_traceback(error)
-
-    async def on_error(_error):
-        assert_correct_traceback(_error)
-        on_error.called = True
-
-    await execute_workflow.execute(test_workflow, on_error=on_error)
-
-    assert on_error.called
 
 
 async def test_correct_progress(test_workflow):
@@ -88,19 +79,4 @@ async def test_on_update_called(test_workflow):
     assert on_state_change.calls == 4
 
 
-async def test_coerce_signature():
-    workflow_ = workflow.Workflow()
-
-    @workflow_.step
-    def some_step():
-        pass
-
-    @workflow_.step
-    def context_step(context):
-        assert isinstance(context, WorkflowExecutionContext)
-
-    some_step()
-
-    await workflow_.steps[0](workflow_, WorkflowExecutionContext())
-    await workflow_.steps[1](workflow_, WorkflowExecutionContext())
 

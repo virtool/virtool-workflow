@@ -8,11 +8,16 @@ from contextlib import AbstractContextManager
 from .workflow import Workflow
 
 
-class InvalidWorkflowFixtureError(ValueError):
+class WorkflowFixtureMultipleYieldError(ValueError):
+    """Raised when a generator workflow fixture yields more than once."""
     pass
 
 
 class WorkflowFixture(Callable, ABC):
+    """
+    Abstract base class for all workflow fixtures. This class is used primarily to keep
+    track of all available fixtures via :func:`WorkflowFixture.__subclasses__`.
+    """
 
     @staticmethod
     @abstractmethod
@@ -41,7 +46,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         for gen in self._generators:
             none = next(gen, None)
             if none is not None:
-                raise InvalidWorkflowFixtureError("Fixture must only yield once")
+                raise WorkflowFixtureMultipleYieldError("Fixture must only yield once")
         self._generators = []
 
     def instantiate(self, fixture: WorkflowFixture):
