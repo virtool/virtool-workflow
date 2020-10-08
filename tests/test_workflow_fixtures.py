@@ -1,7 +1,8 @@
-from virtool_workflow.workflow_fixture import *
-from virtool_workflow.execute_workflow import execute
-from .workflow_with_fixtures import workflow_with_fixtures
 from typing import Dict
+
+from virtool_workflow.execute_workflow import execute
+from virtool_workflow.workflow_fixture import workflow_fixture, WorkflowFixture, WorkflowFixtureScope
+from .workflow_with_fixtures import workflow_with_fixtures
 
 
 @workflow_fixture

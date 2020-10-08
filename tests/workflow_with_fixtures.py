@@ -1,5 +1,5 @@
 import pytest
-from virtool_workflow.workflow_fixture import workflow_fixture, WorkflowFixture
+from virtool_workflow.workflow_fixture import workflow_fixture
 from virtool_workflow import Workflow, WorkflowExecutionContext
 from virtool_workflow.context import State
 from typing import Dict, Any

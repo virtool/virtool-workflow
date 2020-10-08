@@ -16,9 +16,6 @@ def _coerce_to_async_function(func: Callable):
     :return: An equivalent async function
     """
 
-    sig = signature(func)
-    n_params = len(sig.parameters)
-
     if not iscoroutinefunction(func):
         func_ = func
 
