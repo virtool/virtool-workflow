@@ -2,7 +2,7 @@ from inspect import iscoroutinefunction
 from functools import wraps
 from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
 
-WorkflowStep = Callable[[...], Awaitable[Optional[str]]]
+WorkflowStep = Callable[[Iterable[Any]], Awaitable[Optional[str]]]
 """Async function representing a step in a Virtool Workflow."""
 
 

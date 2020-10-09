@@ -6,12 +6,13 @@ from typing import Dict, Any
 
 
 @fixture
-def fixture():
+def fixture_():
     return "FIXTURE"
 
+
 @fixture
-def state(fixture: str):
-    return dict(fixture=fixture)
+def state(fixture_: str):
+    return dict(fixture=fixture_)
 
 
 @pytest.fixture
@@ -33,8 +34,8 @@ def workflow_with_fixtures():
         assert workflow == test_workflow == wf
 
     @test_workflow.step
-    async def step(fixture: str, state: Dict[str, Any]):
-        assert state["fixture"] == fixture
+    async def step(fixture_: str, state: Dict[str, Any]):
+        assert state["fixture"] == fixture_
         state["step"] = True
 
     @test_workflow.cleanup

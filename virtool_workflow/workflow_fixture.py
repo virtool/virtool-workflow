@@ -26,10 +26,20 @@ class WorkflowFixture(ABC):
     parameters as the function passed to the decorator.
     """
 
-    @staticmethod
-    @abstractmethod
-    def __fixture__(*args, **kwargs) -> Any:
+    def __init_subclass__(cls, **kwargs):
+        names = kwargs["param_names"]
+        if not names:
+            if kwargs["param_name"]:
+                names = [kwargs["param_name"]]
+            else:
+                raise ValueError("Must provide `param_names` argument to subclass")
+
+        cls.names = names
+
+    @classmethod
+    def __fixture__(cls) -> Any:
         """A function producing an instance to be used as a workflow fixture."""
+        return cls()
 
     def __call__(self, *args, **kwargs):
         return self.__fixture__(*args, **kwargs)
@@ -42,7 +52,7 @@ class WorkflowFixture(ABC):
         @return: A dict mapping workflow fixture names to
                  their respective :class:`WorkflowFixture` subclasses
         """
-        return {cls.__name__: cls for cls in WorkflowFixture.__subclasses__()}
+        return {name: cls for cls in WorkflowFixture.__subclasses__() for name in cls.names}
 
 
 class WorkflowFixtureScope(AbstractContextManager):
@@ -82,7 +92,9 @@ class WorkflowFixtureScope(AbstractContextManager):
         else:
             instance = bound()
 
-        self._instances[fixture_.__class__.__name__] = instance
+        for name in fixture_.names:
+            self._instances[name] = instance
+
         return instance
 
     def get_or_instantiate(self, name: str):
@@ -183,7 +195,7 @@ def fixture(func: Callable, name: Optional[str] = None):
     @param name: A name for the created fixture, by default the name of `func` is used
     @return: An instance of a WorkflowFixture subclass that acts like the original function.
     """
-    class _Fixture(WorkflowFixture):
+    class _Fixture(WorkflowFixture, param_names=[func.__name__]):
         __fixture__ = func
 
     _Fixture.__name__ = _Fixture.__qualname__ = name if name else func.__name__
