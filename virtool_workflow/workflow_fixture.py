@@ -1,5 +1,5 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
-from typing import Callable, Any, Optional, Iterator, Union
+from typing import Callable, Any, Optional, Iterator, Union, List, Type
 from inspect import signature, iscoroutinefunction, isgeneratorfunction
 from functools import wraps
 from abc import abstractmethod, ABC
@@ -25,6 +25,7 @@ class WorkflowFixture(ABC):
     returns an instance of the newly created class, which is callable with the same
     parameters as the function passed to the decorator.
     """
+    names: List[str]
 
     def __init_subclass__(cls, **kwargs):
         names = kwargs["param_names"]
@@ -78,7 +79,7 @@ class WorkflowFixtureScope(AbstractContextManager):
                 raise WorkflowFixtureMultipleYieldError("Fixture must only yield once")
         self._generators = []
 
-    def instantiate(self, fixture_: WorkflowFixture):
+    def instantiate(self, fixture_: Type[WorkflowFixture]):
         """
         Create an instance of a workflow fixture and cache it
         within this WorkflowFixtureScope.
