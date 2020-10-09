@@ -1,5 +1,5 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Iterator, Union
 from inspect import signature, iscoroutinefunction, isgeneratorfunction
 from functools import wraps
 from abc import abstractmethod, ABC
@@ -28,11 +28,11 @@ class WorkflowFixture(ABC):
 
     @staticmethod
     @abstractmethod
-    def fixture_func(*args, **kwargs) -> Any:
+    def __fixture__(*args, **kwargs) -> Any:
         """A function producing an instance to be used as a workflow fixture."""
 
     def __call__(self, *args, **kwargs):
-        return self.fixture_func(*args, **kwargs)
+        return self.__fixture__(*args, **kwargs)
 
     @staticmethod
     def types():
@@ -68,24 +68,24 @@ class WorkflowFixtureScope(AbstractContextManager):
                 raise WorkflowFixtureMultipleYieldError("Fixture must only yield once")
         self._generators = []
 
-    def instantiate(self, fixture: WorkflowFixture):
+    def instantiate(self, fixture_: WorkflowFixture):
         """
         Create an instance of a workflow fixture and cache it
         within this WorkflowFixtureScope.
         """
-        bound = self.bind(fixture.__class__.fixture_func)
+        bound = self.bind(fixture_.__class__.__fixture__)
 
-        if isgeneratorfunction(fixture.__class__.fixture_func):
-            gen = bound()
-            self._generators.append(gen)
-            instance = next(gen)
+        if isgeneratorfunction(fixture_.__class__.__fixture__):
+            generator = bound()
+            self._generators.append(generator)
+            instance = next(generator)
         else:
             instance = bound()
 
-        self._instances[fixture.__class__.__name__] = instance
+        self._instances[fixture_.__class__.__name__] = instance
         return instance
 
-    def get_fixture(self, name: str):
+    def get_or_instantiate(self, name: str):
         """
         Get an instance of the workflow fixture with a given name. If there exists an
         instance cached in this WorkflowFixtureScope it will returned, else a new instance
@@ -104,6 +104,14 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         raise ValueError(f"{name} is not defined as a workflow fixture")
 
+    def __getitem__(self, item: str):
+        """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
+        return self._instances.__getitem__(item)
+
+    def __setitem__(self, key: str, value: Any):
+        """Add an instance as a fixture with this WorkflowFixtureScope"""
+        return self._instances.__setitem__(key, value)
+
     def add_instance(self, instance: Any, *names: str):
         """
         Add an instance as a fixture within this WorkflowFixtureScope only. The instance
@@ -114,9 +122,9 @@ class WorkflowFixtureScope(AbstractContextManager):
                       (in function parameters)
         """
         for name in names:
-            self._instances[name] = instance
+            self.__setitem__(name, instance)
 
-    def bind(self, func: Callable, **kwargs):
+    def bind(self, func: Callable, **kwargs) -> Union[Callable[[], Any], Callable[[], Iterator[Any]]]:
         """
         Bind workflow fixtures to the provided function based on the parameter
         names of the function. Positional arguments and non-fixture keyword arguments
@@ -130,7 +138,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         sig = signature(func)
         fixture_types = WorkflowFixture.types()
 
-        fixtures = {param: self.get_fixture(param)
+        fixtures = {param: self.get_or_instantiate(param)
                     for param in sig.parameters
                     if param in chain(fixture_types, self._instances)}
 
@@ -138,12 +146,12 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         if iscoroutinefunction(func):
             @wraps(func)
-            async def bound(*args, **_kwargs):
+            async def bound(*args, **_kwargs) -> Iterator[Any]:
                 _kwargs.update(fixtures)
                 return await func(*args, **_kwargs)
         else:
             @wraps(func)
-            def bound(*args, **_kwargs):
+            def bound(*args, **_kwargs) -> Any:
                 _kwargs.update(fixtures)
                 return func(*args, **_kwargs)
 
@@ -159,7 +167,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         workflow.steps = [self.bind(f) for f in workflow.steps]
 
 
-def workflow_fixture(func: Callable, name: Optional[str] = None):
+def fixture(func: Callable, name: Optional[str] = None):
     """
     Decorator for defining a new :class:`WorkflowFixture`. A subclass of
     :class:`WorkflowFixture` is created with the same name as the provided
@@ -176,7 +184,7 @@ def workflow_fixture(func: Callable, name: Optional[str] = None):
     @return: An instance of a WorkflowFixture subclass that acts like the original function.
     """
     class _Fixture(WorkflowFixture):
-        fixture_func = func
+        __fixture__ = func
 
     _Fixture.__name__ = _Fixture.__qualname__ = name if name else func.__name__
     return _Fixture()

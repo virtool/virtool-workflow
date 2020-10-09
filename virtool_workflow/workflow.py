@@ -1,13 +1,12 @@
-from inspect import signature, iscoroutinefunction
+from inspect import iscoroutinefunction
 from functools import wraps
 from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
-from .context import WorkflowExecutionContext
 
-WorkflowStep = Callable[["Workflow", WorkflowExecutionContext], Awaitable[Optional[str]]]
+WorkflowStep = Callable[[...], Awaitable[Optional[str]]]
 """Async function representing a step in a Virtool Workflow."""
 
 
-def _coerce_to_async_function(func: Callable):
+def _make_async(func: Callable):
     """
     Wrap the provided function into an async function, if it is not
     already an async function.
@@ -70,18 +69,15 @@ class Workflow:
 
     def startup(self, action: Callable):
         """Decorator for adding a step to workflow startup."""
-        step = _coerce_to_async_function(action)
-        self.on_startup.append(step)
+        self.on_startup.append(_make_async(action))
         return action
 
     def cleanup(self, action: Callable):
         """Decorator for adding a step to workflow cleanup."""
-        step = _coerce_to_async_function(action)
-        self.on_cleanup.append(step)
+        self.on_cleanup.append(_make_async(action))
         return action
 
     def step(self, step: Callable):
         """Decorator for adding a step to the workflow."""
-        step_ = _coerce_to_async_function(step)
-        self.steps.append(step_)
+        self.steps.append(_make_async(step))
         return step

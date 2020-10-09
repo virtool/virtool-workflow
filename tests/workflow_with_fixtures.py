@@ -1,15 +1,15 @@
 import pytest
-from virtool_workflow.workflow_fixture import workflow_fixture
+from virtool_workflow.workflow_fixture import fixture
 from virtool_workflow import Workflow, WorkflowExecutionContext
 from virtool_workflow.context import State
 from typing import Dict, Any
 
 
-@workflow_fixture
+@fixture
 def fixture():
     return "FIXTURE"
 
-@workflow_fixture
+@fixture
 def state(fixture: str):
     return dict(fixture=fixture)
 
