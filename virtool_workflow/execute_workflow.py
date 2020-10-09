@@ -80,6 +80,7 @@ def _inc_step(wf, ctx):
 async def execute(
         _wf: Workflow,
         _context: WorkflowExecutionContext = None,
+        scope: WorkflowFixtureScope = None,
         on_update: Optional[UpdateListener] = None,
         on_state_change: Optional[UpdateListener] = None,
         on_error: Optional[WorkflowErrorHandler] = None
@@ -89,6 +90,7 @@ async def execute(
     
     :param Workflow _wf: the Workflow to execute
     :param _context: The WorkflowExecutionContext to start from
+    :param scope: The WorkflowFixtureScope to use for fixture injection
     :param on_update: An async function which is called when a step of the workflow provides an update
     :param on_state_change: An async function which is called when the WorkflowState changes
     :param on_error: An async function which is called upon any exception
@@ -102,7 +104,8 @@ async def execute(
     if on_state_change:
         _context.on_state_change(on_state_change)
 
-    with WorkflowFixtureScope() as execution_scope:
+    scope = scope if scope else WorkflowFixtureScope()
+    with scope as execution_scope:
 
         execution_scope.add_instance(_wf, "wf", "workflow")
         execution_scope.add_instance(_context, "context", "execution_context", "ctx")
