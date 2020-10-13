@@ -13,6 +13,7 @@ steps:
     image: python:3.7-buster
     commands:
       - export DATABASE_CONNECTION_URL="mongodb://mongo:27017"
+      - export REDIS_JOB_LIST_URL="redis://redis:6379"
       - pip install .
       - pip install pytest pytest-aiohttp pytest-asyncio pytest-coverage
       - pytest -x --cov --cov-report xml
@@ -24,3 +25,8 @@ services:
     command: [--nojournal]
     ports:
       - 27017
+
+  - name: redis
+    image: redis:6.0.8
+    ports:
+      - 6379
