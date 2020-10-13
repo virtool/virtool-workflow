@@ -6,6 +6,14 @@ from .db import VirtoolDatabase
 
 
 async def execute_with_initialization(workflow: Workflow, job_id: str):
+    """
+    Execute a workflow and access the :class:`Job` and :class:`WorkflowFixtureScope`
+    objects before the workflow starts.
+
+    :param workflow:
+    :param job_id:
+    :yields: First a Tuple[Job, WorkflowFixtureScope], then a Dict[str, Any] (the workflow result)
+    """
     scope = WorkflowFixtureScope()
 
     job = Job(job_id, workflow)
