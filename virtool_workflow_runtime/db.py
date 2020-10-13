@@ -32,7 +32,7 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
     def __getitem__(self, item):
         return getattr(self._db, item)
 
-    def set_updates_for_job(self, job: Job):
+    def send_updates_to_database_for_job(self, job: Job):
         async def _send_update(_, update: str):
             await self._db.jobs.update_one({"_id": job.id}, {
                 "$set": {
