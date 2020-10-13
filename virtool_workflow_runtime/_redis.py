@@ -6,7 +6,7 @@ VIRTOOL_JOBS_CHANNEL = "channel:dispatch"
 
 
 @contextlib.asynccontextmanager
-async def connect(address: str):
+async def connect(address: str) -> aioredis.Redis:
     redis_ = await aioredis.create_redis_pool(address)
     yield redis_
     redis_.close()
