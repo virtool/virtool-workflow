@@ -13,7 +13,7 @@ async def test_updates_sent_to_mongo():
     await db._db.jobs.insert_one({"_id": "1"})
     workflow = discover_workflow(EXAMPLE_WORKFLOW_PATH)
 
-    await runtime.execute(workflow, "1")
+    await runtime.execute(workflow, "1", )
 
     document = await db._db.jobs.find_one({"_id": "1"})
 

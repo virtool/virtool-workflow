@@ -37,13 +37,13 @@ class WorkflowFixture(ABC):
 
         cls.names = names
 
-    @classmethod
-    def __fixture__(cls) -> Any:
+    @staticmethod
+    @abstractmethod
+    def __fixture__() -> Any:
         """A function producing an instance to be used as a workflow fixture."""
-        return cls()
 
-    def __call__(self, *args, **kwargs):
-        return self.__fixture__(*args, **kwargs)
+    def __call__(self):
+        return self.__fixture__()
 
     @staticmethod
     def types():
@@ -84,9 +84,13 @@ class WorkflowFixtureScope(AbstractContextManager):
         Create an instance of a workflow fixture and cache it
         within this WorkflowFixtureScope.
         """
-        bound = self.bind(fixture_.__class__.__fixture__)
+        __fixture__ = getattr(fixture_.__class__, "__fixture__", None)
+        if not __fixture__:
+            __fixture__ = getattr(fixture_, "__fixture__")
 
-        if isgeneratorfunction(fixture_.__class__.__fixture__):
+        bound = self.bind(__fixture__)
+
+        if isgeneratorfunction(__fixture__):
             generator = bound()
             self._generators.append(generator)
             instance = next(generator)

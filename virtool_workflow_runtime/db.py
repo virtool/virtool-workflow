@@ -1,6 +1,6 @@
 """Functions for accessing the Virtool database"""
 from os import getenv
-from typing import Optional
+from typing import Optional, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -25,6 +25,10 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         self._client = AsyncIOMotorClient(db_conn_url)[db_name]
         self._db = DB(self._client, None)
 
+    @staticmethod
+    def __fixture__() -> Any:
+        return VirtoolDatabase()
+
     def set_updates_for_job(self, job: Job):
         async def _send_update(_, update: str):
             await self._db.jobs.update_one({"_id": job.id}, {
@@ -44,5 +48,7 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
             })
 
         job.context.on_update(_send_update)
+
+
 
 
