@@ -23,5 +23,7 @@ async def job_id_queue(redis_connection: str, channel: str = VIRTOOL_JOBS_CHANNE
     :raise ConnectionRefusedError: When redis is not available at the given URL
     """
     async with connect(redis_connection) as redis:
-        async for message in redis.subscribe(channel).iter():
+
+        (job_ids,) = await redis.subscribe(channel)
+        async for message in job_ids.iter():
             yield message
