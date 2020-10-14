@@ -48,9 +48,9 @@ async def test_correct_traceback_data(test_workflow):
 
 async def test_correct_progress(test_workflow):
 
-    async def check_progress(wf, ctx):
-        wf.results[str(ctx.current_step)] = (float(ctx.current_step) / float(len(wf.steps)))
-        assert ctx.progress == wf.results[str(ctx.current_step)]
+    async def check_progress(wf, ctx, result):
+        result[str(ctx.current_step)] = (float(ctx.current_step) / float(len(wf.steps)))
+        assert ctx.progress == result[str(ctx.current_step)]
 
     test_workflow.steps = [check_progress] * 10
     test_workflow.on_startup = []

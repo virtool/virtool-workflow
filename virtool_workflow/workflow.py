@@ -39,7 +39,6 @@ class Workflow:
     on_startup: Sequence[WorkflowStep]
     on_cleanup: Sequence[WorkflowStep]
     steps: Sequence[WorkflowStep]
-    results: Dict[str, Any]
 
     def __new__(
             cls,
@@ -58,7 +57,6 @@ class Workflow:
         obj.on_startup = []
         obj.on_cleanup = []
         obj.steps = []
-        obj.results = {}
         if startup:
             obj.on_startup.extend(startup)
         if cleanup:

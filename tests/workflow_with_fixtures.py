@@ -39,9 +39,9 @@ def workflow_with_fixtures():
         state["step"] = True
 
     @test_workflow.cleanup
-    def clean(state, wf):
+    def clean(state, results):
         state["clean"] = True
-        wf.results = state
+        results.update(state)
 
     return test_workflow
 

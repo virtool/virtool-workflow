@@ -109,6 +109,7 @@ async def execute(
 
         execution_scope.add_instance(_wf, "wf", "workflow")
         execution_scope.add_instance(_context, "context", "execution_context", "ctx")
+        execution_scope.add_instance({}, "result", "results")
 
         execution_scope.bind_to_workflow(_wf)
 
@@ -120,4 +121,4 @@ async def execute(
         await _run_steps(_wf.on_cleanup, _wf, _context, on_error=on_error)
         await _context.set_state(State.FINISHED)
 
-    return _wf.results
+        return scope["result"]

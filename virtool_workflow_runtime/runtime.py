@@ -20,7 +20,9 @@ async def execute(workflow: Workflow, job_id: str):
 
 async def execute_from_redis(workflow: Workflow):
     async for job_id in job_id_queue():
-        yield await execute(copy(workflow), job_id)
+        wf = copy(workflow)
+        wf.results = {}
+        yield await execute(wf, job_id)
 
 
 
