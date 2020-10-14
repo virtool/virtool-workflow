@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from virtool_core.db.core import DB
+from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
 from virtool_workflow import WorkflowFixture
 from .job import Job
@@ -37,9 +37,9 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         """Return an instance of :class:`VirtoolDatabase` to be used as a workflow fixture."""
         return VirtoolDatabase()
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Collection:
         """
-        Get a :class:`motor.motor_asyncio.AsyncIOMotorCollection` instance for a
+        Get a :class:`virtool_core.db.Collection` instance for a
         particular virtool database collection
         """
         return getattr(self._db, item)
