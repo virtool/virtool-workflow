@@ -41,14 +41,14 @@ class WorkflowExecutionContext(SimpleNamespace):
         self.progress = 0.0
         self.error = None
         
-        super(WorkflowExecutionContext, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def on_state_change(self, action: StateListener):
         """
         register a callback function to receive updates about the Workflow state
 
-        :param action: async function to call when the WorkflowState changes. The current WorkflowExecutionContext
-            is included as a parameter
+        :param action: async function to call when the WorkflowState changes.
+            The current WorkflowExecutionContext is included as a parameter
         """
         self._on_state_change.append(action)
 

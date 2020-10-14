@@ -1,10 +1,10 @@
 """Collect new Virtool Jobs from a redis list"""
 import asyncio
-import aioredis
 import contextlib
-
 from os import getenv
 from typing import Optional
+
+import aioredis
 
 VIRTOOL_JOBS_CHANNEL = "channel:dispatch"
 
@@ -14,10 +14,10 @@ VIRTOOL_REDIS_ADDRESS_DEFAULT = "redis://localhost:6379/1"
 
 @contextlib.asynccontextmanager
 async def connect(address: Optional[str] = None) -> aioredis.Redis:
-    f"""
+    """
     Context manager for a Redis connection
-    :param address: The URL for the redis database, when not provided the value of 
-            the {VIRTOOL_REDIS_ADDRESS_ENV} environment variable is used.
+    :param address: The URL for the redis database, when not provided the value of
+            the VIRTOOL_REDIS_ADDRESS environment variable is used.
     :return Iterator[aioredis.Redis]: A connection to Redis
     """
     if not address:
@@ -31,12 +31,13 @@ async def connect(address: Optional[str] = None) -> aioredis.Redis:
     await redis_.wait_closed()
 
 
-async def job_id_queue(redis_connection: Optional[str] = None, channel: Optional[str] = VIRTOOL_JOBS_CHANNEL):
-    f"""
+async def job_id_queue(redis_connection: Optional[str] = None,
+                       channel: Optional[str] = VIRTOOL_JOBS_CHANNEL):
+    """
     Exposes the redis jobs channel for Virtool Jobs as an async generator
 
     :param redis_connection: The URL address of the redis database, if none provided
-        the value of the environment variable {VIRTOOL_REDIS_ADDRESS_ENV} is used
+        the value of the environment variable VIRTOOL_REDIS_ADDRESS is used
     :param channel: The redis channel to which job id's are published
     :return Iterator[str]: The database (mongo) id's for each job to be executed
     :raise ConnectionRefusedError: When redis is not available at the given URL

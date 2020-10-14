@@ -177,11 +177,15 @@ class WorkflowFixtureScope(AbstractContextManager):
     def bind_to_workflow(self, workflow: Workflow):
         """
         Bind workflow fixtures to all functions for a given Workflow
-        @param workflow: The Workflow requiring workflow fixtures
+        :param workflow: The Workflow requiring workflow fixtures
+
+        :return: A new workflow with fixtures bound to all functions
         """
-        workflow.on_startup = [self.bind(f) for f in workflow.on_startup]
-        workflow.on_cleanup = [self.bind(f) for f in workflow.on_cleanup]
-        workflow.steps = [self.bind(f) for f in workflow.steps]
+        bound_workflow = Workflow()
+        bound_workflow.on_startup = [self.bind(f) for f in workflow.on_startup]
+        bound_workflow.on_cleanup = [self.bind(f) for f in workflow.on_cleanup]
+        bound_workflow.steps = [self.bind(f) for f in workflow.steps]
+        return bound_workflow
 
 
 def fixture(func: Callable, name: Optional[str] = None):

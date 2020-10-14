@@ -78,5 +78,3 @@ async def test_on_update_called(test_workflow):
     assert on_update.calls == 4
     assert on_state_change.calls == 4
 
-
-

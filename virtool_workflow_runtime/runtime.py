@@ -15,14 +15,15 @@ async def execute(workflow: Workflow, job_id: str):
     db: VirtoolDatabase = scope.instantiate(VirtoolDatabase)
     db.send_updates_to_database_for_job(job)
 
-    return await virtool_workflow.execute_workflow.execute(job.workflow, _context=job.context, scope=scope)
+    return await virtool_workflow.execute_workflow.execute(
+        _wf=job.workflow,
+        _context=job.context,
+        scope=scope)
 
 
 async def execute_from_redis(workflow: Workflow):
     async for job_id in job_id_queue():
-        wf = copy(workflow)
-        wf.results = {}
-        yield await execute(wf, job_id)
+        yield await execute(workflow, job_id)
 
 
 

@@ -1,8 +1,8 @@
 from inspect import iscoroutinefunction
 from functools import wraps
-from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
+from typing import Callable, Sequence, Optional, Iterable, Any, Coroutine
 
-WorkflowStep = Callable[[Iterable[Any]], Awaitable[Optional[str]]]
+WorkflowStep = Callable[[Any], Coroutine[Any, Any, None]]
 """Async function representing a step in a Virtool Workflow."""
 
 
@@ -65,17 +65,18 @@ class Workflow:
             obj.steps.extend(steps)
         return obj
 
-    def startup(self, action: Callable):
+    def startup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow startup."""
         self.on_startup.append(_make_async(action))
         return action
 
-    def cleanup(self, action: Callable):
+    def cleanup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow cleanup."""
         self.on_cleanup.append(_make_async(action))
         return action
 
-    def step(self, step: Callable):
+    def step(self, step: Callable) -> Callable:
         """Decorator for adding a step to the workflow."""
         self.steps.append(_make_async(step))
         return step
+
