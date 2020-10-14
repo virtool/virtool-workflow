@@ -1,4 +1,5 @@
 """Functions for accessing the Virtool database"""
+import asyncio
 from os import getenv
 from typing import Optional, Any
 
@@ -22,7 +23,7 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         if not db_name:
             db_name = DEFAULT_DATABASE_NAME
 
-        self._client = AsyncIOMotorClient(db_conn_url)[db_name]
+        self._client = AsyncIOMotorClient(db_conn_url, io_loop=asyncio.get_event_loop())[db_name]
         self._db = DB(self._client, None)
 
     @staticmethod

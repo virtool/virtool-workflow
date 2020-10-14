@@ -1,8 +1,10 @@
+from copy import copy
 from virtool_workflow import Workflow
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 import virtool_workflow.execute_workflow
 from .job import Job
 from .db import VirtoolDatabase
+from ._redis import job_id_queue
 
 
 async def execute(workflow: Workflow, job_id: str):
@@ -14,6 +16,11 @@ async def execute(workflow: Workflow, job_id: str):
     db.send_updates_to_database_for_job(job)
 
     return await virtool_workflow.execute_workflow.execute(job.workflow, _context=job.context, scope=scope)
+
+
+async def execute_from_redis(workflow: Workflow):
+    async for job_id in job_id_queue():
+        yield await execute(copy(workflow), job_id)
 
 
 

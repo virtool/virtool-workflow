@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from virtool_workflow import WorkflowExecutionContext, Workflow
 
 
@@ -12,4 +12,4 @@ class Job:
     """
     id: str
     workflow: Workflow
-    context: WorkflowExecutionContext = WorkflowExecutionContext()
+    context: WorkflowExecutionContext = field(default_factory=lambda: WorkflowExecutionContext())

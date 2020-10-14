@@ -1,4 +1,5 @@
 """Collect new Virtool Jobs from a redis list"""
+import asyncio
 import aioredis
 import contextlib
 
@@ -22,7 +23,7 @@ async def connect(address: Optional[str] = None) -> aioredis.Redis:
     if not address:
         address = getenv(VIRTOOL_REDIS_ADDRESS_ENV, default=VIRTOOL_REDIS_ADDRESS_DEFAULT)
 
-    redis_ = await aioredis.create_redis_pool(address)
+    redis_ = await aioredis.create_redis_pool(address, loop=asyncio.get_event_loop())
 
     yield redis_
 
@@ -43,4 +44,4 @@ async def job_id_queue(redis_connection: Optional[str] = None, channel: Optional
     async with connect(redis_connection) as redis:
         (job_ids,) = await redis.subscribe(channel)
         async for message in job_ids.iter():
-            yield message
+            yield str(message, encoding="utf-8")
