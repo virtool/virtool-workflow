@@ -1,4 +1,4 @@
-"""Collect new Virtool Jobs from a redis list"""
+"""Collect new Virtool Jobs from a redis list."""
 import asyncio
 import contextlib
 from os import getenv
@@ -16,6 +16,7 @@ VIRTOOL_REDIS_ADDRESS_DEFAULT = "redis://localhost:6379/1"
 async def connect(address: Optional[str] = None) -> aioredis.Redis:
     """
     Context manager for a Redis connection
+
     :param address: The URL for the redis database, when not provided the value of
             the VIRTOOL_REDIS_ADDRESS environment variable is used.
     :return Iterator[aioredis.Redis]: A connection to Redis

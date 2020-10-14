@@ -1,4 +1,3 @@
-from copy import copy
 from virtool_workflow import Workflow
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 import virtool_workflow.execute_workflow

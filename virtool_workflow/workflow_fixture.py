@@ -25,17 +25,23 @@ class WorkflowFixture(ABC):
     returns an instance of the newly created class, which is callable with the same
     parameters as the function passed to the decorator.
     """
-    names: List[str]
+    param_names: List[str]
 
-    def __init_subclass__(cls, **kwargs):
-        names = kwargs["param_names"]
-        if not names:
-            if kwargs["param_name"]:
-                names = [kwargs["param_name"]]
+    def __init_subclass__(cls, param_names: List[str] = None, param_name: str = None, **kwargs):
+        """
+        Used to set the parameter names by which this fixture will be accessible
+        within a workflow function.
+
+        :param param_names: A list of names for this fixture to be injected for
+        :param param_name: A name for this fixture to be injected for
+        """
+        if not param_names:
+            if param_name:
+                param_names = [param_name]
             else:
-                raise ValueError("Must provide `param_names` argument to subclass")
+                raise ValueError("Must provide `param_names` or `param_name` argument to subclass")
 
-        cls.names = names
+        cls.param_names = param_names
 
     @staticmethod
     @abstractmethod
@@ -53,7 +59,7 @@ class WorkflowFixture(ABC):
         @return: A dict mapping workflow fixture names to
                  their respective :class:`WorkflowFixture` subclasses
         """
-        return {name: cls for cls in WorkflowFixture.__subclasses__() for name in cls.names}
+        return {name: cls for cls in WorkflowFixture.__subclasses__() for name in cls.param_names}
 
 
 class WorkflowFixtureScope(AbstractContextManager):
@@ -97,7 +103,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         else:
             instance = bound()
 
-        for name in fixture_.names:
+        for name in fixture_.param_names:
             self._instances[name] = instance
 
         return instance
@@ -126,7 +132,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         return self._instances.__getitem__(item)
 
     def __setitem__(self, key: str, value: Any):
-        """Add an instance as a fixture with this WorkflowFixtureScope"""
+        """Add an instance as a fixture with this WorkflowFixtureScope."""
         return self._instances.__setitem__(key, value)
 
     def add_instance(self, instance: Any, *names: str):

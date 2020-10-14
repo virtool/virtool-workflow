@@ -1,4 +1,5 @@
-from virtool_workflow_runtime._redis import *
+import asyncio
+from virtool_workflow_runtime._redis import connect, VIRTOOL_JOBS_CHANNEL, job_id_queue
 from virtool_workflow_runtime.runtime import execute_from_redis
 
 JOB_IDs = [str(n) for n in range(3)]

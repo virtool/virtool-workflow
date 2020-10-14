@@ -18,6 +18,12 @@ DEFAULT_DATABASE_NAME = "virtool"
 class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
 
     def __init__(self, db_name: Optional[str] = None, db_conn_url: Optional[str] = None):
+        """
+        An interface to the Virtool database
+
+        :param db_name: The name of the MongoDB database
+        :param db_conn_url: The MongoDB connection URL
+        """
         if not db_conn_url:
             db_conn_url = getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT)
         if not db_name:
@@ -28,9 +34,14 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
 
     @staticmethod
     def __fixture__() -> Any:
+        """Return an instance of :class:`VirtoolDatabase` to be used as a workflow fixture."""
         return VirtoolDatabase()
 
     def __getitem__(self, item):
+        """
+        Get a :class:`motor.motor_asyncio.AsyncIOMotorCollection` instance for a
+        particular virtool database collection
+        """
         return getattr(self._db, item)
 
     def send_updates_to_database_for_job(self, job: Job):
