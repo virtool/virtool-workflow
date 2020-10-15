@@ -14,13 +14,22 @@ def analysis_info():
         dict(
             _id="1",
             paired=True,
-            libraray_type=LibraryTypes.amplicon
+            library_type=LibraryTypes.amplicon,
+            quality=dict(
+                length=["", "1"],
+                count="3"
+            )
+        ),
+        dict(
+            subtraction=dict(id="id with spaces")
         )
     )
 
 
 async def test_analysis_fixture_instantiation():
     with WorkflowFixtureScope() as scope:
+        scope["job_id"] = "1"
         scope.get_or_instantiate("analysis")
 
-        assert "analysis" in scope
+        assert scope["analysis"]
+        # TODO: write more comprehensive checks
