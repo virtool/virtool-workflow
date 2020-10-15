@@ -28,6 +28,7 @@ def trimming_min_length(library_type: LibraryType, sample_read_length: int):
 
     return 160
 
+
 @fixture
 def trimming_parameters(
         library_type: LibraryType,
