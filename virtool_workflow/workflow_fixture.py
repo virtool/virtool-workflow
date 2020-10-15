@@ -46,7 +46,7 @@ class WorkflowFixture(ABC):
 
     @staticmethod
     @abstractmethod
-    def __fixture__() -> Any:
+    def __fixture__(*args, **kwargs) -> Type["WorkflowFixture"]:
         """A function producing an instance to be used as a workflow fixture."""
 
     def __call__(self):
@@ -86,7 +86,7 @@ class WorkflowFixtureScope(AbstractContextManager):
                 raise WorkflowFixtureMultipleYieldError("Fixture must only yield once")
         self._generators = []
 
-    async def instantiate(self, fixture_: Type[WorkflowFixture]):
+    async def instantiate(self, fixture_: Type[WorkflowFixture]) -> Any:
         """
         Create an instance of a workflow fixture and cache it
         within this WorkflowFixtureScope.

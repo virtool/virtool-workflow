@@ -1,5 +1,7 @@
+from pathlib import Path
+
 import virtool_workflow.workflow_fixture
-from virtool_workflow.analysis.analysis_jobs import analysis
+from virtool_workflow.analysis.analysis_jobs import AnalysisArguments
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryTypes
 
@@ -25,20 +27,29 @@ TEST_ANALYSIS_INFO = (
 
 
 async def test_analysis_fixture_instantiation():
-    with WorkflowFixtureScope() as scope:
-        scope["job_id"] = "1"
+    with WorkflowFixtureScope() as fixtures:
+        fixtures["job_id"] = "1"
 
-        scope["analysis_info"] = TEST_ANALYSIS_INFO
+        fixtures["analysis_info"] = TEST_ANALYSIS_INFO
+        fixtures["data_path"] = Path("virtool")
+        fixtures["temp_path"] = Path("temp")
 
-        await scope.get_or_instantiate("analysis")
+        arguments: AnalysisArguments = await fixtures.instantiate(AnalysisArguments)
 
-        assert scope["analysis"]
-        # TODO: write more comprehensive checks
+        assert fixtures["analysis"] == arguments
 
+        assert arguments.analysis == TEST_ANALYSIS_INFO[5]
+        assert arguments.sample == TEST_ANALYSIS_INFO[4]
+        assert arguments.paired
+        assert arguments.read_count == 3
+        assert arguments.sample_read_length == 1
+        assert arguments.sample_path == fixtures["data_path"]/"samples/1"
+        assert arguments.path == arguments.sample_path/"analysis/1"
+        assert arguments.index_path == fixtures["data_path"]/"references/1/1/reference"
+        assert arguments.reads_path == fixtures["temp_path"]/"reads"
+        assert arguments.subtraction_path == fixtures["data_path"]/"subtractions/id_with_spaces/reference"
+        assert arguments.reads_path/"reads_1.fq.gz" in arguments.read_paths
+        assert arguments.reads_path/"reads_2.fq.gz" in arguments.read_paths
+        assert arguments.library_type == LibraryTypes.amplicon
+        assert arguments.raw_path == fixtures["temp_path"]/"raw"
 
-async def test_real_analysis_info_fixture_is_used():
-    with WorkflowFixtureScope() as scope:
-        scope["job_id"] = "1"
-
-        await scope.get_or_instantiate("analysis")
-        pass
