@@ -1,0 +1,3 @@
+
+class LibraryTypes:
+    amplicon="amplicon"
