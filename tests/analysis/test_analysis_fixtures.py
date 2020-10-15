@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 
-from virtool_workflow.analysis.analysis_jobs import AnalysisArguments \
+from virtool_workflow.analysis.analysis_info import AnalysisArguments \
     , analysis_path, analysis_document, sample, sample_path
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryType
