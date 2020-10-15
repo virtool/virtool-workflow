@@ -30,8 +30,8 @@ AnalysisInfo = Tuple[str, str, str, str, Dict[str, Any], Dict[str, Any]]
 
 
 @fixture
-def analysis_info(database: VirtoolDatabase,
-                  job_id: str) -> AnalysisInfo:
+async def analysis_info(database: VirtoolDatabase,
+                        job_id: str) -> AnalysisInfo:
     jobs = database["jobs"]
     samples = database["samples"]
     analysis_db = database["analyses"]
@@ -67,41 +67,32 @@ def analysis(
      analysis_) = analysis_info
 
     subtraction_id = analysis_["subtraction"]["id"].replace(" ", "_").lower()
-    subtraction_path = (data_path/"subtractions"/analysis_["subtraction"]
-                        /subtraction_id/"reference")
+    subtraction_path = data_path / "subtractions" / subtraction_id / "reference"
 
-    sample_path = data_path/"samples"/sample_id
-    reads_path = temp_path/"reads"
+    sample_path = data_path / "samples" / sample_id
+    reads_path = temp_path / "reads"
 
-    read_paths = [reads_path/"reads_1.fq.gz"]
+    read_paths = [reads_path / "reads_1.fq.gz"]
 
     paired = sample["paired"]
 
     if paired:
-        read_paths.append(reads_path/"reads_2.fq.gz")
+        read_paths.append(reads_path / "reads_2.fq.gz")
 
     return AnalysisArguments(
-        path=sample_path/"analysis"/analysis_id,
+        path=sample_path / "analysis" / analysis_id,
         sample_path=sample_path,
-        index_path=data_path/"references"/ref_id/index_id/"reference",
+        index_path=data_path / "references" / ref_id / index_id / "reference",
         reads_path=reads_path,
         read_paths=read_paths,
         subtraction_path=subtraction_path,
-        raw_path=temp_path/"raw",
-        temp_cache_path=temp_path/"cache",
-        temp_analysis_path=temp_path/analysis_id,
+        raw_path=temp_path / "raw",
+        temp_cache_path=temp_path / "cache",
+        temp_analysis_path=temp_path / analysis_id,
         paired=sample["paired"],
-        read_count=int(sample["quality"]["length"]),
+        read_count=int(sample["quality"]["count"]),
         sample_read_length=int(sample["quality"]["length"][1]),
         library_type=sample["library_type"],
         sample=sample,
         analysis=analysis_
     )
-
-
-
-
-
-
-
-
