@@ -65,6 +65,10 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
     library_type: LibraryType
     sample: Dict[str, Any]
     analysis: Dict[str, Any]
+    sample_id: str
+    analysis_id: str
+    ref_id: str
+    index_id: str
 
     @staticmethod
     def __fixture__(
@@ -104,7 +108,11 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
             sample_read_length=int(sample["quality"]["length"][1]),
             library_type=sample["library_type"],
             sample=sample,
-            analysis=analysis_
+            analysis=analysis_,
+            sample_id=sample_id,
+            analysis_id=analysis_id,
+            ref_id=ref_id,
+            index_id=index_id,
         )
 
 
@@ -182,3 +190,22 @@ def sample(analysis_args: AnalysisArguments) -> Dict[str, Any]:
 def analysis_document(analysis_args: AnalysisArguments) -> Dict[str, Any]:
     return analysis_args.analysis
 
+
+@fixture
+def sample_id(analysis_args: AnalysisArguments) -> str:
+    return analysis_args.sample_id
+
+
+@fixture
+def analysis_id(analysis_args: AnalysisArguments) -> str:
+    return analysis_args.analysis_id
+
+
+@fixture
+def ref_id(analysis_args: AnalysisArguments) -> str:
+    return analysis_args.ref_id
+
+
+@fixture
+def index_id(analysis_args: AnalysisArguments) -> str:
+    return analysis_args.index_id
