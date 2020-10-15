@@ -62,7 +62,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
     paired: bool
     read_count: int
     sample_read_length: int
-    library_type: str
+    library_type: LibraryType
     sample: Dict[str, Any]
     analysis: Dict[str, Any]
 
