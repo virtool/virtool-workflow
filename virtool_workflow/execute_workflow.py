@@ -112,7 +112,7 @@ async def execute(
         execution_scope.add_instance(_context, "context", "execution_context", "ctx")
         execution_scope.add_instance({}, "result", "results")
 
-        bound = execution_scope.bind_to_workflow(_wf)
+        bound = await execution_scope.bind_to_workflow(_wf)
 
         await _context.set_state(State.STARTUP)
         await _run_steps(bound.on_startup, bound, _context, on_error=on_error)
