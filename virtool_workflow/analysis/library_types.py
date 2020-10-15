@@ -1,3 +1,6 @@
-from enum import Enum
+from enum import Enum, auto
 
-LibraryType = Enum("LibraryTypes", "amplicon")
+
+class LibraryType(Enum):
+    amplicon = auto()
+    srna = auto()
