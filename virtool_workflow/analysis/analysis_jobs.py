@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple
 
 from virtool_workflow import fixture, WorkflowFixture
+from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.storage.paths import data_path, temp_path
 from virtool_workflow_runtime.db import VirtoolDatabase
 
@@ -43,7 +44,7 @@ async def analysis_info(database: VirtoolDatabase,
 
 
 @dataclass(frozen=True)
-class AnalysisArguments(WorkflowFixture, param_name="analysis"):
+class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
     path: Path
     sample_path: Path
     index_path: Path
@@ -75,12 +76,9 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis"):
 
         subtraction_id = analysis_["subtraction"]["id"].replace(" ", "_").lower()
         subtraction_path = data_path / "subtractions" / subtraction_id / "reference"
-
         sample_path = data_path / "samples" / sample_id
         reads_path = temp_path / "reads"
-
         read_paths = [reads_path / "reads_1.fq.gz"]
-
         paired = sample["paired"]
 
         if paired:
@@ -105,6 +103,77 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis"):
         )
 
 
+@fixture
+def analysis_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.path
 
 
+@fixture
+def sample_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.sample_path
+
+
+@fixture
+def index_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.index_path
+
+
+@fixture
+def reads_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.reads_path
+
+
+@fixture
+def read_paths(analysis_args: AnalysisArguments) -> List[Path]:
+    return analysis_args.read_paths
+
+
+@fixture
+def subtraction_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.subtraction_path
+
+
+@fixture
+def raw_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.raw_path
+
+
+@fixture
+def temp_cache_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.temp_cache_path
+
+
+@fixture
+def temp_analysis_path(analysis_args: AnalysisArguments) -> Path:
+    return analysis_args.temp_analysis_path
+
+
+@fixture
+def paired(analysis_args: AnalysisArguments) -> bool:
+    return analysis_args.paired
+
+
+@fixture
+def read_count(analysis_args: AnalysisArguments) -> int:
+    return analysis_args.read_count
+
+
+@fixture
+def sample_read_length(analysis_args: AnalysisArguments) -> int:
+    return analysis_args.sample_read_length
+
+
+@fixture
+def library_type(analysis_args: AnalysisArguments) -> LibraryType:
+    return analysis_args.library_type
+
+
+@fixture
+def sample(analysis_args: AnalysisArguments) -> Dict[str, Any]:
+    return analysis_args.sample
+
+
+@fixture
+def analysis_document(analysis_args: AnalysisArguments) -> Dict[str, Any]:
+    return analysis_args.analysis
 
