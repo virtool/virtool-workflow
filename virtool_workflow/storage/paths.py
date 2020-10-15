@@ -27,3 +27,8 @@ def data_path():
 def temp_path():
     with context_directory("temp") as temp:
         yield temp
+
+
+@fixture
+def cache_path(data_path: Path):
+    return data_path/"caches"
