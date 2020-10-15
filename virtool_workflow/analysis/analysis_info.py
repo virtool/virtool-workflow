@@ -4,8 +4,9 @@ from typing import List, Dict, Any, Tuple, Optional
 
 from virtool_workflow import fixture, WorkflowFixture
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow.storage.paths import data_path, temp_path
 from virtool_workflow_runtime.db import VirtoolDatabase
+from virtool_workflow.storage.paths import data_path, temp_path
+from virtool_workflow_runtime.db.fixtures import samples, analyses, jobs, Collection
 
 
 AnalysisInfo = Tuple[
@@ -16,28 +17,28 @@ AnalysisInfo = Tuple[
 
 
 @fixture
-async def analysis_info(database: VirtoolDatabase,
-                        job_id: str) -> AnalysisInfo:
+async def analysis_info(
+        job_document: Dict[str, Any],
+        samples: Collection,
+        analyses: Collection,
+) -> AnalysisInfo:
     """
     Fetch data related to an analysis job from the virtool database.
 
-    :param database: A connection to the Virtool database
-    :param job_id: The id of the job document in the Virtool database
+    :param job_document: The jobs document from the virtool database
+    :param samples: The samples collection from the virtool database
+    :param analyses: The analyses collection from the virtool database
     :return: A tuple containing the sample id, analysis id, reference id,
         index id, sample document, and analysis document.
     """
-    jobs = database["jobs"]
-    samples = database["samples"]
-    analysis_db = database["analyses"]
 
-    job = await jobs.find_one(dict(_id=job_id))
-    sample_id = job["sample_id"]
-    analysis_id = job["analysis_id"]
-    ref_id = job["ref_id"]
-    index_id = job["index_id"]
+    sample_id = job_document["sample_id"]
+    analysis_id = job_document["analysis_id"]
+    ref_id = job_document["ref_id"]
+    index_id = job_document["index_id"]
 
     sample = await samples.find_one(dict(_id=sample_id))
-    analysis_ = await analysis_db.find_one(dict(_id=analysis_id))
+    analysis_ = await analyses.find_one(dict(_id=analysis_id))
 
     return (sample_id,
             analysis_id,
