@@ -12,3 +12,4 @@ def test_context_directory():
 
     assert not Path("foobar").exists()
     assert not Path("foobar/cat").exists()
+
