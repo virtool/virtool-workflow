@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 
 from virtool_workflow import fixture, WorkflowFixture
 from virtool_workflow.analysis.library_types import LibraryType
@@ -8,7 +8,11 @@ from virtool_workflow.storage.paths import data_path, temp_path
 from virtool_workflow_runtime.db import VirtoolDatabase
 
 
-AnalysisInfo = Tuple[str, str, str, str, Dict[str, Any], Dict[str, Any]]
+AnalysisInfo = Tuple[
+    str, str, str, str,
+    Dict[str, Any],
+    Dict[str, Any],
+]
 
 
 @fixture

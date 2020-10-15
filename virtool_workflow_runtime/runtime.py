@@ -14,6 +14,11 @@ async def execute(workflow: Workflow, job_id: str):
     db: VirtoolDatabase = await scope.instantiate(VirtoolDatabase)
     db.send_updates_to_database_for_job(job)
 
+    job_document = await db["jobs"].find_one(dict(_id=job_id))
+
+    scope["job_id"] = job_id
+    scope["job_document"] = job_document
+
     return await virtool_workflow.execute_workflow.execute(
         _wf=job.workflow,
         _context=job.context,
