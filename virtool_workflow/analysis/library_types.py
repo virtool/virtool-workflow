@@ -1,3 +1,3 @@
+from enum import Enum
 
-class LibraryTypes:
-    amplicon="amplicon"
+LibraryType = Enum("LibraryTypes", "amplicon")
