@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
 from virtool_workflow import WorkflowFixture
-from .job import Job
+from virtool_workflow_runtime.job import Job
 
 DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
