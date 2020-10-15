@@ -15,13 +15,13 @@ def test_workflow_fixture_is_registered():
     assert my_fixture.__class__ in WorkflowFixture.types().values()
 
 
-def test_workflow_fixture_injection():
+async def test_workflow_fixture_injection():
     def uses_fixture(my_fixture: str):
         assert my_fixture == "FIXTURE"
         uses_fixture.called = True
 
     with WorkflowFixtureScope() as scope:
-        scope.bind(uses_fixture)()
+        (await scope.bind(uses_fixture))()
 
     assert uses_fixture.called
 
@@ -32,7 +32,7 @@ async def test_workflow_fixture_injection_on_async_function():
         uses_fixture.called = True
 
     with WorkflowFixtureScope() as fixtures:
-        await fixtures.bind(uses_fixture)()
+        await (await fixtures.bind(uses_fixture))()
 
     assert uses_fixture.called
 
@@ -48,7 +48,7 @@ async def test_fixtures_used_by_fixtures():
         use_fixture_using_fixture.called = True
 
     with WorkflowFixtureScope() as scope:
-        scope.bind(use_fixture_using_fixture)()
+        (await scope.bind(use_fixture_using_fixture))()
 
     assert use_fixture_using_fixture.called
 
@@ -62,11 +62,11 @@ async def test_preservation_and_injection_of_non_fixture_arguments():
         assert other_param is not None
 
     with WorkflowFixtureScope() as scope:
-        injected = scope.bind(use_fixture_and_other_args, arg1="arg1", other_param="param")
+        injected = await scope.bind(use_fixture_and_other_args, arg1="arg1", other_param="param")
         injected()
         injected(kwarg=None, other_param="stuff")
 
-        injected = scope.bind(use_fixture_and_other_args)
+        injected = await scope.bind(use_fixture_and_other_args)
 
         injected(arg1="arg1", other_param="param")
         injected("arg1", other_param="param")
@@ -80,14 +80,15 @@ async def test_same_instance_is_used():
 
     with WorkflowFixtureScope() as scope:
 
-        @scope.bind
         def func1(dictionary: Dict[str, str]):
             dictionary["item"] = "item"
 
-        @scope.bind
         def func2(dictionary: Dict[str, str]):
             assert dictionary["item"] == "item"
             dictionary["item"] = "different item"
+
+        func1 = await scope.bind(func1)
+        func2 = await scope.bind(func2)
 
         func1()
         func2()
@@ -95,7 +96,7 @@ async def test_same_instance_is_used():
         assert scope._instances["dictionary"]["item"] == "different item"
 
 
-def test_generator_fixtures_cleanup():
+async def test_generator_fixtures_cleanup():
 
     cleanup_executed = False
 
@@ -107,9 +108,10 @@ def test_generator_fixtures_cleanup():
 
     with WorkflowFixtureScope() as scope:
 
-        @scope.bind
         def use_generator_fixture(generator_fixture):
             assert generator_fixture == "FIXTURE"
+
+        await scope.bind(use_generator_fixture)
 
         assert len(scope._generators) == 1
 

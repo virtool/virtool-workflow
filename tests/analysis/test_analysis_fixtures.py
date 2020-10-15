@@ -4,9 +4,7 @@ from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryTypes
 
 
-@virtool_workflow.workflow_fixture.fixture
-def analysis_info():
-    return (
+TEST_ANALYSIS_INFO = (
         "1",
         "1",
         "1",
@@ -29,7 +27,18 @@ def analysis_info():
 async def test_analysis_fixture_instantiation():
     with WorkflowFixtureScope() as scope:
         scope["job_id"] = "1"
-        scope.get_or_instantiate("analysis")
+
+        scope["analysis_info"] = TEST_ANALYSIS_INFO
+
+        await scope.get_or_instantiate("analysis")
 
         assert scope["analysis"]
         # TODO: write more comprehensive checks
+
+
+async def test_real_analysis_info_fixture_is_used():
+    with WorkflowFixtureScope() as scope:
+        scope["job_id"] = "1"
+
+        await scope.get_or_instantiate("analysis")
+        pass

@@ -1,4 +1,5 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
+import asyncio
 from typing import Callable, Any, Optional, Iterator, Union, List, Type
 from inspect import signature, iscoroutinefunction, isgeneratorfunction
 from functools import wraps
@@ -85,7 +86,7 @@ class WorkflowFixtureScope(AbstractContextManager):
                 raise WorkflowFixtureMultipleYieldError("Fixture must only yield once")
         self._generators = []
 
-    def instantiate(self, fixture_: Type[WorkflowFixture]):
+    async def instantiate(self, fixture_: Type[WorkflowFixture]):
         """
         Create an instance of a workflow fixture and cache it
         within this WorkflowFixtureScope.
@@ -94,12 +95,14 @@ class WorkflowFixtureScope(AbstractContextManager):
         if not __fixture__:
             __fixture__ = getattr(fixture_, "__fixture__")
 
-        bound = self.bind(__fixture__)
+        bound = await self.bind(__fixture__)
 
         if isgeneratorfunction(__fixture__):
             generator = bound()
             self._generators.append(generator)
             instance = next(generator)
+        elif iscoroutinefunction(__fixture__):
+            instance = await bound()
         else:
             instance = bound()
 
@@ -108,7 +111,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         return instance
 
-    def get_or_instantiate(self, name: str):
+    async def get_or_instantiate(self, name: str):
         """
         Get an instance of the workflow fixture with a given name. If there exists an
         instance cached in this WorkflowFixtureScope it will returned, else a new instance
@@ -123,7 +126,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         fixture_types = WorkflowFixture.types()
         if name in fixture_types:
-            return self.instantiate(fixture_types[name]())
+            return await self.instantiate(fixture_types[name]())
 
         raise ValueError(f"{name} is not defined as a workflow fixture")
 
@@ -147,7 +150,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         for name in names:
             self.__setitem__(name, instance)
 
-    def bind(self, func: Callable, **kwargs) -> Union[Callable[[], Any], Callable[[], Iterator[Any]]]:
+    async def bind(self, func: Callable, **kwargs) -> Union[Callable[[], Any], Callable[[], Any]]:
         """
         Bind workflow fixtures to the provided function based on the parameter
         names of the function. Positional arguments and non-fixture keyword arguments
@@ -161,7 +164,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         sig = signature(func)
         fixture_types = WorkflowFixture.types()
 
-        fixtures = {param: self.get_or_instantiate(param)
+        fixtures = {param: await self.get_or_instantiate(param)
                     for param in sig.parameters
                     if param in chain(fixture_types, self._instances)}
 
@@ -180,7 +183,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         return bound
 
-    def bind_to_workflow(self, workflow: Workflow):
+    async def bind_to_workflow(self, workflow: Workflow):
         """
         Bind workflow fixtures to all functions for a given Workflow
         :param workflow: The Workflow requiring workflow fixtures
@@ -188,9 +191,9 @@ class WorkflowFixtureScope(AbstractContextManager):
         :return: A new workflow with fixtures bound to all functions
         """
         bound_workflow = Workflow()
-        bound_workflow.on_startup = [self.bind(f) for f in workflow.on_startup]
-        bound_workflow.on_cleanup = [self.bind(f) for f in workflow.on_cleanup]
-        bound_workflow.steps = [self.bind(f) for f in workflow.steps]
+        bound_workflow.on_startup = [await self.bind(f) for f in workflow.on_startup]
+        bound_workflow.on_cleanup = [await self.bind(f) for f in workflow.on_cleanup]
+        bound_workflow.steps = [await self.bind(f) for f in workflow.steps]
         return bound_workflow
 
 

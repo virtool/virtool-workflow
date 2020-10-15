@@ -55,7 +55,7 @@ async def analysis_info(database: VirtoolDatabase,
 
 @fixture
 def analysis(
-        analysis_info,
+        analysis_info: Tuple,
         data_path: Path,
         temp_path: Path,
 ):
