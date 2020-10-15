@@ -1,17 +1,20 @@
-import pytest
-from virtool_workflow.workflow_fixture import workflow_fixture
-from virtool_workflow import Workflow, WorkflowExecutionContext
-from virtool_workflow.context import State
 from typing import Dict, Any
 
+import pytest
 
-@workflow_fixture
-def fixture():
+from virtool_workflow import Workflow, WorkflowExecutionContext
+from virtool_workflow.context import State
+from virtool_workflow.workflow_fixture import fixture
+
+
+@fixture
+def fixture_():
     return "FIXTURE"
 
-@workflow_fixture
-def state(fixture: str):
-    return dict(fixture=fixture)
+
+@fixture
+def state(fixture_: str):
+    return dict(fixture=fixture_)
 
 
 @pytest.fixture
@@ -33,14 +36,14 @@ def workflow_with_fixtures():
         assert workflow == test_workflow == wf
 
     @test_workflow.step
-    async def step(fixture: str, state: Dict[str, Any]):
-        assert state["fixture"] == fixture
+    async def step(fixture_: str, state: Dict[str, Any]):
+        assert state["fixture"] == fixture_
         state["step"] = True
 
     @test_workflow.cleanup
-    def clean(state, wf):
+    def clean(state, results):
         state["clean"] = True
-        wf.results = state
+        results.update(state)
 
     return test_workflow
 

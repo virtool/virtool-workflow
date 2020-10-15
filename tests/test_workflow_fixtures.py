@@ -1,11 +1,11 @@
 from typing import Dict
 
 from virtool_workflow.execute_workflow import execute
-from virtool_workflow.workflow_fixture import workflow_fixture, WorkflowFixture, WorkflowFixtureScope
+from virtool_workflow.workflow_fixture import fixture, WorkflowFixture, WorkflowFixtureScope
 from .workflow_with_fixtures import workflow_with_fixtures
 
 
-@workflow_fixture
+@fixture
 def my_fixture():
     return "FIXTURE"
 
@@ -39,7 +39,7 @@ async def test_workflow_fixture_injection_on_async_function():
 
 async def test_fixtures_used_by_fixtures():
 
-    @workflow_fixture
+    @fixture
     def fixture_using_fixture(my_fixture: str):
         return f"FIXTURE_USING_{my_fixture}"
 
@@ -74,7 +74,7 @@ async def test_preservation_and_injection_of_non_fixture_arguments():
 
 async def test_same_instance_is_used():
 
-    @workflow_fixture
+    @fixture
     def dictionary():
         return {}
 
@@ -99,7 +99,7 @@ def test_generator_fixtures_cleanup():
 
     cleanup_executed = False
 
-    @workflow_fixture
+    @fixture
     def generator_fixture():
         yield "FIXTURE"
         nonlocal cleanup_executed

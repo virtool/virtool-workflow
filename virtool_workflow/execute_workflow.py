@@ -60,8 +60,8 @@ async def _run_step(
         ctx.error = error.traceback_data
         if on_error:
             return await on_error(error)
-        else:
-            raise error
+
+        raise error from exception
 
 
 async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
@@ -70,8 +70,8 @@ async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
             on_each(wf, ctx)
         update = await _run_step(step, wf, ctx, on_error)
         await ctx.send_update(update)
-            
-            
+
+
 def _inc_step(wf, ctx):
     ctx.current_step += 1
     ctx.progress = float(ctx.current_step) / float(len(wf.steps))
@@ -80,6 +80,7 @@ def _inc_step(wf, ctx):
 async def execute(
         _wf: Workflow,
         _context: WorkflowExecutionContext = None,
+        scope: WorkflowFixtureScope = None,
         on_update: Optional[UpdateListener] = None,
         on_state_change: Optional[UpdateListener] = None,
         on_error: Optional[WorkflowErrorHandler] = None
@@ -89,7 +90,9 @@ async def execute(
     
     :param Workflow _wf: the Workflow to execute
     :param _context: The WorkflowExecutionContext to start from
-    :param on_update: An async function which is called when a step of the workflow provides an update
+    :param scope: The WorkflowFixtureScope to use for fixture injection
+    :param on_update: An async function which is called when a step of
+        the workflow provides an update
     :param on_state_change: An async function which is called when the WorkflowState changes
     :param on_error: An async function which is called upon any exception
     :raises WorkflowError: If any Exception occurs during execution it is caught and wrapped in
@@ -102,19 +105,21 @@ async def execute(
     if on_state_change:
         _context.on_state_change(on_state_change)
 
-    with WorkflowFixtureScope() as execution_scope:
+    scope = scope if scope else WorkflowFixtureScope()
+    with scope as execution_scope:
 
         execution_scope.add_instance(_wf, "wf", "workflow")
         execution_scope.add_instance(_context, "context", "execution_context", "ctx")
+        execution_scope.add_instance({}, "result", "results")
 
-        execution_scope.bind_to_workflow(_wf)
+        bound = execution_scope.bind_to_workflow(_wf)
 
         await _context.set_state(State.STARTUP)
-        await _run_steps(_wf.on_startup, _wf, _context, on_error=on_error)
+        await _run_steps(bound.on_startup, bound, _context, on_error=on_error)
         await _context.set_state(State.RUNNING)
-        await _run_steps(_wf.steps, _wf, _context, on_each=_inc_step, on_error=on_error)
+        await _run_steps(bound.steps, bound, _context, on_each=_inc_step, on_error=on_error)
         await _context.set_state(State.CLEANUP)
-        await _run_steps(_wf.on_cleanup, _wf, _context, on_error=on_error)
+        await _run_steps(bound.on_cleanup, bound, _context, on_error=on_error)
         await _context.set_state(State.FINISHED)
 
-    return _wf.results
+        return scope["result"]

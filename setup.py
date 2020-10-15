@@ -17,6 +17,7 @@ INSTALL_REQUIRES = [
     "docker",
     "motor",
     "uvloop",
+    "aioredis==1.3.1",
 ]
 
 

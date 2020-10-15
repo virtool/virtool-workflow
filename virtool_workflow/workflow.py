@@ -1,13 +1,12 @@
-from inspect import signature, iscoroutinefunction
+from inspect import iscoroutinefunction
 from functools import wraps
-from typing import Callable, Sequence, Optional, Awaitable, Iterable, Any, Dict
-from .context import WorkflowExecutionContext
+from typing import Callable, Sequence, Optional, Iterable, Any, Coroutine
 
-WorkflowStep = Callable[["Workflow", WorkflowExecutionContext], Awaitable[Optional[str]]]
+WorkflowStep = Callable[[Any], Coroutine[Any, Any, None]]
 """Async function representing a step in a Virtool Workflow."""
 
 
-def _coerce_to_async_function(func: Callable):
+def _make_async(func: Callable):
     """
     Wrap the provided function into an async function, if it is not
     already an async function.
@@ -40,7 +39,6 @@ class Workflow:
     on_startup: Sequence[WorkflowStep]
     on_cleanup: Sequence[WorkflowStep]
     steps: Sequence[WorkflowStep]
-    results: Dict[str, Any]
 
     def __new__(
             cls,
@@ -59,7 +57,6 @@ class Workflow:
         obj.on_startup = []
         obj.on_cleanup = []
         obj.steps = []
-        obj.results = {}
         if startup:
             obj.on_startup.extend(startup)
         if cleanup:
@@ -68,20 +65,18 @@ class Workflow:
             obj.steps.extend(steps)
         return obj
 
-    def startup(self, action: Callable):
+    def startup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow startup."""
-        step = _coerce_to_async_function(action)
-        self.on_startup.append(step)
+        self.on_startup.append(_make_async(action))
         return action
 
-    def cleanup(self, action: Callable):
+    def cleanup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow cleanup."""
-        step = _coerce_to_async_function(action)
-        self.on_cleanup.append(step)
+        self.on_cleanup.append(_make_async(action))
         return action
 
-    def step(self, step: Callable):
+    def step(self, step: Callable) -> Callable:
         """Decorator for adding a step to the workflow."""
-        step_ = _coerce_to_async_function(step)
-        self.steps.append(step_)
+        self.steps.append(_make_async(step))
         return step
+
