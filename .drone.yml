@@ -18,6 +18,18 @@ steps:
       - pip install pytest pytest-aiohttp pytest-asyncio pytest-coverage
       - pytest -x --cov --cov-report xml
 
+  - name: coverage
+    image: python:3.8-alpine
+    environment:
+      CODACY_PROJECT_TOKEN:
+        from_secret: CODACY_PROJECT_TOKEN
+    commands:
+      - apk add git
+      - pip install codacy-coverage
+      - python-codacy-coverage -r coverage.xml -c $DRONE_COMMIT_SHA -d $PWD
+    when:
+      event:
+        - push
 
 services:
   - name: mongo
