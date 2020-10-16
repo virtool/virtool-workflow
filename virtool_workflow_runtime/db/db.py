@@ -7,6 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
+from virtool_core.db.bindings import BINDINGS
 from virtool_workflow import WorkflowFixture
 from virtool_workflow_runtime.job import Job
 
@@ -31,6 +32,9 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
 
         self._client = AsyncIOMotorClient(db_conn_url, io_loop=asyncio.get_event_loop())[db_name]
         self._db = DB(self._client, None)
+
+        for binding in BINDINGS:
+            setattr(self, binding.collection_name, getattr(self._db, binding.collection_name))
 
     @staticmethod
     def __fixture__() -> Any:
