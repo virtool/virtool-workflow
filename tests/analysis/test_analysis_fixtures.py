@@ -1,10 +1,11 @@
 import pytest
 from pathlib import Path
 
-from virtool_workflow.analysis.analysis_info import AnalysisArguments \
-    , analysis_path, analysis_document, sample, sample_path
+from virtool_workflow.analysis.analysis_info import *
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryType
+from virtool_workflow.analysis.trim_parameters import trimming_parameters
+from virtool_workflow.analysis.read_paths import reads_path
 
 
 TEST_ANALYSIS_INFO = (
@@ -73,3 +74,25 @@ async def test_sub_fixtures_use_same_instance_of_analysis_args(fixtures):
         assert id(analysis_args.sample) == id(sample)
         assert id(analysis_args.sample_path) == id(sample_path)
 
+    bound = await fixtures.bind(use_fixtures)
+    bound()
+
+
+async def test_correct_trimming_parameters(fixtures):
+    params = await fixtures.instantiate(trimming_parameters)
+    assert params == {
+        "end_quality": 0,
+        "mode": "pe",
+        "max_error_rate": "0.1",
+        "max_indel_rate": "0.03",
+        "max_length": None,
+        "mean_quality": 0,
+        "min_length": 1
+    }
+
+
+async def test_reads_paths_initialized(fixtures):
+
+    path = await fixtures.instantiate(reads_path)
+    print(path)
+    raise

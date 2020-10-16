@@ -9,11 +9,14 @@ from virtool_workflow.storage.paths import data_path, temp_path
 from virtool_workflow_runtime.db.fixtures import samples, analyses, jobs, Collection
 
 
-AnalysisInfo = Tuple[
-    str, str, str, str,
-    Dict[str, Any],
-    Dict[str, Any],
-]
+@dataclass(frozen=True)
+class AnalysisInfo:
+    sample_id: str
+    analysis_id: str
+    ref_id: str
+    index_id: str
+    sample: Dict[str, Any]
+    analysis: Dict[str, Any]
 
 
 @fixture
@@ -40,12 +43,13 @@ async def analysis_info(
     sample = await samples.find_one(dict(_id=sample_id))
     analysis_ = await analyses.find_one(dict(_id=analysis_id))
 
-    return (sample_id,
-            analysis_id,
-            ref_id,
-            index_id,
-            sample,
-            analysis_)
+    return AnalysisInfo(
+        sample_id=sample_id,
+        analysis_id=analysis_id,
+        ref_id=ref_id,
+        index_id=index_id,
+        sample=sample,
+        analysis=analysis_)
 
 
 @dataclass(frozen=True)
