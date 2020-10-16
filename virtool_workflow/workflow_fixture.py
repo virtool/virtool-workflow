@@ -126,7 +126,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         fixture_types = WorkflowFixture.types()
         if name in fixture_types:
-            return await self.instantiate(fixture_types[name]())
+            return await self.instantiate(fixture_types[name])
 
         raise ValueError(f"{name} is not defined as a workflow fixture")
 
