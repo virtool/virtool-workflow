@@ -8,21 +8,22 @@ from virtool_workflow.analysis.trim_parameters import trimming_parameters
 from virtool_workflow.analysis.read_paths import reads_path
 
 
-TEST_ANALYSIS_INFO = (
-        "1",
-        "1",
-        "1",
-        "1",
-        dict(
+TEST_ANALYSIS_INFO = AnalysisInfo(
+        sample_id="1",
+        index_id="1",
+        ref_id="1",
+        analysis_id="1",
+        sample=dict(
             _id="1",
             paired=True,
             library_type=LibraryType.amplicon,
             quality=dict(
                 length=["", "1"],
                 count="3"
-            )
+            ),
+            files=[dict(raw=True)],
         ),
-        dict(
+        analysis=dict(
             subtraction=dict(id="id with spaces")
         )
     )
@@ -44,8 +45,8 @@ async def test_analysis_fixture_instantiation(fixtures):
 
     assert fixtures["analysis_args"] == arguments
 
-    assert arguments.analysis == TEST_ANALYSIS_INFO[5]
-    assert arguments.sample == TEST_ANALYSIS_INFO[4]
+    assert arguments.analysis == TEST_ANALYSIS_INFO.analysis
+    assert arguments.sample == TEST_ANALYSIS_INFO.sample
     assert arguments.paired
     assert arguments.read_count == 3
     assert arguments.sample_read_length == 1

@@ -51,8 +51,7 @@ async def reads_path(
                          [reads_path/path.name for path in legacy_paths],
                          run_in_executor)
     else:
-        await create_cache(analysis_args.sample_id, analysis_args.analysis_id,
-                           analysis_args.paired, trimming_parameters, database)
+        await create_cache(analysis_args, trimming_parameters, cache_path)
 
     return analysis_args.reads_path
 

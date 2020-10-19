@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional
 
@@ -85,7 +85,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
          ref_id,
          index_id,
          sample,
-         analysis_) = analysis_info
+         analysis_) = astuple(analysis_info)
 
         subtraction_id = analysis_["subtraction"]["id"].replace(" ", "_").lower()
         subtraction_path = data_path / "subtractions" / subtraction_id / "reference"

@@ -10,8 +10,10 @@ from virtool_workflow_runtime.db.fixtures import caches, Collection
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.execute import run_subprocess
+from . import utils
 from . import fastqc
 from .trim_parameters import trimming_parameters
+from .analysis_info import AnalysisArguments
 
 TRIMMING_PROGRAM = "skewer-0.2.2"
 
@@ -22,7 +24,7 @@ async def cache_document(
         sample_id: str,
         caches: Collection,
 ) -> Optional[Dict[str, Any]]:
-    cache_document = caches.find_one({
+    cache_document = await caches.find_one({
         "hash": virtool_core.caches.db.calculate_cache_hash(trimming_parameters),
         "missing": False,
         "program": TRIMMING_PROGRAM,
@@ -38,13 +40,10 @@ async def fetch_cache(
         reads_path: Path,
         run_in_executor: FunctionExecutor
 ):
-    cached_read_dir_path = cache_path/cache_document["_id"]
-    cached_read_paths = [cached_read_dir_path/"reads_1.fq.gz"]
-
-    if cache_document["paired"]:
-        cached_read_paths.append(
-            cached_read_dir_path/"reads_2.fq.gz"
-        )
+    cached_read_paths = utils.make_read_paths(
+        reads_dir_path=cache_path/cache_document["id"],
+        paired=cache_document["paired"]
+    )
 
     await copy_paths(
         cached_read_paths,
@@ -155,23 +154,17 @@ async def run_cache_qc(
 
 
 async def create_cache(
-        sample_id: str,
-        analysis_id: str,
-        paired: bool,
+        analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any],
-        read_paths: List[Path],
-        raw_path: Path,
-        sample_path: Path,
-        proc: int,
         cache_path: Path,
-        temp_cache_path: Path,
+        number_of_processes: int,
         database: VirtoolDatabase,
         run_in_executor: FunctionExecutor,
 ) -> Dict[str, Any]:
     cache = await virtool_core.caches.db.create(
-        database, sample_id, trimming_parameters, paired)
+        database, analysis_args.sample_id, trimming_parameters, analysis_args.paired)
 
-    await database.analyses.update_one({"_id": analysis_id}, {
+    await database["analyses"].update_one({"_id": analysis_args.analysis_id}, {
         "$set": {
             "cache": {
                 "id": cache["id"]
@@ -179,34 +172,34 @@ async def create_cache(
         }
     })
 
-    await fetch_raw(read_paths, raw_path, run_in_executor)
+    await fetch_raw(analysis_args.read_paths, analysis_args.raw_path, run_in_executor)
 
     trimming_command = compose_trimming_command(cache_path,
                                                 trimming_parameters,
-                                                proc,
-                                                read_paths)
+                                                number_of_processes,
+                                                analysis_args.read_paths)
 
     env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
 
     await run_subprocess(trimming_command, env=env)
 
-    await run_in_executor(rename_trimming_results, temp_cache_path)
+    await run_in_executor(rename_trimming_results, analysis_args.temp_cache_path)
 
     temp_paths = await run_cache_qc(
         cache["id"],
-        temp_cache_path,
-        paired,
-        sample_path,
-        2,
+        analysis_args.temp_cache_path,
+        analysis_args.paired,
+        analysis_args.sample_path,
+        number_of_processes,
         run_in_executor,
         database["caches"]
     )
 
-    await run_in_executor(shutil.copytree, str(temp_cache_path), cache_path/cache["id"])
+    await run_in_executor(shutil.copytree, str(analysis_args.temp_cache_path), cache_path/cache["id"])
 
-    await copy_paths(temp_paths, read_paths)
+    await copy_paths(temp_paths, analysis_args.read_paths)
 
-    await run_in_executor(shutil.rmtree, str(temp_cache_path))
+    await run_in_executor(shutil.rmtree, str(analysis_args.temp_cache_path))
 
     return cache
 
