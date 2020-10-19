@@ -1,7 +1,9 @@
-from typing import Tuple, Callable, Optional, Union
+from typing import Tuple, Callable, Union
 from pathlib import Path
 
+
 PairedPaths = Union[Tuple[Path], Tuple[Path, Path]]
+
 
 def _make_paired_paths(
         dir_path: Path,
@@ -24,4 +26,5 @@ def make_legacy_read_paths(
         paired: bool
 ) -> PairedPaths:
     return _make_paired_paths(reads_dir_path, paired, lambda n: f"reads_{n}.fastq")
+
 

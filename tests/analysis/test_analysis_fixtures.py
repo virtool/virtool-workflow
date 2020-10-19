@@ -1,11 +1,14 @@
 import pytest
-from pathlib import Path
+from contextlib import contextmanager
 
 from virtool_workflow.analysis.analysis_info import *
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.trim_parameters import trimming_parameters
 from virtool_workflow.analysis.read_paths import reads_path
+from virtool_workflow.execute import run_shell_command
+
+from virtool_workflow.storage.paths import context_directory
 
 
 TEST_ANALYSIS_INFO = AnalysisInfo(
@@ -92,8 +95,26 @@ async def test_correct_trimming_parameters(fixtures):
     }
 
 
+@contextmanager
+def init_reads_dir(path: Path):
+    with context_directory(path) as read_dir:
+        paths = utils.make_read_paths(read_dir, True)
+        for path in paths:
+            path.write_text("")
+
+        yield paths
+
+
 async def test_reads_paths_initialized(fixtures):
 
-    path = await fixtures.instantiate(reads_path)
-    print(path)
-    raise
+    sample_path = await fixtures.get_or_instantiate("sample_path")
+    raw_path = await fixtures.get_or_instantiate("raw_path")
+
+    #fixtures["trimming_command"] = ["pwd"]
+
+    with init_reads_dir(sample_path):
+        with init_reads_dir(raw_path):
+
+            path = await fixtures.instantiate(reads_path)
+            print(path)
+            raise
