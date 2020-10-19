@@ -99,7 +99,7 @@ def rename_trimming_results(path: Path):
     """
     Rename Skewer output to a simple name used in Virtool.
 
-    :param path:
+    :param path: The path containing the results from Skewer
 
     """
     try:
