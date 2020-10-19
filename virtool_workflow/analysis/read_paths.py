@@ -1,16 +1,19 @@
 import asyncio
 import shutil
 import virtool_workflow
-import virtool_core.caches.db
 from typing import Dict, Any, List
 from pathlib import Path
-from .analysis_info import AnalysisArguments, sample_path, sample
-from .cache import cache_document, fetch_cache, create_cache
-from .trim_parameters import trimming_parameters
-from virtool_workflow.execute import run_in_executor, FunctionExecutor
-from virtool_workflow.storage.paths import cache_path
-from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow_runtime.db import VirtoolDatabase
+
+from ..config.fixtures import number_of_processes
+from ..storage.paths import cache_path
+from ..execute import run_in_executor, FunctionExecutor
+from ..storage.utils import copy_paths
+
+from .trim_parameters import trimming_parameters
+from .analysis_info import AnalysisArguments
+from .cache import cache_document, fetch_cache, create_cache
+from . import utils
 
 
 async def fetch_legacy_paths(
@@ -33,6 +36,7 @@ async def reads_path(
         cache_document: Dict[str, Any],
         database: VirtoolDatabase,
         trimming_parameters: Dict[str, Any],
+        number_of_processes: int,
         run_in_executor: FunctionExecutor
 ) -> Path:
     """The analysis reads path with caches fetched if they exist"""
@@ -43,15 +47,18 @@ async def reads_path(
                           run_in_executor)
 
     elif not all(f["raw"] for f in analysis_args.sample["files"]):
-        legacy_paths = [analysis_args.sample_path/"reads_1.fastq"]
-        if analysis_args.sample["paired"]:
-            legacy_paths.append(analysis_args.sample_path/"reads_2.fastq")
+        legacy_paths = utils.make_legacy_read_paths(analysis_args.sample_path)
 
         await copy_paths(legacy_paths,
                          [reads_path/path.name for path in legacy_paths],
                          run_in_executor)
     else:
-        await create_cache(analysis_args, trimming_parameters, cache_path)
+        await create_cache(analysis_args,
+                           trimming_parameters,
+                           cache_path,
+                           number_of_processes,
+                           database,
+                           run_in_executor)
 
     return analysis_args.reads_path
 
