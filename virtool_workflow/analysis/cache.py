@@ -24,6 +24,7 @@ async def cache_document(
         sample_id: str,
         caches: Collection,
 ) -> Optional[Dict[str, Any]]:
+    """Fetch the cache document for a given sample if it exists."""
     cache_document = await caches.find_one({
         "hash": virtool_core.caches.db.calculate_cache_hash(trimming_parameters),
         "missing": False,
@@ -94,7 +95,7 @@ def compose_trimming_command(
     return command
 
 
-def rename_trimming_results(path):
+def rename_trimming_results(path: Path):
     """
     Rename Skewer output to a simple name used in Virtool.
 
@@ -103,23 +104,23 @@ def rename_trimming_results(path):
     """
     try:
         shutil.move(
-            os.path.join(path, f"reads-trimmed.fastq.gz"),
-            os.path.join(path, f"reads_1.fq.gz")
+            str(path/"reads-trimmed.fastq.gz"),
+            str(path/"reads_1.fq.gz"),
         )
     except FileNotFoundError:
         shutil.move(
-            os.path.join(path, f"reads-trimmed-pair1.fastq.gz"),
-            os.path.join(path, f"reads_1.fq.gz")
+            str(path/"reads-trimmed-pair1.fastq.gz"),
+            str(path/"reads_1.fq.gz"),
         )
 
         shutil.move(
-            os.path.join(path, f"reads-trimmed-pair2.fastq.gz"),
-            os.path.join(path, f"reads_2.fq.gz")
+            str(path/"reads-trimmed-pair2.fastq.gz"),
+            str(path/"reads_2.fq.gz"),
         )
 
     shutil.move(
-        os.path.join(path, "reads-trimmed.log"),
-        os.path.join(path, "trim.log")
+        str(path/"reads-trimmed.log"),
+        str(path/"trim.log"),
     )
 
 
@@ -135,10 +136,7 @@ async def run_cache_qc(
     fastqc_path = temp_cache_path/"fastqc"
     fastqc_path.mkdir()
 
-    read_paths = [temp_cache_path/"reads_1.fq.gz"]
-
-    if paired:
-        read_paths.append(temp_cache_path/"reads_2.fq.gz")
+    read_paths = utils.make_read_paths(temp_cache_path, paired)
 
     await fastqc.run_fastqc(number_of_processes, read_paths, fastqc_path)
 
