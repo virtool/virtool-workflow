@@ -1,12 +1,12 @@
 """Helper functions for threading and running subprocesses within Virtool Workflows."""
 import asyncio
-from asyncio.subprocess import PIPE, Process
+from subprocess import PIPE, Popen
 from typing import Union, IO, Tuple, Callable, Any, Iterable, Dict, Coroutine
 from concurrent.futures import ThreadPoolExecutor
 from .workflow_fixture import fixture
 
 
-async def run_subprocess(command: Union[str, list], **kwargs) -> Process:
+async def run_subprocess(command: Union[str, list], **kwargs) -> Popen:
     """
     Execute a shell command as a subprocess
 
@@ -25,7 +25,7 @@ async def run_subprocess(command: Union[str, list], **kwargs) -> Process:
 
     args.update(kwargs)
 
-    return await asyncio.create_subprocess_exec(*command, **args)
+    return Popen(command, **args)
 
 
 async def run_shell_command(
@@ -47,7 +47,7 @@ async def run_shell_command(
                   else run_subprocess(command, stdin=stdin, **kwargs))
     input_ = bytes(stdin, encoding="utf-8") if stdin_is_str else None
 
-    out, err = await proc.communicate(input=input_)
+    out, err = proc.communicate(input=input_)
 
     return str(out, encoding="utf-8"), str(err, encoding="utf-8")
 
