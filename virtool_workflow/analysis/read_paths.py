@@ -12,7 +12,7 @@ from ..storage.utils import copy_paths
 
 from .trim_parameters import trimming_parameters
 from .analysis_info import AnalysisArguments
-from .cache import cache_document, fetch_cache, create_cache
+from .cache import cache_document, fetch_cache, create_cache, trimming_command
 from . import utils
 
 
@@ -36,10 +36,14 @@ async def reads_path(
         cache_document: Dict[str, Any],
         database: VirtoolDatabase,
         trimming_parameters: Dict[str, Any],
+        trimming_command: List[str],
         number_of_processes: int,
         run_in_executor: FunctionExecutor
 ) -> Path:
     """The analysis reads path with caches fetched if they exist"""
+
+    analysis_args.reads_path.mkdir(parents=True, exist_ok=True)
+
     if cache_document:
         await fetch_cache(cache_document,
                           cache_path,
@@ -49,12 +53,14 @@ async def reads_path(
     elif not all(f["raw"] for f in analysis_args.sample["files"]):
         legacy_paths = utils.make_legacy_read_paths(analysis_args.sample_path)
 
-        await copy_paths(legacy_paths,
-                         [reads_path/path.name for path in legacy_paths],
-                         run_in_executor)
+        paths_to_copy = {path: reads_path/path.name
+                         for path in legacy_paths}
+
+        await copy_paths(paths_to_copy.items(), run_in_executor)
     else:
         await create_cache(analysis_args,
                            trimming_parameters,
+                           trimming_command,
                            cache_path,
                            number_of_processes,
                            database,

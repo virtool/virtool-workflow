@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Iterable
 from pathlib import Path
 
 import virtool_core.caches.db
@@ -9,7 +9,7 @@ from virtool_workflow.execute import FunctionExecutor
 from virtool_workflow_runtime.db.fixtures import caches, Collection
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow.storage.utils import copy_paths
-from virtool_workflow.execute import run_subprocess
+from virtool_workflow.execute import run_shell_command
 from . import utils
 from . import fastqc
 from .trim_parameters import trimming_parameters
@@ -42,32 +42,31 @@ async def fetch_cache(
         run_in_executor: FunctionExecutor
 ):
     cached_read_paths = utils.make_read_paths(
-        reads_dir_path=cache_path/cache_document["id"],
+        reads_dir_path=cache_path/cache_document["_id"],
         paired=cache_document["paired"]
     )
 
     await copy_paths(
-        cached_read_paths,
-        [reads_path/path.name for path in cached_read_paths],
+        {path: reads_path/path.name for path in cached_read_paths}.items(),
         run_in_executor
     )
 
 
 async def fetch_raw(
-        read_paths: List[Path],
+        read_paths: Iterable[Path],
         raw_path: Path,
         run_in_executor: FunctionExecutor
 ):
     raw_read_paths = [raw_path/path.name for path in read_paths]
 
-    await copy_paths(read_paths, raw_read_paths, run_in_executor)
+    await copy_paths(zip(read_paths, raw_read_paths), run_in_executor)
 
 
 def compose_trimming_command(
         cache_path: Path,
         trimming_parameters: Dict[str, Any],
         number_of_processes: int,
-        read_paths: List[Path]
+        read_paths: Iterable[Path]
 ):
     command = [
         "skewer",
@@ -151,9 +150,23 @@ async def run_cache_qc(
     return read_paths
 
 
+@fixture
+def trimming_command(
+        trimming_parameters: Dict[str, Any],
+        cache_path: Path,
+        number_of_processes: int,
+        read_paths: utils.PairedPaths
+) -> List[str]:
+    return compose_trimming_command(cache_path,
+                                    trimming_parameters,
+                                    number_of_processes,
+                                    read_paths)
+
+
 async def create_cache(
         analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any],
+        trimming_command: List[str],
         cache_path: Path,
         number_of_processes: int,
         database: VirtoolDatabase,
@@ -170,16 +183,21 @@ async def create_cache(
         }
     })
 
-    await fetch_raw(analysis_args.read_paths, analysis_args.raw_path, run_in_executor)
-
-    trimming_command = compose_trimming_command(cache_path,
-                                                trimming_parameters,
-                                                number_of_processes,
-                                                analysis_args.read_paths)
+    await fetch_raw(
+        utils.make_read_paths(
+            analysis_args.sample_path,
+            analysis_args.paired
+        ),
+        analysis_args.raw_path,
+        run_in_executor,
+    )
 
     env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
 
-    await run_subprocess(trimming_command, env=env)
+    out, err = await run_shell_command(trimming_command, env=env)
+
+    if err:
+        raise RuntimeError("trimming command failed", err)
 
     await run_in_executor(rename_trimming_results, analysis_args.temp_cache_path)
 
@@ -195,7 +213,7 @@ async def create_cache(
 
     await run_in_executor(shutil.copytree, str(analysis_args.temp_cache_path), cache_path/cache["id"])
 
-    await copy_paths(temp_paths, analysis_args.read_paths)
+    await copy_paths(zip(temp_paths, analysis_args.read_paths), run_in_executor)
 
     await run_in_executor(shutil.rmtree, str(analysis_args.temp_cache_path))
 

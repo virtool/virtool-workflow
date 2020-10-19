@@ -1,13 +1,13 @@
 import os
 import shutil
 from pathlib import Path
-from typing import List
+from typing import Iterable
 
 import virtool_core.utils
 from virtool_workflow.execute import run_shell_command
 
 
-async def run_fastqc(number_of_processes: int, read_paths: List[Path], fastqc_path: Path):
+async def run_fastqc(number_of_processes: int, read_paths: Iterable[Path], fastqc_path: Path):
     command = [
         "fastqc",
         "-f", "fastq",

@@ -11,7 +11,7 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     if not isinstance(path, Path):
         path = Path(path)
 
-    path.mkdir()
+    path.mkdir(parents=True, exist_ok=True)
     yield path
     rmtree(str(path))
 

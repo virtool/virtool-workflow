@@ -7,6 +7,7 @@ from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow.storage.paths import data_path, temp_path
 from virtool_workflow_runtime.db.fixtures import samples, analyses, jobs, Collection
+from . import utils
 
 
 @dataclass(frozen=True)
@@ -58,7 +59,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
     sample_path: Path
     index_path: Path
     reads_path: Path
-    read_paths: List[Path]
+    read_paths: utils.PairedPaths
     subtraction_path: Path
     raw_path: Path
     temp_cache_path: Path
@@ -91,11 +92,8 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
         subtraction_path = data_path / "subtractions" / subtraction_id / "reference"
         sample_path = data_path / "samples" / sample_id
         reads_path = temp_path / "reads"
-        read_paths = [reads_path / "reads_1.fq.gz"]
         paired = sample["paired"]
-
-        if paired:
-            read_paths.append(reads_path / "reads_2.fq.gz")
+        read_paths = utils.make_read_paths(reads_path, paired)
 
         return AnalysisArguments(
             path=sample_path / "analysis" / analysis_id,
