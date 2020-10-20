@@ -1,19 +1,16 @@
 import asyncio
 import shutil
-import virtool_workflow
-from typing import Dict, Any, List
+from typing import List, Dict, Any
 from pathlib import Path
+
+import virtool_workflow
 from virtool_workflow_runtime.db import VirtoolDatabase
-
-from ..config.fixtures import number_of_processes
-from ..storage.paths import cache_path
-from ..execute import run_in_executor, FunctionExecutor
-from ..storage.utils import copy_paths
-
-from .trim_parameters import trimming_parameters
 from .analysis_info import AnalysisArguments
-from .cache import cache_document, fetch_cache, create_cache, trimming_command
 from . import utils
+from .cache import fetch_cache, create_cache
+from ..execute import FunctionExecutor
+from ..storage.utils import copy_paths
+from ..config.fixtures import number_of_processes
 
 
 async def fetch_legacy_paths(
@@ -40,8 +37,7 @@ async def reads_path(
         number_of_processes: int,
         run_in_executor: FunctionExecutor
 ) -> Path:
-    """The analysis reads path with caches fetched if they exist"""
-
+    """The analysis reads path with caches fetched if they exist."""
     analysis_args.reads_path.mkdir(parents=True, exist_ok=True)
 
     if cache_document:
@@ -51,7 +47,7 @@ async def reads_path(
                           run_in_executor)
 
     elif not all(f["raw"] for f in analysis_args.sample["files"]):
-        legacy_paths = utils.make_legacy_read_paths(analysis_args.sample_path)
+        legacy_paths = utils.make_legacy_read_paths(analysis_args.sample_path, analysis_args.paired)
 
         paths_to_copy = {path: reads_path/path.name
                          for path in legacy_paths}

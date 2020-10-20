@@ -47,8 +47,7 @@ def handle_base_quality_nan(split_line: list) -> list:
 
 
 def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_"):
-    """
-    Parse the FastQC results at `fastqc_path`.
+    """Parse the FastQC results at `fastqc_path`.
 
     All FastQC data except the textual data file are removed. The `prefix` will be prepended to the data file name.
 

@@ -1,15 +1,16 @@
 from typing import Dict, Union
 
 from virtool_core.samples.utils import TRIM_PARAMETERS
-from virtool_workflow import fixture
-from virtool_workflow.analysis.analysis_info import library_type, sample_read_length
-from virtool_workflow.analysis.library_types import LibraryType
+from .library_types import LibraryType
+from .analysis_info import library_type, sample_read_length
+from .. import fixture
 
 
 @fixture
 def trimming_min_length(library_type: LibraryType, sample_read_length: int):
     """
-    Calculate the minimum length of a read before it is discarded.
+    Calculate the minimum length of a read.
+
     This takes into account the library type (eg. srna)
     and the maximum observed read length in the sample.
 
@@ -35,9 +36,9 @@ def trimming_parameters(
         sample_read_length: int,
         trimming_min_length: int
 ) -> Dict[str, Union[str, int]]:
-    """
-    Derive trimming parameters based on the library type,
-    maximum observed read length, and minimum allowed trim length.
+    """Derive trimming parameters.
+
+    Based on the library type, maximum observed read length, and minimum allowed trim length.
 
     :param library_type: The LibraryType (eg. srna)
     :param sample_read_length: The maximum read length in the sample

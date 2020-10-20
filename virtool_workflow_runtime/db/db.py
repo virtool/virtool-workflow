@@ -1,4 +1,4 @@
-"""Functions for accessing the Virtool database"""
+"""Functions for accessing the Virtool database."""
 import asyncio
 from os import getenv
 from typing import Optional, Any

@@ -1,8 +1,8 @@
 """Helper functions for threading and running subprocesses within Virtool Workflows."""
-import asyncio
-from subprocess import PIPE, Popen
-from typing import Union, IO, Tuple, Callable, Any, Iterable, Dict, Coroutine
 from concurrent.futures import ThreadPoolExecutor
+from subprocess import PIPE, Popen
+from typing import Union, IO, Tuple, Callable, Any, Coroutine
+
 from .workflow_fixture import fixture
 
 
