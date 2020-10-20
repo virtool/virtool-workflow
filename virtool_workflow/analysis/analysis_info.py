@@ -95,6 +95,13 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
         paired = sample["paired"]
         read_paths = utils.make_read_paths(reads_path, paired)
 
+        temp_cache_path = temp_path / "cache"
+
+        subtraction_path.mkdir(parents=True, exist_ok=True)
+        sample_path.mkdir(parents=True, exist_ok=True)
+        reads_path.mkdir()
+        temp_cache_path.mkdir()
+
         return AnalysisArguments(
             path=sample_path / "analysis" / analysis_id,
             sample_path=sample_path,
@@ -103,7 +110,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
             read_paths=read_paths,
             subtraction_path=subtraction_path,
             raw_path=temp_path / "raw",
-            temp_cache_path=temp_path / "cache",
+            temp_cache_path=temp_cache_path,
             temp_analysis_path=temp_path / analysis_id,
             paired=sample["paired"],
             read_count=int(sample["quality"]["count"]),
@@ -139,7 +146,7 @@ def reads_path(analysis_args: AnalysisArguments) -> Path:
 
 
 @fixture
-def read_paths(analysis_args: AnalysisArguments) -> List[Path]:
+def read_paths(analysis_args: AnalysisArguments) -> Tuple[Path]:
     return analysis_args.read_paths
 
 

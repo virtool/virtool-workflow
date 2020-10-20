@@ -99,11 +99,11 @@ def rename_trimming_results(path: Path):
     Rename Skewer output to a simple name used in Virtool.
 
     :param path: The path containing the results from Skewer
-
     """
+
     try:
         shutil.move(
-            str(path/"reads-trimmed.fastq.gz"),
+            str(path/"reads_trimmed-pair1.fastq.gz"),
             str(path/"reads_1.fq.gz"),
         )
     except FileNotFoundError:
@@ -197,7 +197,7 @@ async def create_cache(
     out, err = await run_shell_command(trimming_command, env=env)
 
     if err:
-        raise RuntimeError("trimming command failed", err)
+        raise RuntimeError("trimming command failed", err, trimming_command)
 
     await run_in_executor(rename_trimming_results, analysis_args.temp_cache_path)
 
