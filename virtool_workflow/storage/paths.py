@@ -13,7 +13,7 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
 
     path.mkdir(parents=True, exist_ok=True)
     yield path
-    rmtree(str(path))
+    rmtree(path)
 
 
 @fixture
