@@ -1,19 +1,18 @@
 import os
 import shutil
-from typing import Dict, Any, Optional, List, Iterable
 from pathlib import Path
+from typing import Dict, Any, Optional, List, Iterable
 
 import virtool_core.caches.db
-from virtool_workflow import fixture
-from virtool_workflow.execute import FunctionExecutor
-from virtool_workflow_runtime.db.fixtures import caches, Collection
 from virtool_workflow_runtime.db import VirtoolDatabase
-from virtool_workflow.storage.utils import copy_paths
-from virtool_workflow.execute import run_shell_command
-from . import utils
+from virtool_workflow_runtime.db.fixtures import Collection
 from . import fastqc
-from .trim_parameters import trimming_parameters
+from . import utils
 from .analysis_info import AnalysisArguments
+from .. import fixture
+from ..execute import FunctionExecutor
+from ..execute import run_shell_command
+from ..storage.utils import copy_paths
 
 TRIMMING_PROGRAM = "skewer-0.2.2"
 
@@ -100,7 +99,6 @@ def rename_trimming_results(path: Path):
 
     :param path: The path containing the results from Skewer
     """
-
     try:
         shutil.move(
             str(path/"reads_trimmed-pair1.fastq.gz"),
@@ -194,7 +192,7 @@ async def create_cache(
 
     env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
 
-    out, err = await run_shell_command(trimming_command, env=env)
+    _, err = await run_shell_command(trimming_command, env=env)
 
     if err:
         raise RuntimeError("trimming command failed", err, trimming_command)
@@ -211,11 +209,10 @@ async def create_cache(
         database["caches"]
     )
 
-    await run_in_executor(shutil.copytree, str(analysis_args.temp_cache_path), cache_path/cache["id"])
+    await run_in_executor(
+        shutil.copytree,
+        str(analysis_args.temp_cache_path),
+        cache_path/cache["id"])
 
     await copy_paths(zip(temp_paths, analysis_args.read_paths), run_in_executor)
-
-    await run_in_executor(shutil.rmtree, str(analysis_args.temp_cache_path))
-
     return cache
-

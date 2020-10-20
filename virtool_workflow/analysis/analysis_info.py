@@ -1,17 +1,20 @@
+"""Workflow fixtures for use in analysis workflows."""
 from dataclasses import dataclass, astuple
 from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple
 
-from virtool_workflow import fixture, WorkflowFixture
-from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow_runtime.db import VirtoolDatabase
-from virtool_workflow.storage.paths import data_path, temp_path
-from virtool_workflow_runtime.db.fixtures import samples, analyses, jobs, Collection
+from virtool_workflow_runtime.db.fixtures import Collection
 from . import utils
+from .library_types import LibraryType
+from .. import fixture, WorkflowFixture
+from ..storage.paths import data_path, temp_path
 
 
 @dataclass(frozen=True)
 class AnalysisInfo:
+    """
+    Fields required for analysis jobs which are found in a jobs database document.
+    """
     sample_id: str
     analysis_id: str
     ref_id: str
@@ -35,7 +38,6 @@ async def analysis_info(
     :return: A tuple containing the sample id, analysis id, reference id,
         index id, sample document, and analysis document.
     """
-
     sample_id = job_document["sample_id"]
     analysis_id = job_document["analysis_id"]
     ref_id = job_document["ref_id"]
@@ -55,6 +57,9 @@ async def analysis_info(
 
 @dataclass(frozen=True)
 class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
+    """
+    Dataclass containing standard arguments required for Virtool analysis workflows.
+    """
     path: Path
     sample_path: Path
     index_path: Path
@@ -81,6 +86,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
             temp_path: Path,
             analysis_info: AnalysisInfo
     ) -> "AnalysisArguments":
+        """Initialize directory structure for analysis workflows."""
         (sample_id,
          analysis_id,
          ref_id,

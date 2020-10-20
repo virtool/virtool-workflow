@@ -18,7 +18,7 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
 
 @fixture
 def data_path():
-    """Fetch the virtool data path"""
+    """Fetch the virtool data path."""
     # TODO: Get path from settings
     return Path("virtool")
 

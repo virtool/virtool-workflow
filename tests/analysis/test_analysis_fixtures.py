@@ -1,8 +1,9 @@
 import pytest
-import shutil
 from contextlib import contextmanager
+from pathlib import Path
 
-from virtool_workflow.analysis.analysis_info import *
+from virtool_workflow.analysis import utils
+from virtool_workflow.analysis.analysis_info import AnalysisArguments, AnalysisInfo
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.trim_parameters import trimming_parameters
