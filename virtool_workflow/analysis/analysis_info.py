@@ -97,12 +97,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
 
         temp_cache_path = temp_path / "cache"
 
-        subtraction_path.mkdir(parents=True, exist_ok=True)
-        sample_path.mkdir(parents=True, exist_ok=True)
-        reads_path.mkdir()
-        temp_cache_path.mkdir()
-
-        return AnalysisArguments(
+        args = AnalysisArguments(
             path=sample_path / "analysis" / analysis_id,
             sample_path=sample_path,
             index_path=data_path / "references" / ref_id / index_id / "reference",
@@ -123,6 +118,11 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
             ref_id=ref_id,
             index_id=index_id,
         )
+
+        for path in [path for path in astuple(args) if isinstance(path, Path)]:
+            path.mkdir(parents=True, exist_ok=True)
+
+        return args
 
 
 @fixture
