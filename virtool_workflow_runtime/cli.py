@@ -30,7 +30,8 @@ def workflow_file_option(func):
 @click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @cli.command()
 async def run(f: str, job_id: str):
-    workflow = discovery.discover_workflow(Path(f).absolute())
+    workflow, _ = discovery.run_discovery(Path(f), Path(f).parent/"fixtures.py")
+
     await runtime.execute(workflow, job_id=job_id)
 
 
