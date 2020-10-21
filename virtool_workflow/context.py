@@ -40,7 +40,6 @@ class WorkflowExecutionContext(SimpleNamespace):
         self.current_step = 0
         self.progress = 0.0
         self.error = None
-        
         super().__init__(**kwargs)
 
     def on_state_change(self, action: StateListener):
@@ -54,7 +53,9 @@ class WorkflowExecutionContext(SimpleNamespace):
 
     def on_update(self, action: UpdateListener):
         """
-        register a callback function to receive updates sent from the workflow via :func:`send_update`
+        register a callback function to receive updates.
+
+        Updates are sent from the workflow via :func:`send_update`.
 
         :param action: async function to call when updates are received. The WorkflowExecutionContext
                        and update string are included as parameters.

@@ -7,7 +7,7 @@ import virtool_workflow
 from virtool_workflow_runtime.db import VirtoolDatabase
 from . import utils
 from .analysis_info import AnalysisArguments
-from .cache import fetch_cache, create_cache
+from .cache import fetch_cache, prepare_reads_and_create_cache
 from ..execute import FunctionExecutor
 from ..storage.utils import copy_paths
 
@@ -53,13 +53,13 @@ async def reads_path(
 
         await copy_paths(paths_to_copy.items(), run_in_executor)
     else:
-        await create_cache(analysis_args,
-                           trimming_parameters,
-                           trimming_command,
-                           cache_path,
-                           number_of_processes,
-                           database,
-                           run_in_executor)
+        await prepare_reads_and_create_cache(analysis_args,
+                                             trimming_parameters,
+                                             trimming_command,
+                                             cache_path,
+                                             number_of_processes,
+                                             database,
+                                             run_in_executor)
 
     return analysis_args.reads_path
 
