@@ -11,7 +11,7 @@ echo "Starting Redis"
 REDIS=$(docker run -d --network=host redis)
 
 echo "Running pytest"
-pytest . "$@"
+pytest --disable-pytest-warnings "$@"
 
 echo "Stopping MongoDB"
 (docker stop "$ID")
