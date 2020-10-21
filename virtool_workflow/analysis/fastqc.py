@@ -176,7 +176,7 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_"):
                         fastqc[flag][i - 1] = values
                 else:
                     for i in pos:
-                        fastqc[flag][i - 1] = virtool_core.utils.average_list(fastqc[flag][i - 1], values)
+                        fastqc[flag][i - 1] = [(_1 + _2)/2 for _1, _2 in zip(values, fastqc[flag][i-1])]
 
             elif flag == "sequences" and "#" not in line:
                 line = line.rstrip().split()
