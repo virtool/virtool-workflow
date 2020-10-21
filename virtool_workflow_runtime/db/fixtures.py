@@ -1,6 +1,6 @@
+"""Fixtures for individual Collections from the Virtool Database."""
 from virtool_workflow import fixture
-from .db import Collection
-from .db import VirtoolDatabase
+from .db import Collection, VirtoolDatabase
 
 
 @fixture

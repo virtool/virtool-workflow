@@ -1,3 +1,4 @@
+"""An example workflow which uses workflow fixtures."""
 from typing import Dict, Any
 
 import pytest
@@ -46,7 +47,3 @@ def workflow_with_fixtures():
         results.update(state)
 
     return test_workflow
-
-
-
-

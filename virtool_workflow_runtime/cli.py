@@ -32,7 +32,7 @@ def workflow_file_option(func):
 async def run(f: str, job_id: str):
     workflow, _ = discovery.run_discovery(Path(f), Path(f).parent/"fixtures.py")
 
-    await runtime.execute(workflow, job_id=job_id)
+    await runtime.execute(job_id, workflow)
 
 
 @workflow_file_option

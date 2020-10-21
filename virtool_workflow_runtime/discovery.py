@@ -1,3 +1,4 @@
+"""Find workflows and fixtures from python modules."""
 from importlib import import_module
 from importlib.util import spec_from_file_location, module_from_spec
 from pathlib import Path
@@ -6,7 +7,7 @@ from typing import List, Union, Iterable, Tuple, Optional
 
 from virtool_workflow import Workflow, WorkflowFixture
 
-__fixtures__type__ = Iterable[
+FixtureImportType = Iterable[
     Union[
         str,
         Iterable[str]
@@ -41,10 +42,17 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[WorkflowFixture]:
     return [attr for attr in module.__dict__.values() if isinstance(attr, WorkflowFixture)]
 
 
-def load_fixtures_from__fixtures__(path: Path):
+def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
+    """
+    Load all fixtures specified by the __fixtures__ attribute of a module.
+
+    :param path: The path to a python module containing __fixtures__: FixtureImportType attribute
+    :return: A list of discovered fixtures
+    :raise AttributeError: When the imported module does not have an __fixtures__ attribute
+    """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
 
-    __fixtures__ = getattr(module, "__fixtures__", [])
+    __fixtures__ = getattr(module, "__fixtures__")
 
     fixtures = []
     for fixture_set in __fixtures__:
@@ -77,6 +85,19 @@ def run_discovery(
         path: Path,
         fixture_path: Optional[Path] = None
 ) -> Tuple[Workflow, List[WorkflowFixture]]:
+    """
+    Discover a workflow and fixtures from the given path(s).
+
+    Fixtures are loaded in the following order:
+
+        1. virtool_workflow_runtime.autoload, used to standard runtime fixtures.
+        2. __fixtures__ attribute from the workflow file (located by `path`)
+        3. Any :class:`WorkflowFixture` instances from the module located by `fixture_path`
+
+    :param path: A Path locating a python module which contains a :class:`Workflow` instance
+    :param fixture_path: A Path locating a file containing :class:`WorkflowFixture` instances
+    :return: The Workflow instance from `path` and a list of discovered fixtures.
+    """
     fixtures = load_fixtures_from__fixtures__(Path(__file__).parent/"autoload.py")
 
     fixtures.extend(load_fixtures_from__fixtures__(path))
@@ -87,4 +108,3 @@ def run_discovery(
     workflow = discover_workflow(path)
 
     return workflow, fixtures
-

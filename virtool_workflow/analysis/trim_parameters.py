@@ -1,3 +1,4 @@
+"""Calculate trimming parameters (parameters to skewer)."""
 from typing import Dict, Union
 
 from virtool_core.samples.utils import TRIM_PARAMETERS
@@ -32,15 +33,13 @@ def trimming_min_length(library_type: LibraryType, sample_read_length: int):
 @fixture
 def trimming_parameters(
         library_type: LibraryType,
-        sample_read_length: int,
         trimming_min_length: int
 ) -> Dict[str, Union[str, int]]:
     """Derive trimming parameters.
 
-    Based on the library type, maximum observed read length, and minimum allowed trim length.
+    Based on the library type, and minimum allowed trim length.
 
     :param library_type: The LibraryType (eg. srna)
-    :param sample_read_length: The maximum read length in the sample
     :param trimming_min_length: The minimum length of a read
         before it is discarded.
     :return: the trimming parameters
@@ -63,4 +62,3 @@ def trimming_parameters(
         **TRIM_PARAMETERS,
         "min_length": trimming_min_length
     }
-

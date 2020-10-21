@@ -1,15 +1,17 @@
+"""Perform read prep before accessing Virtool reads_path"""
+# pylint: disable=redefined-outer-name
 import asyncio
 import shutil
 from pathlib import Path
 from typing import List, Dict, Any
 
 import virtool_workflow
+from virtool_workflow.analysis import utils
+from virtool_workflow.analysis.analysis_info import AnalysisArguments
+from virtool_workflow.analysis.cache import fetch_cache, prepare_reads_and_create_cache
+from virtool_workflow.execute import FunctionExecutor
+from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow_runtime.db import VirtoolDatabase
-from . import utils
-from .analysis_info import AnalysisArguments
-from .cache import fetch_cache, prepare_reads_and_create_cache
-from ..execute import FunctionExecutor
-from ..storage.utils import copy_paths
 
 
 async def fetch_legacy_paths(
@@ -62,17 +64,3 @@ async def reads_path(
                                              run_in_executor)
 
     return analysis_args.reads_path
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,3 +1,4 @@
+"""Execute workflows without runtime related hooks (database, redis, etc.)."""
 import sys
 import traceback
 from typing import Awaitable, Callable, Optional, Dict, Any
@@ -48,7 +49,7 @@ WorkflowErrorHandler = Callable[[WorkflowError], Awaitable[Optional[str]]]
 
 async def _run_step(
         step: WorkflowStep,
-        wf: Workflow,
+        workflow: Workflow,
         ctx: WorkflowExecutionContext,
         on_error: Optional[WorkflowErrorHandler] = None
 ):
@@ -56,7 +57,7 @@ async def _run_step(
     try:
         return await step()
     except Exception as exception:
-        error = WorkflowError(cause=exception, workflow=wf, context=ctx)
+        error = WorkflowError(cause=exception, workflow=workflow, context=ctx)
         ctx.error = error.traceback_data
         if on_error:
             return await on_error(error)
@@ -64,17 +65,17 @@ async def _run_step(
         raise error from exception
 
 
-async def _run_steps(steps, wf, ctx, on_error=None, on_each=None):
+async def _run_steps(steps, workflow, ctx, on_error=None, on_each=None):
     for step in steps:
         if on_each:
-            on_each(wf, ctx)
-        update = await _run_step(step, wf, ctx, on_error)
+            on_each(workflow, ctx)
+        update = await _run_step(step, workflow, ctx, on_error)
         await ctx.send_update(update)
 
 
-def _inc_step(wf, ctx):
+def _inc_step(workflow, ctx):
     ctx.current_step += 1
-    ctx.progress = float(ctx.current_step) / float(len(wf.steps))
+    ctx.progress = float(ctx.current_step) / float(len(workflow.steps))
 
 
 async def execute(
@@ -87,7 +88,7 @@ async def execute(
 ) -> Dict[str, Any]:
     """
     Execute a Workflow.
-    
+
     :param Workflow _wf: the Workflow to execute
     :param _context: The WorkflowExecutionContext to start from
     :param scope: The WorkflowFixtureScope to use for fixture injection

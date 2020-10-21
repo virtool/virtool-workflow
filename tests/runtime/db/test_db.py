@@ -14,7 +14,7 @@ async def test_updates_sent_to_mongo():
     db = VirtoolDatabase()
     await db._db.jobs.insert_one({"_id": "1"})
 
-    await runtime.execute(workflow, "1")
+    await runtime.execute("1", workflow)
 
     document = await db._db.jobs.find_one({"_id": "1"})
 
