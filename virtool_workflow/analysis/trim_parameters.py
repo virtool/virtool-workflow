@@ -2,7 +2,6 @@ from typing import Dict, Union
 
 from virtool_core.samples.utils import TRIM_PARAMETERS
 from .library_types import LibraryType
-from .analysis_info import library_type, sample_read_length
 from .. import fixture
 
 

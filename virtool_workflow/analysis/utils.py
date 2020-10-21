@@ -1,6 +1,5 @@
-from typing import Tuple, Callable, Union
 from pathlib import Path
-
+from typing import Tuple, Callable, Union
 
 PairedPaths = Union[Tuple[Path], Tuple[Path, Path]]
 

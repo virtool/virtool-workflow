@@ -1,6 +1,6 @@
 from enum import Enum, auto
-from typing import Callable, Optional, Coroutine, Any
 from types import SimpleNamespace
+from typing import Callable, Optional, Coroutine, Any
 
 
 class State(Enum):

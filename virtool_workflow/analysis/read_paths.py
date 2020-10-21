@@ -1,16 +1,15 @@
 import asyncio
 import shutil
-from typing import List, Dict, Any
 from pathlib import Path
+from typing import List, Dict, Any
 
 import virtool_workflow
 from virtool_workflow_runtime.db import VirtoolDatabase
-from .analysis_info import AnalysisArguments
 from . import utils
+from .analysis_info import AnalysisArguments
 from .cache import fetch_cache, create_cache
 from ..execute import FunctionExecutor
 from ..storage.utils import copy_paths
-from ..config.fixtures import number_of_processes
 
 
 async def fetch_legacy_paths(

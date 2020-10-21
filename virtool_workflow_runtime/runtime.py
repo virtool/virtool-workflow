@@ -1,9 +1,9 @@
+import virtool_workflow.execute_workflow
 from virtool_workflow import Workflow
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
-import virtool_workflow.execute_workflow
-from .job import Job
-from .db import VirtoolDatabase
 from ._redis import job_id_queue
+from .db import VirtoolDatabase
+from .job import Job
 
 
 async def execute(workflow: Workflow, job_id: str):
