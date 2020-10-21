@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+
 from virtool_workflow import WorkflowExecutionContext, Workflow
 
 

@@ -1,11 +1,10 @@
-from pathlib import Path
-from importlib.util import spec_from_file_location, module_from_spec
 from importlib import import_module
+from importlib.util import spec_from_file_location, module_from_spec
+from pathlib import Path
 from types import ModuleType
 from typing import List, Union, Iterable, Tuple, Optional
 
 from virtool_workflow import Workflow, WorkflowFixture
-
 
 __fixtures__type__ = Iterable[
     Union[

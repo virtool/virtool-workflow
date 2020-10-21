@@ -1,12 +1,12 @@
 """Command Line Interface to virtool_workflow"""
-import click
-import uvloop
 from pathlib import Path
 
-from virtool_workflow.execute_workflow import execute
-from . import runtime
+import click
+import uvloop
 
+from virtool_workflow.execute_workflow import execute
 from . import discovery
+from . import runtime
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 

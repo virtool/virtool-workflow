@@ -7,7 +7,6 @@ from virtool_workflow_runtime.db.fixtures import Collection
 from . import utils
 from .library_types import LibraryType
 from .. import fixture, WorkflowFixture
-from ..storage.paths import data_path, temp_path
 
 
 @dataclass(frozen=True)

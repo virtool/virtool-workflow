@@ -108,6 +108,7 @@ def init_reads_dir(path: Path):
 
 
 async def test_reads_path_initialized(fixtures, monkeypatch):
+    fixtures["number_of_processes"] = 2
 
     sample_path = await fixtures.get_or_instantiate("sample_path")
     raw_path = await fixtures.get_or_instantiate("raw_path")

@@ -1,10 +1,10 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
-from typing import Callable, Any, Optional, Iterator, Union, List, Type
-from inspect import signature, iscoroutinefunction, isgeneratorfunction
-from functools import wraps
 from abc import abstractmethod, ABC
-from itertools import chain
 from contextlib import AbstractContextManager
+from functools import wraps
+from inspect import signature, iscoroutinefunction, isgeneratorfunction
+from itertools import chain
+from typing import Callable, Any, Optional, Iterator, Union, List, Type
 
 from virtool_workflow.workflow import Workflow
 

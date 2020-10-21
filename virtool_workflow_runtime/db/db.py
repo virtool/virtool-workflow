@@ -5,9 +5,9 @@ from typing import Optional, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
-from virtool_core.db.bindings import BINDINGS
 from virtool_workflow import WorkflowFixture
 from virtool_workflow_runtime.job import Job
 
