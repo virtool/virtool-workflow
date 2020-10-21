@@ -1,12 +1,18 @@
 """Workflow fixtures for use in analysis workflows."""
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=redefined-outer-name
+# pylint: disable=too-many-locals
+# pylint: disable=arguments-differ
+# pylint: disable=missing-function-docstring
+
 from dataclasses import dataclass, astuple
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
 from virtool_workflow_runtime.db.fixtures import Collection
-from . import utils
-from .library_types import LibraryType
-from .. import fixture, WorkflowFixture
+from virtool_workflow.analysis import utils
+from virtool_workflow.analysis.library_types import LibraryType
+from virtool_workflow import fixture, WorkflowFixture
 
 
 @dataclass(frozen=True)
