@@ -8,8 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
-from virtool_workflow import WorkflowFixture
-from virtool_workflow_runtime.job import Job
+from virtool_workflow import WorkflowFixture, Workflow, WorkflowExecutionContext
 
 DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
 DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
@@ -17,16 +16,17 @@ DEFAULT_DATABASE_NAME = "virtool"
 
 
 class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
+    """
+    An interface to the Virtool database
+
+    :param db_name: The name of the MongoDB database
+    :param db_conn_url: The MongoDB connection URL
+    """
 
     def __init__(self, db_name: Optional[str] = None, db_conn_url: Optional[str] = None):
-        """
-        An interface to the Virtool database
-
-        :param db_name: The name of the MongoDB database
-        :param db_conn_url: The MongoDB connection URL
-        """
         if not db_conn_url:
-            db_conn_url = getenv(DATABASE_CONNECTION_URL_ENV, default=DATABASE_CONNECTION_URL_DEFAULT)
+            db_conn_url = getenv(DATABASE_CONNECTION_URL_ENV,
+                                 default=DATABASE_CONNECTION_URL_DEFAULT)
         if not db_name:
             db_name = DEFAULT_DATABASE_NAME
 
@@ -48,26 +48,22 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         """
         return getattr(self._db, item)
 
-    def send_updates_to_database_for_job(self, job: Job):
+    def send_updates_to_database_for_job(self, job_id: str, context: WorkflowExecutionContext, workflow: Workflow):
         async def _send_update(_, update: str):
-            await self._db.jobs.update_one({"_id": job.id}, {
+            await self._db.jobs.update_one({"_id": job_id}, {
                 "$set": {
-                    "state": str(job.context.state)
+                    "state": str(context.state)
                 },
                 "$push": {
                     "status": {
-                        "state": str(job.context.state),
-                        "stage": job.workflow.steps[job.context.current_step - 1].__name__,
-                        "error": job.context.error,
-                        "progress": job.context.progress,
+                        "state": str(context.state),
+                        "stage": workflow.steps[context.current_step - 1].__name__,
+                        "error": context.error,
+                        "progress": context.progress,
                         "update": update,
                         "timestamp": timestamp(),
                     }
                 }
             })
 
-        job.context.on_update(_send_update)
-
-
-
-
+        context.on_update(_send_update)

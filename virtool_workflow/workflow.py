@@ -1,3 +1,4 @@
+"""Main definitions for Virtool Workflows."""
 from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Callable, Sequence, Optional, Iterable, Any, Coroutine
@@ -79,4 +80,3 @@ class Workflow:
         """Decorator for adding a step to the workflow."""
         self.steps.append(_make_async(step))
         return step
-

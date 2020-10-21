@@ -1,16 +1,15 @@
-import pytest
 from contextlib import contextmanager
 from pathlib import Path
 
+import pytest
+
 from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.analysis_info import AnalysisArguments, AnalysisInfo
-from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow.analysis.trim_parameters import trimming_parameters
 from virtool_workflow.analysis.read_paths import reads_path
-
+from virtool_workflow.analysis.trim_parameters import trimming_parameters
 from virtool_workflow.storage.paths import context_directory
-
+from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 
 TEST_ANALYSIS_INFO = AnalysisInfo(
         sample_id="1",
@@ -59,7 +58,8 @@ async def test_analysis_fixture_instantiation(fixtures):
     assert arguments.path == arguments.sample_path/"analysis/1"
     assert arguments.index_path == fixtures["data_path"]/"references/1/1/reference"
     assert arguments.reads_path == fixtures["temp_path"]/"reads"
-    assert arguments.subtraction_path == fixtures["data_path"]/"subtractions/id_with_spaces/reference"
+    assert arguments.subtraction_path == \
+           fixtures["data_path"]/"subtractions/id_with_spaces/reference"
     assert arguments.reads_path/"reads_1.fq.gz" in arguments.read_paths
     assert arguments.reads_path/"reads_2.fq.gz" in arguments.read_paths
     assert arguments.library_type == LibraryType.amplicon

@@ -25,5 +25,3 @@ def make_legacy_read_paths(
         paired: bool
 ) -> PairedPaths:
     return _make_paired_paths(reads_dir_path, paired, lambda n: f"reads_{n}.fastq")
-
-

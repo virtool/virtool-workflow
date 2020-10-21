@@ -54,17 +54,23 @@ async def run_shell_command(
 
 @fixture
 def thread_pool_executor() -> ThreadPoolExecutor:
+    """A fixture for a :class:`ThreadPoolExecutor` to be used by :func:`run_in_executor`."""
     return ThreadPoolExecutor()
 
 
 FunctionExecutor = Callable[..., Coroutine[Any, Any, Any]]
+"""A function which accepts a Callable and it's arguments as parameters and returns a coroutine"""
 
 
 @fixture
 def run_in_executor(thread_pool_executor: ThreadPoolExecutor) -> FunctionExecutor:
+    """
+    Fixture to execute functions in a ThreadPoolExecutor.
+
+    Wraps :func:`ThreadPoolExecutor.submit` as an async function.
+    """
     async def _run_in_executor(func, *args, **kwargs):
         future = thread_pool_executor.submit(func, *args, **kwargs)
         return future.result()
 
     return _run_in_executor
-

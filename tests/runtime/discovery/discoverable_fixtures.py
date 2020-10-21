@@ -41,6 +41,3 @@ def step(data_path, temp_path, thread_pool_executor, run_in_executor, results):
     results["run_in_executor"] = run_in_executor
 
     return "__fixtures__ loaded correctly"
-
-
-

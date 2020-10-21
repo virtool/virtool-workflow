@@ -1,5 +1,7 @@
-from setuptools import setup, find_packages
+"""setup.py for virtool_workflow_runtime and virtool_workflow."""
 from pathlib import Path
+
+from setuptools import setup, find_packages
 
 AUTHORS = ["Ian Boyes", "Blake Smith"]
 

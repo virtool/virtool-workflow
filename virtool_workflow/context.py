@@ -1,3 +1,4 @@
+"""Execution context for Virtool Workflows."""
 from enum import Enum, auto
 from types import SimpleNamespace
 from typing import Callable, Optional, Coroutine, Any
@@ -57,8 +58,8 @@ class WorkflowExecutionContext(SimpleNamespace):
 
         Updates are sent from the workflow via :func:`send_update`.
 
-        :param action: async function to call when updates are received. The WorkflowExecutionContext
-                       and update string are included as parameters.
+        :param action: async function to call when updates are received.
+            The WorkflowExecutionContext and update string are included as parameters.
         """
         self._on_update.append(action)
 
