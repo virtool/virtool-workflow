@@ -3,15 +3,63 @@
 import asyncio
 import shutil
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 import virtool_workflow
-from virtool_workflow.analysis import utils
+from virtool_workflow.analysis import utils, fastqc
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.analysis.cache import fetch_cache, prepare_reads_and_create_cache
 from virtool_workflow.execute import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow_runtime.db import VirtoolDatabase
+
+
+def rename_trimming_results(path: Path):
+    """
+    Rename Skewer output to a simple name used in Virtool.
+
+    :param path: The path containing the results from Skewer
+    """
+    try:
+        shutil.move(
+            path/"reads-trimmed.fastq.gz",
+            path/"reads_1.fq.gz",
+        )
+    except FileNotFoundError:
+        shutil.move(
+            path/"reads-trimmed-pair1.fastq.gz",
+            path/"reads_1.fq.gz",
+        )
+
+        shutil.move(
+            path/"reads-trimmed-pair2.fastq.gz",
+            path/"reads_2.fq.gz",
+        )
+
+    shutil.move(
+        path/"reads-trimmed.log",
+        path/"trim.log",
+    )
+
+
+@virtool_workflow.fixture
+async def parsed_fastqc(
+        trimming_output: Tuple[Path, str],
+        analysis_args: AnalysisArguments,
+        number_of_processes: int,
+):
+    trimming_output_path, _ = trimming_output
+
+    rename_trimming_results(trimming_output_path)
+
+    read_paths = utils.make_read_paths(trimming_output_path, analysis_args.paired)
+
+    fastqc_path = analysis_args.temp_cache_path/"fastqc"
+    fastqc_path.mkdir()
+
+    await fastqc.run_fastqc(number_of_processes, read_paths, fastqc_path)
+
+    return fastqc.parse_fastqc(fastqc_path, analysis_args.sample_path)
 
 
 async def fetch_legacy_paths(
