@@ -32,6 +32,9 @@ async def cache_document(
         "sample.id": sample_id,
     })
 
+    if cache_document:
+        cache_document["id"] = cache_document["_id"]
+
     return cache_document
 
 
@@ -58,6 +61,16 @@ async def create_cache_document(
         analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any]
 ):
+    """
+    Create a new cache document in the database.
+
+    This document will be used to check for the presence of cached prepared reads.
+
+    :param database: The Virtool database object
+    :param analysis_args: The AnalysisArguments fixture
+    :param trimming_parameters: The trimming parameters (see virtool_workflow.analysis.trimming)
+    :return:
+    """
     cache = await virtool_core.caches.db.create(
         database,
         analysis_args.sample_id,
@@ -84,9 +97,10 @@ async def create_cache(
         trimming_output_path: Path,
         cache_path: Path,
 ):
+    """Create a new cache once the trimming program and fastqc have been run."""
     cache = await create_cache_document(database, analysis_args, trimming_parameters)
 
-    await database["caches"].update_one({"_id": cache["_id"]}, {"$set": {
+    await database["caches"].update_one({"_id": cache["id"]}, {"$set": {
             "quality": fastq
         }
     })

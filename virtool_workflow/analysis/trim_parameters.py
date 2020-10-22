@@ -35,9 +35,8 @@ def trimming_parameters(
         library_type: LibraryType,
         trimming_min_length: int
 ) -> Dict[str, Union[str, int]]:
-    """Derive trimming parameters.
-
-    Based on the library type, and minimum allowed trim length.
+    """
+    Derive trimming parameters based on the library type, and minimum allowed trim length.
 
     :param library_type: The LibraryType (eg. srna)
     :param trimming_min_length: The minimum length of a read

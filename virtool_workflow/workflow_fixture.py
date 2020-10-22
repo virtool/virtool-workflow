@@ -137,6 +137,14 @@ class WorkflowFixtureScope(AbstractContextManager):
         """Add an instance as a fixture with this WorkflowFixtureScope."""
         return self._instances.__setitem__(key, value)
 
+    def __delitem__(self, key: str):
+        """Support `del` keyword"""
+        return self._instances.__delitem__(key)
+
+    def __contains__(self, item):
+        """Support `in` operator."""
+        return self._instances.__contains__(item)
+
     def add_instance(self, instance: Any, *names: str):
         """
         Add an instance as a fixture within this WorkflowFixtureScope only. The instance

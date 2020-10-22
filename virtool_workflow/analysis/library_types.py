@@ -8,3 +8,4 @@ class LibraryType(Enum):
     """
     amplicon = auto()
     srna = auto()
+    other = auto()
