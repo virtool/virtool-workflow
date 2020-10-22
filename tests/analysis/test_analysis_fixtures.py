@@ -1,8 +1,11 @@
 import shutil
+import filecmp
 from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+
+from . import fastqc_out
 
 from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.analysis_info import AnalysisArguments, AnalysisInfo
@@ -14,6 +17,7 @@ from virtool_workflow.workflow_fixture import WorkflowFixtureScope
 from virtool_core.db import Collection
 from virtool_workflow.analysis.cache import cache_document
 from virtool_workflow.analysis.trimming import trimming_output, trimming_output_path, trimming_input_paths
+from virtool_workflow.analysis.read_paths import parsed_fastqc
 
 TEST_ANALYSIS_INFO = AnalysisInfo(
         sample_id="1",
@@ -168,6 +172,21 @@ async def test_correct_trimming_output(fixtures):
 
     assert "reads-trimmed.fastq.gz" in filenames
     assert "reads-trimmed.log" in filenames
+
+    with (trimmed_read_path/"reads-trimmed.fastq.gz").open("r") as output:
+        with Path(__file__).parent/"large_trimmed.fq.gz" as expected:
+            assert filecmp.cmp(output, expected)
+
+
+async def test_parsed_fastqc(fixtures):
+    path = await fixtures.instantiate(trimming_output_path)
+    fixtures["trimming_output"] = path, "TEST"
+
+    shutil.copyfile(Path(__file__).parent/"large_trimmed.fq.gz", path/"reads-trimmed.fastq.gz")
+    (path/"reads-trimmed.log").touch()
+
+    fastqc = await fixtures.instantiate(parsed_fastqc)
+    assert fastqc == fastqc_out.expected_output
 
 
 

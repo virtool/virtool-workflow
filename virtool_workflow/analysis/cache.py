@@ -69,32 +69,7 @@ async def fetch_raw_sample_data(
     )
 
 
-def rename_trimming_results(path: Path):
-    """
-    Rename Skewer output to a simple name used in Virtool.
 
-    :param path: The path containing the results from Skewer
-    """
-    try:
-        shutil.move(
-            path/"reads_trimmed.fastq.gz",
-            path/"reads_1.fq.gz",
-        )
-    except FileNotFoundError:
-        shutil.move(
-            path/"reads-trimmed-pair1.fastq.gz",
-            path/"reads_1.fq.gz",
-        )
-
-        shutil.move(
-            path/"reads-trimmed-pair2.fastq.gz",
-            path/"reads_2.fq.gz",
-        )
-
-    shutil.move(
-        path/"reads-trimmed.log",
-        path/"trim.log",
-    )
 
 async def run_cache_qc(
         cache_id: str,
