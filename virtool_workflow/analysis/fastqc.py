@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 from typing import Iterable
 
-import virtool_core.utils
 from virtool_workflow.execute import run_shell_command
 
 

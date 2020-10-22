@@ -19,6 +19,7 @@ def trimming_output_path(cache_path: Path):
 @fixture
 async def trimming_input_paths(analysis_args: analysis_info.AnalysisArguments,
                                run_in_executor: FunctionExecutor) -> utils.ReadPaths:
+    """Copy sample data to raw_path and read_paths and return the read_paths."""
 
     sample_paths = utils.make_read_paths(analysis_args.sample_path, analysis_args.paired)
     raw_read_paths = {path: analysis_args.raw_path / path.name for path in sample_paths}
@@ -94,6 +95,7 @@ async def trimming_output(
         trimming_input_paths: utils.ReadPaths,
         trimming_output_path: Path
 ) -> Tuple[Path, str]:
+    """Perform the trimming command and return the trimming_output_path."""
     env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
 
     out, err = await run_shell_command(trimming_command, env=env)
