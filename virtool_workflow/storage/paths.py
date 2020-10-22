@@ -21,7 +21,7 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     if not isinstance(path, Path):
         path = Path(path)
 
-    path.mkdir(parents=True)
+    path.mkdir(parents=True, exist_ok=True)
     yield path
     rmtree(path)
 
@@ -30,7 +30,10 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
 def data_path():
     """Fetch the virtool data path."""
     # TODO: Get path from settings
-    return Path("virtool")
+    _data_path = Path("virtool")
+    if not _data_path.exists():
+        _data_path.mkdir()
+    return _data_path
 
 
 @fixture
@@ -43,4 +46,7 @@ def temp_path():
 @fixture
 def cache_path(data_path: Path):
     """The virtool cache path"""
-    return data_path/"caches"
+    _cache_path = data_path/"caches"
+    if not _cache_path.exists():
+        _cache_path.mkdir()
+    return _cache_path

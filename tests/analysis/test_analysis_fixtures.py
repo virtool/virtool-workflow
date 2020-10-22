@@ -1,3 +1,4 @@
+import shutil
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -10,6 +11,9 @@ from virtool_workflow.analysis.read_paths import reads_path
 from virtool_workflow.analysis.trim_parameters import trimming_parameters
 from virtool_workflow.storage.paths import context_directory
 from virtool_workflow.workflow_fixture import WorkflowFixtureScope
+from virtool_core.db import Collection
+from virtool_workflow.analysis.cache import cache_document
+from virtool_workflow.analysis.trimming import trimming_output, trimming_output_path, trimming_input_paths
 
 TEST_ANALYSIS_INFO = AnalysisInfo(
         sample_id="1",
@@ -18,7 +22,7 @@ TEST_ANALYSIS_INFO = AnalysisInfo(
         analysis_id="1",
         sample=dict(
             _id="1",
-            paired=True,
+            paired=False,
             library_type=LibraryType.amplicon,
             quality=dict(
                 length=["", "1"],
@@ -38,6 +42,7 @@ def fixtures():
         _fixtures["job_id"] = "1"
         _fixtures["analysis_info"] = TEST_ANALYSIS_INFO
         _fixtures["data_path"] = Path("virtool")
+        _fixtures["number_of_processes"] = 3
         with context_directory(Path("temp")) as temp:
             _fixtures["temp_path"] = temp
 
@@ -51,7 +56,7 @@ async def test_analysis_fixture_instantiation(fixtures):
 
     assert arguments.analysis == TEST_ANALYSIS_INFO.analysis
     assert arguments.sample == TEST_ANALYSIS_INFO.sample
-    assert arguments.paired
+    assert not arguments.paired
     assert arguments.read_count == 3
     assert arguments.sample_read_length == 1
     assert arguments.sample_path == fixtures["data_path"]/"samples/1"
@@ -61,7 +66,6 @@ async def test_analysis_fixture_instantiation(fixtures):
     assert arguments.subtraction_path == \
            fixtures["data_path"]/"subtractions/id_with_spaces/reference"
     assert arguments.reads_path/"reads_1.fq.gz" in arguments.read_paths
-    assert arguments.reads_path/"reads_2.fq.gz" in arguments.read_paths
     assert arguments.library_type == LibraryType.amplicon
     assert arguments.raw_path == fixtures["temp_path"]/"raw"
 
@@ -107,7 +111,7 @@ def init_reads_dir(path: Path):
         yield paths
 
 
-async def test_reads_path_initialized(fixtures, monkeypatch):
+async def tes_reads_path_initialized(fixtures, monkeypatch):
     fixtures["number_of_processes"] = 2
 
     sample_path = await fixtures.get_or_instantiate("sample_path")
@@ -141,7 +145,30 @@ async def test_reads_path_initialized(fixtures, monkeypatch):
                     for p in path.glob("**/*"):
                         assert p.exists()
 
+                    cache = await fixtures.instantiate(cache_document)
+                    caches: Collection = await fixtures.get_or_instantiate("caches")
+                    deleted = await caches.delete_one(cache)
+                    assert deleted
 
-async def test_correctness_of_initialized_reads_path():
-    # TODO: test correctness of reads produced for the reads_path fixture
-    pass
+
+async def test_trimming_input_paths(fixtures):
+    sample_path = await fixtures.get_or_instantiate("sample_path")
+    shutil.copyfile(Path(__file__).parent/"large.fq.gz", sample_path/"reads_1.fq.gz")
+
+    input_paths = await fixtures.instantiate(trimming_input_paths)
+
+    assert input_paths[0].exists()
+
+
+async def test_correct_trimming_output(fixtures):
+    trimmed_read_path, _ = await fixtures.instantiate(trimming_output)
+
+    files = list(trimmed_read_path.glob("*"))
+    filenames = [p.name for p in files]
+
+    assert "reads-trimmed.fastq.gz" in filenames
+    assert "reads-trimmed.log" in filenames
+
+
+
+
