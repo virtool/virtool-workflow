@@ -53,54 +53,6 @@ async def fetch_cache(
     )
 
 
-async def fetch_raw_sample_data(
-        sample_paths: Iterable[Path],
-        read_paths: Iterable[Path],
-        raw_path: Path,
-        run_in_executor: FunctionExecutor
-):
-    """Copy reads to the raw_path and temp path before trimming/processing."""
-    raw_read_paths = {path: raw_path/path.name for path in sample_paths}
-    await copy_paths(raw_read_paths.items(), run_in_executor)
-
-    await copy_paths(
-        zip(sample_paths, read_paths),
-        run_in_executor
-    )
-
-
-
-
-async def run_cache_qc(
-        cache_id: str,
-        analysis_args: AnalysisArguments,
-        number_of_processes: int,
-        run_in_executor: FunctionExecutor,
-        caches: Collection
-):
-    """
-    Run fastqc on the trimmed read files.
-
-    Expected to be ran after the :func:`trimming_command` has been executed.
-    """
-    fastqc_path = analysis_args.temp_cache_path/"fastqc"
-    fastqc_path.mkdir()
-
-    read_paths = utils.make_read_paths(analysis_args.temp_cache_path, analysis_args.paired)
-
-    await fastqc.run_fastqc(number_of_processes, read_paths, fastqc_path)
-
-    quality = await run_in_executor(fastqc.parse_fastqc, fastqc_path, analysis_args.sample_path)
-
-    await caches.update_one({"_id": cache_id}, {
-        "$set": {
-            "quality": quality
-        }
-    })
-
-    return read_paths
-
-
 async def create_cache_document(
         database: VirtoolDatabase,
         analysis_args: AnalysisArguments,
@@ -124,63 +76,19 @@ async def create_cache_document(
     return cache
 
 
-@fixture
-def cached_reads_path(cache_path: Path) -> Path:
-    return cache_path/"reads"
-
-
-@fixture
-def cached_read_paths(cached_reads_path: Path, paired: bool) -> utils.ReadPaths:
-    return utils.make_read_paths(cached_reads_path, paired)
-
-
-@fixture
-async def cached_reads(
-        cached_read_paths,
-        analysis_args: AnalysisArguments,
-        run_in_executor: FunctionExecutor,
-) -> utils.ReadPaths:
-    await fetch_raw_sample_data(
-        utils.make_read_paths(
-            analysis_args.sample_path,
-            analysis_args.paired,
-        ),
-        cached_read_paths,
-        analysis_args.raw_path,
-        run_in_executor,
-    )
-
-    return cached_reads_path
-
-
-async def prepare_reads_and_create_cache(
+async def create_cache(
+        fastq: Dict[str, Any],
+        database: VirtoolDatabase,
         analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any],
-        trimming_output: Path,
+        trimming_output_path: Path,
         cache_path: Path,
-        number_of_processes: int,
-        database: VirtoolDatabase,
-        run_in_executor: FunctionExecutor,
-) -> Dict[str, Any]:
-    """Prepare read data (run skewer and fastqc) and create a new cache."""
+):
     cache = await create_cache_document(database, analysis_args, trimming_parameters)
 
-    trimming_output_path, _ = trimming_output
+    await database["caches"].update_one({"_id": cache["_id"]}, {"$set": {
+            "quality": fastq
+        }
+    })
 
-    await run_in_executor(rename_trimming_results, utils.make_read_paths(trimming_output_path))
-
-    temp_paths = await run_cache_qc(
-        cache["id"],
-        analysis_args,
-        number_of_processes,
-        run_in_executor,
-        database["caches"],
-    )
-
-    await run_in_executor(
-        shutil.copytree,
-        trimming_output_path,
-        cache_path/cache["id"])
-
-    await copy_paths(zip(temp_paths, analysis_args.read_paths), run_in_executor)
-    return cache
+    shutil.copytree(trimming_output_path, cache_path/cache["id"])

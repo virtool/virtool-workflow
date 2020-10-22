@@ -70,7 +70,7 @@ class WorkflowFixtureScope(AbstractContextManager):
     """
 
     def __init__(self):
-        self._instances = {}
+        self._instances = {"scope": self}
         self._generators = []
 
     def __enter__(self):

@@ -1,3 +1,4 @@
+import os
 import shutil
 import filecmp
 from contextlib import contextmanager
@@ -115,46 +116,6 @@ def init_reads_dir(path: Path):
         yield paths
 
 
-async def tes_reads_path_initialized(fixtures, monkeypatch):
-    fixtures["number_of_processes"] = 2
-
-    sample_path = await fixtures.get_or_instantiate("sample_path")
-    raw_path = await fixtures.get_or_instantiate("raw_path")
-    cache_path = await fixtures.get_or_instantiate("cache_path")
-    read_path = fixtures["analysis_args"].reads_path
-
-    async def noop(*args, **kwargs):
-        return "no-op", ""
-
-    # Not testing correctness of fastqc and trimming commands during this test.
-    monkeypatch.setattr("virtool_workflow.analysis.cache.run_shell_command", noop)
-    monkeypatch.setattr("virtool_workflow.analysis.fastqc.run_shell_command", noop)
-
-    temp_cache_path = await fixtures.get_or_instantiate("temp_cache_path")
-    (temp_cache_path/"reads-trimmed-pair1.fastq.gz").touch()
-    (temp_cache_path/"reads-trimmed-pair2.fastq.gz").touch()
-    (temp_cache_path/"reads-trimmed.log").touch()
-    (sample_path/"fastqc_1.txt").touch()
-
-    with init_reads_dir(sample_path):
-        with init_reads_dir(raw_path):
-            with init_reads_dir(cache_path):
-                with init_reads_dir(read_path):
-
-                    path = await fixtures.instantiate(reads_path)
-                    paths = list(path.glob("**/*"))
-
-                    assert "reads_1.fq.gz", "reads_2.fq.gz" in [p.name for p in paths]
-
-                    for p in path.glob("**/*"):
-                        assert p.exists()
-
-                    cache = await fixtures.instantiate(cache_document)
-                    caches: Collection = await fixtures.get_or_instantiate("caches")
-                    deleted = await caches.delete_one(cache)
-                    assert deleted
-
-
 async def test_trimming_input_paths(fixtures):
     sample_path = await fixtures.get_or_instantiate("sample_path")
     shutil.copyfile(Path(__file__).parent/"large.fq.gz", sample_path/"reads_1.fq.gz")
@@ -173,9 +134,13 @@ async def test_correct_trimming_output(fixtures):
     assert "reads-trimmed.fastq.gz" in filenames
     assert "reads-trimmed.log" in filenames
 
-    with (trimmed_read_path/"reads-trimmed.fastq.gz").open("r") as output:
-        with Path(__file__).parent/"large_trimmed.fq.gz" as expected:
-            assert filecmp.cmp(output, expected)
+    output = trimmed_read_path/"reads-trimmed.fastq.gz"
+    expected = Path(__file__).parent/"large_trimmed.fq.gz"
+
+    print(os.stat(output))
+    print(os.stat(expected))
+
+    assert filecmp.cmp(output, expected)
 
 
 async def test_parsed_fastqc(fixtures):
