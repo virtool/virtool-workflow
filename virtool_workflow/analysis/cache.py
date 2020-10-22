@@ -29,7 +29,7 @@ async def cache_document(
         "hash": virtool_core.caches.db.calculate_cache_hash(trimming_parameters),
         "missing": False,
         "program": TRIMMING_PROGRAM,
-        "sample.id": sample_id
+        "sample.id": sample_id,
     })
 
     return cache_document
@@ -53,56 +53,20 @@ async def fetch_cache(
     )
 
 
-async def fetch_raw(
+async def fetch_raw_sample_data(
+        sample_paths: Iterable[Path],
         read_paths: Iterable[Path],
         raw_path: Path,
         run_in_executor: FunctionExecutor
 ):
-    """Copy reads to the raw_path before trimming/processing."""
-    raw_read_paths = {path: raw_path/path.name for path in read_paths}
+    """Copy reads to the raw_path and temp path before trimming/processing."""
+    raw_read_paths = {path: raw_path/path.name for path in sample_paths}
     await copy_paths(raw_read_paths.items(), run_in_executor)
 
-
-def compose_trimming_command(
-        cache_path: Path,
-        trimming_parameters: Dict[str, Any],
-        number_of_processes: int,
-        read_paths: Iterable[Path]
-):
-    """
-    Compose a shell command to run skewer on the reads located by read_paths.
-
-    :param cache_path: The Path to a directory where the output from skewer should be stored
-    :param trimming_parameters: The trimming parameters
-        (see virtool_workflow.analysis.trimming_parameters)
-    :param number_of_processes: The number of allowable processes to be used by skewer
-    :param read_paths: The paths to the reads data
-        (see virtool_workflow.analysis.reads_path)
-    """
-    command = [
-        "skewer",
-        "-r", str(trimming_parameters["max_error_rate"]),
-        "-d", str(trimming_parameters["max_indel_rate"]),
-        "-m", str(trimming_parameters["mode"]),
-        "-l", str(trimming_parameters["min_length"]),
-        "-q", str(trimming_parameters["end_quality"]),
-        "-Q", str(trimming_parameters["mean_quality"]),
-        "-t", str(number_of_processes),
-        "-o", str(cache_path/"reads"),
-        "-n",
-        "-z",
-        "--quiet"
-    ]
-
-    if trimming_parameters["max_length"]:
-        command += [
-            "-L", str(trimming_parameters["max_length"]),
-            "-e"
-        ]
-
-    command += [str(path) for path in read_paths]
-
-    return command
+    await copy_paths(
+        zip(sample_paths, read_paths),
+        run_in_executor
+    )
 
 
 def rename_trimming_results(path: Path):
@@ -113,25 +77,24 @@ def rename_trimming_results(path: Path):
     """
     try:
         shutil.move(
-            str(path/"reads_trimmed-pair1.fastq.gz"),
-            str(path/"reads_1.fq.gz"),
+            path/"reads_trimmed.fastq.gz",
+            path/"reads_1.fq.gz",
         )
     except FileNotFoundError:
         shutil.move(
-            str(path/"reads-trimmed-pair1.fastq.gz"),
-            str(path/"reads_1.fq.gz"),
+            path/"reads-trimmed-pair1.fastq.gz",
+            path/"reads_1.fq.gz",
         )
 
         shutil.move(
-            str(path/"reads-trimmed-pair2.fastq.gz"),
-            str(path/"reads_2.fq.gz"),
+            path/"reads-trimmed-pair2.fastq.gz",
+            path/"reads_2.fq.gz",
         )
 
     shutil.move(
-        str(path/"reads-trimmed.log"),
-        str(path/"trim.log"),
+        path/"reads-trimmed.log",
+        path/"trim.log",
     )
-
 
 async def run_cache_qc(
         cache_id: str,
@@ -163,32 +126,17 @@ async def run_cache_qc(
     return read_paths
 
 
-@fixture
-def trimming_command(
-        trimming_parameters: Dict[str, Any],
-        cache_path: Path,
-        number_of_processes: int,
-        read_paths: utils.PairedPaths
-) -> List[str]:
-    """A fixture for the skewer trimming command."""
-    return compose_trimming_command(cache_path,
-                                    trimming_parameters,
-                                    number_of_processes,
-                                    read_paths)
-
-
-async def prepare_reads_and_create_cache(
-        analysis_args: AnalysisArguments,
-        trimming_parameters: Dict[str, Any],
-        trimming_command: List[str],
-        cache_path: Path,
-        number_of_processes: int,
+async def create_cache_document(
         database: VirtoolDatabase,
-        run_in_executor: FunctionExecutor,
-) -> Dict[str, Any]:
-    """Prepare read data (run skewer and fastqc) and create a new cache."""
+        analysis_args: AnalysisArguments,
+        trimming_parameters: Dict[str, Any]
+):
     cache = await virtool_core.caches.db.create(
-        database, analysis_args.sample_id, trimming_parameters, analysis_args.paired)
+        database,
+        analysis_args.sample_id,
+        trimming_parameters,
+        analysis_args.paired
+    )
 
     await database["analyses"].update_one({"_id": analysis_args.analysis_id}, {
         "$set": {
@@ -198,23 +146,53 @@ async def prepare_reads_and_create_cache(
         }
     })
 
-    await fetch_raw(
+    return cache
+
+
+@fixture
+def cached_reads_path(cache_path: Path) -> Path:
+    return cache_path/"reads"
+
+
+@fixture
+def cached_read_paths(cached_reads_path: Path, paired: bool) -> utils.ReadPaths:
+    return utils.make_read_paths(cached_reads_path, paired)
+
+
+@fixture
+async def cached_reads(
+        cached_read_paths,
+        analysis_args: AnalysisArguments,
+        run_in_executor: FunctionExecutor,
+) -> utils.ReadPaths:
+    await fetch_raw_sample_data(
         utils.make_read_paths(
             analysis_args.sample_path,
-            analysis_args.paired
+            analysis_args.paired,
         ),
+        cached_read_paths,
         analysis_args.raw_path,
         run_in_executor,
     )
 
-    env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
+    return cached_reads_path
 
-    _, err = await run_shell_command(trimming_command, env=env)
 
-    if err:
-        raise RuntimeError("trimming command failed", err, trimming_command)
+async def prepare_reads_and_create_cache(
+        analysis_args: AnalysisArguments,
+        trimming_parameters: Dict[str, Any],
+        trimming_output: Path,
+        cache_path: Path,
+        number_of_processes: int,
+        database: VirtoolDatabase,
+        run_in_executor: FunctionExecutor,
+) -> Dict[str, Any]:
+    """Prepare read data (run skewer and fastqc) and create a new cache."""
+    cache = await create_cache_document(database, analysis_args, trimming_parameters)
 
-    await run_in_executor(rename_trimming_results, analysis_args.temp_cache_path)
+    trimming_output_path, _ = trimming_output
+
+    await run_in_executor(rename_trimming_results, utils.make_read_paths(trimming_output_path))
 
     temp_paths = await run_cache_qc(
         cache["id"],
@@ -226,7 +204,7 @@ async def prepare_reads_and_create_cache(
 
     await run_in_executor(
         shutil.copytree,
-        str(analysis_args.temp_cache_path),
+        trimming_output_path,
         cache_path/cache["id"])
 
     await copy_paths(zip(temp_paths, analysis_args.read_paths), run_in_executor)

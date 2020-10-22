@@ -69,7 +69,7 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
     sample_path: Path
     index_path: Path
     reads_path: Path
-    read_paths: utils.PairedPaths
+    read_paths: utils.ReadPaths
     subtraction_path: Path
     raw_path: Path
     temp_cache_path: Path
@@ -157,7 +157,7 @@ def reads_path(analysis_args: AnalysisArguments) -> Path:
 
 
 @fixture
-def read_paths(analysis_args: AnalysisArguments) -> Tuple[Path]:
+def trimming_input_paths(analysis_args: AnalysisArguments) -> Tuple[Path]:
     return analysis_args.read_paths
 
 

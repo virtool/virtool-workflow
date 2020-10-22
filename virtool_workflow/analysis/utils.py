@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import Tuple, Callable, Union
 
-PairedPaths = Union[Tuple[Path], Tuple[Path, Path]]
+ReadPaths = Union[Tuple[Path], Tuple[Path, Path]]
 
 
 def _make_paired_paths(
         dir_path: Path,
         paired: bool,
         mkstr: Callable[[int], str]
-) -> PairedPaths:
+) -> ReadPaths:
     path1 = dir_path/mkstr(1)
     return (path1, dir_path/mkstr(2)) if paired else (path1,)
 
@@ -16,12 +16,12 @@ def _make_paired_paths(
 def make_read_paths(
         reads_dir_path: Path,
         paired: bool
-) -> PairedPaths:
+) -> ReadPaths:
     return _make_paired_paths(reads_dir_path, paired, lambda n: f"reads_{n}.fq.gz")
 
 
 def make_legacy_read_paths(
         reads_dir_path: Path,
         paired: bool
-) -> PairedPaths:
+) -> ReadPaths:
     return _make_paired_paths(reads_dir_path, paired, lambda n: f"reads_{n}.fastq")
