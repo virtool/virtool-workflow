@@ -1,16 +1,15 @@
-"""Create caches of read-prep steps for Virtool analysis workflows"""
+"""Create caches of read-prep steps for Virtool analysis workflows."""
 # pylint: disable=redefined-outer-name
 # pylint: disable=too-many-arguments
-import os
 import shutil
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Iterable
+from typing import Dict, Any, Optional
 
 import virtool_core.caches.db
 from virtool_workflow import fixture
-from virtool_workflow.analysis import fastqc, utils
+from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
-from virtool_workflow.execute import FunctionExecutor, run_shell_command
+from virtool_workflow.execute import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.db.fixtures import Collection

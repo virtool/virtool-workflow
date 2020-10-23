@@ -9,17 +9,15 @@ from dataclasses import dataclass, astuple
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
-from virtool_workflow_runtime.db.fixtures import Collection
+from virtool_workflow import fixture, WorkflowFixture
 from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow import fixture, WorkflowFixture
+from virtool_workflow_runtime.db.fixtures import Collection
 
 
 @dataclass(frozen=True)
 class AnalysisInfo:
-    """
-    Fields required for analysis jobs which are found in a jobs database document.
-    """
+    """Information from the Virtool database for analysis workflows."""
     sample_id: str
     analysis_id: str
     ref_id: str

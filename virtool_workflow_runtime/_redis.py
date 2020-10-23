@@ -1,10 +1,10 @@
 """Collect new Virtool Jobs from a redis list."""
 import asyncio
-import async_generator
 from os import getenv
 from typing import Optional
 
 import aioredis
+import async_generator
 
 VIRTOOL_JOBS_CHANNEL = "channel:dispatch"
 

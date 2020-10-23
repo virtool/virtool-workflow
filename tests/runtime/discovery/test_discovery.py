@@ -44,7 +44,7 @@ async def test_run_discovery():
 
 
 async def test_fixtures_from_autoload_py():
-    wf, _ = discovery.run_discovery(FIXTURE_TEST_FILE)
+    discovery.run_discovery(FIXTURE_TEST_FILE)
 
     assert "jobs" in WorkflowFixture.types()
     assert "analyses" in WorkflowFixture.types()

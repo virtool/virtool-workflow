@@ -5,6 +5,7 @@ from typing import Callable, Optional, Coroutine, Any
 
 
 class State(Enum):
+    """Enum for workflow execution states."""
     WAITING = auto()
     STARTUP = auto()
     RUNNING = auto()
@@ -64,14 +65,23 @@ class WorkflowExecutionContext(SimpleNamespace):
         self._on_update.append(action)
 
     async def send_update(self, update: Optional[str]):
+        """
+        Send an update.
+
+        All functions registered by :func:`on_update` will be called.
+
+        :param update: A string update to send.
+        """
         for on_update in self._on_update:
             await on_update(self, update)
 
     @property
     def state(self) -> State:
+        """The current :class:`State` of the executing workflow."""
         return self._state
 
     async def set_state(self, new_state: State):
+        """Change the state of the executing workflow."""
         self._state = new_state
         for on_state in self._on_state_change:
             await on_state(self)
