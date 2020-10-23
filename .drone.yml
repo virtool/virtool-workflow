@@ -10,7 +10,7 @@ steps:
 
 
   - name: test
-    image: virtool/external-tools:0.1.2
+    image: python:3.6-buster
     commands:
       - export DATABASE_CONNECTION_URL="mongodb://mongo:27017"
       - export VIRTOOL_REDIS_ADDRESS="redis://redis:6379/1"

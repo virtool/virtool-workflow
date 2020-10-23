@@ -1,6 +1,6 @@
 """Collect new Virtool Jobs from a redis list."""
 import asyncio
-import contextlib
+import async_generator
 from os import getenv
 from typing import Optional
 
@@ -12,7 +12,7 @@ VIRTOOL_REDIS_ADDRESS_ENV = "VIRTOOL_REDIS_ADDRESS"
 VIRTOOL_REDIS_ADDRESS_DEFAULT = "redis://localhost:6379/1"
 
 
-@contextlib.asynccontextmanager
+@async_generator.asynccontextmanager
 async def connect(address: Optional[str] = None) -> aioredis.Redis:
     """
     Context manager for a Redis connection

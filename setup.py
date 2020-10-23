@@ -20,6 +20,7 @@ INSTALL_REQUIRES = [
     "motor",
     "uvloop",
     "aioredis==1.3.1",
+    "async_generator==1.10"
 ]
 
 
