@@ -9,7 +9,8 @@ async def copy_paths(
         paths: Iterable[Tuple[Path, Path]],
         run_in_executor: FunctionExecutor
 ):
-    """Copy the contents from a set of source paths to a set of destination paths concurrently.
+    """
+    Copy the contents from a set of source paths to a set of destination paths concurrently.
 
     :param paths: An iterable containing source -> destination path pairs,
         where the first path is the source and the second is the destination.
