@@ -4,7 +4,7 @@ from contextlib import AbstractContextManager
 from functools import wraps
 from inspect import signature, iscoroutinefunction, isgeneratorfunction
 from itertools import chain
-from typing import Callable, Any, Optional, Iterator, Union, List, Type
+from typing import Callable, Any, Optional, Iterator, Union, List, Type, Dict
 
 from virtool_workflow.workflow import Workflow
 
@@ -64,19 +64,41 @@ class WorkflowFixture(ABC):
 
 class WorkflowFixtureScope(AbstractContextManager):
     """
-    A scope maintaining instances of workflow fixtures and binding those fixture instances
-    to functions based on parameter names. Any calls to :func:`.bind`
-    will bind the exact same instances for any given workflow fixture.
+    A scope maintaining instances of workflow fixtures.
+
+    Fixture instances can be bound to functions using the :func:`.bind` method.
     """
 
-    def __init__(self):
+    def __init__(self,
+                 instances: Optional[Dict[str, Any]] = None,
+                 parent_scope: Optional["WorkflowFixtureScope"] = None):
+        """
+
+        :param instances: Any objects to be maintained as instance fixtures.
+            Values in this dictionary will be accessible as fixtures by their key.
+        :param parent_scope: Another WorkflowFixtureScope to inherit instances from.
+            Note that exiting this WorkflowFixtureScope will not invoke __exit__ on the
+            parent scope.
+        """
         self._instances = {"scope": self}
         self._generators = []
 
+        if instances:
+            self._instances.update(instances)
+        if parent_scope:
+            self._instances.update(parent_scope._instances)
+
     def __enter__(self):
+        """Return this instance when `with` statement is used."""
         return self
 
     def __exit__(self, *args, **kwargs):
+        """
+        Remove references to any instances managed by this WorkflowFixtureScope.
+
+        Return execution to each of the generator fixtures and remove
+        references to them.
+        """
         self._instances = {}
         # return control to the generator fixtures which are still left open
         for gen in self._generators:
@@ -87,8 +109,13 @@ class WorkflowFixtureScope(AbstractContextManager):
 
     async def instantiate(self, fixture_: Type[WorkflowFixture]) -> Any:
         """
-        Create an instance of a workflow fixture and cache it
-        within this WorkflowFixtureScope.
+        Create an instance of a fixture.
+
+        The instance will be stored within this WorkflowFixtureScope.
+
+        :param fixture_: The fixture class to instantiate
+        :return: The instantiated fixture instance.
+
         """
         __fixture__ = getattr(fixture_.__class__, "__fixture__", None)
         if not __fixture__:
@@ -159,14 +186,15 @@ class WorkflowFixtureScope(AbstractContextManager):
 
     async def bind(self, func: Callable, **kwargs) -> Union[Callable[[], Any], Callable[[], Any]]:
         """
-        Bind workflow fixtures to the provided function based on the parameter
-        names of the function. Positional arguments and non-fixture keyword arguments
+        Bind fixtures to the parameters of a function.
+
+        Positional arguments and non-fixture keyword arguments
         of the function will be preserved. Essentially,The fixtures & other keyword
         arguments given are added as keyword arguments to the function.
 
-        @param func: The function requiring workflow fixtures to be bound
-        @param kwargs: Any other arguments that should be bound to the function
-        @return: A new function with it's arguments appropriately bound
+        :param func: The function requiring workflow fixtures to be bound
+        :param kwargs: Any other arguments that should be bound to the function
+        :return: A new function with it's arguments appropriately bound
         """
         sig = signature(func)
         fixture_types = WorkflowFixture.types()
@@ -193,8 +221,8 @@ class WorkflowFixtureScope(AbstractContextManager):
     async def bind_to_workflow(self, workflow: Workflow):
         """
         Bind workflow fixtures to all functions for a given Workflow
-        :param workflow: The Workflow requiring workflow fixtures
 
+        :param workflow: The Workflow requiring workflow fixtures
         :return: A new workflow with fixtures bound to all functions
         """
         bound_workflow = Workflow()
@@ -206,9 +234,10 @@ class WorkflowFixtureScope(AbstractContextManager):
 
 def fixture(func: Callable, name: Optional[str] = None):
     """
-    Decorator for defining a new :class:`WorkflowFixture`. A subclass of
-    :class:`WorkflowFixture` is created with the same name as the provided
-    function. An instance of the new subclass which is callable with the same
+    Define a new :class:`WorkflowFixture`.
+
+    A subclass of :class:`WorkflowFixture` is created with the same name as the
+    provided function. An instance of the new subclass which is callable with the same
     parameters as the original function is then returned. This allows the fixture
     to be discovered automatically via :func:`.__subclasses__`.
 
@@ -216,9 +245,12 @@ def fixture(func: Callable, name: Optional[str] = None):
     generator functions which only yield a single value. Any code after the yield statement
     will be executed when the :class:`WorkflowFixtureScope` closes.
 
-    @param func: A function returning some value to be used as a workflow fixture
-    @param name: A name for the created fixture, by default the name of `func` is used
-    @return: An instance of a WorkflowFixture subclass that acts like the original function.
+    Workflow fixtures may accept other fixtures as parameters. They will be discovered as long
+    as they have been imported (and are accessible by WorkflowFixture.__subclasses__).
+
+    :param func: A function returning some value to be used as a workflow fixture
+    :param name: A name for the created fixture, by default the name of `func` is used
+    :return: An instance of a WorkflowFixture subclass that acts like the original function.
     """
     class _Fixture(WorkflowFixture, param_names=[func.__name__]):
         __fixture__ = func
