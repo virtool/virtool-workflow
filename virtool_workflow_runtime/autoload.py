@@ -1,5 +1,4 @@
-"""Workflow fixtures from this module are implicitly loaded by the runtime"""
-from virtool_workflow import analysis
+"""Workflow fixtures from this module are implicitly loaded by the runtime."""
 
 __fixtures__ = [
     "virtool_workflow.execute",

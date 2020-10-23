@@ -38,14 +38,14 @@ def data_path():
 
 @fixture
 def temp_path():
-    """The virtool temp path"""
+    """The virtool temp path."""
     with context_directory("temp") as temp:
         yield temp
 
 
 @fixture
 def cache_path(data_path: Path):
-    """The virtool cache path"""
+    """The virtool cache path."""
     _cache_path = data_path/"caches"
     if not _cache_path.exists():
         _cache_path.mkdir()

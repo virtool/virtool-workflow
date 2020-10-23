@@ -1,4 +1,4 @@
-"""Perform read prep before accessing Virtool reads_path"""
+"""Perform read prep before accessing Virtool reads_path."""
 # pylint: disable=redefined-outer-name
 import shutil
 from pathlib import Path
@@ -88,7 +88,7 @@ async def prepared_reads_and_fastqc(
     """
 
     path, _ = trimming_output
-    shutil.copytree(path, analysis_args.reads_path, dirs_exist_ok=True)
+    shutil.copytree(path, analysis_args.reads_path)
 
     return analysis_args.reads_path, parsed_fastqc
 

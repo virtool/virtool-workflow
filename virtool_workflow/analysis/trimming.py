@@ -20,7 +20,6 @@ def trimming_output_path(cache_path: Path):
 async def trimming_input_paths(analysis_args: analysis_info.AnalysisArguments,
                                run_in_executor: FunctionExecutor) -> utils.ReadPaths:
     """Copy sample data to raw_path and read_paths and return the read_paths."""
-
     sample_paths = utils.make_read_paths(analysis_args.sample_path, analysis_args.paired)
     raw_read_paths = {path: analysis_args.raw_path / path.name for path in sample_paths}
     await copy_paths(raw_read_paths.items(), run_in_executor)

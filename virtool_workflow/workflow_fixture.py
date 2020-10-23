@@ -138,7 +138,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         return self._instances.__setitem__(key, value)
 
     def __delitem__(self, key: str):
-        """Support `del` keyword"""
+        """Support `del` keyword."""
         return self._instances.__delitem__(key)
 
     def __contains__(self, item):
