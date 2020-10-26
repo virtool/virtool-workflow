@@ -1,8 +1,11 @@
+import inspect
 from typing import Dict
 
 from virtool_workflow.execute_workflow import execute
 from virtool_workflow.fixtures.workflow_fixture import fixture, WorkflowFixture
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.errors import WorkflowFixtureNotAvailable
+from .workflow_with_fixtures import workflow_with_fixtures
 
 
 @fixture
@@ -51,25 +54,6 @@ async def test_fixtures_used_by_fixtures():
         (await scope.bind(use_fixture_using_fixture))()
 
     assert use_fixture_using_fixture.called
-
-
-async def test_preservation_and_injection_of_non_fixture_arguments():
-
-    def use_fixture_and_other_args(arg1: str, my_fixture: str, kwarg=None, other_param=None):
-        assert arg1 == "arg1"
-        assert kwarg is None
-        assert my_fixture == "FIXTURE"
-        assert other_param is not None
-
-    with WorkflowFixtureScope() as scope:
-        injected = await scope.bind(use_fixture_and_other_args, arg1="arg1", other_param="param")
-        injected()
-        injected(kwarg=None, other_param="stuff")
-
-        injected = await scope.bind(use_fixture_and_other_args)
-
-        injected(arg1="arg1", other_param="param")
-        injected("arg1", other_param="param")
 
 
 async def test_same_instance_is_used():
@@ -122,4 +106,18 @@ async def test_workflow_using_fixtures(workflow_with_fixtures):
     result = await execute(workflow_with_fixtures)
 
     assert result["start"] and result["clean"] and result["step"]
+
+
+async def test_exception_is_raised_when_fixture_not_available():
+
+    async def non_resolvable_fixture_function(fixture_that_doesnt_exist):
+        pass
+
+    with WorkflowFixtureScope() as scope:
+        try:
+            await scope.bind(non_resolvable_fixture_function)
+            assert False
+        except WorkflowFixtureNotAvailable as not_available:
+            assert not_available.param_name == "fixture_that_doesnt_exist"
+            assert inspect.signature(non_resolvable_fixture_function) == not_available.signature
 
