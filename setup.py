@@ -19,6 +19,7 @@ INSTALL_REQUIRES = [
     "docker",
     "motor",
     "uvloop",
+    "aiohttp",
     "aioredis==1.3.1",
 ]
 
