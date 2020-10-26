@@ -5,7 +5,7 @@ from typing import Awaitable, Callable, Optional, Dict, Any
 
 from .context import WorkflowExecutionContext, UpdateListener, State
 from .workflow import Workflow, WorkflowStep
-from .workflow_fixture import WorkflowFixtureScope
+from .fixtures.scope import WorkflowFixtureScope
 
 
 class WorkflowError(Exception):

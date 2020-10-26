@@ -1,65 +1,10 @@
-"""Pytest-style fixtures for use in Virtool Workflows."""
-from abc import abstractmethod, ABC
 from contextlib import AbstractContextManager
 from functools import wraps
-from inspect import signature, iscoroutinefunction, isgeneratorfunction
-from itertools import chain
-from typing import Callable, Any, Optional, Iterator, Union, List, Type, Dict
+from inspect import isgeneratorfunction, iscoroutinefunction, signature
+from typing import Optional, Dict, Any, Type, Callable, Iterator
 
-from virtool_workflow.workflow import Workflow
-
-
-class WorkflowFixtureMultipleYieldError(ValueError):
-    """
-    Raised when a generator workflow fixture yields more than once.
-    """
-
-
-class WorkflowFixture(ABC):
-    """
-    Abstract base class for all workflow fixtures. This class is used primarily to keep
-    track of all available fixtures via :func:`WorkflowFixture.__subclasses__`.
-
-    The :func:`workflow_fixture` decorator function creates a new subclass of WorkflowFixture with
-    the same name as the function passed to :func:`workflow_fixture`. The decorator
-    returns an instance of the newly created class, which is callable with the same
-    parameters as the function passed to the decorator.
-    """
-    param_names: List[str]
-
-    def __init_subclass__(cls, param_names: List[str] = None, param_name: str = None, **kwargs):
-        """
-        Used to set the parameter names by which this fixture will be accessible
-        within a workflow function.
-
-        :param param_names: A list of names for this fixture to be injected for
-        :param param_name: A name for this fixture to be injected for
-        """
-        if not param_names:
-            if param_name:
-                param_names = [param_name]
-            else:
-                raise ValueError("Must provide `param_names` or `param_name` argument to subclass")
-
-        cls.param_names = param_names
-
-    @staticmethod
-    @abstractmethod
-    def __fixture__(*args, **kwargs) -> Type["WorkflowFixture"]:
-        """A function producing an instance to be used as a workflow fixture."""
-
-    def __call__(self):
-        return self.__fixture__()
-
-    @staticmethod
-    def types():
-        """
-        Get all currently available types of workflow fixtures.
-
-        @return: A dict mapping workflow fixture names to
-                 their respective :class:`WorkflowFixture` subclasses
-        """
-        return {name: cls for cls in WorkflowFixture.__subclasses__() for name in cls.param_names}
+from virtool_workflow import WorkflowFixture, Workflow
+from virtool_workflow.fixtures.errors import WorkflowFixtureMultipleYield, WorkflowFixtureNotAvailable
 
 
 class WorkflowFixtureScope(AbstractContextManager):
@@ -104,7 +49,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         for gen in self._generators:
             none = next(gen, None)
             if none is not None:
-                raise WorkflowFixtureMultipleYieldError("Fixture must only yield once")
+                raise WorkflowFixtureMultipleYield("Fixture must only yield once")
         self._generators = []
 
     async def instantiate(self, fixture_: Type[WorkflowFixture]) -> Any:
@@ -143,9 +88,9 @@ class WorkflowFixtureScope(AbstractContextManager):
         instance cached in this WorkflowFixtureScope it will returned, else a new instance
         will be created and cached.
 
-        @param name: The name of the workflow fixture to get
-        @return: The workflow fixture instance for this WorkflowFixtureScope
-        @raise ValueError: When the given name does not correspond to a defined workflow fixture.
+        :param name: The name of the workflow fixture to get
+        :return: The workflow fixture instance for this WorkflowFixtureScope
+        :raise ValueError: When the given name does not correspond to a defined workflow fixture.
         """
         if name in self._instances:
             return self._instances[name]
@@ -184,7 +129,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         for name in names:
             self.__setitem__(name, instance)
 
-    async def bind(self, func: Callable, **kwargs) -> Union[Callable[[], Any], Callable[[], Any]]:
+    async def bind(self, func: Callable[..., Any]) -> Callable[[], Any]:
         """
         Bind fixtures to the parameters of a function.
 
@@ -193,17 +138,16 @@ class WorkflowFixtureScope(AbstractContextManager):
         arguments given are added as keyword arguments to the function.
 
         :param func: The function requiring workflow fixtures to be bound
-        :param kwargs: Any other arguments that should be bound to the function
         :return: A new function with it's arguments appropriately bound
         """
         sig = signature(func)
-        fixture_types = WorkflowFixture.types()
 
-        fixtures = {param: await self.get_or_instantiate(param)
-                    for param in sig.parameters
-                    if param in chain(fixture_types, self._instances)}
-
-        fixtures.update(kwargs)
+        try:
+            fixtures = {param: await self.get_or_instantiate(param)
+                        for param in sig.parameters}
+        except KeyError as key_error:
+            missing_param = str(key_error)
+            raise WorkflowFixtureNotAvailable(param_name=missing_param, signature=sig)
 
         if iscoroutinefunction(func):
             @wraps(func)
@@ -230,30 +174,3 @@ class WorkflowFixtureScope(AbstractContextManager):
         bound_workflow.on_cleanup = [await self.bind(f) for f in workflow.on_cleanup]
         bound_workflow.steps = [await self.bind(f) for f in workflow.steps]
         return bound_workflow
-
-
-def fixture(func: Callable, name: Optional[str] = None):
-    """
-    Define a new :class:`WorkflowFixture`.
-
-    A subclass of :class:`WorkflowFixture` is created with the same name as the
-    provided function. An instance of the new subclass which is callable with the same
-    parameters as the original function is then returned. This allows the fixture
-    to be discovered automatically via :func:`.__subclasses__`.
-
-    Workflow fixtures can be either async or standard functions. They can also be
-    generator functions which only yield a single value. Any code after the yield statement
-    will be executed when the :class:`WorkflowFixtureScope` closes.
-
-    Workflow fixtures may accept other fixtures as parameters. They will be discovered as long
-    as they have been imported (and are accessible by WorkflowFixture.__subclasses__).
-
-    :param func: A function returning some value to be used as a workflow fixture
-    :param name: A name for the created fixture, by default the name of `func` is used
-    :return: An instance of a WorkflowFixture subclass that acts like the original function.
-    """
-    class _Fixture(WorkflowFixture, param_names=[func.__name__]):
-        __fixture__ = func
-
-    _Fixture.__name__ = _Fixture.__qualname__ = name if name else func.__name__
-    return _Fixture()

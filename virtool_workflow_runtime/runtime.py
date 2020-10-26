@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 import virtool_workflow.execute_workflow
 from virtool_workflow import Workflow, WorkflowExecutionContext
-from virtool_workflow.workflow_fixture import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from ._redis import job_id_queue
 from .db import VirtoolDatabase
 

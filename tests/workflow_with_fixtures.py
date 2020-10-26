@@ -5,7 +5,7 @@ import pytest
 
 from virtool_workflow import Workflow, WorkflowExecutionContext
 from virtool_workflow.context import State
-from virtool_workflow.workflow_fixture import fixture
+from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
 @fixture
