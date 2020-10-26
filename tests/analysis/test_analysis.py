@@ -1,5 +1,5 @@
 import pytest
-from virtool_workflow.workflow_fixture import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.storage.paths import context_directory
 from virtool_workflow.analysis.analysis_info import AnalysisInfo, AnalysisArguments
 from virtool_workflow.analysis.library_types import LibraryType

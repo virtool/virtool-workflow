@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from subprocess import PIPE, Popen
 from typing import Union, IO, Tuple, Callable, Any, Coroutine
 
-from .workflow_fixture import fixture
+from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
 async def run_subprocess(command: Union[str, list], **kwargs) -> Popen:
