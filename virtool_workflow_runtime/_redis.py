@@ -2,9 +2,9 @@
 import asyncio
 from os import getenv
 from typing import Optional
+from contextlib import asynccontextmanager
 
 import aioredis
-import async_generator
 
 VIRTOOL_JOBS_CHANNEL = "channel:dispatch"
 
@@ -12,7 +12,7 @@ VIRTOOL_REDIS_ADDRESS_ENV = "VIRTOOL_REDIS_ADDRESS"
 VIRTOOL_REDIS_ADDRESS_DEFAULT = "redis://localhost:6379/1"
 
 
-@async_generator.asynccontextmanager
+@asynccontextmanager
 async def connect(address: Optional[str] = None) -> aioredis.Redis:
     """
     Context manager for a Redis connection
