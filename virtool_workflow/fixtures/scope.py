@@ -90,7 +90,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         :param name: The name of the workflow fixture to get
         :return: The workflow fixture instance for this WorkflowFixtureScope
-        :raise ValueError: When the given name does not correspond to a defined workflow fixture.
+        :raise KeyError: When the given name does not correspond to a defined workflow fixture.
         """
         if name in self._instances:
             return self._instances[name]
@@ -99,7 +99,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         if name in fixture_types:
             return await self.instantiate(fixture_types[name])
 
-        raise ValueError(f"{name} is not defined as a workflow fixture")
+        raise KeyError(name, f"{name} is not defined as a workflow fixture")
 
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
@@ -139,6 +139,8 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         :param func: The function requiring workflow fixtures to be bound
         :return: A new function with it's arguments appropriately bound
+        :raise WorkflowFixtureNotAvailable: When `func` requires an argument
+            which cannot be bound due to no fixture of it's name being available.
         """
         sig = signature(func)
 
@@ -146,7 +148,7 @@ class WorkflowFixtureScope(AbstractContextManager):
             fixtures = {param: await self.get_or_instantiate(param)
                         for param in sig.parameters}
         except KeyError as key_error:
-            missing_param = str(key_error)
+            missing_param = key_error.args[0]
             raise WorkflowFixtureNotAvailable(param_name=missing_param, signature=sig)
 
         if iscoroutinefunction(func):
