@@ -188,12 +188,11 @@ instantiated once, even if they are later referred to directly within the workfl
 
 Some standard fixtures are always made available when a workflow is executed. These include; 
 
-| Fixture  | Description  | 
-|---|---|
-| results, result  | The results dictionary  |
-| ctx, context, execution_context  |  The current WorkflowExecutionContext |
-| wf, workflow  | The Workflow instance being executed |
-| scope, fixtures | The current WorkflowFixtureScope |
+| Fixture                          | Description                           | 
+|----------------------------------|---------------------------------------|
+| results, result                  | The results dictionary                |
+| ctx, context, execution_context  | The current WorkflowExecutionContext  |
+| wf, workflow                     | The Workflow instance being executed  |
 
 #### The Results Dictionary
 
@@ -218,6 +217,20 @@ returned from `virtool_workflow.execute_workflow.execute`.
 
 When a workflow is executed as part of a virtool job, the values in the results dictionary will be stored in the 
 database and provided to the user. 
+
+#### The Context Fixture
+The `context` (or `ctx`, `execution_context`) fixture provides access to the current `WorkflowExecutionContext` instance.
+It provides information regarding the state of the workflow's execution, such as the current
+step (number) being executed. It can also be used to send additional updates via `context.send_update`.
+
+
+```python
+    @wf.step
+    async def send_more_updates(context: WorkflowExecutionContext):
+        await context.send_update("Additional update")
+        await context.send_update("Another update")
+        return "Last update for this step"
+```
 
 ### Running a Workflow
 
@@ -259,7 +272,13 @@ pytest .
 ```
 
 The test suite requires MongoDB and Redis to be available. The [test.sh](tests/test.sh)
-script will run MongoDB and Redis using Docker for the duration of the tests. 
+script will run MongoDB and Redis using Docker for the duration of the tests. Any
+arguments will be passed directly to pytest. 
+
+```shell script
+./test.sh . 
+```
+
 
 ### Documentation
 
