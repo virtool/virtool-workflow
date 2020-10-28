@@ -29,7 +29,7 @@ A Workflow is comprised of
 
 ### Basic Workflow Definition
 
-A Workflow is defined by an an instance of the `Workflow` class. Startup, step, and 
+A Workflow is defined by an an instance of the [Workflow](#) class. Startup, step, and 
 cleanup functions are added using the `startup`, `step`, and `cleanup` decorator methods 
 respectively. 
 
@@ -82,14 +82,14 @@ def step_that_sends_an_update():
 
 ```
 
-Additional updates can be sent using the `context` fixture, described in the **Standard Fixtures** section.
+Additional updates can be sent using the [context](#) fixture, described in the **Standard Fixtures** section.
 
 ### Workflow Fixtures
 
 Workflow fixtures provide a mechanism for injecting dependencies into workflows. They 
 are inspired by and work similarly to [pytest fixtures](https://docs.pytest.org/en/2.8.7/fixture.html).
 
-Fixtures are created using the `virtool_workflow.fixture` decorator. 
+Fixtures are created using the [virtool_workflow.fixture](#) decorator. 
 
 ```python
 from virtool_workflow import fixture
@@ -114,7 +114,7 @@ def step(my_workflow_fixture: str):
 
 #### Fixture Classes
 
-Under the hood, workflow fixtures are subclasses of the `virtool_workflow.WorkflowFixture` class. The `WorkflowFixture`
+Under the hood, workflow fixtures are subclasses of the [virtool_workflow.WorkflowFixture](#) class. The `WorkflowFixture`
 class is an abstract base class which requires a static method `__fixture__` to be implemented. When the `@fixture` 
 decorator is invoked a new subclass is created and the decorated function is used as the `__fixture__` static method. 
 
@@ -184,6 +184,8 @@ def step_2(mutable_fixture):
 This also means that fixtures which were instantiated in-directly (used by other fixtures) will still only be 
 instantiated once, even if they are later referred to directly within the workflow. 
 
+For more details about fixture scope and binding see the [API docs](#).
+
 ### Standard Fixtures
 
 Some standard fixtures are always made available when a workflow is executed. These include; 
@@ -232,7 +234,7 @@ step (number) being executed. It can also be used to send additional updates via
         return "Last update for this step"
 ```
 
-### Running a Workflow
+### Running a Workflow Outside of the Runtime
 
 Assuming your workflow is defined in `workflow.py` in the current working directory, 
 you can execute it using the `workflow` command line utility. 
@@ -259,6 +261,15 @@ A workflow can also be executed from python using `virtool_workflow.execute_work
 
     asyncio.run(execute(my_workflow))
 ```
+
+
+### Runtime Fixtures
+
+The runtime provides several fixtures implicitly. These include the id of the job 
+the workflow is being executed for (`job_id`), the job document in the database (`job_document`),
+the virtool `data_path` and `temp_path`, the [database](#) object, and others. 
+
+More details about the fixtures provided can be found in the [API docs](#)
 
 ## Contributing
 
