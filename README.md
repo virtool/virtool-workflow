@@ -47,9 +47,11 @@ async def this_will_be_executed_on_startup():
 async def this_is_the_first_step_of_the_workflow():
     ...
 
+
 @my_workflow.step
 async def this_is_the_second_step_of_the_workflow():
     ...
+
 
 @my_workflow.cleanup
 async def this_will_be_executed_last():
@@ -66,10 +68,26 @@ def non_async_step_function():
     ...
 ```
 
+### Workflow Updates
+
+Workflow's are typically long-running. As such updates about the workflow's progress should be sent to 
+the user regularly. To facilitate this, the return value (string) from any startup, cleanup, or step 
+function will be sent as an update and displayed in the Virtool UI. 
+
+```python
+@wf.step
+def step_that_sends_an_update():
+    ...
+    return "Successfully completed a step"
+
+```
+
+Additional updates can be sent using the `context` fixture, described in the **Standard Fixtures** section.
+
 ### Workflow Fixtures
 
 Workflow fixtures provide a mechanism for injecting dependencies into workflows. They 
-are inspired by work similarly to [pytest fixtures](https://docs.pytest.org/en/2.8.7/fixture.html).
+are inspired by and work similarly to [pytest fixtures](https://docs.pytest.org/en/2.8.7/fixture.html).
 
 Fixtures are created using the `virtool_workflow.fixture` decorator. 
 
@@ -139,7 +157,7 @@ Upon execution of the workflow, `my_workflow_fixture` will be instantiated and p
 an argument. The value returned will then be used as the instance for `uses_my_fixture` which will be passed to the
 workflow's step function. 
 
-#### Scoping of Workflow Fixtures
+### Scoping of Workflow Fixtures
 
 Workflow fixtures are scoped to the execution of a particular workflow. This means that any specific fixture
 will refer to the exact same instance throughout a workflow's execution. This property allows fixtures to be 
@@ -166,7 +184,18 @@ def step_2(mutable_fixture):
 This also means that fixtures which were instantiated in-directly (used by other fixtures) will still only be 
 instantiated once, even if they are later referred to directly within the workflow. 
 
-### Workflow Results
+### Standard Fixtures
+
+Some standard fixtures are always made available when a workflow is executed. These include; 
+
+| Fixture  | Description  | 
+|---|---|
+| results, result  | The results dictionary  |
+| ctx, context, execution_context  |  The current WorkflowExecutionContext |
+| wf, workflow  | The Workflow instance being executed |
+| scope, fixtures | The current WorkflowFixtureScope |
+
+#### The Results Dictionary
 
 The `results` (or `result`) dictionary is used to store the results of the workflow so that they can be provided to 
 the end user through the Virtool's UI. It is available within workflows as a fixture. The `results` dictionary is
