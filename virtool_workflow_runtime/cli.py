@@ -1,13 +1,10 @@
 """Command Line Interface to virtool_workflow"""
-import asyncio
 from pathlib import Path
 
 import click
 import uvloop
 
-from virtool_workflow.execute_workflow import execute
-from virtool_workflow_runtime.config import environment
-from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
+from virtool_workflow.execution.execute_workflow import execute
 from . import discovery
 from . import runtime
 
@@ -20,73 +17,32 @@ def cli():
     uvloop.install()
 
 
-def create_config(**kwargs) -> VirtoolConfiguration:
-    """
-    Create a VirtoolConfiguration.
-
-    Uses the provided keyword arguments if available. If an argument is
-    not provided for a particular field then the value of it's associated
-    environment variable is used.
-
-    :param kwargs: The configuration arguments from the CLI.
-    """
-    return VirtoolConfiguration(
-        data_path=kwargs["data_path"] or environment.data_path_str(),
-        temp_path=kwargs["temp_path"] or environment.temp_path_str(),
-        proc=kwargs["proc"] or environment.proc(),
-        mem=kwargs["mem"] or environment.mem(),
-        redis_connection_string=kwargs["redis_connection_string"] or environment.redis_connection_string(),
-        no_sentry=kwargs["no_sentry"] if kwargs["no_sentry"] is not None else environment.no_sentry(),
-        development_mode=kwargs["dev"] if kwargs["dev"] is not None else environment.dev_mode(),
-        mongo_database_name=kwargs["db_name"] or environment.db_name(),
-        mongo_connection_string=kwargs["db_connection_string"] or environment.db_connection_string(),
-    )
-
-
-def apply_config_options(func):
-    """Apply all configuration related options to a click command."""
-
-    func = click.option("--temp-path", type=click.Path())(func)
-    func = click.option("--proc", type=int)(func)
-    func = click.option("--mem", type=int)(func)
-    func = click.option("--redis-connection-string", type=str)(func)
-    func = click.option("--no-sentry", type=bool)(func)
-    func = click.option("--dev", type=bool)(func)
-    func = click.option("--db-name", type=str)(func)
-    func = click.option("--db-connection-string", type=str)(func)
-    func = click.option("--data-path", type=click.Path())(func)
-
-    return func
-
-
 def workflow_file_option(func):
     """Option to provide workflow file."""
     return click.option(
+        func,
         "-f",
         default="workflow.py",
         type=click.Path(exists=True),
         help="python module containing an instance of `virtool_workflow.Workflow`"
-    )(func)
+    )
 
 
-@apply_config_options
 @workflow_file_option
 @click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @cli.command()
-def run(f: str, job_id: str, **kwargs):
+async def run(file: str, job_id: str):
     """Run a workflow and send updates to Virtool."""
-    workflow, _ = discovery.run_discovery(Path(f), Path(f).parent / "environment.py")
-    config = create_config(**kwargs)
-    asyncio.run(runtime.execute(job_id, workflow, config=config))
+    workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
+
+    await runtime.execute(job_id, workflow)
 
 
-@apply_config_options
 @workflow_file_option
 @cli.command()
-def run_local(f: str, **kwargs):
+async def run_local(f: str):
     """Run a workflow locally, without runtime specific dependencies."""
-    config = create_config(**kwargs)
-    asyncio.run(execute(discovery.discover_workflow(Path(f).absolute()), config=config))
+    await execute(discovery.discover_workflow(Path(f).absolute()))
 
 
 def cli_main():

@@ -4,7 +4,7 @@ from typing import Dict, Any
 import pytest
 
 from virtool_workflow import Workflow, WorkflowExecutionContext
-from virtool_workflow.context import State
+from virtool_workflow.execution.context import State
 from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
