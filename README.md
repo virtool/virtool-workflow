@@ -204,7 +204,7 @@ returned from `virtool_workflow.execute_workflow.execute`.
 
 ```python
     from virtool_workflow import Workflow
-    from virtool_workflow.execute_workflow import execute
+    from virtool_workflow.execution.execute_workflow import execute
 
     wf = Workflow()
 
@@ -253,7 +253,7 @@ A workflow can also be executed from python using `virtool_workflow.execute_work
 ```python
     import asyncio
     from virtool_workflow import Workflow
-    from virtool_workflow.execute_workflow import execute
+    from virtool_workflow.execution.execute_workflow import execute
     
     my_workflow = Workflow()
 

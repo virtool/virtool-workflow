@@ -1,6 +1,7 @@
 from pathlib import Path
 from virtool_workflow_runtime import discovery
-from virtool_workflow import Workflow, WorkflowFixture, execute_workflow
+from virtool_workflow import Workflow, WorkflowFixture
+from virtool_workflow.execution import execute_workflow
 
 cwd = Path(__file__).parent
 TEST_FILE = cwd/"discoverable_workflow.py"
