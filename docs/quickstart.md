@@ -1,2 +1,0 @@
-# Virtool Workflow Quickstart
-
