@@ -1,6 +1,6 @@
 import inspect
 import functools
-from typing import List, Any, Callable
+from typing import List, Any, Callable, Coroutine
 from abc import ABC, abstractmethod
 
 
@@ -59,20 +59,44 @@ async def _trigger_async_hook(hook_, *args, **kwargs) -> List[Any]:
     return [await callback(*args, **kwargs) for callback in hook_.callbacks]
 
 
-def _trigger_sync_hook(hook_, *args, **kwargs) -> List[Any]:
-    return [callback(*args, **kwargs) for callback in hook_.callbacks]
-
-
 class AbstractHook(ABC):
 
     @abstractmethod
-    def __trigger__(self):
+    def callback(self, callback_: Callable) -> Callable:
         pass
 
-    @property
     @abstractmethod
-    def callbacks(self) -> List[Callable]:
+    def __trigger__(self, *args, **kwargs) -> List[Any]:
         pass
+
+
+class Hook(AbstractHook):
+
+    def __init__(self, function):
+        self._function = function
+        self._params = _extract_params(function)
+        self.callbacks = []
+
+    def callback(self, callback_: Callable):
+        _validate_parameters(self._function, callback_, self._params, _extract_params(callback_))
+        self.callbacks.append(callback_)
+        return callback_
+
+    def __call__(self, *args, **kwargs):
+        self._function(*args, **kwargs)
+
+    def __trigger__(self, *args, **kwargs) -> List[Any]:
+        return [callback(*args, **kwargs) for callback in self.callbacks]
+
+class AsyncHook(Hook):
+
+    def callback(self, callback_: Callable[..., Coroutine[Any, Any, Any]]):
+        return super().callback(callback_)
+
+    async def __call__(self, *args, **kwargs):
+        return await self._function(*args, **kwargs)
+
+
 
 def hook(func: Callable):
     params = _extract_params(func)
@@ -81,14 +105,6 @@ def hook(func: Callable):
     is_coroutine = inspect.iscoroutinefunction(func)
 
     def _callback(callback: Callable):
-        _validate_coroutine_sync_vs_async(func,
-                                          callback,
-                                          is_coroutine,
-                                          inspect.iscoroutinefunction(callback))
-        _validate_parameters(func, callback, params, _extract_params(callback))
-        # noinspection PyUnresolvedReferences
-        func.callbacks.append(callback)
-        return callback
 
     func.callback = _callback
 
