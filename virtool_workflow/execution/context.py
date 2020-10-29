@@ -1,7 +1,8 @@
 """Execution context for Virtool Workflows."""
 from enum import Enum, auto
-from types import SimpleNamespace
 from typing import Callable, Optional, Coroutine, Any
+from virtool_workflow.execution.hooks import FixtureHook
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 
 
 class State(Enum):
@@ -17,52 +18,31 @@ UpdateListener = Callable[["WorkflowExecutionContext", Optional[str]], Coroutine
 StateListener = Callable[["WorkflowExecutionContext"], Coroutine[Any, Any, None]]
 
 
-class WorkflowExecutionContext(SimpleNamespace):
-    """Execution context for a workflow.Workflow.
+class WorkflowExecutionContext:
+    """
+    Execution context for a workflow.Workflow.
 
-    Contains the current execution state and manages updates
+    Contains the current execution state and manages updates.
     """
 
-    def __init__(
-            self,
-            on_update: Optional[UpdateListener] = None,
-            on_state_change: Optional[StateListener] = None,
-            **kwargs,
-    ):
+    def __init__(self, scope: WorkflowFixtureScope):
         """
-        :param on_update: Async callback function for workflow updates
-        :param on_state_change: Async callback function for changes in WorkflowState
-        :param kwargs: Any other keyword arguments will be stored as instance attributes
         """
         self._updates = []
-        self._on_update = [] if not on_update else [on_update]
+
+        self.scope = scope
+        self.on_error = FixtureHook(scope)
+        self.on_finish = FixtureHook(scope)
+        self.on_success = FixtureHook(scope)
+        self.on_failure = FixtureHook(scope)
+        self.on_update = FixtureHook(scope)
+        self.on_state_change = FixtureHook(scope)
+
         self._state = State.WAITING
-        self._on_state_change = [] if not on_state_change else [on_state_change]
 
         self.current_step = 0
         self.progress = 0.0
         self.error = None
-        super().__init__(**kwargs)
-
-    def on_state_change(self, action: StateListener):
-        """
-        register a callback function to receive updates about the Workflow state
-
-        :param action: async function to call when the WorkflowState changes.
-            The current WorkflowExecutionContext is included as a parameter
-        """
-        self._on_state_change.append(action)
-
-    def on_update(self, action: UpdateListener):
-        """
-        register a callback function to receive updates.
-
-        Updates are sent from the workflow via :func:`send_update`.
-
-        :param action: async function to call when updates are received.
-            The WorkflowExecutionContext and update string are included as parameters.
-        """
-        self._on_update.append(action)
 
     async def send_update(self, update: Optional[str]):
         """
@@ -72,8 +52,8 @@ class WorkflowExecutionContext(SimpleNamespace):
 
         :param update: A string update to send.
         """
-        for on_update in self._on_update:
-            await on_update(self, update)
+        self.scope["update"] = update
+        self.on_update.__trigger__()
 
     @property
     def state(self) -> State:
