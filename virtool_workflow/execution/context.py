@@ -1,8 +1,6 @@
 """Execution context for Virtool Workflows."""
 from enum import Enum, auto
 from typing import Callable, Optional, Coroutine, Any
-from virtool_workflow.execution.hooks import FixtureHook
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 
 
 class State(Enum):
@@ -25,18 +23,11 @@ class WorkflowExecutionContext:
     Contains the current execution state and manages updates.
     """
 
-    def __init__(self, scope: WorkflowFixtureScope):
+    def __init__(self):
         """
         """
         self._updates = []
 
-        self.scope = scope
-        self.on_error = FixtureHook(scope)
-        self.on_finish = FixtureHook(scope)
-        self.on_success = FixtureHook(scope)
-        self.on_failure = FixtureHook(scope)
-        self.on_update = FixtureHook(scope)
-        self.on_state_change = FixtureHook(scope)
 
         self._state = State.WAITING
 
