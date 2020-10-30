@@ -1,4 +1,5 @@
 from virtool_workflow.execution import execute_workflow
+from virtool_workflow import WorkflowExecutionContext
 
 
 async def test_execute(test_workflow):
@@ -15,16 +16,20 @@ async def test_respond_errors(test_workflow):
     async def throw_error():
         raise Exception()
 
-    async def raise_exception(error: execute_workflow.WorkflowError):
+    @execute_workflow.on_workflow_error.callback
+    async def handle_error(error: execute_workflow.WorkflowError):
         assert error.context.current_step == 3
         return "Step 3 skipped due to internal error"
 
     updates = []
-    
+
+    context = WorkflowExecutionContext()
+
+    @context.on_update
     async def receive_updates(_, update):
         updates.append(update)
 
-    await execute_workflow.execute(test_workflow, on_error=raise_exception, on_update=receive_updates)
+    await execute_workflow.execute(test_workflow, context)
     assert "Step 3 skipped due to internal error" in updates
 
 
@@ -48,9 +53,22 @@ async def test_correct_traceback_data(test_workflow):
 
 async def test_correct_progress(test_workflow):
 
-    async def check_progress(wf, ctx, result):
-        result[str(ctx.current_step)] = (float(ctx.current_step) / float(len(wf.steps)))
-        assert ctx.progress == result[str(ctx.current_step)]
+    correct_progress = {
+        0: 0.0,
+        1: 0.1,
+        2: 0.2,
+        3: 0.3,
+        4: 0.4,
+        5: 0.5,
+        6: 0.6,
+        7: 0.7,
+        8: 0.8,
+        9: 0.9,
+        10: 1.0
+    }
+
+    async def check_progress(wf, ctx):
+        assert ctx.progress == correct_progress[ctx.current_step]
 
     test_workflow.steps = [check_progress] * 10
     test_workflow.on_startup = []
@@ -64,17 +82,21 @@ async def test_correct_progress(test_workflow):
 
 async def test_on_update_called(test_workflow):
 
-    async def on_update(*_):
-        on_update.calls += 1
+    context = WorkflowExecutionContext()
 
-    async def on_state_change(_):
-        on_state_change.calls += 1
+    @context.on_update
+    async def _on_update(*_):
+        _on_update.calls += 1
 
-    on_update.calls = 0
-    on_state_change.calls = 0
+    @context.on_update
+    async def _on_state_change(*_):
+        _on_state_change.calls += 1
 
-    await execute_workflow.execute(test_workflow, on_update=on_update, on_state_change=on_state_change)
+    _on_update.calls = 0
+    _on_state_change.calls = 0
 
-    assert on_update.calls == 4
-    assert on_state_change.calls == 4
+    await execute_workflow.execute(test_workflow, context)
+
+    assert _on_update.calls == 4
+    assert _on_state_change.calls == 4
 
