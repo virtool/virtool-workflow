@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Union, AnyStr
 from shutil import rmtree
 
-from virtool_workflow import fixture
+from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
 @contextmanager

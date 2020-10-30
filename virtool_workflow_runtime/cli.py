@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 import uvloop
 
-from virtool_workflow.execution.execute_workflow import execute
+from virtool_workflow.execution.execution import execute
 from . import discovery
 from . import runtime
 

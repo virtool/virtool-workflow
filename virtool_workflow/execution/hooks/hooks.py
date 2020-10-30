@@ -1,6 +1,6 @@
 import inspect
-from typing import List, Any, Callable, Coroutine, Type
-from abc import ABC, abstractmethod
+from typing import List, Any, Callable
+from functools import wraps
 
 from virtool_workflow.utils import coerce_to_coroutine_function
 
@@ -39,6 +39,15 @@ def _validate_parameters(
         callback_params: List[inspect.Parameter]
 ):
     """Validate that the signatures of the hook function and callback function are compatible. """
+    if len(callback_params) == 0:
+        callback = coerce_to_coroutine_function(callback)
+
+        @wraps(callback)
+        async def _callback(*args, **kwargs):
+            return await callback()
+
+        return _callback
+
     if len(callback_params) != len(hook_params):
         if all(callback_param.kind != inspect.Parameter.VAR_POSITIONAL for callback_param in callback_params):
             raise ParameterMismatch(f"{callback} takes {len(callback_params)} parameters "
@@ -51,6 +60,7 @@ def _validate_parameters(
         if hook_param.annotation != callback_param.annotation:
             raise TypeHintMismatch(f"({callback_param}) of {callback} does not "
                                    f"match the type of ({hook_param}) of {hook_name}.")
+    return coerce_to_coroutine_function(callback)
 
 
 class Hook:
@@ -68,9 +78,23 @@ class Hook:
 
     def callback(self, callback_: Callable) -> Callable:
         callback_params = _extract_params(callback_)
-        _validate_parameters(self.name, callback_, self._params, callback_params)
-        self.callbacks.append(coerce_to_coroutine_function(callback_))
+        callback_ = _validate_parameters(self.name, callback_, self._params, callback_params)
+        self.callbacks.append(callback_)
         return callback_
+
+    def temporary_callback(self, hook_: "Hook"):
+
+        def _temporary_callback(callback_):
+            callback_ = self.callback(callback_)
+
+            @hook_.callback
+            def remove_callback():
+                self.callbacks.remove(callback_)
+                hook_.callbacks.remove(remove_callback)
+
+            return callback_
+
+        return _temporary_callback
 
     async def trigger(self, *args, **kwargs) -> List[Any]:
         return [await callback(*args, **kwargs) for callback in self.callbacks]

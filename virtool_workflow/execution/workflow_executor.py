@@ -1,9 +1,45 @@
-from virtool_workflow import Workflow
-from virtool_workflow.execution.execute_workflow import WorkflowError
-from virtool_workflow.execution.hooks import create_hook
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-from typing import Optional, Callable, Coroutine, Any
+import sys
+import traceback
 from enum import Enum
+from typing import Optional, Callable, Coroutine, Any, Dict
+
+from virtool_workflow.workflow import Workflow
+from virtool_workflow.execution.hooks.hooks import create_hook
+from virtool_workflow.execution.hooks.workflow_hooks import on_workflow_finish
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+
+
+class WorkflowError(Exception):
+    """An exception occurring during the execution of a workflow."""
+
+    def __init__(
+            self,
+            cause: Exception,
+            workflow: Workflow,
+            context: "WorkflowExecutor",
+            max_traceback_depth: int = 50
+    ):
+        """
+
+        :param cause: The initial exception raised
+        :param workflow: The workflow object being executed
+        :param context: The execution context of the workflow being executed
+        :param max_traceback_depth: The maximum depth for the traceback data
+        """
+        self.cause = cause
+        self.workflow = workflow
+        self.context = context
+
+        exception, value, trace_info = sys.exc_info()
+
+        self.traceback_data = {
+            "type": exception.__name__,
+            "traceback": traceback.format_tb(trace_info, max_traceback_depth),
+            "details": [str(arg) for arg in value.args]
+        }
+
+        super().__init__(str(cause))
+
 
 State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 
@@ -17,7 +53,8 @@ class WorkflowExecutor:
         self.on_update = create_hook("on_update", str)
         self.on_state_change = create_hook("on_state_change", State, State)
         self.on_error = create_hook("on_error", WorkflowError, return_type=Optional[str])
-        self.on_step = create_hook("on_step", WorkflowExecutor)
+        self.on_step = create_hook("on_step", WorkflowExecutor, str)
+        self.on_result = create_hook("on_result", Dict[str, Any])
 
         self._updates = []
         self._state = State.WAITING
@@ -41,7 +78,7 @@ class WorkflowExecutor:
     def state(self):
         return self._state
 
-    async def set_state(self, new_state: State):
+    async def _set_state(self, new_state: State):
         await self.on_state_change.trigger(self._state, new_state)
         self._state = new_state
         return new_state
@@ -63,10 +100,34 @@ class WorkflowExecutor:
 
     async def _run_steps(self, steps):
         for step in steps:
-            update = await _run_step(step, workflow, ctx)
-            await self.on_step.trigger(workflow, ctx)
-            await ctx.send_update(*update)
+            update = await self._run_step(step)
+            await self.on_step.trigger(self, update)
+            await self.send_update(*update)
 
-    def execute(self):
+    async def execute(self) -> Dict[str, Any]:
+
+        self.scope.add_instance(self.workflow, "wf", "workflow")
+        self.scope.add_instance(self, "context", "execution_context", "ctx")
+        self.scope.add_instance({}, "result", "results")
+
+        bound_workflow = await self.scope.bind_to_workflow(self.workflow)
+
+        for state, steps in ((State.STARTUP, bound_workflow.on_startup),
+                             (State.RUNNING, bound_workflow.steps),
+                             (State.CLEAUP, bound_workflow.on_cleanup)):
+            await self._set_state(state)
+            await self._run_steps(steps)
+
+        await self._set_state(State.FINISHED)
+
+        result = self.scope["result"]
+
+        await self.on_result.trigger(result)
+        await on_workflow_finish.trigger(self.workflow, result)
+
+        return self.scope["result"]
+
+    def __await__(self):
+        return self.execute().__await__()
 
 

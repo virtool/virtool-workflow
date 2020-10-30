@@ -3,7 +3,8 @@ from functools import wraps
 from inspect import isgeneratorfunction, iscoroutinefunction, signature
 from typing import Optional, Dict, Any, Type, Callable, Iterator, Union
 
-from virtool_workflow import WorkflowFixture, Workflow
+from virtool_workflow.workflow import Workflow
+from virtool_workflow.fixtures.workflow_fixture import WorkflowFixture
 from virtool_workflow.fixtures.errors import WorkflowFixtureMultipleYield, WorkflowFixtureNotAvailable
 
 
