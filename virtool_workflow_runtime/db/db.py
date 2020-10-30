@@ -61,7 +61,8 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         :param context: The :class:`WorkflowExecutionContext` instance
         :param workflow: The :class:`Workflow` being executed
         """
-        async def _send_update(_, update: str):
+        async def _send_update(_, update: Optional[str]):
+            print(context.current_step)
             await self._db.jobs.update_one({"_id": job_id}, {
                 "$set": {
                     "state": str(context.state)
@@ -69,7 +70,7 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
                 "$push": {
                     "status": {
                         "state": str(context.state),
-                        "stage": workflow.steps[context.current_step - 1].__name__,
+                        "stage": workflow.steps[context.current_step-1].__name__,
                         "error": context.error,
                         "progress": context.progress,
                         "update": update,

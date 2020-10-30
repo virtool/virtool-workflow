@@ -3,7 +3,7 @@ from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Callable, Sequence, Optional, Iterable, Any, Coroutine
 
-WorkflowStep = Callable[[Any], Coroutine[Any, Any, None]]
+WorkflowStep = Callable[..., Coroutine[Any, Any, None]]
 """Async function representing a step in a Virtool Workflow."""
 
 

@@ -1,19 +1,20 @@
 """Execution context for Virtool Workflows."""
-from enum import Enum, auto
-from typing import Callable, Optional, Coroutine, Any
+from enum import Enum
+from typing import Optional
+
+from virtool_workflow.execution.hooks import hook
+
+State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 
 
-class State(Enum):
-    """Enum for workflow execution states."""
-    WAITING = auto()
-    STARTUP = auto()
-    RUNNING = auto()
-    CLEANUP = auto()
-    FINISHED = auto()
+def _on_state_change(old_state: State, new_state: State):
+    """Triggered wen the state of an executing workflow changes."""
+    pass
 
 
-UpdateListener = Callable[["WorkflowExecutionContext", Optional[str]], Coroutine[Any, Any, None]]
-StateListener = Callable[["WorkflowExecutionContext"], Coroutine[Any, Any, None]]
+def _on_update(context: "WorkflowExecutionContext", update: Optional[str]):
+    """Triggered when an update is sent by a Workflow."""
+    pass
 
 
 class WorkflowExecutionContext:
@@ -24,10 +25,10 @@ class WorkflowExecutionContext:
     """
 
     def __init__(self):
-        """
-        """
-        self._updates = []
+        self.on_state_change = hook(_on_state_change)
+        self.on_update = hook(_on_update)
 
+        self._updates = []
 
         self._state = State.WAITING
 
@@ -35,7 +36,7 @@ class WorkflowExecutionContext:
         self.progress = 0.0
         self.error = None
 
-    async def send_update(self, update: Optional[str]):
+    async def send_update(self, *update: Optional[str]):
         """
         Send an update.
 
@@ -43,8 +44,10 @@ class WorkflowExecutionContext:
 
         :param update: A string update to send.
         """
-        self.scope["update"] = update
-        self.on_update.__trigger__()
+        for update_ in update:
+            if update:
+                self._updates.append(update_)
+                await self.on_update.trigger(self, update_)
 
     @property
     def state(self) -> State:
@@ -53,6 +56,5 @@ class WorkflowExecutionContext:
 
     async def set_state(self, new_state: State):
         """Change the state of the executing workflow."""
+        await self.on_state_change.trigger(self._state, new_state)
         self._state = new_state
-        for on_state in self._on_state_change:
-            await on_state(self)
