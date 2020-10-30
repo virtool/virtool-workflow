@@ -7,15 +7,6 @@ from virtool_workflow.execution.hooks import hook
 State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 
 
-def _on_state_change(old_state: State, new_state: State):
-    """Triggered wen the state of an executing workflow changes."""
-    pass
-
-
-def _on_update(context: "WorkflowExecutionContext", update: Optional[str]):
-    """Triggered when an update is sent by a Workflow."""
-    pass
-
 
 class WorkflowExecutionContext:
     """
@@ -48,7 +39,6 @@ class WorkflowExecutionContext:
             if update:
                 self._updates.append(update_)
                 await self.on_update.trigger(self, update_)
-
     @property
     def state(self) -> State:
         """The current :class:`State` of the executing workflow."""
