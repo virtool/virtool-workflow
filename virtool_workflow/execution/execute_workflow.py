@@ -82,7 +82,6 @@ async def _run_steps(steps, workflow, ctx):
 def _inc_step(workflow, ctx):
     ctx.current_step += 1
     ctx.progress = float(ctx.current_step) / float(len(workflow.steps))
-    print(ctx.progress)
 
 
 async def execute(
