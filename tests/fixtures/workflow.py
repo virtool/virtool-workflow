@@ -9,21 +9,23 @@ def test_workflow():
     @_test_workflow.startup
     async def startup(results):
         results["start"] = True
+        return "Startup complete"
 
     @_test_workflow.cleanup
     async def cleanup(result):
         result["clean"] = True
+        return "Cleanup complete"
 
     @_test_workflow.step
     async def step_1(ctx, results):
         results["1"] = True
-        print(ctx.current_step)
-        print(ctx.state)
         assert ctx.current_step == 1
+        return "Step 1 complete"
 
     @_test_workflow.step
     async def step_2(ctx, results):
         results["2"] = True
         assert ctx.current_step == 2
+        return "Step 2 complete"
 
     return _test_workflow

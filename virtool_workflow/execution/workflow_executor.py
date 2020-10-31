@@ -4,8 +4,7 @@ from enum import Enum
 from typing import Optional, Callable, Coroutine, Any, Dict
 
 from virtool_workflow.workflow import Workflow
-from virtool_workflow.execution.hooks.hooks import create_hook
-from virtool_workflow.execution.hooks.workflow_hooks import on_workflow_finish
+from virtool_workflow.execution import hooks
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 
 
@@ -16,7 +15,7 @@ class WorkflowError(Exception):
             self,
             cause: Exception,
             workflow: Workflow,
-            context: "WorkflowExecutor",
+            context: "WorkflowExecution",
             max_traceback_depth: int = 50
     ):
         """
@@ -44,22 +43,16 @@ class WorkflowError(Exception):
 State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 
 
-class WorkflowExecutor:
+class WorkflowExecution:
 
     def __init__(self, workflow: Workflow, scope: WorkflowFixtureScope):
         self.workflow = workflow
         self.scope = scope
-
-        self.on_update = create_hook("on_update", str)
-        self.on_state_change = create_hook("on_state_change", State, State)
-        self.on_error = create_hook("on_error", WorkflowError, return_type=Optional[str])
-        self.on_step = create_hook("on_step", WorkflowExecutor, str)
-        self.on_result = create_hook("on_result", Dict[str, Any])
-
         self._updates = []
         self._state = State.WAITING
         self.current_step = 0
         self.progress = 0.0
+        self.error = None
 
     async def send_update(self, update: str):
         """
@@ -69,17 +62,15 @@ class WorkflowExecutor:
 
         :param update: A string update to send.
         """
-        for update_ in update:
-            if update:
-                self._updates.append(update_)
-                await self.on_update.trigger(self, update_)
+        self._updates.append(update)
+        await hooks.on_update.trigger(self, update)
 
     @property
     def state(self):
         return self._state
 
     async def _set_state(self, new_state: State):
-        await self.on_state_change.trigger(self._state, new_state)
+        await hooks.on_state_change.trigger(self._state, new_state)
         self._state = new_state
         return new_state
 
@@ -88,21 +79,27 @@ class WorkflowExecutor:
             step: Callable[[], Coroutine[Any, Any, Optional[str]]],
     ):
         try:
-            return [await step()]
+            return await step()
         except Exception as exception:
+            self.error = exception
             error = WorkflowError(cause=exception, workflow=self.workflow, context=self)
-            callback_results = await self.on_error.trigger(error)
+            callback_results = await hooks.on_error.trigger(error)
 
             if callback_results:
-                return callback_results
+                return callback_results[0]
 
             raise error from exception
 
-    async def _run_steps(self, steps):
+    async def _run_steps(self, steps, count_steps=False):
         for step in steps:
+            if count_steps:
+                self.current_step += 1
+                self.progress = float(self.current_step) / float(len(self.workflow.steps))
             update = await self._run_step(step)
-            await self.on_step.trigger(self, update)
-            await self.send_update(*update)
+            if count_steps:
+                await hooks.on_workflow_step.trigger(self, update)
+            if update:
+                await self.send_update(update)
 
     async def execute(self) -> Dict[str, Any]:
 
@@ -112,18 +109,17 @@ class WorkflowExecutor:
 
         bound_workflow = await self.scope.bind_to_workflow(self.workflow)
 
-        for state, steps in ((State.STARTUP, bound_workflow.on_startup),
-                             (State.RUNNING, bound_workflow.steps),
-                             (State.CLEAUP, bound_workflow.on_cleanup)):
+        for state, steps, count_steps in ((State.STARTUP, bound_workflow.on_startup, False),
+                                          (State.RUNNING, bound_workflow.steps, True),
+                                          (State.CLEANUP, bound_workflow.on_cleanup, False)):
             await self._set_state(state)
-            await self._run_steps(steps)
+            await self._run_steps(steps, count_steps)
 
         await self._set_state(State.FINISHED)
 
         result = self.scope["result"]
 
-        await self.on_result.trigger(result)
-        await on_workflow_finish.trigger(self.workflow, result)
+        await hooks.on_result.trigger(self.workflow, result)
 
         return self.scope["result"]
 

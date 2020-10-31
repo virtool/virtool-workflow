@@ -1,7 +1,7 @@
 from pathlib import Path
 from virtool_workflow_runtime import discovery
 from virtool_workflow import Workflow, WorkflowFixture
-from virtool_workflow.execution import execute_workflow
+from virtool_workflow.execution import execution
 
 cwd = Path(__file__).parent
 TEST_FILE = cwd/"discoverable_workflow.py"
@@ -33,7 +33,7 @@ def test_load_fixtures():
 async def test_run_discovery():
     wf = discovery.discover_workflow(FIXTURE_TEST_FILE)
     discovery.load_fixtures_from__fixtures__(FIXTURE_TEST_FILE)
-    result = await execute_workflow.execute(wf)
+    result = await execution.execute(wf)
 
     assert result["fixture_a"] == "a"
     assert result["fixture_b"] == "ab"

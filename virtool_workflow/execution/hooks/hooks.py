@@ -39,7 +39,7 @@ def _validate_parameters(
         callback_params: List[inspect.Parameter]
 ):
     """Validate that the signatures of the hook function and callback function are compatible. """
-    if len(callback_params) == 0:
+    if len(callback_params) == 0 and len(hook_params) != 0:
         callback = coerce_to_coroutine_function(callback)
 
         @wraps(callback)
@@ -82,13 +82,14 @@ class Hook:
         self.callbacks.append(callback_)
         return callback_
 
-    def temporary_callback(self, hook_: "Hook"):
+    def callback_until(self, hook_: "Hook"):
 
         def _temporary_callback(callback_):
             callback_ = self.callback(callback_)
 
             @hook_.callback
             def remove_callback():
+                print(f"removing {callback_}")
                 self.callbacks.remove(callback_)
                 hook_.callbacks.remove(remove_callback)
 
