@@ -7,7 +7,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
-from virtool_workflow import WorkflowFixture, Workflow, WorkflowExecutionContext
+from virtool_workflow import WorkflowFixture
+from virtool_workflow.execution.workflow_executor import WorkflowExecution
 
 
 class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
@@ -48,35 +49,29 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         """Get a particular database collection."""
         return getattr(self._db, item)
 
-    def send_updates_to_database_for_job(
-            self,
-            job_id: str,
-            context: WorkflowExecutionContext,
-            workflow: Workflow
-    ):
+    async def send_update(self, job_id: str, context: WorkflowExecution, update: str):
         """
-        Send updates to the jobs database when the WorkflowExecutionContext is updated.
+        Send an update to the jobs database.
 
         :param job_id: Id of the job in the Virtool database
-        :param context: The :class:`WorkflowExecutionContext` instance
-        :param workflow: The :class:`Workflow` being executed
+        :param context: The :class:`WorkflowExecutor` instance
         """
-        async def _send_update(_, update: Optional[str]):
-            print(context.current_step)
-            await self._db.jobs.update_one({"_id": job_id}, {
-                "$set": {
-                    "state": str(context.state)
-                },
-                "$push": {
-                    "status": {
-                        "state": str(context.state),
-                        "stage": workflow.steps[context.current_step-1].__name__,
-                        "error": context.error,
-                        "progress": context.progress,
-                        "update": update,
-                        "timestamp": timestamp(),
-                    }
+        print(context.current_step)
+        print(context.workflow.steps)
+        print(update)
+        await self["jobs"].update_one({"_id": job_id}, {
+            "$set": {
+                "state": str(context.state)
+            },
+            "$push": {
+                "status": {
+                    "state": str(context.state),
+                    "stage": context.workflow.steps[context.current_step - 1].__name__,
+                    "error": context.error,
+                    "progress": context.progress,
+                    "update": update,
+                    "timestamp": timestamp(),
                 }
-            })
+            }
+        })
 
-        context.on_update(_send_update)

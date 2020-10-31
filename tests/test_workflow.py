@@ -1,9 +1,9 @@
-from virtool_workflow.execution import execute_workflow
-from virtool_workflow import WorkflowExecutionContext
+from virtool_workflow.execution.execution import execute
+from virtool_workflow import WorkflowExecution, hooks, WorkflowError
 
 
 async def test_execute(test_workflow):
-    result = await execute_workflow.execute(test_workflow)
+    result = await execute(test_workflow)
     assert result["start"]
     assert result["1"]
     assert result["2"]
@@ -16,20 +16,18 @@ async def test_respond_errors(test_workflow):
     async def throw_error():
         raise Exception()
 
-    @execute_workflow.on_workflow_error.callback
-    async def handle_error(error: execute_workflow.WorkflowError):
+    @hooks.on_error.callback_until(hooks.on_result)
+    async def handle_error(error: WorkflowError):
         assert error.context.current_step == 3
         return "Step 3 skipped due to internal error"
 
     updates = []
 
-    context = WorkflowExecutionContext()
-
-    @context.on_update
+    @hooks.on_update.callback_until(hooks.on_result)
     async def receive_updates(_, update):
         updates.append(update)
 
-    await execute_workflow.execute(test_workflow, context)
+    await execute(test_workflow)
     assert "Step 3 skipped due to internal error" in updates
 
 
@@ -46,8 +44,8 @@ async def test_correct_traceback_data(test_workflow):
         assert arg1, arg2 in tb["details"]
 
     try:
-        await execute_workflow.execute(test_workflow)
-    except execute_workflow.WorkflowError as error:
+        await execute(test_workflow)
+    except WorkflowError as error:
         assert_correct_traceback(error)
 
 
@@ -74,7 +72,7 @@ async def test_correct_progress(test_workflow):
     test_workflow.on_startup = []
     test_workflow.on_cleanup = []
 
-    results = await execute_workflow.execute(test_workflow)
+    results = await execute(test_workflow)
 
     for result, progress in zip(results, range(1, 11)):
         assert int(result) == progress
@@ -82,21 +80,23 @@ async def test_correct_progress(test_workflow):
 
 async def test_on_update_called(test_workflow):
 
-    context = WorkflowExecutionContext()
-
-    @context.on_update
+    @hooks.on_update.callback
     async def _on_update(*_):
+        print("called")
         _on_update.calls += 1
 
-    @context.on_update
+    @hooks.on_state_change.callback
     async def _on_state_change(*_):
         _on_state_change.calls += 1
 
     _on_update.calls = 0
     _on_state_change.calls = 0
 
-    await execute_workflow.execute(test_workflow, context)
+    await execute(test_workflow)
 
     assert _on_update.calls == 4
     assert _on_state_change.calls == 4
+
+    hooks.on_update.callbacks.remove(_on_update)
+    hooks.on_state_change.callbacks.remove(_on_state_change)
 

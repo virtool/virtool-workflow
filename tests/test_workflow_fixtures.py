@@ -1,7 +1,7 @@
 import inspect
 from typing import Dict
 
-from virtool_workflow.execution.execute_workflow import execute
+from virtool_workflow.execution.execution import execute
 from virtool_workflow.fixtures.workflow_fixture import fixture, WorkflowFixture
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.fixtures.errors import WorkflowFixtureNotAvailable

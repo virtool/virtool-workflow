@@ -1,16 +1,22 @@
 from typing import Dict, Any
 
 from .hooks import hook
-from virtool_workflow.execution.workflow_executor import WorkflowError, State
+from virtool_workflow.workflow import Workflow
+from virtool_workflow.execution.workflow_executor import WorkflowError, State, WorkflowExecution
 
 
 @hook
-def on_result(result: Dict[str, Any]):
+def on_result(workflow: Workflow, result: Dict[str, Any]):
     pass
 
 
 @hook
-def on_update(update: str):
+def on_update(workflow: WorkflowExecution, update: str):
+    pass
+
+
+@hook
+def on_workflow_step(executor: WorkflowExecution):
     pass
 
 
@@ -22,5 +28,6 @@ def on_state_change(old_state: State, new_state: State):
 @hook
 def on_error(error: WorkflowError):
     pass
+
 
 

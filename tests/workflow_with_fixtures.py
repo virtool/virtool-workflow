@@ -3,9 +3,7 @@ from typing import Dict, Any
 
 import pytest
 
-from virtool_workflow import Workflow, WorkflowExecutionContext
-from virtool_workflow.execution.context import State
-from virtool_workflow.fixtures.workflow_fixture import fixture
+from virtool_workflow import Workflow, WorkflowExecution, State, fixture
 
 
 @fixture
@@ -26,8 +24,8 @@ def workflow_with_fixtures():
     @test_workflow.startup
     def start(
             state: Dict[str, Any],
-            execution_context: WorkflowExecutionContext,
-            ctx: WorkflowExecutionContext,
+            execution_context: WorkflowExecution,
+            ctx: WorkflowExecution,
             workflow: Workflow,
             wf: Workflow,
     ):
