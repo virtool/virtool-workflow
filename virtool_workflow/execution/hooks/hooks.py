@@ -1,8 +1,7 @@
 import inspect
 from typing import List, Any, Callable
-from functools import wraps
 
-from virtool_workflow.utils import coerce_to_coroutine_function
+from virtool_workflow import utils
 
 
 class IncompatibleCallback(ValueError):
@@ -38,29 +37,34 @@ def _validate_parameters(
         hook_params: List[inspect.Parameter],
         callback_params: List[inspect.Parameter]
 ):
-    """Validate that the signatures of the hook function and callback function are compatible. """
+    """
+    Validate the signature of a callback function against the hook expected parameter types.
+
+    :param hook_name: The name of the hook, used in the exception message.
+    :param callback: The callback function to be validated.
+    :param hook_params: The parameter types to expect for the callback.
+            only the type hints
+    :param callback_params: The actual parameter types of the callback function.
+    """
     if len(callback_params) == 0 and len(hook_params) != 0:
-        callback = coerce_to_coroutine_function(callback)
-
-        @wraps(callback)
-        async def _callback(*args, **kwargs):
-            return await callback()
-
-        return _callback
+        callback = utils.coerce_to_coroutine_function(callback)
+        return utils.coerce_coroutine_function_to_accept_any_parameters(callback)
 
     if len(callback_params) != len(hook_params):
         if all(callback_param.kind != inspect.Parameter.VAR_POSITIONAL for callback_param in callback_params):
             raise ParameterMismatch(f"{callback} takes {len(callback_params)} parameters "
                                     f"where {hook_name} takes {len(hook_params)} parameters.")
+
     for hook_param, callback_param in zip(hook_params, callback_params):
-        if hook_param.annotation is inspect.Parameter.empty:
+        if hook_param.annotation is inspect.Parameter.empty or \
+                callback_param.annotation is inspect.Parameter.empty:
             continue
-        if callback_param.annotation is inspect.Parameter.empty:
-            continue
+
         if hook_param.annotation != callback_param.annotation:
             raise TypeHintMismatch(f"({callback_param}) of {callback} does not "
                                    f"match the type of ({hook_param}) of {hook_name}.")
-    return coerce_to_coroutine_function(callback)
+
+    return utils.coerce_to_coroutine_function(callback)
 
 
 class Hook:
@@ -81,15 +85,19 @@ class Hook:
         self.name = hook_name
         self._params = parameters
         self._return = return_type
-        # TODO: verify return type
         self.callbacks = []
 
     def __call__(self, callback_: Callable) -> Callable:
         return self.callback(callback_)
 
     def callback(self, callback_: Callable) -> Callable:
-        callback_params = _extract_params(callback_)
+        callback_params, return_type = _extract_params(callback_, extract_return=True)
         callback_ = _validate_parameters(self.name, callback_, self._params, callback_params)
+
+        if self._return != return_type:
+            raise TypeHintMismatch(f"Return type {return_type} of {callback_}\n"
+                                   f"does not match expected type hint {self._return}")
+
         self.callbacks.append(callback_)
         return callback_
 
