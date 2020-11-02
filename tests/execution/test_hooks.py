@@ -1,4 +1,5 @@
 from virtool_workflow import Workflow, hooks, hook
+from virtool_workflow.execution.hooks.hooks import IncompatibleCallback
 
 
 @hook
@@ -19,13 +20,9 @@ async def test_hook():
 
 async def test_temporary_callback():
 
-    print(example_hook_without_params.callbacks)
-
-    @example_hook_without_params.callback_until(hooks.on_result)
+    @example_hook_without_params.callback(until=hooks.on_result)
     def temporary_callback():
         pass
-
-    print(hooks.on_result.callbacks)
 
     assert temporary_callback in example_hook_without_params.callbacks
 
@@ -34,4 +31,36 @@ async def test_temporary_callback():
     assert "remove_callback" not in [f.__name__ for f in example_hook_without_params.callbacks]
     assert temporary_callback not in example_hook_without_params.callbacks
 
+
+async def test_return_type_hint_checking_error_raised():
+
+    @hook
+    def hook_with_return_hint() -> str:
+        pass
+
+    thrown = False
+
+    try:
+        @hook_with_return_hint.callback
+        def callback_with_return_type_hint() -> int:
+            return 1
+    except IncompatibleCallback:
+        thrown = True
+
+    assert thrown
+
+
+async def test_return_type_hint_checking():
+
+    @hook
+    def hook_with_return_hint() -> str:
+        pass
+
+    @hook_with_return_hint.callback
+    def no_hints():
+        return ""
+
+    @hook_with_return_hint.callback
+    def correct_hint() -> str:
+        return ""
 

@@ -16,14 +16,14 @@ async def test_respond_errors(test_workflow):
     async def throw_error():
         raise Exception()
 
-    @hooks.on_error.callback_until(hooks.on_result)
+    @hooks.on_error(until=hooks.on_result)
     async def handle_error(error: WorkflowError):
         assert error.context.current_step == 3
         return "Step 3 skipped due to internal error"
 
     updates = []
 
-    @hooks.on_update.callback_until(hooks.on_result)
+    @hooks.on_update(until=hooks.on_result)
     async def receive_updates(_, update):
         updates.append(update)
 
