@@ -87,26 +87,35 @@ class Hook:
         self._return = return_type
         self.callbacks = []
 
-    def __call__(self, callback_: Callable) -> Callable:
-        return self.callback(callback_)
+    def callback(self, callback_: Callable = None, until=None):
+        if callback_ and not until:
+            return self._callback(callback_)
+        if callback_ and until:
+            return self._callback_until(until)(callback_)
+        if until:
+            return self._callback_until(until)
 
-    def callback(self, callback_: Callable) -> Callable:
+    __call__ = callback
+
+    def _callback(self, callback_: Callable) -> Callable:
         callback_params, return_type = _extract_params(callback_, extract_return=True)
         callback_ = _validate_parameters(self.name, callback_, self._params, callback_params)
 
-        if self._return != return_type:
+        if self._return != inspect.Parameter.empty \
+                and return_type != inspect.Parameter.empty \
+                and self._return != return_type:
             raise TypeHintMismatch(f"Return type {return_type} of {callback_}\n"
                                    f"does not match expected type hint {self._return}")
 
         self.callbacks.append(callback_)
         return callback_
 
-    def callback_until(self, hook_: "Hook"):
+    def _callback_until(self, hook_: "Hook"):
 
         def _temporary_callback(callback_):
-            callback_ = self.callback(callback_)
+            callback_ = self._callback(callback_)
 
-            @hook_.callback
+            @hook_._callback
             def remove_callback():
                 print(f"removing {callback_}")
                 self.callbacks.remove(callback_)
@@ -124,11 +133,3 @@ def hook(func: Callable):
     """Create a hook based on a function signature."""
     parameters, return_annotation = _extract_params(func, extract_return=True)
     return Hook(str(func), parameters, return_annotation)
-
-
-def create_hook(name: str, *param_types, return_type=None):
-    return Hook(name,
-                [inspect.Parameter("", inspect.Parameter.POSITIONAL_ONLY, annotation=typ)
-                 for typ in param_types],
-                return_type=return_type)
-

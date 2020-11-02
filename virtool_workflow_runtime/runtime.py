@@ -25,7 +25,7 @@ async def execute(job_id: str, workflow: Workflow) -> Dict[str, Any]:
 
         executor = WorkflowExecution(workflow, fixtures)
 
-        @hooks.on_update.callback_until(hooks.on_result)
+        @hooks.on_update(until=hooks.on_result)
         async def send_database_updates(_, update: str):
             await database.send_update(job_id, executor, update)
 
