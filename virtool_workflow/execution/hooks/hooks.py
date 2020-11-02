@@ -64,9 +64,20 @@ def _validate_parameters(
 
 
 class Hook:
-    """A standard hook."""
 
     def __init__(self, hook_name, parameters, return_type):
+        """
+        A set of functions to be called as a group upon a particular event.
+
+        The signature of any functions added (via :func:`.callback` or :func:`__call__`
+        are validated to match the types provided.
+
+        :param hook_name: The name of this hook.
+        :param parameters: A list of types for the parameters a callback function
+            should accept. These will be used to validate function signatures before
+            adding them to the set.
+        :param return_type: The expected return type for callback functions.
+        """
         self.name = hook_name
         self._params = parameters
         self._return = return_type
