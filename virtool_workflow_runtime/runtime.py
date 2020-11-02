@@ -1,10 +1,11 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
 from typing import Dict, Any
 
-from virtool_workflow.workflow import Workflow
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-from virtool_workflow.execution.workflow_executor import WorkflowExecution
 from virtool_workflow.execution import hooks
+from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.workflow import Workflow
+from . import runtime_hooks
 from ._redis import job_id_queue
 from .db import VirtoolDatabase
 
@@ -19,20 +20,39 @@ async def execute(job_id: str, workflow: Workflow) -> Dict[str, Any]:
     """
 
     with WorkflowFixtureScope() as fixtures:
-        database: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
-
-        job_document = await database["jobs"].find_one(dict(_id=job_id))
-
         executor = WorkflowExecution(workflow, fixtures)
+        try:
+            return await _execute(job_id, workflow, fixtures, executor)
+        except Exception as e:
+            if isinstance(e, WorkflowError):
+                await runtime_hooks.on_failure.trigger(e)
+            else:
+                await runtime_hooks.on_failure.trigger(WorkflowError(cause=e, context=executor, workflow=workflow))
 
-        @hooks.on_update(until=hooks.on_result)
-        async def send_database_updates(_, update: str):
-            await database.send_update(job_id, executor, update)
+            raise e
 
-        fixtures["job_id"] = job_id
-        fixtures["job_document"] = job_document
 
-        return await executor
+async def _execute(job_id: str,
+                   workflow: Workflow,
+                   fixtures: WorkflowFixtureScope,
+                   executor: WorkflowExecution) -> Dict[str, Any]:
+
+    await runtime_hooks.on_load_fixtures.trigger(fixtures)
+
+    database: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
+
+    job_document = await database["jobs"].find_one(dict(_id=job_id))
+
+    executor = WorkflowExecution(workflow, fixtures)
+
+    @hooks.on_update(until=hooks.on_result)
+    async def send_database_updates(_, update: str):
+        await database.send_update(job_id, executor, update)
+
+    fixtures["job_id"] = job_id
+    fixtures["job_document"] = job_document
+
+    return await executor
 
 
 async def execute_from_redis(workflow: Workflow):
