@@ -80,23 +80,24 @@ async def test_correct_progress(test_workflow):
 
 async def test_on_update_called(test_workflow):
 
-    @hooks.on_update.callback
-    async def _on_update(*_):
-        print("called")
-        _on_update.calls += 1
+    calls = 0
+    state_calls = 0
 
-    @hooks.on_state_change.callback
-    async def _on_state_change(*_):
-        _on_state_change.calls += 1
+    @hooks.on_update.callback(until=hooks.on_result)
+    async def _on_update():
+        nonlocal calls
+        calls += 1
+
+    @hooks.on_state_change.callback(until=hooks.on_result)
+    async def _on_state_change():
+        nonlocal state_calls
+        state_calls += 1
 
     _on_update.calls = 0
     _on_state_change.calls = 0
 
     await execute(test_workflow)
 
-    assert _on_update.calls == 4
-    assert _on_state_change.calls == 4
-
-    hooks.on_update.callbacks.remove(_on_update)
-    hooks.on_state_change.callbacks.remove(_on_state_change)
+    assert calls == 4
+    assert state_calls == 4
 
