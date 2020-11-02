@@ -1,17 +1,26 @@
 import inspect
-from typing import List, Any, Callable
+from typing import List, Any, Callable, Type
 
 from virtool_workflow import utils
 
 
 class IncompatibleCallback(ValueError):
     """Raised when a callback function is not compatible with a Hook"""
-    pass
+
+    def __init__(self, callback, *args):
+        super().__init__(*args)
+        self.callback = callback
+
+    def __str__(self):
+        s = super().__str__()
+        code, line_number = inspect.getsourcelines(self.callback)
+        code = "".join(code)
+        file = inspect.getsourcefile(self.callback)
+        return f"{s}\n\n{file}:{line_number}\n\n{code}"
 
 
 class ParameterMismatch(IncompatibleCallback):
     """Raised when the parameters of a callback function are not compatible with a Hook."""
-    pass
 
 
 class TypeHintMismatch(ParameterMismatch):
@@ -19,23 +28,22 @@ class TypeHintMismatch(ParameterMismatch):
     Raised when the type hints of a positional parameter
     do not match between a callback function and a hook definition.
     """
-    pass
 
 
 def _extract_params(func: Callable, extract_return: bool = False):
     """Extract parameters from the signature of a function."""
     signature = inspect.signature(func)
-    parameters = signature.parameters
+    parameters = [param.annotation for param in signature.parameters.values()]
     if extract_return:
-        return list(parameters.values()), signature.return_annotation
-    return list(parameters.values())
+        return parameters, signature.return_annotation
+    return parameters
 
 
 def _validate_parameters(
         hook_name: str,
         callback: Callable,
-        hook_params: List[inspect.Parameter],
-        callback_params: List[inspect.Parameter]
+        hook_params: List[Type],
+        callback_params: List[Type]
 ):
     """
     Validate the signature of a callback function against the hook expected parameter types.
@@ -51,17 +59,16 @@ def _validate_parameters(
         return utils.coerce_coroutine_function_to_accept_any_parameters(callback)
 
     if len(callback_params) != len(hook_params):
-        if all(callback_param.kind != inspect.Parameter.VAR_POSITIONAL for callback_param in callback_params):
-            raise ParameterMismatch(f"{callback} takes {len(callback_params)} parameters "
-                                    f"where {hook_name} takes {len(hook_params)} parameters.")
+        raise ParameterMismatch(callback, f"{callback} takes {len(callback_params)} parameters "
+                                f"where {hook_name} takes {len(hook_params)} parameters.")
 
     for hook_param, callback_param in zip(hook_params, callback_params):
-        if hook_param.annotation is inspect.Parameter.empty or \
-                callback_param.annotation is inspect.Parameter.empty:
+        if hook_param is inspect.Parameter.empty or \
+                callback_param is inspect.Parameter.empty:
             continue
 
-        if hook_param.annotation != callback_param.annotation:
-            raise TypeHintMismatch(f"({callback_param}) of {callback} does not "
+        if hook_param != callback_param:
+            raise TypeHintMismatch(callback, f"({callback_param}) of {callback} does not "
                                    f"match the type of ({hook_param}) of {hook_name}.")
 
     return utils.coerce_to_coroutine_function(callback)
@@ -80,11 +87,13 @@ class Hook:
         :param parameters: A list of types for the parameters a callback function
             should accept. These will be used to validate function signatures before
             adding them to the set.
+
         :param return_type: The expected return type for callback functions.
         """
         self.name = hook_name
         self._params = parameters
         self._return = return_type
+
         self.callbacks = []
 
     def callback(self, callback_: Callable = None, until=None):
