@@ -1,12 +1,11 @@
 import os
 from dataclasses import dataclass
-from typing import Type
 
 from virtool_workflow import WorkflowFixture
 
 
 @dataclass(frozen=True)
-class VirtoolConfiguration(WorkflowFixture):
+class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuration"]):
     temp_path: str
     data_path: str
     proc: int
