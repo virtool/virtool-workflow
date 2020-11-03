@@ -1,5 +1,5 @@
 from virtool_workflow.execution.execution import execute
-from virtool_workflow import WorkflowExecution, hooks, WorkflowError
+from virtool_workflow import hooks, WorkflowError
 
 
 async def test_execute(test_workflow):
@@ -23,7 +23,7 @@ async def test_respond_errors(test_workflow):
 
     updates = []
 
-    @hooks.on_update(until=hooks.on_result)
+    @hooks.on_update(until=hooks.on_workflow_finish)
     async def receive_updates(_, update):
         updates.append(update)
 
@@ -83,12 +83,12 @@ async def test_on_update_called(test_workflow):
     calls = 0
     state_calls = 0
 
-    @hooks.on_update.callback(until=hooks.on_result)
+    @hooks.on_update
     async def _on_update():
         nonlocal calls
         calls += 1
 
-    @hooks.on_state_change.callback(until=hooks.on_result)
+    @hooks.on_state_change
     async def _on_state_change():
         nonlocal state_calls
         state_calls += 1
@@ -100,4 +100,7 @@ async def test_on_update_called(test_workflow):
 
     assert calls == 4
     assert state_calls == 4
+
+    hooks.on_update.callbacks.remove(_on_update)
+    hooks.on_state_change.callbacks.remove(_on_state_change)
 
