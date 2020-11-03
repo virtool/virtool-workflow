@@ -101,7 +101,14 @@ class WorkflowExecution:
             if update:
                 await self.send_update(update)
 
-    async def execute(self) -> Dict[str, Any]:
+    async def execute(self):
+        try:
+            return await self._execute()
+        except Exception as e:
+            await hooks.on_workflow_failure.trigger(self, e)
+            raise e
+
+    async def _execute(self) -> Dict[str, Any]:
 
         self.scope.add_instance(self.workflow, "wf", "workflow")
         self.scope.add_instance(self, "context", "execution_context", "ctx")
