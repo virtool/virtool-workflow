@@ -12,6 +12,8 @@ from virtool_workflow.execute import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow_runtime.db import VirtoolDatabase
+from virtool_workflow import hooks
+from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 
 
 def rename_trimming_results(path: Path):
@@ -121,6 +123,9 @@ async def reads_path(
 
         await copy_paths(paths_to_copy.items(), run_in_executor)
     else:
+        hooks.on_workflow_failure(delete_cache_if_not_ready, once=True)
+        hooks.on_workflow_failure(delete_analysis, once=True)
+
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
         await create_cache(fq, database, analysis_args, trimming_parameters, trimming_output_path, cache_path)
 

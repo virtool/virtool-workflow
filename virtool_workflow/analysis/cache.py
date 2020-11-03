@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 import virtool_core.caches.db
+import virtool_core.samples.db
 from virtool_workflow import fixture
 from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
@@ -105,3 +106,46 @@ async def create_cache(
     })
 
     shutil.copytree(trimming_output_path, cache_path/cache["id"])
+
+
+async def delete_cache_if_not_ready(cache_id: str, caches: Collection, cache_path: Path):
+    """
+    Delete a cache if it is not ready
+
+    :param cache_id: The database id of the cache document.
+    :param caches: The caches database collection for Virtool.
+    :param cache_path: The path to the cache entry which is to be removed.
+    """
+    cache = await caches.find_one(cache_id, ["ready"])
+
+    if not cache["ready"]:
+        await caches.delete_one({"_id": cache_id})
+
+        try:
+            shutil.rmtree(cache_path)
+        except FileNotFoundError:
+            pass
+
+
+async def delete_analysis(analysis_id: str, analysis_path: Path, sample_id: str, database: VirtoolDatabase):
+    """
+    Delete the analysis associated to `analysis_id`.
+
+    Intended to be called upon failure of an analysis workflow.
+
+    :param analysis_id: The database id of the analysis document.
+    :param analysis_path: The virtool analysis path.
+    :param analyses: The analyses database collection.
+    """
+
+    analyses = database["analyses"]
+
+    await analyses.delete_one({"_id": analysis_id})
+
+    try:
+        shutil.rmtree(analysis_path)
+    except FileNotFoundError:
+        pass
+
+    await virtool_core.samples.db.recalculate_workflow_tags(database, sample_id)
+
