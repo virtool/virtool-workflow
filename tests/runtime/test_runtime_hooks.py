@@ -49,3 +49,21 @@ async def test_on_failure_triggered():
     assert failure_called
 
 
+async def test_on_failure_not_triggered_when_successful():
+
+    @hooks.on_success
+    def success_callback(_, results):
+        results["SUCCESS"] = True
+
+    @hooks.on_failure
+    def failure_callback(_):
+        raise RuntimeError("Failure hook incorrectly triggered.")
+
+    workflow = Workflow()
+
+    result = await runtime.execute("1", workflow)
+
+    assert result["SUCCESS"]
+
+
+
