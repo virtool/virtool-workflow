@@ -1,9 +1,12 @@
 import os
 from dataclasses import dataclass
+from typing import Type
+
+from virtool_workflow import WorkflowFixture
 
 
 @dataclass(frozen=True)
-class VirtoolConfiguration:
+class VirtoolConfiguration(WorkflowFixture):
     temp_path: str
     data_path: str
     proc: int
@@ -53,3 +56,8 @@ class VirtoolConfiguration:
 
             mongo_database_name=mongo_database_name if mongo_database_name else os.getenv(cls.MONGO_DATABASE_NAME_ENV),
         )
+
+    @staticmethod
+    def __fixture__() -> WorkflowFixture:
+        return VirtoolConfiguration.from_environment()
+
