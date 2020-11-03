@@ -271,6 +271,35 @@ the virtool `data_path` and `temp_path`, the [database](#) object, and others.
 
 More details about the fixtures provided can be found in the [API docs](#)
 
+### Responding to Runtime Events
+
+The workflow runtime provides several hooks into it's lifecycle. These
+can be accessed via the [virtool_workflow.hooks](#) module. 
+
+Here is an example using the `on_result` hook, which is triggered after all 
+cleanup steps have been completed.
+
+```python
+from virtool_workflow import hooks, Workflow
+from typing import Dict, Any
+
+@hooks.on_result
+def respond_to_workflow_result(workflow: Workflow, results: Dict[str, Any]):
+    ...
+```
+
+The function `respond_to_workflow_result` will be called once the workflow result is available. The
+`on_result` hook expects two parameters, but all hooks can also accept functions without parameters.
+
+```python
+@hooks.on_result
+async def respond_to_result_but_without_parameters():
+    ...
+```
+
+The callback functions provided for a hook can be either async functions or standard 
+functions. Any standard function provided will be wrapped into an async function.
+
 ## Contributing
 
 ### Tests

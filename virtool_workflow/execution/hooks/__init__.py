@@ -3,6 +3,7 @@ from typing import Dict, Any
 from .hooks import Hook
 from virtool_workflow.workflow import Workflow
 from virtool_workflow.execution.workflow_executor import WorkflowError, State, WorkflowExecution
+from virtool_workflow_runtime.hooks import on_failure, on_success, on_finish, on_load_fixtures
 
 
 on_result = Hook("on_result", [Workflow, Dict[str, Any]], None)
