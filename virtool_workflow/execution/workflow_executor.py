@@ -1,3 +1,4 @@
+"""Execute workflows and manage the execution context."""
 import sys
 import traceback
 from enum import Enum
@@ -44,8 +45,13 @@ State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 
 
 class WorkflowExecution:
+    """An awaitable object providing access to the results of a workflow."""
 
     def __init__(self, workflow: Workflow, scope: WorkflowFixtureScope):
+        """
+        :param workflow: The Workflow to be executed
+        :param scope: The WorkflowFixtureScope used to bind fixtures to the workflow.
+        """
         self.workflow = workflow
         self.scope = scope
         self._updates = []
@@ -58,7 +64,7 @@ class WorkflowExecution:
         """
         Send an update.
 
-        All functions registered by :func:`on_update` will be called.
+        Triggers the :obj:`virtool_workflow.hooks.on_update` hook.
 
         :param update: A string update to send.
         """
@@ -70,6 +76,13 @@ class WorkflowExecution:
         return self._state
 
     async def _set_state(self, new_state: State):
+        """
+        Change the current state of execution.
+
+        Triggers the :obj:`virtool_workflow.hooks.on_state_change` hook.
+
+        :param new_state: The new state that should be applied.
+        """
         await hooks.on_state_change.trigger(self._state, new_state)
         self._state = new_state
         return new_state
@@ -101,7 +114,8 @@ class WorkflowExecution:
             if update:
                 await self.send_update(update)
 
-    async def execute(self):
+    async def execute(self) -> Dict[str, Any]:
+        """Execute the workflow and return the result."""
         try:
             return await self._execute()
         except Exception as e:
@@ -128,7 +142,7 @@ class WorkflowExecution:
 
         await hooks.on_result.trigger(self.workflow, result)
 
-        return self.scope["result"]
+        return result
 
     def __await__(self):
         return self.execute().__await__()
