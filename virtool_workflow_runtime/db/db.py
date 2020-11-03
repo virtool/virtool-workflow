@@ -56,9 +56,6 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
         :param job_id: Id of the job in the Virtool database
         :param context: The :class:`WorkflowExecutor` instance
         """
-        print(context.current_step)
-        print(context.workflow.steps)
-        print(update)
         await self["jobs"].update_one({"_id": job_id}, {
             "$set": {
                 "state": str(context.state)

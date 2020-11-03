@@ -1,11 +1,11 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
 from typing import Dict, Any
 
-from virtool_workflow.execution import hooks
+from virtool_workflow.execution.hooks import on_update, on_workflow_finish
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
-from . import runtime_hooks
+from . import hooks
 from ._redis import job_id_queue
 from .db import VirtoolDatabase
 
@@ -22,12 +22,16 @@ async def execute(job_id: str, workflow: Workflow) -> Dict[str, Any]:
     with WorkflowFixtureScope() as fixtures:
         executor = WorkflowExecution(workflow, fixtures)
         try:
-            return await _execute(job_id, workflow, fixtures, executor)
+            result = await _execute(job_id, workflow, fixtures, executor)
+
+            await hooks.on_success.trigger(workflow, result)
+
+            return result
         except Exception as e:
             if isinstance(e, WorkflowError):
-                await runtime_hooks.on_failure.trigger(e)
+                await hooks.on_failure.trigger(e)
             else:
-                await runtime_hooks.on_failure.trigger(WorkflowError(cause=e, context=executor, workflow=workflow))
+                await hooks.on_failure.trigger(WorkflowError(cause=e, context=executor, workflow=workflow))
 
             raise e
 
@@ -37,7 +41,7 @@ async def _execute(job_id: str,
                    fixtures: WorkflowFixtureScope,
                    executor: WorkflowExecution) -> Dict[str, Any]:
 
-    await runtime_hooks.on_load_fixtures.trigger(fixtures)
+    await hooks.on_load_fixtures.trigger(fixtures)
 
     database: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
 
@@ -45,7 +49,7 @@ async def _execute(job_id: str,
 
     executor = WorkflowExecution(workflow, fixtures)
 
-    @hooks.on_update(until=hooks.on_result)
+    @on_update(until=on_workflow_finish)
     async def send_database_updates(_, update: str):
         await database.send_update(job_id, executor, update)
 

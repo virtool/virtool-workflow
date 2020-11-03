@@ -96,13 +96,19 @@ class Hook:
 
         self.callbacks = []
 
-    def callback(self, callback_: Callable = None, until=None):
+    def callback(self, callback_: Callable = None, until=None, once=False):
+        if once:
+            until = self
         if callback_ and not until:
-            return self._callback(callback_)
-        if callback_ and until:
-            return self._callback_until(until)(callback_)
-        if until:
-            return self._callback_until(until)
+            cb = self._callback(callback_)
+        elif callback_ and until:
+            cb = self._callback_until(until)(callback_)
+        elif until:
+            cb = self._callback_until(until)
+        else:
+            cb = self._callback
+
+        return cb
 
     __call__ = callback
 
