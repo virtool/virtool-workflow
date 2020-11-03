@@ -12,3 +12,18 @@ from virtool_workflow.workflow import Workflow
 __fixtures__ = [
     "virtool_workflow.storage.paths"
 ]
+
+__all__ = [
+    "hooks",
+    "hook",
+    "Hook",
+    "WorkflowExecution",
+    "WorkflowError",
+    "State",
+    "WorkflowFixtureScope",
+    "WorkflowFixtureNotAvailable",
+    "WorkflowFixtureMultipleYield",
+    "WorkflowFixture",
+    "fixture",
+    "Workflow"
+]
