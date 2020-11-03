@@ -1,3 +1,4 @@
+"""Create hooks for triggering and responding to events."""
 import inspect
 from typing import List, Any, Callable, Type
 
@@ -97,6 +98,19 @@ class Hook:
         self.callbacks = []
 
     def callback(self, callback_: Callable = None, until=None, once=False):
+        """
+        Register a callback function for this hook.
+
+        Functions provided here will be called once the :func:`.trigger` is called.
+
+        :param callback_: The callback function to register.
+
+        :param until: Another :obj:`Hook` which signals that the registered callback
+            function should no longer be called by this hook. When the `until` hook is
+            triggered, the callback function `_callback` will be removed from the set of callbacks.
+
+        :param once: Only execute the callback the next time this Hook is triggered.
+        """
         if once:
             until = self
         if callback_ and not until:
