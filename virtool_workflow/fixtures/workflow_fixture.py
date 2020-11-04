@@ -36,8 +36,8 @@ class WorkflowFixture(ABC):
     def __fixture__(*args, **kwargs) -> Type["WorkflowFixture"]:
         """A function producing an instance to be used as a workflow fixture."""
 
-    def __call__(self):
-        return self.__fixture__()
+    def __call__(self, *args, **kwargs):
+        return self.__class__.__fixture__(*args, **kwargs)
 
     @staticmethod
     def types():

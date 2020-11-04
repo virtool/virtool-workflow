@@ -7,13 +7,11 @@ from contextlib import asynccontextmanager
 import aioredis
 
 VIRTOOL_JOBS_CHANNEL = "channel:dispatch"
-
-VIRTOOL_REDIS_ADDRESS_ENV = "VIRTOOL_REDIS_ADDRESS"
-VIRTOOL_REDIS_ADDRESS_DEFAULT = "redis://localhost:6379/1"
+VIRTOOL_JOBS_CANCEL_CHANNEL = "channel:cancel"
 
 
 @asynccontextmanager
-async def connect(address: Optional[str] = None) -> aioredis.Redis:
+async def connect(address: Optional[str]) -> aioredis.Redis:
     """
     Context manager for a Redis connection
 
@@ -21,9 +19,6 @@ async def connect(address: Optional[str] = None) -> aioredis.Redis:
             the VIRTOOL_REDIS_ADDRESS environment variable is used.
     :return Iterator[aioredis.Redis]: A connection to Redis
     """
-    if not address:
-        address = getenv(VIRTOOL_REDIS_ADDRESS_ENV, default=VIRTOOL_REDIS_ADDRESS_DEFAULT)
-
     redis_ = await aioredis.create_redis_pool(address, loop=asyncio.get_event_loop())
 
     yield redis_
@@ -32,8 +27,8 @@ async def connect(address: Optional[str] = None) -> aioredis.Redis:
     await redis_.wait_closed()
 
 
-async def job_id_queue(redis_connection: Optional[str] = None,
-                       channel: Optional[str] = VIRTOOL_JOBS_CHANNEL):
+async def job_id_queue(redis_connection: str,
+                       channel: str = VIRTOOL_JOBS_CHANNEL):
     """
     Exposes the redis jobs channel for Virtool Jobs as an async generator
 

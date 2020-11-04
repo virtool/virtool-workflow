@@ -6,6 +6,7 @@ from virtool_workflow import Workflow, WorkflowExecutionContext
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from ._redis import job_id_queue
 from .db import VirtoolDatabase
+from virtool_workflow_runtime.config.fixtures import redis_connection_string
 
 
 async def execute(job_id: str, workflow: Workflow,
@@ -40,5 +41,5 @@ async def execute(job_id: str, workflow: Workflow,
 
 async def execute_from_redis(workflow: Workflow):
     """Execute jobs from the Redis jobs list."""
-    async for job_id in job_id_queue():
+    async for job_id in job_id_queue(redis_connection_string()):
         yield await execute(job_id, workflow)
