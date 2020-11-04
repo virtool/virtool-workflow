@@ -1,55 +1,59 @@
 """Fixtures for getting runtime configuration details."""
+import os
+from typing import Optional, Iterable
 from virtool_workflow import fixture
 from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
 
-
-@fixture
-def temp_path_str(config: VirtoolConfiguration) -> str:
-    return config.temp_path
-
-
-@fixture
-def data_path_str(config: VirtoolConfiguration) -> str:
-    return config.data_path
-
-
-@fixture(alt_names=["number_of_processes", "process_limit"])
-def proc(config: VirtoolConfiguration) -> int:
-    """The number of allowable processes for the currently executed workflow/job."""
-    return config.proc
+TEMP_PATH_ENV = "VT_TEMP_PATH"
+DATA_PATH_ENV = "VT_DATA_PATH"
+PROC_ENV = "VT_PROC"
+MEM_ENV = "VT_MEM"
+REDIS_CONNECTION_STRING_ENV = "VT_REDIS_CONNECTION_STRING"
+NO_SENTRY_ENV = "VT_NO_SENTRY"
+DEVELOPMENT_MODE_ENV = "VT_DEV"
+MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
+MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 
 
-@fixture(alt_names=["memory_limit", "RAM_limit"])
-def mem(config: VirtoolConfiguration) -> int:
-    return config.mem
+def environment_variable_fixture(
+        name: str,
+        variable: str,
+        default: Optional[str] = None,
+        alt_names: Iterable[str] = ()
+):
+
+    def _fixture():
+        var = os.getenv(variable, default=default)
+        if not var:
+            raise KeyError(f"{variable} is not set.")
+
+        return var
+
+    return fixture(_fixture, name=name, alt_names=alt_names)
 
 
-@fixture(alt_names=["redis_url"])
-def redis_connection_string(config: VirtoolConfiguration) -> str:
-    return config.redis_connection_string
+temp_path_str = environment_variable_fixture("temp_path_str", TEMP_PATH_ENV)
+data_path_str = environment_variable_fixture("data_path_str", DATA_PATH_ENV)
 
+proc = environment_variable_fixture("proc", PROC_ENV,
+                                    alt_names=("number_of_processes", "process_limit"))
 
-@fixture(alt_names=["sentry_enabled", "use_sentry"])
-def no_sentry(config: VirtoolConfiguration) -> bool:
-    return config.use_sentry
+mem = environment_variable_fixture("mem", MEM_ENV,
+                                   alt_names=("memory_limit", "RAM_limit"))
 
+redis_connection_string = environment_variable_fixture(
+    "redis_connection_str",
+    REDIS_CONNECTION_STRING_ENV,
+    alt_names=("redis_url",)
+)
 
-@fixture(alt_names=["DEV", "dev_mode"])
-def development_mode(config: VirtoolConfiguration) -> bool:
-    return config.development_mode
-
-
-@fixture(alt_names=["db_name", "mongo_db_name", "database_name"])
-def mongo_database_name(config: VirtoolConfiguration) -> str:
-    return config.mongo_database_name
-
-
-@fixture(alt_names=["db_conn_string", "mongo_conn_string",
-                    "db_conn_str", "mongo_conn_str",
-                    "mongo_connection_string"])
-def db_connection_string(config: VirtoolConfiguration) -> str:
-    return config.mongo_connection_string
-
+no_sentry = environment_variable_fixture("no_sentry", NO_SENTRY_ENV)
+dev_mode = environment_variable_fixture("dev_mode", DEVELOPMENT_MODE_ENV)
+db_name = environment_variable_fixture("db_name", MONGO_DATABASE_NAME_ENV)
+db_connection_string = environment_variable_fixture(
+    "db_connection_string",
+    MONGO_DATABASE_CONNECTION_STRING_ENV,
+    alt_names=("db_conn_string", "db_conn_url", "db_connection_url")
 
 
 

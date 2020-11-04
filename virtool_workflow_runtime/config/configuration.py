@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 from virtool_workflow import WorkflowFixture
 
@@ -59,4 +60,5 @@ class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuratio
     @staticmethod
     def __fixture__() -> WorkflowFixture:
         return VirtoolConfiguration.from_environment()
+
 
