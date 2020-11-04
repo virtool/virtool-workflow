@@ -1,6 +1,6 @@
 """Fixtures for getting runtime configuration details."""
 import os
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Type, Union
 from virtool_workflow import fixture, WorkflowFixture
 
 TEMP_PATH_ENV = "VT_TEMP_PATH"
@@ -18,13 +18,23 @@ def environment_variable_fixture(
         name: str,
         variable: str,
         default: Optional[str] = None,
-        alt_names: Iterable[str] = ()
+        alt_names: Iterable[str] = (),
+        type: Type[int, str, bool] = str,
 ) -> WorkflowFixture:
 
-    def _fixture() -> str:
+    def _fixture() -> Union[int, str, bool]:
         var = os.getenv(variable, default=default)
         if not var:
             raise KeyError(f"{variable} is not set.")
+
+        if type == bool:
+            if var in ("True", "true", "Yes", "yes"):
+                return True
+            else:
+                return False
+
+        if type == int:
+            return int(var)
 
         return var
 
@@ -53,6 +63,7 @@ db_connection_string = environment_variable_fixture(
     "db_connection_string",
     MONGO_DATABASE_CONNECTION_STRING_ENV,
     alt_names=("db_conn_string", "db_conn_url", "db_connection_url")
+)
 
 
 
