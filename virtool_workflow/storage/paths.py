@@ -27,19 +27,18 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
 
 
 @fixture
-def data_path():
+def data_path(data_path_str: str):
     """Fetch the virtool data path."""
-    # TODO: Get path from settings
-    _data_path = Path("virtool")
+    _data_path = Path(data_path_str)
     if not _data_path.exists():
         _data_path.mkdir()
     return _data_path
 
 
 @fixture
-def temp_path():
+def temp_path(temp_path_str: str):
     """The virtool temp path."""
-    with context_directory("temp") as temp:
+    with context_directory(temp_path_str) as temp:
         yield temp
 
 
