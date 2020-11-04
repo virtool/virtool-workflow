@@ -52,7 +52,7 @@ class WorkflowFixtureScope(AbstractContextManager):
                 raise WorkflowFixtureMultipleYield("Fixture must only yield once")
         self._generators = []
 
-    async def instantiate(self, fixture_: Type[WorkflowFixture]) -> Any:
+    async def instantiate(self, fixture_: WorkflowFixture) -> Any:
         """
         Create an instance of a fixture.
 
