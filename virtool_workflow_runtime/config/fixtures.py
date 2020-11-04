@@ -14,31 +14,38 @@ MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 
 
+ENV_VARIABLE_TYPE = Union[str, int, bool]
+
+
 def environment_variable_fixture(
         name: str,
         variable: str,
-        default: Optional[str] = None,
+        default: Optional[ENV_VARIABLE_TYPE] = None,
         alt_names: Iterable[str] = (),
-        type: Type[int, str, bool] = str,
+        type_: Type[ENV_VARIABLE_TYPE] = str,
 ) -> WorkflowFixture:
 
     def _fixture() -> Union[int, str, bool]:
         var = os.getenv(variable, default=default)
         if not var:
-            raise KeyError(f"{variable} is not set.")
+            if default is None:
+                raise KeyError(f"{variable} is not set.")
+            return default
 
-        if type == bool:
+        if type_ == bool:
             if var in ("True", "true", "Yes", "yes"):
                 return True
             else:
                 return False
 
-        if type == int:
+        if type_ == int:
             return int(var)
 
         return var
 
-    return fixture(_fixture, name=name, alt_names=alt_names)
+    _fixture.__name__ = _fixture.__qualname__ = name
+
+    return fixture(_fixture, alt_names=alt_names)
 
 
 temp_path_str = environment_variable_fixture("temp_path_str", TEMP_PATH_ENV)
