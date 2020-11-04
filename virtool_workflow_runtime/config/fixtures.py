@@ -1,8 +1,7 @@
 """Fixtures for getting runtime configuration details."""
 import os
 from typing import Optional, Iterable
-from virtool_workflow import fixture
-from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
+from virtool_workflow import fixture, WorkflowFixture
 
 TEMP_PATH_ENV = "VT_TEMP_PATH"
 DATA_PATH_ENV = "VT_DATA_PATH"
@@ -20,9 +19,9 @@ def environment_variable_fixture(
         variable: str,
         default: Optional[str] = None,
         alt_names: Iterable[str] = ()
-):
+) -> WorkflowFixture:
 
-    def _fixture():
+    def _fixture() -> str:
         var = os.getenv(variable, default=default)
         if not var:
             raise KeyError(f"{variable} is not set.")
