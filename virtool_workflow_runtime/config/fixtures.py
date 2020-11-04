@@ -48,28 +48,32 @@ def environment_variable_fixture(
     return fixture(_fixture, alt_names=alt_names)
 
 
-temp_path_str = environment_variable_fixture("temp_path_str", TEMP_PATH_ENV)
-data_path_str = environment_variable_fixture("data_path_str", DATA_PATH_ENV)
+temp_path_str = environment_variable_fixture("temp_path_str", TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
+data_path_str = environment_variable_fixture("data_path_str", DATA_PATH_ENV, default=f"{os.getcwd()}/virtool")
 
 proc = environment_variable_fixture("proc", PROC_ENV,
-                                    alt_names=("number_of_processes", "process_limit"))
+                                    alt_names=("number_of_processes", "process_limit"),
+                                    default=2)
 
 mem = environment_variable_fixture("mem", MEM_ENV,
-                                   alt_names=("memory_limit", "RAM_limit"))
+                                   alt_names=("memory_limit", "RAM_limit"),
+                                   default=8)
 
 redis_connection_string = environment_variable_fixture(
     "redis_connection_str",
     REDIS_CONNECTION_STRING_ENV,
-    alt_names=("redis_url",)
+    alt_names=("redis_url",),
+    default="redis://localhost:6397"
 )
 
-no_sentry = environment_variable_fixture("no_sentry", NO_SENTRY_ENV)
-dev_mode = environment_variable_fixture("dev_mode", DEVELOPMENT_MODE_ENV)
-db_name = environment_variable_fixture("db_name", MONGO_DATABASE_NAME_ENV)
+no_sentry = environment_variable_fixture("no_sentry", NO_SENTRY_ENV, default=True)
+dev_mode = environment_variable_fixture("dev_mode", DEVELOPMENT_MODE_ENV, default=False)
+db_name = environment_variable_fixture("db_name", MONGO_DATABASE_NAME_ENV, default="virtool")
 db_connection_string = environment_variable_fixture(
     "db_connection_string",
     MONGO_DATABASE_CONNECTION_STRING_ENV,
-    alt_names=("db_conn_string", "db_conn_url", "db_connection_url")
+    alt_names=("db_conn_string", "db_conn_url", "db_connection_url"),
+    default="mongodb://localhost:27017",
 )
 
 
