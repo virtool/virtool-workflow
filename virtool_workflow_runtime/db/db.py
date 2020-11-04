@@ -1,6 +1,5 @@
 """Functions for accessing the Virtool database."""
 import asyncio
-from os import getenv
 from typing import Optional, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,10 +8,6 @@ from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
 from virtool_workflow import WorkflowFixture, Workflow, WorkflowExecutionContext
-
-DATABASE_CONNECTION_URL_ENV = "DATABASE_CONNECTION_URL"
-DATABASE_CONNECTION_URL_DEFAULT = "mongodb://localhost:27017"
-DEFAULT_DATABASE_NAME = "virtool"
 
 
 class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
@@ -29,8 +24,8 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
     """
 
     def __init__(self,
-                 db_name: Optional[str] = DEFAULT_DATABASE_NAME,
-                 db_conn_url: Optional[str] = None):
+                 db_name: Optional[str],
+                 db_conn_url: Optional[str]):
         """
         :param db_name: The name of the MongoDB database. 'virtool' will
             be used if None is provided.
@@ -38,10 +33,6 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
             the value of the 'DATABASE_CONNECTION_URL` environment variable
             is used. If the variable is not set then 'mongodb://localhost:27017' is used.
         """
-        if not db_conn_url:
-            db_conn_url = getenv(DATABASE_CONNECTION_URL_ENV,
-                                 default=DATABASE_CONNECTION_URL_DEFAULT)
-
         self._client = AsyncIOMotorClient(db_conn_url, io_loop=asyncio.get_event_loop())[db_name]
         self._db = DB(self._client, None)
 
@@ -49,9 +40,9 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
             setattr(self, binding.collection_name, getattr(self._db, binding.collection_name))
 
     @staticmethod
-    def __fixture__() -> Any:
+    def __fixture__(db_name: str, db_conn_url: str) -> Any:
         """Return an instance of :class:`VirtoolDatabase` to be used as a workflow fixture."""
-        return VirtoolDatabase()
+        return VirtoolDatabase(db_name, db_conn_url)
 
     def __getitem__(self, item) -> Collection:
         """Get a particular database collection."""
