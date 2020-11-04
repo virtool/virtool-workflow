@@ -1,19 +1,20 @@
 import asyncio
 from virtool_workflow_runtime._redis import connect, VIRTOOL_JOBS_CHANNEL, job_id_queue
 from virtool_workflow_runtime.runtime import execute_from_redis
+from virtool_workflow_runtime.config.fixtures import redis_connection_string
 
 JOB_IDs = [str(n) for n in range(3)]
 
 
 async def assert_correct_job_ids():
-    queue = job_id_queue()
+    queue = job_id_queue(redis_connection_string())
     for id_ in JOB_IDs:
         _id = await queue.__anext__()
         assert _id == id_
 
 
 async def publish_job_ids():
-    async with connect() as redis:
+    async with connect(redis_connection_string()) as redis:
         for id_ in JOB_IDs:
             await redis.publish(VIRTOOL_JOBS_CHANNEL, id_)
 

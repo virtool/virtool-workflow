@@ -1,7 +1,7 @@
 from contextlib import AbstractContextManager
 from functools import wraps
 from inspect import isgeneratorfunction, iscoroutinefunction, signature
-from typing import Optional, Dict, Any, Type, Callable, Iterator
+from typing import Optional, Dict, Any, Type, Callable, Iterator, Union
 
 from virtool_workflow import WorkflowFixture, Workflow
 from virtool_workflow.fixtures.errors import WorkflowFixtureMultipleYield, WorkflowFixtureNotAvailable
@@ -52,7 +52,7 @@ class WorkflowFixtureScope(AbstractContextManager):
                 raise WorkflowFixtureMultipleYield("Fixture must only yield once")
         self._generators = []
 
-    async def instantiate(self, fixture_: WorkflowFixture) -> Any:
+    async def instantiate(self, fixture_: Union[WorkflowFixture, Type[WorkflowFixture]]) -> Any:
         """
         Create an instance of a fixture.
 

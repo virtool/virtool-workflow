@@ -63,7 +63,7 @@ redis_connection_string = environment_variable_fixture(
     "redis_connection_str",
     REDIS_CONNECTION_STRING_ENV,
     alt_names=("redis_url",),
-    default="redis://localhost:6397"
+    default="redis://localhost:6379"
 )
 
 no_sentry = environment_variable_fixture("no_sentry", NO_SENTRY_ENV, default=True)
