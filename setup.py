@@ -33,7 +33,7 @@ SETUP_REQUIRES = [
 
 ENTRY_POINTS = {
     "console_scripts": [
-        "workflow = virtool_workflow_runtime:cli_main",
+        "workflow = virtool_workflow_runtime.cli:cli_main",
     ]
 }
 
