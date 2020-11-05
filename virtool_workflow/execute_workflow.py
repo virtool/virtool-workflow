@@ -6,6 +6,7 @@ from typing import Awaitable, Callable, Optional, Dict, Any
 from .context import WorkflowExecutionContext, UpdateListener, State
 from .workflow import Workflow, WorkflowStep
 from .fixtures.scope import WorkflowFixtureScope
+from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
 
 
 class WorkflowError(Exception):
@@ -84,7 +85,8 @@ async def execute(
         scope: WorkflowFixtureScope = None,
         on_update: Optional[UpdateListener] = None,
         on_state_change: Optional[UpdateListener] = None,
-        on_error: Optional[WorkflowErrorHandler] = None
+        on_error: Optional[WorkflowErrorHandler] = None,
+        config: VirtoolConfiguration = None
 ) -> Dict[str, Any]:
     """
     Execute a Workflow.
@@ -96,6 +98,8 @@ async def execute(
         the workflow provides an update
     :param on_state_change: An async function which is called when the WorkflowState changes
     :param on_error: An async function which is called upon any exception
+    :param config: An optional custom VirtoolConfiguration.
+
     :raises WorkflowError: If any Exception occurs during execution it is caught and wrapped in
         a WorkflowError. The initial Exception is available by the `cause` attribute.
     """
@@ -108,6 +112,9 @@ async def execute(
 
     scope = scope if scope else WorkflowFixtureScope()
     with scope as execution_scope:
+
+        if config:
+            execution_scope.add_instance(config, *config.param_names)
 
         execution_scope.add_instance(_wf, "wf", "workflow")
         execution_scope.add_instance(_context, "context", "execution_context", "ctx")
