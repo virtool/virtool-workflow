@@ -1,6 +1,5 @@
 """Collect new Virtool Jobs from a redis list."""
 import asyncio
-from os import getenv
 from typing import Optional
 from contextlib import asynccontextmanager
 
