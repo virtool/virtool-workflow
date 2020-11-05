@@ -1,6 +1,10 @@
 from dataclasses import dataclass
-from virtool_workflow_runtime.config.environment import *
+
+from virtool_workflow import WorkflowFixture
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow_runtime.config.environment import \
+    temp_path_str, data_path_str, proc, mem, redis_connection_string, no_sentry, \
+    dev_mode, db_name, db_connection_string
 
 
 @dataclass(frozen=True)
