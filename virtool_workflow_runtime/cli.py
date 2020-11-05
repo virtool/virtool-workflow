@@ -6,11 +6,10 @@ import click
 import uvloop
 
 from virtool_workflow.execute_workflow import execute
+from virtool_workflow_runtime.config import fixtures
+from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
 from . import discovery
 from . import runtime
-
-from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
-from virtool_workflow_runtime.config import fixtures
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
