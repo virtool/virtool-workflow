@@ -17,8 +17,8 @@ class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuratio
     redis_connection_string: str
     no_sentry: bool
     development_mode: bool
-    mongo_database_name: str
-    mongo_connection_string: str
+    db_name: str
+    db_connection_string: str
 
     @staticmethod
     def __fixture__(
@@ -40,8 +40,8 @@ class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuratio
             redis_connection_string=redis_connection_string,
             no_sentry=no_sentry,
             development_mode=dev_mode,
-            mongo_database_name=db_name,
-            mongo_connection_string=db_connection_string
+            db_name=db_name,
+            db_connection_string=db_connection_string
         )
 
 
@@ -53,8 +53,8 @@ def set_config_fixtures(config: VirtoolConfiguration, scope: WorkflowFixtureScop
     scope.add_instance(config.proc, *proc.param_names)
     scope.add_instance(config.no_sentry, *no_sentry.param_names)
     scope.add_instance(config.development_mode, *dev_mode.param_names)
-    scope.add_instance(config.mongo_database_name, *db_name.param_names)
-    scope.add_instance(config.mongo_connection_string, *db_connection_string.param_names)
+    scope.add_instance(config.db_name, *db_name.param_names)
+    scope.add_instance(config.db_connection_string, *db_connection_string.param_names)
     scope.add_instance(config.redis_connection_string, *redis_connection_string.param_names)
     scope.add_instance(config, *config.param_names)
 
