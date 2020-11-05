@@ -6,7 +6,7 @@ from virtool_workflow import Workflow, WorkflowExecutionContext
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from ._redis import job_id_queue
 from .db import VirtoolDatabase
-from virtool_workflow_runtime.config.fixtures import redis_connection_string
+from virtool_workflow_runtime.config.environment import redis_connection_string
 from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
 
 
@@ -20,6 +20,8 @@ async def execute(job_id: str, workflow: Workflow,
     :param workflow: The workflow to be executed
     :param context: The initialized WorkflowExecutionContext. If none
         is provided a new :class:`WorkflowExecutionContext` will be created.
+    :param config: The VirtoolConfiguration to use. If none is provided then
+        the configuration will be taken from environment variables.
     :return: A dictionary containing the results from the workflow (the results fixture).
     """
     if not context:

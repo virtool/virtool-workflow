@@ -64,7 +64,7 @@ mem = environment_variable_fixture("mem",
 redis_connection_string = environment_variable_fixture(
     "redis_connection_str",
     REDIS_CONNECTION_STRING_ENV,
-    alt_names=("redis_url",),
+    alt_names=("redis_url", "redis_connection_string"),
     default="redis://localhost:6379"
 )
 
