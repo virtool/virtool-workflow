@@ -4,5 +4,5 @@ __fixtures__ = [
     "virtool_workflow.execute",
     "virtool_workflow_runtime.db.db",
     "virtool_workflow_runtime.db.fixtures",
-    "virtool_workflow_runtime.config.fixtures",
+    "virtool_workflow_runtime.config.environment",
 ]
