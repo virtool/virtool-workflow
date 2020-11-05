@@ -9,7 +9,7 @@ class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuratio
     proc: int
     mem: int
     redis_connection_string: str
-    use_sentry: bool
+    no_sentry: bool
     development_mode: bool
     mongo_database_name: str
     mongo_connection_string: str

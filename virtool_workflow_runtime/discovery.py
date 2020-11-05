@@ -52,7 +52,9 @@ def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
     """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
 
-    __fixtures__ = getattr(module, "__fixtures__")
+    __fixtures__ = getattr(module, "__fixtures__", None)
+    if not __fixtures__:
+        return []
 
     fixtures = []
     for fixture_set in __fixtures__:

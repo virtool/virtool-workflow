@@ -51,11 +51,13 @@ def environment_variable_fixture(
 temp_path_str = environment_variable_fixture("temp_path_str", TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
 data_path_str = environment_variable_fixture("data_path_str", DATA_PATH_ENV, default=f"{os.getcwd()}/virtool")
 
-proc = environment_variable_fixture("proc", PROC_ENV,
+proc = environment_variable_fixture("proc",
+                                    PROC_ENV,
                                     alt_names=("number_of_processes", "process_limit"),
                                     default=2)
 
-mem = environment_variable_fixture("mem", MEM_ENV,
+mem = environment_variable_fixture("mem",
+                                   MEM_ENV,
                                    alt_names=("memory_limit", "RAM_limit"),
                                    default=8)
 

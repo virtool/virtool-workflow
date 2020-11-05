@@ -7,10 +7,12 @@ from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from ._redis import job_id_queue
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.fixtures import redis_connection_string
+from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
 
 
 async def execute(job_id: str, workflow: Workflow,
-                  context: WorkflowExecutionContext = None) -> Dict[str, Any]:
+                  context: WorkflowExecutionContext = None,
+                  config: VirtoolConfiguration = None) -> Dict[str, Any]:
     """
     Execute a workflow as a Virtool Job.
 
@@ -32,6 +34,9 @@ async def execute(job_id: str, workflow: Workflow,
 
     scope["job_id"] = job_id
     scope["job_document"] = job_document
+
+    if config:
+        scope.add_instance(config, *config.param_names)
 
     return await virtool_workflow.execute_workflow.execute(
         _wf=workflow,
