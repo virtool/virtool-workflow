@@ -6,7 +6,7 @@ import click
 import uvloop
 
 from virtool_workflow.execute_workflow import execute
-from virtool_workflow_runtime.config import fixtures
+from virtool_workflow_runtime.config import environment
 from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
 from . import discovery
 from . import runtime
@@ -20,21 +20,31 @@ def cli():
     uvloop.install()
 
 
-def create_config(**kwargs):
+def create_config(**kwargs) -> VirtoolConfiguration:
+    """
+    Create a VirtoolConfiguration.
+
+    Uses the provided keyword arguments if available. If an argument is
+    not provided for a particular field then the value of it's associated
+    environment variable is used.
+
+    :param kwargs: The configuration arguments from the CLI.
+    """
     return VirtoolConfiguration(
-        data_path=kwargs["data_path"] or fixtures.data_path_str(),
-        temp_path=kwargs["temp_path"] or fixtures.temp_path_str(),
-        proc=kwargs["proc"] or fixtures.proc(),
-        mem=kwargs["mem"] or fixtures.mem(),
-        redis_connection_string=kwargs["redis_connection_string"] or fixtures.redis_connection_string(),
-        no_sentry=kwargs["no_sentry"] if kwargs["no_sentry"] is not None else fixtures.no_sentry(),
-        development_mode=kwargs["dev"] if kwargs["dev"] is not None else fixtures.dev_mode(),
-        mongo_database_name=kwargs["db_name"] or fixtures.db_name(),
-        mongo_connection_string=kwargs["db_connection_string"] or fixtures.db_connection_string(),
+        data_path=kwargs["data_path"] or environment.data_path_str(),
+        temp_path=kwargs["temp_path"] or environment.temp_path_str(),
+        proc=kwargs["proc"] or environment.proc(),
+        mem=kwargs["mem"] or environment.mem(),
+        redis_connection_string=kwargs["redis_connection_string"] or environment.redis_connection_string(),
+        no_sentry=kwargs["no_sentry"] if kwargs["no_sentry"] is not None else environment.no_sentry(),
+        development_mode=kwargs["dev"] if kwargs["dev"] is not None else environment.dev_mode(),
+        mongo_database_name=kwargs["db_name"] or environment.db_name(),
+        mongo_connection_string=kwargs["db_connection_string"] or environment.db_connection_string(),
     )
 
 
 def apply_config_options(func):
+    """Apply all configuration related options to a click command."""
 
     func = click.option("--temp-path", type=click.Path())(func)
     func = click.option("--proc", type=int)(func)
@@ -65,7 +75,7 @@ def workflow_file_option(func):
 @cli.command()
 def run(f: str, job_id: str, **kwargs):
     """Run a workflow and send updates to Virtool."""
-    workflow, _ = discovery.run_discovery(Path(f), Path(f).parent / "fixtures.py")
+    workflow, _ = discovery.run_discovery(Path(f), Path(f).parent / "environment.py")
     config = create_config(**kwargs)
     asyncio.run(runtime.execute(job_id, workflow, config=config))
 

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from virtool_workflow_runtime.config.fixtures import *
+from virtool_workflow_runtime.config.environment import *
 
 
 @dataclass(frozen=True)
 class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuration"]):
+    """Dataclass containing all configuration options."""
     temp_path: str
     data_path: str
     proc: int
@@ -32,7 +33,7 @@ class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuratio
             proc=proc,
             mem=mem,
             redis_connection_string=redis_connection_string,
-            use_sentry=no_sentry,
+            no_sentry=no_sentry,
             development_mode=dev_mode,
             mongo_database_name=db_name,
             mongo_connection_string=db_connection_string
