@@ -54,4 +54,4 @@ async def test_use_config():
         assert id(fixtures["no_sentry"]) == id(config.no_sentry)
         assert config.no_sentry == environment.no_sentry()
         assert config.mem == environment.mem()
-        assert config.mongo_connection_string == environment.db_connection_string()
+        assert config.db_connection_string == environment.db_connection_string()
