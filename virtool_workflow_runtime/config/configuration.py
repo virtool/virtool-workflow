@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from virtool_workflow_runtime.config.environment import *
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 
 
 @dataclass(frozen=True)
@@ -38,5 +39,19 @@ class VirtoolConfiguration(WorkflowFixture, param_names=["config", "configuratio
             mongo_database_name=db_name,
             mongo_connection_string=db_connection_string
         )
+
+
+def set_config_fixtures(config: VirtoolConfiguration, scope: WorkflowFixtureScope):
+    """Set the values of all config related fixtures based on the values in a VirtoolConfiguration."""
+    scope.add_instance(config.data_path, *data_path_str.param_names)
+    scope.add_instance(config.temp_path, *temp_path_str.param_names)
+    scope.add_instance(config.mem, *mem.param_names)
+    scope.add_instance(config.proc, *proc.param_names)
+    scope.add_instance(config.no_sentry, *no_sentry.param_names)
+    scope.add_instance(config.development_mode, *dev_mode.param_names)
+    scope.add_instance(config.mongo_database_name, *db_name.param_names)
+    scope.add_instance(config.mongo_connection_string, *db_connection_string.param_names)
+    scope.add_instance(config.redis_connection_string, *redis_connection_string.param_names)
+    scope.add_instance(config, *config.param_names)
 
 
