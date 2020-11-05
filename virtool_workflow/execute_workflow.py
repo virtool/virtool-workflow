@@ -6,7 +6,7 @@ from typing import Awaitable, Callable, Optional, Dict, Any
 from .context import WorkflowExecutionContext, UpdateListener, State
 from .workflow import Workflow, WorkflowStep
 from .fixtures.scope import WorkflowFixtureScope
-from virtool_workflow_runtime.config.configuration import VirtoolConfiguration
+from virtool_workflow_runtime.config.configuration import VirtoolConfiguration, set_config_fixtures
 
 
 class WorkflowError(Exception):
@@ -114,7 +114,7 @@ async def execute(
     with scope as execution_scope:
 
         if config:
-            execution_scope.add_instance(config, *config.param_names)
+            set_config_fixtures(config, scope)
 
         execution_scope.add_instance(_wf, "wf", "workflow")
         execution_scope.add_instance(_context, "context", "execution_context", "ctx")
