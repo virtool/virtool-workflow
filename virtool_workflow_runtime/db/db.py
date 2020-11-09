@@ -1,8 +1,11 @@
 """Functions for accessing the Virtool database."""
 import asyncio
-from typing import Optional, Any
+import json
+from typing import Optional, Any, Dict
+from pathlib import Path
 
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.errors import DocumentTooLarge
 
 from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
@@ -71,4 +74,36 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
                 }
             }
         })
+
+    @staticmethod
+    async def store_result(id_: str,
+                           collection: Collection,
+                           results: Dict[str, Any],
+                           file_results_location: Path):
+        """
+        Store a result in the Virtool database and mark the document as ready.
+
+        :param id_: The ID of the document to add results to.
+        :param collection: The collection in which to store the results.
+        :param results: The results dict to store.
+        :param file_results_location: A path to a directory in which the results
+            should be stored in the case that they are too large to be stored in
+            the database.
+        """
+        try:
+            await collection.update_one({"_id": id_}, {
+                "$set": {
+                    "results": results,
+                    "ready": True
+                }
+            })
+        except DocumentTooLarge:
+            (file_results_location/"results.json").write_text(json.dumps(results))
+
+            await collection.update_one({"_id": id_}, {
+                "$set": {
+                    "results": "file",
+                    "ready": True
+                }
+            })
 
