@@ -108,8 +108,8 @@ class VirtoolDatabase(WorkflowFixture, param_names=["database", "db"]):
             })
 
     @staticmethod
-    async def store_result_callback(id_: str, collection: Collection, file_results_location: Path):
-        def _store_results(_, results):
-            return VirtoolDatabase.store_result(id_, collection, results, file_results_location)
+    def store_result_callback(id_: str, collection: Collection, file_results_location: Path):
+        async def _store_results(_, results):
+            return await VirtoolDatabase.store_result(id_, collection, results, file_results_location)
 
         return _store_results
