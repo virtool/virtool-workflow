@@ -125,6 +125,7 @@ async def reads_path(
     else:
         hooks.on_workflow_failure(delete_cache_if_not_ready, once=True)
         hooks.on_workflow_failure(delete_analysis, once=True)
+        hooks.on_result(store_analysis_result, once=True)
 
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
         await create_cache(fq, database, analysis_args, trimming_parameters, trimming_output_path, cache_path)
