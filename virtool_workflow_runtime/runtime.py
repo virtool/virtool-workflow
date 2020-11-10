@@ -89,5 +89,9 @@ async def execute_while_watching_for_cancellation(job_id: str, workflow: Workflo
 async def execute_from_redis(workflow: Workflow):
     """Execute jobs from the Redis jobs list."""
     async for job_id in job_id_queue(redis_connection_string()):
-        yield await execute_while_watching_for_cancellation(job_id, workflow)
+        try:
+            yield await execute_while_watching_for_cancellation(job_id, workflow)
+        except asyncio.CancelledError:
+            continue
+
 
