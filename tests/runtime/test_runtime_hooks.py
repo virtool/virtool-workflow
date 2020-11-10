@@ -28,7 +28,7 @@ async def test_on_failure_triggered():
 
     failure_called = False
 
-    @hooks.on_failure
+    @hooks.on_failure(once=True)
     def failure_callback(error):
         nonlocal failure_called
         failure_called = True
@@ -64,6 +64,8 @@ async def test_on_failure_not_triggered_when_successful():
     result = await runtime.execute("1", workflow)
 
     assert result["SUCCESS"]
+
+    hooks.on_failure.callbacks.remove(failure_callback)
 
 
 

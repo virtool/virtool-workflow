@@ -7,7 +7,8 @@ from virtool_workflow_runtime._redis import \
     monitor_cancel, \
     VIRTOOL_JOBS_CANCEL_CHANNEL
 from virtool_workflow_runtime.config.environment import redis_connection_string
-from virtool_workflow_runtime.runtime import execute_from_redis
+from virtool_workflow_runtime.runtime import execute_from_redis, hooks, on_cancelled, \
+    execute_while_watching_for_cancellation
 
 JOB_IDs = [str(n) for n in range(3)]
 
@@ -43,7 +44,7 @@ async def test_execute_from_redis(test_workflow):
     await run_workflows_from_redis(test_workflow)
 
 
-async def test_cancellation(test_workflow):
+async def test_cancellation_monitoring(test_workflow):
     wait = asyncio.create_task(asyncio.sleep(10000))
     wait_for_cancel = asyncio.create_task(monitor_cancel(redis_connection_string(), "1", wait))
 
@@ -56,6 +57,39 @@ async def test_cancellation(test_workflow):
     cancelled = await wait_for_cancel
 
     assert cancelled.cancelled()
+
+
+async def test_execute_from_redis_with_cancellation(test_workflow):
+    @test_workflow.step
+    async def _step():
+        await asyncio.sleep(1000)
+
+    @hooks.on_failure
+    def failure():
+        failure.called = True
+
+    @on_cancelled
+    def cancelled():
+        cancelled.called = True
+
+    running = asyncio.create_task(execute_while_watching_for_cancellation("1", test_workflow))
+
+    # give monitor_cancel routine enough time to get started
+    await asyncio.sleep(0.1)
+
+    async with connect(redis_connection_string()) as redis:
+        await redis.publish(VIRTOOL_JOBS_CANCEL_CHANNEL, "1")
+
+    try:
+        await running
+    except asyncio.CancelledError:
+        assert failure.called
+        assert cancelled.called
+        return
+
+    assert False
+
+
 
 
 
