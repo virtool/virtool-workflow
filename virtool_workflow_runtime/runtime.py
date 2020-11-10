@@ -1,4 +1,5 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
+import asyncio
 from typing import Dict, Any
 
 from virtool_workflow.execution.hooks import on_update, on_workflow_finish
@@ -6,7 +7,7 @@ from virtool_workflow.execution.workflow_executor import WorkflowExecution, Work
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
 from . import hooks
-from ._redis import job_id_queue, VIRTOOL_JOBS_CANCEL_CHANNEL, VIRTOOL_JOBS_CHANNEL
+from ._redis import job_id_queue, monitor_cancel
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.environment import redis_connection_string
 
@@ -60,10 +61,33 @@ async def _execute(job_id: str,
     return await executor
 
 
+on_cancelled = hooks.Hook("on_cancelled", [Workflow, asyncio.CancelledError], None)
+
+
 async def execute_catching_cancellation(job_id, workflow):
-    pass
+    try:
+        with WorkflowFixtureScope() as fixtures:
+            execution = WorkflowExecution(workflow, fixtures)
+            return await execution
+    except asyncio.CancelledError as error:
+        await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=execution))
+        await on_cancelled.trigger(workflow, error)
+        raise error
+
+
+async def execute_while_watching_for_cancellation(job_id: str, workflow: Workflow):
+    exec_workflow = asyncio.create_task(execute_catching_cancellation(job_id, workflow))
+    watch_for_cancel = asyncio.create_task(monitor_cancel(redis_connection_string(), job_id, exec_workflow))
+
+    result = await exec_workflow
+
+    watch_for_cancel.cancel()
+
+    return result
+
 
 async def execute_from_redis(workflow: Workflow):
     """Execute jobs from the Redis jobs list."""
     async for job_id in job_id_queue(redis_connection_string()):
-        yield await execute(job_id, workflow)
+        yield await execute_while_watching_for_cancellation(job_id, workflow)
+
