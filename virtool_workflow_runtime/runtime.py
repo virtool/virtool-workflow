@@ -6,7 +6,7 @@ from virtool_workflow.execution.workflow_executor import WorkflowExecution, Work
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
 from . import hooks
-from ._redis import job_id_queue
+from ._redis import job_id_queue, VIRTOOL_JOBS_CANCEL_CHANNEL, VIRTOOL_JOBS_CHANNEL
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.environment import redis_connection_string
 
@@ -59,6 +59,9 @@ async def _execute(job_id: str,
 
     return await executor
 
+
+async def execute_catching_cancellation(job_id, workflow):
+    pass
 
 async def execute_from_redis(workflow: Workflow):
     """Execute jobs from the Redis jobs list."""
