@@ -41,3 +41,14 @@ async def job_id_queue(redis_connection: str,
         (job_ids,) = await redis.subscribe(channel)
         async for message in job_ids.iter():
             yield str(message, encoding="utf-8")
+
+
+class JobCancelledViaRedis(RuntimeError):
+    """Raised when a currently executing job is cancelled via the redis cancellation queue."""
+
+
+async def monitor_cancel(redis_connection: str, current_job_id: str, task: asyncio.Task) -> asyncio.Task:
+    async for id_ in job_id_queue(redis_connection, VIRTOOL_JOBS_CANCEL_CHANNEL):
+        if id_ == current_job_id:
+            task.cancel()
+            return task
