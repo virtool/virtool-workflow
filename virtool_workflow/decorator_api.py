@@ -1,34 +1,41 @@
-import sys
-from virtool_workflow import Workflow
 from types import ModuleType
 
-
-class DelegatedAttribute:
-
-    def __init__(self, delegate_name):
-        self._delegate_name = delegate_name
-
-    def __set_name__(self, owner, name):
-        self._name = name
-
-    def __get__(self, instance, owner):
-        if instance:
-            return getattr(getattr(instance, self._delegate_name), self._name)
-        else:
-            return getattr(getattr(owner, self._delegate_name), self._name)
+from virtool_workflow import Workflow
 
 
-workflow = Workflow
+def startup(func):
+    func._is_workflow_startup_function = True
+    return func
 
 
-class WorkflowDecoratorModule(ModuleType):
-    _workflow = Workflow()
-    startup = DelegatedAttribute("_workflow")
-    step = DelegatedAttribute("_workflow")
-    cleanup = DelegatedAttribute("_workflow")
+def cleanup(func):
+    func._is_workflow_cleanup_function = True
+    return func
 
 
-sys.modules[__name__] = WorkflowDecoratorModule(__name__, __doc__)
+def step(func):
+    func._is_workflow_step_function = True
+    return func
+
+
+def collect(module: ModuleType) -> Workflow:
+
+    # From python 3.7+ dictionary order is guaranteed to be insertion order.
+    # So, for a module, __dict__ is in definition order.
+
+    workflow = Workflow()
+    for value in module.__dict__.values():
+        if hasattr(value, "_is_workflow_startup_function"):
+            workflow.startup(value)
+        elif hasattr(value, "_is_workflow_step_function"):
+            workflow.step(value)
+        elif hasattr(value, "_is_workflow_cleanup_function"):
+            workflow.cleanup(value)
+
+    return workflow
+
+
+
 
 
 
