@@ -8,6 +8,7 @@ from virtool_workflow.fixtures.scope import \
     WorkflowFixtureNotAvailable
 from virtool_workflow.fixtures.workflow_fixture import WorkflowFixture, fixture
 from virtool_workflow.workflow import Workflow
+from virtool_workflow.decorator_api import step, cleanup, startup
 
 __fixtures__ = [
     "virtool_workflow.storage.paths"
@@ -25,5 +26,8 @@ __all__ = [
     "WorkflowFixtureMultipleYield",
     "WorkflowFixture",
     "fixture",
-    "Workflow"
+    "Workflow",
+    "step",
+    "cleanup",
+    "startup",
 ]
