@@ -2,7 +2,7 @@ import os
 from typing import Any, Iterable, Type
 from types import SimpleNamespace
 
-from virtool_workflow import WorkflowFixtureScope
+from virtool_workflow import WorkflowFixtureScope, fixture
 from virtool_workflow_runtime.config.environment import environment_variable_fixture, ENV_VARIABLE_TYPE
 
 DATA_PATH_ENV = "VT_DATA_PATH"

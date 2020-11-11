@@ -16,7 +16,7 @@ class WorkflowError(Exception):
             self,
             cause: Exception,
             workflow: Workflow,
-            context: "WorkflowExecution",
+            context: Optional["WorkflowExecution"],
             max_traceback_depth: int = 50
     ):
         """
