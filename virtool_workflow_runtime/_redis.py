@@ -39,7 +39,9 @@ async def redis_channel(redis: aioredis.Redis, channel: str):
 async def redis_list(redis: aioredis.Redis, list_name: str):
     """Expose redis list as async generator."""
     while True:
-        yield await redis.lpop(list_name, encoding="utf-8")
+        message = await redis.lpop(list_name, encoding="utf-8")
+        if message:
+            yield message
 
 
 async def monitor_cancel(redis: aioredis.Redis, current_job_id: str, task: asyncio.Task) -> asyncio.Task:

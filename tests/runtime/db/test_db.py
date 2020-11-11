@@ -5,7 +5,7 @@ from virtool_workflow_runtime import runtime
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.discovery import discover_workflow
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-from virtool_workflow_runtime.config.environment import db_name, db_connection_string
+from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow import hooks
 
 EXAMPLE_WORKFLOW_PATH = Path(sys.path[0]).joinpath("tests/example_workflow.py")
