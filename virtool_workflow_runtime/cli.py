@@ -15,7 +15,7 @@ JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
 @click.group()
 def cli():
-    """Main cli entrypoint."""
+    """Command Line Interface for Virtool Workflows."""
     uvloop.install()
 
 

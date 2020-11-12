@@ -6,6 +6,7 @@ from types import ModuleType
 from typing import List, Union, Iterable, Tuple, Optional
 
 from virtool_workflow import Workflow, WorkflowFixture
+from virtool_workflow.decorator_api import collect
 
 FixtureImportType = Iterable[
     Union[
@@ -80,7 +81,12 @@ def discover_workflow(path: Path) -> Workflow:
     """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
 
-    return next(attr for attr in module.__dict__.values() if isinstance(attr, Workflow))
+    workflow = next((attr for attr in module.__dict__.values() if isinstance(attr, Workflow)), None)
+
+    if not workflow:
+        workflow = collect(module)
+
+    return workflow
 
 
 def run_discovery(
