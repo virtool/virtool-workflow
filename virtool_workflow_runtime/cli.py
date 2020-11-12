@@ -1,5 +1,4 @@
 """Command Line Interface to virtool_workflow"""
-import os
 from pathlib import Path
 
 import asyncclick as click
@@ -7,9 +6,9 @@ import uvloop
 
 from virtool_workflow.execution.execution import execute
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow_runtime.config.configuration import create_config, options
 from . import discovery
 from . import runtime
-from virtool_workflow_runtime.config.configuration import create_config, options
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
@@ -83,9 +82,6 @@ async def create_env_script(**kwargs):
             commands.append(f"export {fixture.environment_variable}={fixture.default_value}")
     for cmd in commands:
         print(cmd)
-
-
-
 
 
 def cli_main():

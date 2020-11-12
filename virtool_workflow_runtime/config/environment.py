@@ -1,7 +1,8 @@
 """Fixtures for getting runtime configuration details."""
 import os
-from typing import Optional, Iterable, Type, Union, Any
-from virtool_workflow import fixture, WorkflowFixture
+from typing import Optional, Iterable, Type, Union
+
+from virtool_workflow import WorkflowFixture
 
 ENV_VARIABLE_TYPE = Union[str, int, bool]
 

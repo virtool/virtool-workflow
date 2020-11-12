@@ -1,8 +1,8 @@
 import os
-from typing import Any, Iterable, Type
+from typing import Any, Iterable, Type, List, Tuple, Optional
 from types import SimpleNamespace
 
-from virtool_workflow import WorkflowFixtureScope, fixture
+from virtool_workflow import WorkflowFixtureScope, WorkflowFixture
 from virtool_workflow_runtime.config.environment import environment_variable_fixture, ENV_VARIABLE_TYPE
 
 DATA_PATH_ENV = "VT_DATA_PATH"
@@ -17,7 +17,7 @@ MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 
 
-options = []
+options: List[Tuple[str, str, Type[ENV_VARIABLE_TYPE], Optional[Any], str, WorkflowFixture]] = []
 
 
 def config_option(
@@ -27,7 +27,24 @@ def config_option(
         type_: Type[ENV_VARIABLE_TYPE] = str,
         alt_names: Iterable[str] = (),
         help_: str = "",
-):
+) -> WorkflowFixture:
+    """
+    Create a configuration option.
+
+    This creates a fixture for the option with the given name and type. The value
+    of the fixture is determined by the environment variable `env`. The option will
+    also be added to the virtool_workflow CLI.
+
+    :param name: The name to be used for the workflow fixture. The name used for the CLI option
+        will be this name with `_` replaced by `-`. For example, the CLI option for the name
+        `workflow_config_option` would be `--workflow-config-option`.
+    :param env: The name of an environment variable backing this option.
+    :param default: The default value for the fixture if the environment variable is not set.
+    :param type_: The expected type of the environment variable. Supported types are `str`, `int`, and `bool`.
+    :param alt_names: Alternate names for the fixture.
+    :param help_: A string which is used for the `--help` command in the CLI.
+    """
+
     option_name = f"--{name}".replace("_", "-")
 
     fixture = environment_variable_fixture(name, env, default, alt_names=alt_names, type_=type_)
@@ -37,7 +54,16 @@ def config_option(
     return fixture
 
 
-async def create_config(scope: WorkflowFixtureScope, **kwargs):
+async def create_config(scope: WorkflowFixtureScope, **kwargs) -> SimpleNamespace:
+    """
+    Create a namespace containing all config options which have been defined.
+
+    The created namespace will be added to the scope as a fixture.
+
+    :param scope: The WorkflowFixtureScope for the current context.
+    :param kwargs: Values for any config options to be used before the fixtures.
+    :return SimpleNamespace: A namespace containing any available config options.
+    """
     config = SimpleNamespace()
     for name, _, _, _, _, fixture in options:
         if name in kwargs and kwargs[name] is not None:
