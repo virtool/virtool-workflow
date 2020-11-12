@@ -119,7 +119,9 @@ class WorkflowExecution:
         try:
             return await self._execute()
         except Exception as e:
-            await hooks.on_workflow_failure.trigger(self, e)
+            if not isinstance(e, WorkflowError):
+                e = WorkflowError(cause=e, workflow=self.workflow, context=self)
+            await hooks.on_workflow_failure.trigger(self.workflow, e)
             raise e
 
     async def _execute(self) -> Dict[str, Any]:
