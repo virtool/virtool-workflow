@@ -23,13 +23,6 @@ INSTALL_REQUIRES = [
 ]
 
 
-SETUP_REQUIRES = [
-    "pytest",
-    "pytest-aiohttp",
-    "pytest-asyncio",
-]
-
-
 ENTRY_POINTS = {
     "console_scripts": [
         "workflow = virtool_workflow_runtime.cli:cli_main",
@@ -46,7 +39,6 @@ setup(
     platforms="linux",
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
-    setup_requires=SETUP_REQUIRES,
     python_requires=">=3.6",
     entry_points=ENTRY_POINTS
 )

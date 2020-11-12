@@ -17,9 +17,9 @@ echo "Running pytest"
 
 if [ "$1" = "--no-pull" ]
 then
-  pytest --disable-pytest-warnings "${@:3}"
+  tox -- --disable-pytest-warnings "${@:3}"
 else
-  pytest --disable-pytest-warnings "$@"
+  tox -- --disable-pytest-warnings "$@"
 fi
 
 echo "Stopping MongoDB"
