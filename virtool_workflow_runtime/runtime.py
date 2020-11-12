@@ -13,6 +13,14 @@ from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 
+on_cancelled = hooks.Hook("on_cancelled", [Workflow, asyncio.CancelledError], None)
+
+
+@hooks.on_failure
+async def _trigger_on_cancelled(error: WorkflowError):
+    if isinstance(error.cause, asyncio.CancelledError) or isinstance(error.cause, futures.CancelledError):
+        await on_cancelled.trigger(error.workflow, error.cause)
+
 
 async def execute(
         job_id: str,
@@ -71,8 +79,6 @@ async def _execute(job_id: str,
     return await executor
 
 
-on_cancelled = hooks.Hook("on_cancelled", [Workflow, asyncio.CancelledError], None)
-
 
 async def execute_catching_cancellation(job_id, workflow):
     """Execute while catching :class:`asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
@@ -80,7 +86,6 @@ async def execute_catching_cancellation(job_id, workflow):
         return await execute(job_id, workflow)
     except (asyncio.CancelledError, futures._base.CancelledError) as error:
         await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=None))
-        await on_cancelled.trigger(workflow, error)
         raise error
 
 
