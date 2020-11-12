@@ -1,0 +1,23 @@
+# Run test suite using tox.
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - "*"
+        
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.9-buster
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install tox
+        run: pip install tox
+      - name: run test suite
+        run: tox
