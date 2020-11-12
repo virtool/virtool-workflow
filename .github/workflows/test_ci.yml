@@ -17,9 +17,9 @@ jobs:
     
     services:
       redis: 
-        image: redis
+        image: redis:6.0
       mongo:
-        image: mongo
+        image: mongo:4.4
         
     steps:
       - uses: actions/checkout@v2
