@@ -1,6 +1,6 @@
 # virtool-workflow
 
-An SDK for developing new Virtool workflows.
+An framework for developing new Virtool workflows.
 
 [![Build Status](https://cloud.drone.io/api/badges/virtool/virtool-workflow/status.svg)](https://cloud.drone.io/virtool/virtool-workflow)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/1bf01ed0b27040cc92b4ad2380e650d5)](https://www.codacy.com/gh/virtool/virtool-workflow/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=virtool/virtool-workflow&amp;utm_campaign=Badge_Grade)
