@@ -19,5 +19,8 @@ jobs:
 
       - name: install tox
         run: pip install tox
+        
       - name: run test suite
-        run: tox
+        run: |
+            cd /github/workspace
+            tox
