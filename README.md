@@ -306,9 +306,9 @@ functions. Any standard function provided will be wrapped into an async function
 
 The testing framework used is [pytest](https://docs.pytest.org/en/stable/).
 
-Run the tests from the root directory:
+Run the tests using tox:
 ```shell script
-pytest . 
+tox
 ```
 
 The test suite requires MongoDB and Redis to be available. The [test.sh](tests/test.sh)
@@ -316,7 +316,7 @@ script will run MongoDB and Redis using Docker for the duration of the tests. An
 arguments will be passed directly to pytest. 
 
 ```shell script
-./test.sh . 
+./tests/test.sh 
 ```
 
 

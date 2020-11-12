@@ -3,14 +3,14 @@
 
 if [ "$1" != "--no-pull" ]
 then
-  docker pull mongo:4.4.1 && docker pull redis:6.0.8
+  sudo docker pull mongo:4.4.1 && docker pull redis:6.0.8
 fi
 
 echo "Starting MongoDB"
-ID=$(docker run -d --network=host mongo)
+ID=$(sudo docker run -d --network=host mongo)
 
 echo "Starting Redis"
-REDIS=$(docker run -d --network=host redis)
+REDIS=$(sudo docker run -d --network=host redis)
 
 echo "Running pytest"
 
@@ -23,9 +23,9 @@ else
 fi
 
 echo "Stopping MongoDB"
-(docker stop "$ID")
-(docker rm "$ID")
+(sudo docker stop "$ID")
+(sudo docker rm "$ID")
 
 echo "Stopping Redis"
-(docker stop "$REDIS")
-(docker rm "$REDIS")
+(sudo docker stop "$REDIS")
+(sudo docker rm "$REDIS")
