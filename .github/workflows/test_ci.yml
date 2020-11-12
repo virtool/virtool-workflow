@@ -24,13 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: install tox
+      - name: Install tox
         run: pip install tox
         
-      - name: setup environment
+      - name: Run tox
         run: |
           export VT_DB_CONNECTION_STRING="mongodb://mongo:27017"
           export VT_REDIS_CONNECTION_STRING="redis://redis:6379/1"
-        
-      - name: run test suite
-        run: tox
+          tox
