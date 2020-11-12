@@ -2,6 +2,7 @@
 import asyncio
 import aioredis
 from typing import Dict, Any
+from concurrent import futures
 
 from virtool_workflow.execution.hooks import on_update, on_workflow_finish
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
@@ -77,7 +78,7 @@ async def execute_catching_cancellation(job_id, workflow):
     """Execute while catching :class:`asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
     try:
         return await execute(job_id, workflow)
-    except asyncio.CancelledError as error:
+    except (asyncio.CancelledError, futures._base.CancelledError) as error:
         await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=None))
         await on_cancelled.trigger(workflow, error)
         raise error

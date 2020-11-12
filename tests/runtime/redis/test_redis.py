@@ -1,4 +1,5 @@
 import asyncio
+import concurrent.futures._base
 
 from virtool_workflow import WorkflowError
 from virtool_workflow_runtime._redis import \
@@ -85,9 +86,11 @@ async def test_execute_from_redis_with_cancellation(test_workflow):
 
         try:
             await running
-        except (asyncio.CancelledError, WorkflowError) as e:
+        except (asyncio.CancelledError, concurrent.futures._base.CancelledError, WorkflowError) as e:
             if isinstance(e, WorkflowError):
-                assert isinstance(e.cause, asyncio.CancelledError)
+                if not isinstance(e.cause, asyncio.CancelledError):
+                    assert isinstance(e.cause, concurrent.futures._base.CancelledError)
+
             assert failure.called
             assert cancelled.called
             return
