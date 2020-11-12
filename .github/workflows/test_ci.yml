@@ -20,6 +20,9 @@ jobs:
       - name: install tox
         run: pip install tox
         
+      - name: where are we
+        run: ls -la && pwd
+        
       - name: run test suite
         run: |
             cd /github/workspace
