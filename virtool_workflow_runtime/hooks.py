@@ -1,3 +1,5 @@
+import asyncio
+from concurrent import futures
 from virtool_workflow import Hook, Workflow, WorkflowError, WorkflowFixtureScope
 from typing import Dict, Any
 
@@ -14,6 +16,15 @@ async def _trigger_on_finish_from_on_success(workflow: Workflow, _):
 @on_failure
 async def _trigger_on_finish_from_on_failure(error: WorkflowError):
     await on_finish.trigger(error.workflow)
+
+
+on_cancelled = Hook("on_cancelled", [Workflow, asyncio.CancelledError], None)
+
+
+@on_failure
+async def _trigger_on_cancelled(error: WorkflowError):
+    if isinstance(error.cause, asyncio.CancelledError) or isinstance(error.cause, futures.CancelledError):
+        await on_cancelled.trigger(error.workflow, error.cause)
 
 
 on_load_fixtures = Hook("on_load_fixtures", [WorkflowFixtureScope], return_type=None)

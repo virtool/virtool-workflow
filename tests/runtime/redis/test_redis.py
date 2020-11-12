@@ -8,7 +8,7 @@ from virtool_workflow_runtime._redis import \
     monitor_cancel, \
     VIRTOOL_JOBS_CANCEL_CHANNEL
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
-from virtool_workflow_runtime.runtime import execute_from_redis, hooks, on_cancelled, \
+from virtool_workflow_runtime.runtime import execute_from_redis, hooks, \
     execute_while_watching_for_cancellation
 
 JOB_IDs = [str(n) for n in range(3)]
@@ -72,7 +72,7 @@ async def test_execute_from_redis_with_cancellation(test_workflow):
     def failure():
         failure.called = True
 
-    @on_cancelled
+    @hooks.on_cancelled
     def cancelled():
         cancelled.called = True
 
