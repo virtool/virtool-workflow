@@ -1,8 +1,9 @@
 """Command Line Interface to virtool_workflow"""
 from pathlib import Path
 
-import asyncclick as click
+import click
 import uvloop
+import asyncio
 
 from virtool_workflow.execution.execution import execute
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
@@ -36,12 +37,7 @@ def apply_config_options(func):
     return func
 
 
-@apply_config_options
-@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
-@workflow_file_option
-@cli.command()
-async def run(file: str, job_id: str, **kwargs):
-    """Run a workflow and send updates to Virtool."""
+async def _run(file: str, job_id: str, **kwargs):
     with WorkflowFixtureScope() as scope:
         await create_config(scope, **kwargs)
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
@@ -50,19 +46,29 @@ async def run(file: str, job_id: str, **kwargs):
 
 
 @apply_config_options
+@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @workflow_file_option
 @cli.command()
-async def run_local(f: str, **kwargs):
-    """Run a workflow locally, without runtime specific dependencies."""
+async def run(file: str, job_id: str, **kwargs):
+    """Run a workflow and send updates to Virtool."""
+    asyncio.run(_run(file, job_id, **kwargs))
+
+
+async def _run_local(f: str, **kwargs):
     with WorkflowFixtureScope() as scope:
         await create_config(scope=scope, **kwargs)
         await execute(discovery.discover_workflow(Path(f).absolute()), scope)
 
 
 @apply_config_options
+@workflow_file_option
 @cli.command()
-async def print_config(**kwargs):
-    """Print the configuration which would be used with the given arguments."""
+async def run_local(f: str, **kwargs):
+    """Run a workflow locally, without runtime specific dependencies."""
+    asyncio.run(_run_local(f, **kwargs))
+
+
+async def _print_config(**kwargs):
     with WorkflowFixtureScope() as scope:
         config = await create_config(scope, **kwargs)
 
@@ -72,7 +78,14 @@ async def print_config(**kwargs):
 
 @apply_config_options
 @cli.command()
-async def create_env_script(**kwargs):
+async def print_config(**kwargs):
+    """Print the configuration which would be used with the given arguments."""
+    asyncio.run(_print_config(**kwargs))
+
+
+@apply_config_options
+@cli.command()
+def create_env_script(**kwargs):
     """Create a bash script to set environment variables based on default values and provided arguments."""
     commands = []
     for name, _, _, _, _, fixture in options:
