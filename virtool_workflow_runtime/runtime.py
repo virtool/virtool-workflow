@@ -13,13 +13,6 @@ from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 
-on_cancelled = hooks.Hook("on_cancelled", [Workflow, asyncio.CancelledError], None)
-
-
-@hooks.on_failure
-async def _trigger_on_cancelled(error: WorkflowError):
-    if isinstance(error.cause, asyncio.CancelledError) or isinstance(error.cause, futures.CancelledError):
-        await on_cancelled.trigger(error.workflow, error.cause)
 
 
 async def execute(
