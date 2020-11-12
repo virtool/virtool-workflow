@@ -40,6 +40,9 @@ class WorkflowError(Exception):
 
         super().__init__(str(cause))
 
+    def __str__(self):
+        return f"{self.traceback_data}"
+
 
 State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 
