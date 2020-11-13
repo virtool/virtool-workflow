@@ -33,6 +33,7 @@ setup(
     name="virtool_workflow",
     description="An SDK and runtime for creating Virtool workflows",
     long_description=Path("README.md").read_text(),
+    long_description_content_type="text/markdown",
     url="https://github.com/virtool/virtool-workflow",
     author=", ".join(AUTHORS),
     license="MIT",
