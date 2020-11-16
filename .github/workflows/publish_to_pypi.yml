@@ -1,0 +1,27 @@
+
+name: PyPi Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: python:3.9-buster
+
+    steps:
+        - uses: actions/checkout@v2
+
+        - name: Set Version Number in setup.py
+          run: python replace_version_number.py ${{ github.event.release.tag_name }}
+
+        - name: Prepare Distribution
+          run: python setup.py sdist
+
+        - name: Deploy To PyPi Using Twine
+          run: |
+            pip install twine
+            twine upload -r ${{ secrets.PYPI_REPOSITORY}} --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_TOKEN }} dist/*
