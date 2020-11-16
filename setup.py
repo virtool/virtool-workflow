@@ -7,7 +7,7 @@ AUTHORS = ["Ian Boyes", "Blake Smith"]
 
 CLASSIFIERS = [
     "Topic :: Software Development :: Libraries",
-    "Programming Language:: Python:: 3.6",
+    "Programming Language:: Python:: 3.9",
 ]
 
 PACKAGES = find_packages(exclude="tests")
@@ -41,6 +41,6 @@ setup(
     platforms="linux",
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     entry_points=ENTRY_POINTS
 )
