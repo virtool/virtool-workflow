@@ -31,6 +31,7 @@ ENTRY_POINTS = {
 
 setup(
     name="virtool_workflow",
+    version="0.1.0",
     description="An SDK and runtime for creating Virtool workflows",
     long_description=Path("README.md").read_text(),
     long_description_content_type="text/markdown",
