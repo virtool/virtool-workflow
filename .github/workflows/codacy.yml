@@ -1,7 +1,7 @@
-name: codacy-c
+name: codacy-coverage
 
 on:
-  pull_request:
+  push:
     branches:
       - "*"
 
