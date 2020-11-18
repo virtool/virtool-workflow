@@ -156,75 +156,83 @@ def index_path(analysis_args: AnalysisArguments) -> Path:
 
 
 @fixture
-def trimming_input_paths(analysis_args: AnalysisArguments) -> Tuple[Path]:
-    return analysis_args.read_paths
-
-
-@fixture
 def subtraction_path(analysis_args: AnalysisArguments) -> Path:
     return analysis_args.subtraction_path
 
 
 @fixture
 def raw_path(analysis_args: AnalysisArguments) -> Path:
+    """Path to the raw read data (un-trimmed) for the current analysis."""
     return analysis_args.raw_path
 
 
 @fixture
 def temp_cache_path(analysis_args: AnalysisArguments) -> Path:
+    """Path at which to store temporarily cached data."""
     return analysis_args.temp_cache_path
 
 
 @fixture
 def temp_analysis_path(analysis_args: AnalysisArguments) -> Path:
+    """Path to store temporary analysis data."""
     return analysis_args.temp_analysis_path
 
 
 @fixture
 def paired(analysis_args: AnalysisArguments) -> bool:
+    """A boolean indicating that the sequence currently being analyzed is paired."""
     return analysis_args.paired
 
 
 @fixture
 def read_count(analysis_args: AnalysisArguments) -> int:
+    """The read count for the current sample."""
     return analysis_args.read_count
 
 
 @fixture
 def sample_read_length(analysis_args: AnalysisArguments) -> int:
+    """The read length for the current sample."""
     return analysis_args.sample_read_length
 
 
 @fixture
 def library_type(analysis_args: AnalysisArguments) -> LibraryType:
+    """The library type of the current sample data."""
     return analysis_args.library_type
 
 
 @fixture
 def sample(analysis_args: AnalysisArguments) -> Dict[str, Any]:
+    """The sample database document for the current job."""
     return analysis_args.sample
 
 
 @fixture
 def analysis_document(analysis_args: AnalysisArguments) -> Dict[str, Any]:
+    """The analysis database document for the current job."""
     return analysis_args.analysis
 
 
 @fixture
 def sample_id(analysis_args: AnalysisArguments) -> str:
+    """The database ID of the sample being analyzed."""
     return analysis_args.sample_id
 
 
 @fixture
 def analysis_id(analysis_args: AnalysisArguments) -> str:
+    """The database ID for the current analysis."""
     return analysis_args.analysis_id
 
 
 @fixture
 def ref_id(analysis_args: AnalysisArguments) -> str:
+    """The database ID for the current reference."""
     return analysis_args.ref_id
 
 
 @fixture
 def index_id(analysis_args: AnalysisArguments) -> str:
+    """The database ID for the current index."""
     return analysis_args.index_id
