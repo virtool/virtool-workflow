@@ -81,7 +81,7 @@ class Hook:
         """
         A set of functions to be called as a group upon a particular event.
 
-        The signature of any functions added (via :func:`.callback` or :func:`__call__`
+        The signature of any functions added (via #Hook.callback or #Hook.__call__)
         are validated to match the types provided.
 
         :param hook_name: The name of this hook.
@@ -99,17 +99,17 @@ class Hook:
 
     def callback(self, callback_: Callable = None, until=None, once=False):
         """
-        Register a callback function for this hook.
-
-        Functions provided here will be called once the :func:`.trigger` is called.
+        Add a callback function to this Hook, to be invoked on `.trigger()`
 
         :param callback_: The callback function to register.
 
-        :param until: Another :obj:`Hook` which signals that the registered callback
-            function should no longer be called by this hook. When the `until` hook is
-            triggered, the callback function `_callback` will be removed from the set of callbacks.
+        :param until: Another #Hook which signals that the registered callback
+            function should no longer be called by this hook. When the other hook is
+            triggered, the callback function `callback_` will be removed from the set of callbacks.
 
         :param once: Only execute the callback the next time this Hook is triggered.
+        :return: The original value of `callback_` if it was a coroutine function, else a coroutine
+            wrapping `callback_`.
         """
         if once:
             until = self
@@ -127,6 +127,7 @@ class Hook:
     __call__ = callback
 
     def _callback(self, callback_: Callable) -> Callable:
+        """Validate and add a callback to this Hook."""
         callback_params, return_type = _extract_params(callback_, extract_return=True)
         callback_ = _validate_parameters(self.name, callback_, self._params, callback_params)
 
@@ -140,6 +141,7 @@ class Hook:
         return callback_
 
     def _callback_until(self, hook_: "Hook"):
+        """Add a callback to this hook and have it removed once `hook_` is triggered. """
 
         def _temporary_callback(callback_):
             callback_ = self._callback(callback_)
@@ -155,6 +157,16 @@ class Hook:
         return _temporary_callback
 
     async def trigger(self, *args, **kwargs) -> List[Any]:
+        """
+        Trigger this Hook.
+
+        Each callback function registered by #Hook.callback or #Hook.__call__
+        will be called using the arguments supplied to this function.
+
+        :param args: Positional Arguments for this Hook.
+        :param kwargs: Keyword arguments for this Hook.
+        :return List[Any]: The results of each callback function.
+        """
         return [await callback(*args, **kwargs) for callback in self.callbacks]
 
 
