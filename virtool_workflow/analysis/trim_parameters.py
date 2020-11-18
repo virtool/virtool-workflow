@@ -9,7 +9,7 @@ from .. import fixture
 @fixture
 def trimming_min_length(library_type: LibraryType, sample_read_length: int):
     """
-    Calculate the minimum length of a read.
+    The minimum length of a read.
 
     This takes into account the library type (eg. srna)
     and the maximum observed read length in the sample.
@@ -36,7 +36,7 @@ def trimming_parameters(
         trimming_min_length: int
 ) -> Dict[str, Union[str, int]]:
     """
-    Derive trimming parameters based on the library type, and minimum allowed trim length.
+    The trimming parameters based on the library type, and minimum allowed trim length.
 
     :param library_type: The LibraryType (eg. srna)
     :param trimming_min_length: The minimum length of a read

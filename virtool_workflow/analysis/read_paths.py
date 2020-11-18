@@ -74,6 +74,7 @@ async def fetch_legacy_paths(
         reads_path: Path,
         run_in_executor: FunctionExecutor
 ):
+    """Copy legacy style reads to the reads_path."""
     return await copy_paths({path: reads_path/path.name for path in paths}.items(), run_in_executor)
 
 
@@ -84,9 +85,12 @@ async def prepared_reads_and_fastqc(
         parsed_fastqc: Dict[str, Any],
 ) -> Tuple[Path, Dict[str, Any]]:
     """
-    Move the trimmed reads to the reads_path once trimming is complete.
+    The reads_path and parsed fastqc output for the sample being analyzed.
 
-    :return: The reads path and the parsed fastqc output
+    The raw reads are trimmed and moved to the reads path before returning.
+
+    :param analysis_args: The AnalysisArguments for the current job.
+    :param trimming_output: The trimmed reads. See #virtool_workflow.analysis.trimming.trimming_output.
     """
 
     path, _ = trimming_output
@@ -106,7 +110,11 @@ async def reads_path(
         trimming_output_path: Path,
         run_in_executor: FunctionExecutor
 ) -> Path:
-    """The analysis reads for the current sample with trimming and fastqc check completed."""
+    """
+    The path to the prepared sample data for the current analysis.
+
+    The trimming and fastqc check for the sample is completed before returning.
+    """
     analysis_args.reads_path.mkdir(parents=True, exist_ok=True)
 
     if cache_document:

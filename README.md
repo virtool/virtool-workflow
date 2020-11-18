@@ -68,6 +68,34 @@ def non_async_step_function():
     ...
 ```
 
+### Alternative Static API
+
+`virtool_workflow` also provides a static API for building workflows without explicitly using an instance of `Workflow`.
+Any functions tagged by the `virtool_workflow.startup`, `virtool_workflow.step`, or `virtool_workflow.cleanup` decorators
+will be used by the framework to create a workflow. 
+
+```python
+from virtool_workflow import startup, step, cleanup
+
+@startup
+def startup_function():
+    ...
+
+@step 
+def step_function():
+    ...
+
+@cleanup
+def cleanup_function():
+    ...
+```
+
+When the `Workflow` instance is built, the functions will be added in **definition order**. In other words, 
+those functions appearing first in the file will be executed first by the framework.
+
+The `Workflow` instance itself is available from the *startup*, *cleanup*, and *step*
+functions via a **fixture**.
+
 ### Workflow Updates
 
 Workflow's are typically long-running. As such updates about the workflow's progress should be sent to 
@@ -75,21 +103,25 @@ the user regularly. To facilitate this, the return value (string) from any start
 function will be sent as an update and displayed in the Virtool UI. 
 
 ```python
-@wf.step
+@step
 def step_that_sends_an_update():
     ...
     return "Successfully completed a step"
 
 ```
 
-Additional updates can be sent using the [context](#) fixture, described in the **Standard Fixtures** section.
+Additional updates can be sent using the [execution](#) fixture, described in the **Standard Fixtures** section.
 
 ### Workflow Fixtures
 
 Workflow fixtures provide a mechanism for injecting dependencies into workflows. They 
 are inspired by and work similarly to [pytest fixtures](https://docs.pytest.org/en/2.8.7/fixture.html).
 
-Fixtures are created using the [virtool_workflow.fixture](#) decorator. 
+Fixtures utilize the parameter names of a function as identifiers of a particular instance to supply 
+as an argument.
+
+Fixtures are created using the [virtool_workflow.fixture](#) decorator on a factory function which produces 
+the instance to be injected.
 
 ```python
 from virtool_workflow import fixture
@@ -99,14 +131,14 @@ def my_workflow_fixture():
     return "my_workflow_fixture"
 ```
 
-Fixtures are injected into workflow steps based on declared parameter names. When a startup,
-cleanup, or step function of a workflow declares a parameter, the appropriate fixture instance will be 
-supplied when the function is executed. 
+The above defines a fixture with a value of `"my_workflow_fixture"`.
+
+When a startup, cleanup, or step function of a workflow declares a parameter, the appropriate fixture instance will be 
+supplied when the function is executed, as long as the fixture is defined within the 
+current scope (or global/module scope)
 
 ```python
-wf = Workflow()
-
-@wf.step
+@step
 def step(my_workflow_fixture: str):
     print(my_workflow_fixture) # "my_workflow_fixture"
 ```
@@ -157,7 +189,7 @@ Upon execution of the workflow, `my_workflow_fixture` will be instantiated and p
 an argument. The value returned will then be used as the instance for `uses_my_fixture` which will be passed to the
 workflow's step function. 
 
-### Scoping of Workflow Fixtures
+### Mutable Fixtures as a Means of Sharing Data Between Workflow Steps
 
 Workflow fixtures are scoped to the execution of a particular workflow. This means that any specific fixture
 will refer to the exact same instance throughout a workflow's execution. This property allows fixtures to be 
@@ -193,7 +225,7 @@ Some standard fixtures are always made available when a workflow is executed. Th
 | Fixture                          | Description                           | 
 |----------------------------------|---------------------------------------|
 | results, result                  | The results dictionary                |
-| ctx, context, execution_context  | The current WorkflowExecutionContext  |
+| execution, context, ctx          | The current WorkflowExecution         |
 | wf, workflow                     | The Workflow instance being executed  |
 
 #### The Results Dictionary
@@ -220,15 +252,15 @@ returned from `virtool_workflow.execute_workflow.execute`.
 When a workflow is executed as part of a virtool job, the values in the results dictionary will be stored in the 
 database and provided to the user. 
 
-#### The Context Fixture
-The `context` (or `ctx`, `execution_context`) fixture provides access to the current `WorkflowExecutionContext` instance.
+#### The Context/Execution Fixture
+The `context` (or `ctx`, `execution`) fixture provides access to the current `WorkflowExecution` instance.
 It provides information regarding the state of the workflow's execution, such as the current
-step (number) being executed. It can also be used to send additional updates via `context.send_update`.
+step (number) being executed. It can also be used to send additional updates via `.send_update`.
 
 
 ```python
-    @wf.step
-    async def send_more_updates(context: WorkflowExecutionContext):
+    @step
+    async def send_more_updates(context: WorkflowExecution):
         await context.send_update("Additional update")
         await context.send_update("Another update")
         return "Last update for this step"

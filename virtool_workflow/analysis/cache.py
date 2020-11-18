@@ -24,7 +24,11 @@ async def cache_document(
         sample_id: str,
         caches: Collection,
 ) -> Optional[Dict[str, Any]]:
-    """Fetch the cache document for a given sample if it exists."""
+    """
+    The cache document for the current analysis.
+
+    If no cache exists (ie. the current analysis job is not a re-try) then None is returned.
+    """
     cache_document = await caches.find_one({
         "hash": virtool_core.caches.db.calculate_cache_hash(trimming_parameters),
         "missing": False,
@@ -60,7 +64,7 @@ async def create_cache_document(
         database: VirtoolDatabase,
         analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any]
-):
+) -> Dict[str, Any]:
     """
     Create a new cache document in the database.
 
@@ -69,7 +73,7 @@ async def create_cache_document(
     :param database: The Virtool database object
     :param analysis_args: The AnalysisArguments fixture
     :param trimming_parameters: The trimming parameters (see virtool_workflow.analysis.trimming)
-    :return:
+    :return: The cache document which was created.
     """
     cache = await virtool_core.caches.db.create(
         database,
@@ -97,7 +101,12 @@ async def create_cache(
         trimming_output_path: Path,
         cache_path: Path,
 ):
-    """Create a new cache once the trimming program and fastqc have been run."""
+    """
+    Cache the trimmed reads and parsed fastqc data.
+
+    :param fastq: The parsed fastqc data produced by #virtool_workflow.analysis.fastqc.parse_fastqc
+        or the #virtool_workflow.analysis.read_paths.parsed_fastqc fixture.
+    """
     cache = await create_cache_document(database, analysis_args, trimming_parameters)
 
     await database["caches"].update_one({"_id": cache["id"]}, {"$set": {
@@ -110,7 +119,7 @@ async def create_cache(
 
 async def delete_cache_if_not_ready(cache_id: str, caches: Collection, cache_path: Path):
     """
-    Delete a cache if it is not ready
+    Delete a cache if it is not ready.
 
     :param cache_id: The database id of the cache document.
     :param caches: The caches database collection for Virtool.
