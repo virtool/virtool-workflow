@@ -59,9 +59,7 @@ class AnalysisInfo(WorkflowFixture, param_name="analysis_info"):
 
 @dataclass(frozen=True)
 class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
-    """
-    Dataclass containing standard arguments required for Virtool analysis workflows.
-    """
+    """Dataclass containing standard arguments required for Virtool analysis workflows."""
     path: Path
     sample_path: Path
     index_path: Path
@@ -88,7 +86,13 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
             temp_path: Path,
             analysis_info: AnalysisInfo
     ) -> "AnalysisArguments":
-        """Initialize directory structure for analysis workflows."""
+        """
+        Initialize AnalysisArguments based on information from the database.
+
+        Any directories which do not yet exist will be created, so when this fixture
+        fixture all path variables can be assumed to exist.
+
+        """
         (sample_id,
          analysis_id,
          ref_id,
@@ -135,22 +139,20 @@ class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
 
 @fixture
 def analysis_path(analysis_args: AnalysisArguments) -> Path:
+    """The Virtool analysis path."""
     return analysis_args.path
 
 
 @fixture
 def sample_path(analysis_args: AnalysisArguments) -> Path:
+    """The path to the sample data currently being analyzed."""
     return analysis_args.sample_path
 
 
 @fixture
 def index_path(analysis_args: AnalysisArguments) -> Path:
+    """The Virtool index path."""
     return analysis_args.index_path
-
-
-@fixture
-def reads_path(analysis_args: AnalysisArguments) -> Path:
-    return analysis_args.reads_path
 
 
 @fixture
