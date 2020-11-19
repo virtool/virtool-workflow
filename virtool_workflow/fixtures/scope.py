@@ -78,8 +78,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         else:
             instance = bound()
 
-        for name in fixture_.param_names:
-            self._instances[name] = instance
+        self._instances[fixture_.param_name] = instance
 
         return instance
 
@@ -150,7 +149,7 @@ class WorkflowFixtureScope(AbstractContextManager):
                         for param in sig.parameters}
         except KeyError as key_error:
             missing_param = key_error.args[0]
-            raise WorkflowFixtureNotAvailable(param_name=missing_param, signature=sig)
+            raise WorkflowFixtureNotAvailable(param_name=missing_param, signature=sig, func=func)
 
         if iscoroutinefunction(func):
             @wraps(func)

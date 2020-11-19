@@ -1,6 +1,6 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
 from abc import abstractmethod, ABC
-from typing import Callable, Optional, List, Type, Iterable
+from typing import Callable, Optional, Type
 
 
 class WorkflowFixture(ABC):
@@ -13,9 +13,9 @@ class WorkflowFixture(ABC):
     returns an instance of the newly created class, which is callable with the same
     parameters as the function passed to the decorator.
     """
-    param_names: List[str]
+    param_name: str
 
-    def __init_subclass__(cls, param_names: List[str] = None, param_name: str = None, **kwargs):
+    def __init_subclass__(cls, param_name: str = None, **kwargs):
         """
         Used to set the parameter names by which this fixture will be accessible
         within a workflow function.
@@ -23,13 +23,10 @@ class WorkflowFixture(ABC):
         :param param_names: A list of names for this fixture to be injected for
         :param param_name: A name for this fixture to be injected for
         """
-        if not param_names:
-            if param_name:
-                param_names = [param_name]
-            else:
-                raise ValueError("Must provide `param_names` or `param_name` argument to subclass")
+        if not param_name:
+            raise ValueError("Must provide `param_name` argument to subclass")
 
-        cls.param_names = param_names
+        cls.param_name = param_name
 
     @staticmethod
     @abstractmethod
@@ -47,10 +44,10 @@ class WorkflowFixture(ABC):
         @return: A dict mapping workflow fixture names to
                  their respective :class:`WorkflowFixture` subclasses
         """
-        return {name: cls for cls in WorkflowFixture.__subclasses__() for name in cls.param_names}
+        return {cls.param_name: cls for cls in WorkflowFixture.__subclasses__()}
 
 
-def fixture(func: Callable = None, name: Optional[str] = None, alt_names: Iterable[str] = ()):
+def fixture(func: Callable = None, name: Optional[str] = None):
     """
     Define a new :class:`WorkflowFixture`.
 
@@ -68,19 +65,20 @@ def fixture(func: Callable = None, name: Optional[str] = None, alt_names: Iterab
 
     :param func: A function returning some value to be used as a workflow fixture
     :param name: A name for the created fixture, by default the name of `func` is used
-    :param alt_names: A list of alternate names for the fixture.
     :return: An instance of a WorkflowFixture subclass that acts like the original function.
     """
 
     if func:
-        return _fixture(func, name, alt_names)
+        return _fixture(func, name)
     else:
-        return lambda f: _fixture(f, name, alt_names)
+        return lambda f: _fixture(f, name)
 
 
-def _fixture(func: Callable, name: Optional[str] = None, alt_names: Iterable[str] = ()):
+def _fixture(func: Callable, name: Optional[str] = None):
+    if not name:
+        name = func.__name__
 
-    class _Fixture(WorkflowFixture, param_names=[func.__name__, *alt_names]):
+    class _Fixture(WorkflowFixture, param_name=name):
         __fixture__ = func
 
     _Fixture.__name__ = _Fixture.__qualname__ = name if name else func.__name__

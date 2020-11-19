@@ -129,9 +129,9 @@ class WorkflowExecution:
 
     async def _execute(self) -> Dict[str, Any]:
 
-        self.scope.add_instance(self.workflow, "wf", "workflow")
-        self.scope.add_instance(self, "context", "ctx", "execution")
-        self.scope.add_instance({}, "result", "results")
+        self.scope["workflow"] = self.workflow
+        self.scope["execution"] = self
+        self.scope["results"] = {}
 
         bound_workflow = await self.scope.bind_to_workflow(self.workflow)
 
