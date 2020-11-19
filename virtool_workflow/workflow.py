@@ -4,7 +4,6 @@ from inspect import iscoroutinefunction
 from typing import Callable, Sequence, Optional, Iterable, Any, Coroutine
 
 WorkflowStep = Callable[..., Coroutine[Any, Any, None]]
-"""Async function representing a step in a Virtool Workflow."""
 
 
 def _make_async(func: Callable):

@@ -13,11 +13,44 @@ renderer:
   content_directory: content/docs
   default_preamble: {menu: main}
   pages:
-    - title: Home
-      source: README.md
-
-    - title: API Documentation
+    - title: virtool_workflow.analysis
       contents:
-        - '*'
-    - title: Usage of Analysis Fixtures
-      source: docs/tutorials/analysis_fixture_examples.md
+        - 'virtool_workflow.analysi*'
+    - title: virtool_workflow.execution
+      contents:
+        - 'virtool_workflow.execution*'
+
+    - title: virtool_workflow.workflow
+      contents:
+        - 'virtool_workflow.workflo*'
+        - 'virtool_workflow.decorator*'
+
+    - title: virtool_workflow.execute
+      contents:
+        - 'virtool_workflow.execute.*'
+
+    - title: virtool_workflow.utils
+      contents:
+        - 'virtool_workflow.utils.*'
+
+
+    - title: virtool_workflow_runtime
+      contents:
+        - 'virtool_workflow_runtime'
+        - 'virtool_workflow_runtime*'
+
+    - title: virtool_workflow_runtime.config
+      contents:
+        - 'virtool_workflow_runtime.config.*'
+
+    - title: virtool_workflow_runtime.discovery
+      contents:
+        - 'virtool_workflow_runtime.discovery.*'
+
+    - title: virtool_workflow_runtime.liveness
+      contents:
+        - 'virtool_workflow_runtime.liveness*'
+
+    - title: virtool_workflow_runtime.runtime
+      contents:
+        - 'virtool_workflow_runtime.runtime.*'

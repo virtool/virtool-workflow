@@ -31,10 +31,10 @@ def _import_module_from_file(module_name: str, path: Path) -> ModuleType:
 
 def discover_fixtures(module: Union[Path, ModuleType]) -> List[WorkflowFixture]:
     """
-    Find all instances of :class:`WorkflowFixture` in a python module.
+    Find all instances of #execution.fixtures.workflow_fixture.WorkflowFixture in a python module.
 
     :param module: The path to the python module to import
-    :return: A list of all :class:`WorkflowFixture` instances contained
+    :return: A list of all #WorkflowFixture instances contained
         in the module
     """
     if isinstance(module, Path):
@@ -74,8 +74,8 @@ def discover_workflow(path: Path) -> Workflow:
     """
     Find a instance of virtool_workflow.Workflow in the python module located at the given path.
 
-    :param path: The :class:`pathlib.Path` to the python file containing the module
-    :returns: The first instance of :class:`virtool_workflow.Workflow` occurring in `dir(module)`
+    :param path: The #pathlib.Path to the python file containing the module
+    :returns: The first instance of #virtool_workflow.Workflow occurring in `dir(module)`
 
     :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
     """
@@ -100,10 +100,10 @@ def run_discovery(
 
         1. virtool_workflow_runtime.autoload, used to standard runtime fixtures.
         2. __fixtures__ attribute from the workflow file (located by `path`)
-        3. Any :class:`WorkflowFixture` instances from the module located by `fixture_path`
+        3. Any #WorkflowFixture instances from the module located by `fixture_path`
 
-    :param path: A Path locating a python module which contains a :class:`Workflow` instance
-    :param fixture_path: A Path locating a file containing :class:`WorkflowFixture` instances
+    :param path: A Path locating a python module which contains a #Workflow instance
+    :param fixture_path: A Path locating a file containing #WorkflowFixture instances
     :return: The Workflow instance from `path` and a list of discovered fixtures.
     """
     fixtures = load_fixtures_from__fixtures__(Path(__file__).parent/"autoload.py")

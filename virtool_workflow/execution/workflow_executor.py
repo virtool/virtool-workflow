@@ -69,7 +69,7 @@ class WorkflowExecution:
         """
         Send an update.
 
-        Triggers the :obj:`virtool_workflow.hooks.on_update` hook.
+        Triggers the #virtool_workflow.hooks.on_update hook.
 
         :param update: A string update to send.
         """
@@ -84,7 +84,7 @@ class WorkflowExecution:
         """
         Change the current state of execution.
 
-        Triggers the :obj:`virtool_workflow.hooks.on_state_change` hook.
+        Triggers the #virtool_workflow.hooks.on_state_change hook.
 
         :param new_state: The new state that should be applied.
         """

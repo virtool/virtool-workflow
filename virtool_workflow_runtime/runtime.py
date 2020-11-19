@@ -72,7 +72,7 @@ async def _execute(job_id: str,
 
 
 async def execute_catching_cancellation(job_id, workflow):
-    """Execute while catching :class:`asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
+    """Execute while catching `asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
     try:
         return await execute(job_id, workflow)
     except (asyncio.CancelledError, futures._base.CancelledError) as error:
