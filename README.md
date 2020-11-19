@@ -222,15 +222,15 @@ For more details about fixture scope and binding see the [API docs](#).
 
 Some standard fixtures are always made available when a workflow is executed. These include; 
 
-| Fixture                          | Description                           | 
-|----------------------------------|---------------------------------------|
-| results, result                  | The results dictionary                |
-| execution, context, ctx          | The current WorkflowExecution         |
-| wf, workflow                     | The Workflow instance being executed  |
+| Fixture     | Description                           | 
+|-------------|---------------------------------------|
+| results     | The results dictionary                |
+| execution   | The current WorkflowExecution         |
+| workflow    | The Workflow instance being executed  |
 
 #### The Results Dictionary
 
-The `results` (or `result`) dictionary is used to store the results of the workflow so that they can be provided to 
+The `results` dictionary is used to store the results of the workflow so that they can be provided to 
 the end user through the Virtool's UI. It is available within workflows as a fixture. The `results` dictionary is
 returned from `virtool_workflow.execute_workflow.execute`. 
 
@@ -244,8 +244,8 @@ returned from `virtool_workflow.execute_workflow.execute`.
     def add_to_results(results: dict):
         results["result"] = "some result"
 
-    result = await execute(wf) 
-    result["result"] # "some result"
+    results = await execute(wf) 
+    results["result"] # "some result"
     
 ```
 
@@ -253,16 +253,16 @@ When a workflow is executed as part of a virtool job, the values in the results 
 database and provided to the user. 
 
 #### The Context/Execution Fixture
-The `context` (or `ctx`, `execution`) fixture provides access to the current `WorkflowExecution` instance.
+The `execution` fixture provides access to the current `WorkflowExecution` instance.
 It provides information regarding the state of the workflow's execution, such as the current
 step (number) being executed. It can also be used to send additional updates via `.send_update`.
 
 
 ```python
     @step
-    async def send_more_updates(context: WorkflowExecution):
-        await context.send_update("Additional update")
-        await context.send_update("Another update")
+    async def send_more_updates(execution: WorkflowExecution):
+        await execution.send_update("Additional update")
+        await execution.send_update("Another update")
         return "Last update for this step"
 ```
 
