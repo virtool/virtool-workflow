@@ -24,15 +24,12 @@ def workflow_with_fixtures():
     @test_workflow.startup
     def start(
             state: Dict[str, Any],
-            execution_context: WorkflowExecution,
-            ctx: WorkflowExecution,
+            execution: WorkflowExecution,
             workflow: Workflow,
-            wf: Workflow,
     ):
         state["start"] = True
-        assert execution_context.state == State.STARTUP
-        assert execution_context == ctx
-        assert workflow == test_workflow == wf
+        assert execution.state == State.STARTUP
+        assert workflow == test_workflow
 
     @test_workflow.step
     async def step(fixture_: str, state: Dict[str, Any]):

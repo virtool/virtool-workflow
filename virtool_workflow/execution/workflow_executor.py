@@ -41,8 +41,7 @@ class WorkflowError(Exception):
         super().__init__(str(cause))
 
     def __str__(self):
-        return ("Cause: \n"
-                f"{self.cause}\n\n"
+        return (f"{self.cause}\n\n"
                 f"Context: {self.context}\n"
                 f"Workflow: {self.workflow}\n")
 
@@ -146,7 +145,7 @@ class WorkflowExecution:
 
         await self._set_state(State.FINISHED)
 
-        result = self.scope["result"]
+        result = self.scope["results"]
 
         await hooks.on_result.trigger(self.workflow, result)
 

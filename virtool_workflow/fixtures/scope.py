@@ -1,3 +1,4 @@
+import pprint
 from contextlib import AbstractContextManager
 from functools import wraps
 from inspect import isgeneratorfunction, iscoroutinefunction, signature
@@ -103,7 +104,13 @@ class WorkflowFixtureScope(AbstractContextManager):
 
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
-        return self._instances.__getitem__(item)
+        try:
+            return self._instances.__getitem__(item)
+        except KeyError as error:
+            raise ValueError(
+                f"{error} is not available within this scope.\n"
+                f"Available instances are: \n {pprint.pformat(self._instances)}"
+            )
 
     def __setitem__(self, key: str, value: Any):
         """Add an instance as a fixture with this WorkflowFixtureScope."""

@@ -6,24 +6,24 @@ from virtool_workflow.execution.execution import execute
 
 
 @startup
-def first(result: dict):
-    result["startup"] = True
+def first(results: dict):
+    results["startup"] = True
 
 
 @step
-def step_z(result: dict):
-    result["step"] = True
+def step_z(results: dict):
+    results["step"] = True
 
 
 @step
-def step_a(result: dict):
-    result["step2"] = True
-    assert result["step"]
+def step_a(results: dict):
+    results["step2"] = True
+    assert results["step"]
 
 
 @cleanup
-def last(result: dict):
-    result["cleanup"] = True
+def last(results: dict):
+    results["cleanup"] = True
 
 
 async def test_decorator_api_workflow():

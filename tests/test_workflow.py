@@ -65,8 +65,8 @@ async def test_correct_progress(test_workflow):
         10: 1.0
     }
 
-    async def check_progress(wf, ctx):
-        assert ctx.progress == correct_progress[ctx.current_step]
+    async def check_progress(execution):
+        assert execution.progress == correct_progress[execution.current_step]
 
     test_workflow.steps = [check_progress] * 10
     test_workflow.on_startup = []
