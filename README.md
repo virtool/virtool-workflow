@@ -356,27 +356,23 @@ arguments will be passed directly to pytest.
 
 For docstrings, use the [**Sphinx** docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
 
-The packages `sphinx_rtd_theme` and `sphinx_autoapi` are used in rendering the documentation. 
+#### pydoc-markdown
 
-```  shell script
-pip install sphinx_rtd_theme sphinx_autoapi
-```
-
-#### Markdown for Sphinx
-
-[recommonmark](https://github.com/readthedocs/recommonmark) is used so that Sphinx can 
-render documentation from *markdown* files as well as *rst* files. It will need to 
-be installed before running `sphinx-build`:
+[pydoc-markdown](https://pydoc-markdown.readthedocs.io/en/latest/) is used to generate python API documentation
+in markdown format. 
 
 ```shell script
-pip install recommonmark
+pip install pydoc-markdown
 ```
 
-To use sphinx rst [directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html) in a *markdown* file use the 
-`eval_rst` [code block](https://recommonmark.readthedocs.io/en/latest/auto_structify.html#embed-restructuredtext)
+##### Building And Viewing the API Documentation
 
-#### Building the documentation
+From the repository root directory run;
 
 ```shell script
-cd sphinx && make html
+pydoc-markdown --server --open
 ```
+
+This will open a browser window showing the rendered documentation.
+The source markdown files are available under `build/content/docs`. The 
+page will reload the page automatically when any of the source files change.
