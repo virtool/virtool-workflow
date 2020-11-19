@@ -1,4 +1,4 @@
-"""Fixtures for getting runtime configuration details."""
+"""Create fixtures for environment variable values."""
 import os
 from typing import Optional, Iterable, Type, Union
 

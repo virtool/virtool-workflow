@@ -5,7 +5,6 @@ from typing import Callable
 from virtool_workflow.fixtures.workflow_fixture import WorkflowFixture
 
 
-
 class WorkflowFixtureMultipleYield(ValueError):
     """Raised when a generator workflow fixture yields more than once."""
 

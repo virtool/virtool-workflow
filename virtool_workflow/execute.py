@@ -8,11 +8,11 @@ from virtool_workflow.fixtures.workflow_fixture import fixture
 
 async def run_subprocess(command: Union[str, list], **kwargs) -> Popen:
     """
-    Execute a shell command as a subprocess
+    Execute a shell command as a subprocess.
 
     :param command: The command to be executed
     :param kwargs: Keyword arguments are passed to :func:`asyncio.create_subprocess_exec`
-    :return: A :class:`asyncio.subprocess.Process` instance
+    :return: A #asyncio.subprocess.Process instance
     """
     if isinstance(command, str):
         command = command.split(" ")
@@ -38,8 +38,8 @@ async def run_shell_command(
 
     :param command: Either a string or a list representing the shell command and it's arguments.
     :param stdin: Either a string or file-like object to be used as stdin for the command.
-    :param kwargs: Any other parameters are passed directly to :func:`subprocess.Popen`
-    :return
+    :param kwargs: Any other parameters are passed directly to #subprocess.Popen()
+    :return: A `Tuple[str, str]` containing the output from to stdin and stderr
     """
     stdin_is_str = isinstance(stdin, str)
 
@@ -54,20 +54,19 @@ async def run_shell_command(
 
 @fixture
 def thread_pool_executor() -> ThreadPoolExecutor:
-    """A fixture for a :class:`ThreadPoolExecutor` to be used by :func:`run_in_executor`."""
+    """A fixture for a #concurrent.futures.ThreadPoolExecutor to be used by #run_in_executor()."""
     return ThreadPoolExecutor()
 
 
 FunctionExecutor = Callable[..., Coroutine[Any, Any, Any]]
-"""A function which accepts a Callable and it's arguments as parameters and returns a coroutine"""
 
 
 @fixture
 def run_in_executor(thread_pool_executor: ThreadPoolExecutor) -> FunctionExecutor:
     """
-    Fixture to execute functions in a ThreadPoolExecutor.
+    Fixture to execute functions in a #concurrent.futures.ThreadPoolExecutor.
 
-    Wraps :func:`ThreadPoolExecutor.submit` as an async function.
+    Wraps #concurrent.futures.ThreadPoolExecutor.submit() as an async function.
     """
     async def _run_in_executor(func, *args, **kwargs):
         future = thread_pool_executor.submit(func, *args, **kwargs)
