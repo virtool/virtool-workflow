@@ -1,3 +1,4 @@
+"""Scoping and injection of workflow fixtures."""
 import pprint
 from contextlib import AbstractContextManager
 from functools import wraps
@@ -13,7 +14,7 @@ class WorkflowFixtureScope(AbstractContextManager):
     """
     A scope maintaining instances of workflow fixtures.
 
-    Fixture instances can be bound to functions using the :func:`.bind` method.
+    Fixture instances can be bound to functions using the #.bind() method.
     """
 
     def __init__(self,

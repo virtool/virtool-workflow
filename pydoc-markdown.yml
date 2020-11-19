@@ -13,9 +13,18 @@ renderer:
   content_directory: content/docs
   default_preamble: {menu: main}
   pages:
+    - title: README
+      index: true
+      source: 'README.md'
+
+    - title: virtool_workflow
+      contents:
+        - 'virtool_workflow.*'
+
     - title: virtool_workflow.analysis
       contents:
         - 'virtool_workflow.analysi*'
+
     - title: virtool_workflow.execution
       contents:
         - 'virtool_workflow.execution*'
