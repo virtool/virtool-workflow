@@ -14,7 +14,6 @@ from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 
 
-
 async def execute(
         job_id: str,
         workflow: Workflow,
@@ -70,7 +69,6 @@ async def _execute(job_id: str,
     fixtures["job_document"] = job_document
 
     return await executor
-
 
 
 async def execute_catching_cancellation(job_id, workflow):

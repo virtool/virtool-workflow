@@ -7,7 +7,7 @@
 
 from dataclasses import dataclass, astuple
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 
 from virtool_workflow import fixture, WorkflowFixture
 from virtool_workflow.analysis import utils

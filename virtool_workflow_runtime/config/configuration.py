@@ -47,7 +47,7 @@ def config_option(
 
     option_name = f"--{name}".replace("_", "-")
 
-    fixture = environment_variable_fixture(name, env, default, alt_names=alt_names, type_=type_)
+    fixture = environment_variable_fixture(name, env, default, type_=type_)
 
     options.append((name, option_name, type_, default, help_, fixture))
 
@@ -82,22 +82,19 @@ temp_path_str = config_option("temp_path_str", TEMP_PATH_ENV, default=f"{os.getc
 data_path_str = config_option("data_path_str", DATA_PATH_ENV, default=f"{os.getcwd()}/virtool",
                               help_="The path where persistent data should be stored.")
 
-proc = config_option("proc",
+proc = config_option("number_of_processes",
                      PROC_ENV,
-                     alt_names=("number_of_processes", "process_limit"),
                      default=2,
                      help_="The number of cores available for a workflow.")
 
-mem = config_option("mem",
+mem = config_option("memory_usage_limit",
                     MEM_ENV,
-                    alt_names=("memory_limit", "RAM_limit"),
                     default=8,
                     help_="The amount of RAM in GB available for use in a workflow.")
 
 redis_connection_string = config_option(
-    "redis_connection_str",
+    "redis_connection_string",
     REDIS_CONNECTION_STRING_ENV,
-    alt_names=("redis_url", "redis_connection_string"),
     default="redis://localhost:6379",
     help_="The URL used to connect to redis.",
 )
@@ -116,7 +113,6 @@ db_name = config_option("db_name", MONGO_DATABASE_NAME_ENV, default="virtool",
 db_connection_string = config_option(
     "db_connection_string",
     MONGO_DATABASE_CONNECTION_STRING_ENV,
-    alt_names=("db_conn_string", "db_conn_url", "db_connection_url"),
     default="mongodb://localhost:27017",
     help_="The URL used to connect to MongoDB.")
 

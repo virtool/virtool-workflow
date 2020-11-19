@@ -11,7 +11,6 @@ def environment_variable_fixture(
         name: str,
         variable: str,
         default: Optional[ENV_VARIABLE_TYPE] = None,
-        alt_names: Iterable[str] = (),
         type_: Type[ENV_VARIABLE_TYPE] = str,
 ) -> WorkflowFixture:
     """
@@ -20,7 +19,6 @@ def environment_variable_fixture(
     :param name: The name of the fixture.
     :param variable: The name of the environment variable to be used.
     :param default: The default value to use if the environment variable is not set.
-    :param alt_names: Alternate names for the fixture.
     :param type_: The expected type of the environment variable. Supported types are str, int, and bool.
     """
 
@@ -44,7 +42,7 @@ def environment_variable_fixture(
 
     _fixture.__name__ = _fixture.__qualname__ = name
 
-    class _Fixture(WorkflowFixture, param_names=[name, *alt_names]):
+    class _Fixture(WorkflowFixture, param_name=name):
         default_value = default
         environment_variable = variable
 
