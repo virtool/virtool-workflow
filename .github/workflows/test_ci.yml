@@ -1,5 +1,5 @@
 # Run test suite using tox.
-name: CI
+name: Tests
 
 on:
   pull_request:
@@ -42,22 +42,9 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
-  codacy-coverage-reporter:
-    if: github.event_name == 'push'
-    needs: test
-    runs-on: ubuntu-latest
-    name: Update Coverage Report
-    steps:
-      - uses: actions/checkout@master
-
-      - name: Download Latest Coverage Report
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-report
-
       - name: Run codacy-coverage-reporter
+        if: github.event_name == 'push'
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: $GITHUB_WORKSPACE/coverage.xml
-
