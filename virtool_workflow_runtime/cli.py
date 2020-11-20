@@ -99,4 +99,4 @@ def create_env_script(**kwargs):
 
 def cli_main():
     """Main pip entrypoint."""
-    cli(_anyio_backend="asyncio")
+    cli()
