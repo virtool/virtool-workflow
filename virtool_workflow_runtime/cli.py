@@ -14,11 +14,11 @@ from . import runtime
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
 
-@click.option("--uv-loop", is_flag=True, help="Use uvloop in place of standard asyncio event loop.")
+@click.option("--no-uv-loop", is_flag=True, help="Use standard asyncio event loop.")
 @click.group()
-def cli(uv_loop):
+def cli(no_uv_loop):
     """Command Line Interface for Virtool Workflows."""
-    if uv_loop:
+    if not no_uv_loop:
         uvloop.install()
 
 
