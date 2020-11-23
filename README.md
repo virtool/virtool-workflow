@@ -8,6 +8,14 @@ An framework for developing new Virtool workflows.
 
 ## Installation
 
+Install from PyPi using;
+
+```shell script
+pip install virtool-workflow
+```
+
+Or install from source;
+
 ```shell script
 git clone https://github.com/virtool/virtool-workflow.git
 pip install .
@@ -33,46 +41,6 @@ A Workflow is defined by an an instance of the [Workflow](#) class. Startup, ste
 cleanup functions are added using the `startup`, `step`, and `cleanup` decorator methods 
 respectively. 
 
-```python
-from virtool_workflow import Workflow
-
-my_workflow = Workflow()
-
-@my_workflow.startup
-async def this_will_be_executed_on_startup():
-    ...
-
-
-@my_workflow.step
-async def this_is_the_first_step_of_the_workflow():
-    ...
-
-
-@my_workflow.step
-async def this_is_the_second_step_of_the_workflow():
-    ...
-
-
-@my_workflow.cleanup
-async def this_will_be_executed_last():
-    ...
-```
-
-All workflow startup, cleanup, and step functions are coroutines. However
-any functions added using the `startup`, `step`, or `cleanup` decorators will
-be coerced to a coroutine. Thus, the following is also valid.  
-
-```python
-@my_workflow.step
-def non_async_step_function():
-    ...
-```
-
-### Alternative Static API
-
-`virtool_workflow` also provides a static API for building workflows without explicitly using an instance of `Workflow`.
-Any functions tagged by the `virtool_workflow.startup`, `virtool_workflow.step`, or `virtool_workflow.cleanup` decorators
-will be used by the framework to create a workflow. 
 
 ```python
 from virtool_workflow import startup, step, cleanup
@@ -85,16 +53,27 @@ def startup_function():
 def step_function():
     ...
 
+@step
+def step_function_2():
+    ...
+
 @cleanup
 def cleanup_function():
     ...
 ```
 
-When the `Workflow` instance is built, the functions will be added in **definition order**. In other words, 
-those functions appearing first in the file will be executed first by the framework.
+Within their own sets, the `step`, `startup`, and `cleanup` functions will be executed in **definition order**. As such
+`step_function_2()` in the above example will be executed after `step_function()`.
 
-The `Workflow` instance itself is available from the *startup*, *cleanup*, and *step*
-functions via a **fixture**.
+All workflow startup, cleanup, and step functions are coroutines. However
+any functions added using the `startup`, `step`, or `cleanup` decorators will
+be coerced to a coroutine. Thus, the following is also valid.  
+
+```python
+@step
+def non_async_step_function():
+    ...
+```
 
 ### Workflow Updates
 
@@ -153,7 +132,7 @@ decorator is invoked a new subclass is created and the decorated function is use
 ```python
 from virtool_workflow import WorkflowFixture 
 
-class MyWorkflowFixture(WorkflowFixture, param_names=["my_workflow_fixture", "my_wf_fixture"]):
+class MyWorkflowFixture(WorkflowFixture, param_name="my_workflow_fixture"):
 
     @staticmethod
     def __fixture__():
@@ -161,7 +140,7 @@ class MyWorkflowFixture(WorkflowFixture, param_names=["my_workflow_fixture", "my
 
 ```
 
-The fixture will be available within workflows by the names provided in the `param_names` argument. 
+The fixture will be available within workflows by the name specified by `param_name`.
 
 
 ### Fixtures Using Other Fixtures
@@ -170,16 +149,14 @@ Workflow fixtures can use other fixtures as long as they have been defined befor
 they simply declare a parameter with the same name as the desired fixture.
 
 ```python
-from virtool_workflow import fixture, Workflow
+from virtool_workflow import fixture, step
 
 @fixture
 def uses_my_fixture(my_workflow_fixture: str):
     # use my_workflow_fixture
     ...
 
-my_workflow = Workflow()
-
-@my_workflow.step
+@step
 def step(uses_my_fixture):
     ...
 
@@ -196,19 +173,17 @@ will refer to the exact same instance throughout a workflow's execution. This pr
 used to pass state between workflow steps. 
 
 ```python
-from virtool_workflow import fixture, Workflow
+from virtool_workflow import fixture, step
 
 @fixture
 def mutable_fixture():
     return dict()
 
-wf = Workflow()
-
-@wf.step
+@step
 def step_1(mutable_fixture):
     mutable_fixture["intermediate value"] = "some workflow state"
 
-@wf.step
+@step
 def step_2(mutable_fixture):
     print(mutable_fixture["intermediate value"]) # "some workflow state" 
 ```
@@ -235,18 +210,16 @@ the end user through the Virtool's UI. It is available within workflows as a fix
 returned from `virtool_workflow.execute_workflow.execute`. 
 
 ```python
-    from virtool_workflow import Workflow
-    from virtool_workflow.execution.execute_workflow import execute
+    from virtool_workflow import step, hooks
 
-    wf = Workflow()
-
-    @wf.step
+    @step
     def add_to_results(results: dict):
         results["result"] = "some result"
 
-    results = await execute(wf) 
-    results["result"] # "some result"
-    
+
+    @hooks.on_result
+    def print_result(workflow, results):
+        print(results["result"]) # prints "some_result"
 ```
 
 When a workflow is executed as part of a virtool job, the values in the results dictionary will be stored in the 
@@ -299,7 +272,7 @@ A workflow can also be executed from python using `virtool_workflow.execute_work
 
 The runtime provides several fixtures implicitly. These include the id of the job 
 the workflow is being executed for (`job_id`), the job document in the database (`job_document`),
-the virtool `data_path` and `temp_path`, the [database](#) object, and others. 
+the virtool `data_path` and `temp_path`, and others. 
 
 More details about the fixtures provided can be found in the [API docs](#)
 
