@@ -42,7 +42,8 @@ async def _run(file: str, job_id: str, **kwargs):
         await create_config(scope, **kwargs)
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
 
-        await runtime.execute(job_id, workflow, scope)
+        result = await runtime.execute(job_id, workflow, scope)
+        print(result)
 
 
 @apply_config_options
@@ -57,7 +58,8 @@ def run(file: str, job_id: str, **kwargs):
 async def _run_local(f: str, **kwargs):
     with WorkflowFixtureScope() as scope:
         await create_config(scope=scope, **kwargs)
-        await execute(discovery.discover_workflow(Path(f).absolute()), scope)
+        result = await execute(discovery.discover_workflow(Path(f).absolute()), scope)
+        print(result)
 
 
 @apply_config_options
