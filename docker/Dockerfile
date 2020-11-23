@@ -1,18 +1,9 @@
 FROM python:3.9 as build_wheel
 
-ARG VIRTOOL_CORE_REPO_URL="https://github.com/virtool/virtool-core"
-ARG VIRTOOL_WORKFLOW_REPO_URL="https://github.com/virtool/virtool-workflow"
+ARG VIRTOOL_WORKFLOW_PIP_PACKAGE="virtool-workflow==0.1.0"
 
 WORKDIR /build
-RUN git clone $VIRTOOL_CORE_REPO_URL \
-    && cd virtool-core \
-    && python setup.py bdist_wheel \
-    && pip install --user dist/*.whl # installs to .local
-
-RUN git clone $VIRTOOL_WORKFLOW_REPO_URL \
-    && cd virtool-workflow \
-    && python setup.py bdist_wheel \
-    && pip install --user dist/*.whl # installs to .local
+RUN pip install --user $VIRTOOL_WORKFLOW_PIP_PACKAGE
 
 FROM python:3.9-slim as main
 
