@@ -41,11 +41,12 @@ def apply_config_options(func):
 
 async def _run(file: str, job_id: str, **kwargs):
     with WorkflowFixtureScope() as scope:
-        await create_config(scope, **kwargs)
+        config = await create_config(scope, **kwargs)
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
 
         result = await runtime.execute(job_id, workflow, scope)
-        print(result)
+        if config.dev_mode:
+            print(result)
 
 
 @apply_config_options
@@ -59,9 +60,11 @@ def run(f: str, job_id: str, **kwargs):
 
 async def _run_local(f: str, **kwargs):
     with WorkflowFixtureScope() as scope:
-        await create_config(scope=scope, **kwargs)
+        config = await create_config(scope=scope, **kwargs)
         result = await execute(discovery.discover_workflow(Path(f).absolute()), scope)
-        print(result)
+
+        if config.dev_mode:
+            print(result)
 
 
 @apply_config_options
