@@ -14,10 +14,12 @@ from . import runtime
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
 
+@click.option("--uv-loop", is_flag=True, help="Use uvloop in place of standard asyncio event loop.")
 @click.group()
-def cli():
+def cli(uv_loop):
     """Command Line Interface for Virtool Workflows."""
-    uvloop.install()
+    if uv_loop:
+        uvloop.install()
 
 
 def workflow_file_option(func):
@@ -25,7 +27,7 @@ def workflow_file_option(func):
     return click.option(
         "-f",
         default="workflow.py",
-        type=click.Path(exists=True),
+        type=click.Path(),
         help="python module containing an instance of `virtool_workflow.Workflow`"
     )(func)
 
@@ -47,12 +49,12 @@ async def _run(file: str, job_id: str, **kwargs):
 
 
 @apply_config_options
-@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @workflow_file_option
+@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @cli.command()
-def run(file: str, job_id: str, **kwargs):
+def run(f: str, job_id: str, **kwargs):
     """Run a workflow and send updates to Virtool."""
-    asyncio.run(_run(file, job_id, **kwargs))
+    asyncio.run(_run(f, job_id, **kwargs))
 
 
 async def _run_local(f: str, **kwargs):
