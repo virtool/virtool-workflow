@@ -49,7 +49,7 @@ async def _run(file: str, job_id: str, **kwargs):
 @click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @workflow_file_option
 @cli.command()
-async def run(file: str, job_id: str, **kwargs):
+def run(file: str, job_id: str, **kwargs):
     """Run a workflow and send updates to Virtool."""
     asyncio.run(_run(file, job_id, **kwargs))
 
@@ -63,7 +63,7 @@ async def _run_local(f: str, **kwargs):
 @apply_config_options
 @workflow_file_option
 @cli.command()
-async def run_local(f: str, **kwargs):
+def run_local(f: str, **kwargs):
     """Run a workflow locally, without runtime specific dependencies."""
     asyncio.run(_run_local(f, **kwargs))
 
@@ -78,7 +78,7 @@ async def _print_config(**kwargs):
 
 @apply_config_options
 @cli.command()
-async def print_config(**kwargs):
+def print_config(**kwargs):
     """Print the configuration which would be used with the given arguments."""
     asyncio.run(_print_config(**kwargs))
 
