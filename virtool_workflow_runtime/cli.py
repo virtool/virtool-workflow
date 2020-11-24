@@ -10,6 +10,7 @@ from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow_runtime.config.configuration import create_config, options
 from . import discovery
 from . import runtime
+from .uvloop_compatible_run import asyncio_run
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
@@ -55,7 +56,7 @@ async def _run(file: str, job_id: str, **kwargs):
 @cli.command()
 def run(f: str, job_id: str, **kwargs):
     """Run a workflow and send updates to Virtool."""
-    asyncio.run(_run(f, job_id, **kwargs))
+    asyncio_run(_run(f, job_id, **kwargs))
 
 
 async def _run_local(f: str, **kwargs):
@@ -72,7 +73,7 @@ async def _run_local(f: str, **kwargs):
 @cli.command()
 def run_local(f: str, **kwargs):
     """Run a workflow locally, without runtime specific dependencies."""
-    asyncio.run(_run_local(f, **kwargs))
+    asyncio_run(_run_local(f, **kwargs))
 
 
 async def _print_config(**kwargs):
@@ -87,7 +88,7 @@ async def _print_config(**kwargs):
 @cli.command()
 def print_config(**kwargs):
     """Print the configuration which would be used with the given arguments."""
-    asyncio.run(_print_config(**kwargs))
+    asyncio_run(_print_config(**kwargs))
 
 
 @apply_config_options
