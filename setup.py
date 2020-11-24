@@ -42,6 +42,6 @@ setup(
     platforms="linux",
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     entry_points=ENTRY_POINTS
 )
