@@ -102,6 +102,7 @@ async def prepared_reads_and_fastqc(
 
 @virtool_workflow.fixture
 def unprepared_reads(analysis_args: AnalysisArguments):
+    """The unprepared reads for the current analysis job."""
     min_length, max_length = analysis_args.sample["quality"]["length"]
 
     return Reads(paired=analysis_args.paired,
