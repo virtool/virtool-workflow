@@ -203,6 +203,8 @@ Some standard fixtures are always made available when a workflow is executed. Th
 | execution   | The current WorkflowExecution         |
 | workflow    | The Workflow instance being executed  |
 
+A more complete list of available fixtures can be found [here](virtool_workflow/fixtures/README.md)
+
 #### The Results Dictionary
 
 The `results` dictionary is used to store the results of the workflow so that they can be provided to 
@@ -267,14 +269,6 @@ A workflow can also be executed from python using `virtool_workflow.execute_work
     asyncio.run(execute(my_workflow))
 ```
 
-
-### Runtime Fixtures
-
-The runtime provides several fixtures implicitly. These include the id of the job 
-the workflow is being executed for (`job_id`), the job document in the database (`job_document`),
-the virtool `data_path` and `temp_path`, and others. 
-
-More details about the fixtures provided can be found in the [API docs](#)
 
 ### Responding to Runtime Events
 
