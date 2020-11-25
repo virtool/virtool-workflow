@@ -69,7 +69,7 @@ async def _execute(job_id: str,
     fixtures["job_document"] = job_document
 
     if "args" in job_document:
-        fixtures["job_args"] = job_document["job_args"]
+        fixtures["job_args"] = job_document["args"]
 
     return await executor
 
