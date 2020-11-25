@@ -101,6 +101,17 @@ async def prepared_reads_and_fastqc(
 
 
 @virtool_workflow.fixture
+def unprepared_reads(analysis_args: AnalysisArguments):
+    min_length, max_length = analysis_args.sample["quality"]["length"]
+
+    return Reads(paired=analysis_args.paired,
+                 min_length=min_length,
+                 max_length=max_length,
+                 count=analysis_args.sample["quality"]["count"],
+                 paths=analysis_args.read_paths)
+
+
+@virtool_workflow.fixture
 async def reads(
         scope: WorkflowFixtureScope,
         analysis_args: AnalysisArguments,
@@ -109,7 +120,8 @@ async def reads(
         database: VirtoolDatabase,
         trimming_parameters: Dict[str, Any],
         trimming_output_path: Path,
-        run_in_executor: FunctionExecutor
+        run_in_executor: FunctionExecutor,
+        unprepared_reads: Reads
 ) -> Reads:
     """
     The prepared reads for the current job.
@@ -134,17 +146,13 @@ async def reads(
     else:
         hooks.on_workflow_failure(delete_cache_if_not_ready, once=True)
         hooks.on_workflow_failure(delete_analysis, once=True)
-        hooks.on_result(VirtoolDatabase.store_result_callback(analysis_args.analysis_id,
-                                                              database["analyses"],
-                                                              analysis_args.path), once=True)
 
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
         await create_cache(fq, database, analysis_args, trimming_parameters, trimming_output_path, cache_path)
 
-    min_length, max_length = analysis_args.sample["quality"]["length"]
+    hooks.on_result(VirtoolDatabase.store_result_callback(analysis_args.analysis_id,
+                                                          database["analyses"],
+                                                          analysis_args.path), once=True)
 
-    return Reads(paired=analysis_args.paired,
-                 min_length=min_length,
-                 max_length=max_length,
-                 count=analysis_args.sample["quality"]["count"],
-                 paths=analysis_args.read_paths)
+    return unprepared_reads
+
