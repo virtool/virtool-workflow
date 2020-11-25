@@ -17,5 +17,7 @@ The fixtures which are automatically imported by the runtime for any type of wor
 | run_in_executor | A function which runs functions in a `concurrent.futures.ThreadPoolExecutor` | `Callable[[Callable, Iterable[Any], dict], Coroutine` |
 | scope       | The `WorkflowFixtureScope` object being used to bind fixtures for this workflow | `virtool_workflow.fixtures.scope.WorkflowFixtureScope` |
 
+The `job_id`, `job_document`, and `job_args` fixtures are not available when running a workflow using `workflow run-local`.
+
 
 
