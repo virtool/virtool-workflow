@@ -14,6 +14,7 @@ from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow import hooks
 from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
+from virtool_workflow.analysis.reads import Reads
 
 
 def rename_trimming_results(path: Path):
@@ -100,7 +101,7 @@ async def prepared_reads_and_fastqc(
 
 
 @virtool_workflow.fixture
-async def reads_path(
+async def reads(
         scope: WorkflowFixtureScope,
         analysis_args: AnalysisArguments,
         cache_path: Path,
@@ -109,9 +110,9 @@ async def reads_path(
         trimming_parameters: Dict[str, Any],
         trimming_output_path: Path,
         run_in_executor: FunctionExecutor
-) -> Path:
+) -> Reads:
     """
-    The path to the prepared sample data for the current analysis.
+    The prepared reads for the current job.
 
     The trimming and fastqc check for the sample is completed before returning.
     """
@@ -126,7 +127,7 @@ async def reads_path(
     elif not all(f["raw"] for f in analysis_args.sample["files"]):
         legacy_paths = utils.make_legacy_read_paths(analysis_args.sample_path, analysis_args.paired)
 
-        paths_to_copy = {path: reads_path/path.name
+        paths_to_copy = {path: analysis_args.reads_path/path.name
                          for path in legacy_paths}
 
         await copy_paths(paths_to_copy.items(), run_in_executor)
@@ -140,4 +141,10 @@ async def reads_path(
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
         await create_cache(fq, database, analysis_args, trimming_parameters, trimming_output_path, cache_path)
 
-    return analysis_args.reads_path
+    min_length, max_length = analysis_args.sample["quality"]["length"]
+
+    return Reads(paired=analysis_args.paired,
+                 min_length=min_length,
+                 max_length=max_length,
+                 count=analysis_args.sample["quality"]["count"],
+                 paths=analysis_args.read_paths)
