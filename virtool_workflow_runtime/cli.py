@@ -2,7 +2,6 @@
 from pathlib import Path
 
 import click
-import uvloop
 import asyncio
 
 from virtool_workflow.execution.execution import execute
@@ -14,12 +13,9 @@ from . import runtime
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
 
-@click.option("--no-uv-loop", is_flag=True, help="Use standard asyncio event loop.")
 @click.group()
-def cli(no_uv_loop):
-    """Command Line Interface for Virtool Workflows."""
-    if not no_uv_loop:
-        uvloop.install()
+def cli():
+    pass
 
 
 def workflow_file_option(func):
