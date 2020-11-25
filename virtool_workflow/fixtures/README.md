@@ -11,6 +11,8 @@ The fixtures which are automatically imported by the runtime for any type of wor
 | workflow    | The Workflow instance being executed  | `virtool_workflow.Workflow` |
 | data_path   | The root path for data                | `pathlib.Path` |
 | temp_path   | The root path for temporary files     |`pathlib.Path` |
+| proc        | The number of allowable processes for the current job  | int |
+| mem         | The amount of RAM available for the current job, in GB | int |
 | job_id      | The ID of the current job       | `str` |
 | job_document| The database document (dict) for the current job | `dict` |
 | job_args    | The arguments provided for the job from the front end application. | `dict` |
