@@ -19,7 +19,10 @@ FixtureImportType = Iterable[
 
 def _import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
-    Import a module from a file
+    Import a module from a file.
+
+    The parent directory of `path` will also be added to `sys.path` prior to importing. This
+    ensures that modules and packages defined in that directory can be properly imported.
 
     :param module_name: The name of the python module.
     :param path: The :class:`pathlib.Path` of the python file
