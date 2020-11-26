@@ -53,4 +53,4 @@ async def test_fixtures_from_autoload_py():
 
 
 
-
+    assert results["variable"] is None
