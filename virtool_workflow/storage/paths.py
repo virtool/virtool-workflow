@@ -25,7 +25,6 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     yield path
     rmtree(path)
 
-
 @fixture
 def data_path(data_path_str: str):
     """Fetch the virtool data path."""
@@ -52,9 +51,16 @@ def cache_path(data_path: Path):
 
 
 @fixture
-def subtraction_path(data_path: Path):
+def subtraction_data_path(data_path: Path):
     """The path locating subtraction data."""
     path = data_path/"subtractions"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+@fixture
+def subtraction_path(temp_path: Path):
+    path = temp_path/"subtractions"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
