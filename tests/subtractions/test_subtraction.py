@@ -26,10 +26,10 @@ async def _fetch_subtraction_document(id: str):
     return mock_subtractions[id]
 
 
-def test_subtractions(monkeypatch):
+async def test_subtractions(monkeypatch):
     monkeypatch.setattr("virtool_workflow.db.db.fetch_subtraction_document", _fetch_subtraction_document)
 
-    subtraction_id = mock_subtractions[0]["id"]
+    subtraction_id = mock_subtractions["0"]["id"]
 
     with context_directory(f"data/subtractions/{subtraction_id}") as current_subtraction_data_path:
 
@@ -38,7 +38,7 @@ def test_subtractions(monkeypatch):
 
         with context_directory(f"temp/subtractions") as subtraction_path:
 
-            _subtractions = subtractions(
+            _subtractions = await subtractions(
                 job_args=dict(subtraction_id=subtraction_id),
                 subtraction_data_path=current_subtraction_data_path.parent,
                 subtraction_path=subtraction_path,

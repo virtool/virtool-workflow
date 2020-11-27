@@ -63,6 +63,6 @@ async def subtractions(job_args: Dict[str, Any],
     if isinstance(ids, str):
         ids = [ids]
 
-    await copy_paths({subtraction_data_path/id_: subtraction_path/id_ for id_ in ids}, run_in_executor)
+    await copy_paths({subtraction_data_path/id_: subtraction_path/id_ for id_ in ids}.items(), run_in_executor)
 
     return [Subtraction.from_document(await db.fetch_subtraction_document(id_), subtraction_data_path) for id_ in ids]
