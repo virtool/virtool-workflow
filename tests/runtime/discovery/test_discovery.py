@@ -9,6 +9,8 @@ STATIC_TEST_FILE = cwd/"static_workflow.py"
 
 FIXTURE_TEST_FILE = cwd/"discoverable_fixtures.py"
 
+IMPORT_TEST_FILE = cwd/"discoverable_workflow/discoverable_workflow_with_imports.py"
+
 
 def test_discover_workflow():
     workflow = discovery.discover_workflow(TEST_FILE)
@@ -52,5 +54,14 @@ async def test_fixtures_from_autoload_py():
     assert "samples" in WorkflowFixture.types()
 
 
+async def test_import_workflow_with_other_imports():
+    workflow = discovery.discover_workflow(IMPORT_TEST_FILE)
+
+    results = {}
+    await workflow.steps[0](results)
+
+    assert results["foo"] == "foo"
+    assert results["bar"] == "bar"
+    assert results["variable"] is None
 
 
