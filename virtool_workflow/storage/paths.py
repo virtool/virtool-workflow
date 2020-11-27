@@ -49,3 +49,12 @@ def cache_path(data_path: Path):
     if not _cache_path.exists():
         _cache_path.mkdir()
     return _cache_path
+
+
+@fixture
+def subtraction_path(data_path: Path):
+    """The path locating subtraction data."""
+    path = data_path/"subtractions"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
