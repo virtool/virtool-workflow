@@ -1,3 +1,4 @@
+import pytest
 from virtool_workflow.storage.paths import context_directory
 from virtool_workflow.subtractions.subtraction import subtractions
 from virtool_workflow.execute import run_in_executor, thread_pool_executor
@@ -9,7 +10,7 @@ mock_subtraction_base = dict(
     gc={"A":0.2, "T":0.2, "C":0.2, "G":0.4}
 )
 
-mock_subtractions = {str(i):{**mock_subtraction_base, "id": str(i)} for i in range(5)}
+mock_subtractions = {str(i): {**mock_subtraction_base, "id": str(i)} for i in range(5)}
 
 subtraction_data_filenames = [
     "subtraction.fa.gz",
@@ -29,24 +30,32 @@ async def _fetch_subtraction_document(id: str):
 async def test_subtractions(monkeypatch):
     monkeypatch.setattr("virtool_workflow.db.db.fetch_subtraction_document", _fetch_subtraction_document)
 
-    subtraction_id = mock_subtractions["0"]["id"]
+    with context_directory(f"data/subtractions") as subtraction_data_path:
 
-    with context_directory(f"data/subtractions/{subtraction_id}") as current_subtraction_data_path:
+        for subtraction in mock_subtractions.values():
+            current_subtraction_data_path = subtraction_data_path/subtraction["id"]
+            current_subtraction_data_path.mkdir()
 
-        for name in subtraction_data_filenames:
-            (current_subtraction_data_path/name).touch()
+            for name in subtraction_data_filenames:
+                (current_subtraction_data_path/name).touch()
 
         with context_directory(f"temp/subtractions") as subtraction_path:
 
             _subtractions = await subtractions(
-                job_args=dict(subtraction_id=subtraction_id),
-                subtraction_data_path=current_subtraction_data_path.parent,
+                job_args=dict(subtraction_id=[s["id"] for s in mock_subtractions.values()]),
+                subtraction_data_path=subtraction_data_path,
                 subtraction_path=subtraction_path,
                 run_in_executor=run_in_executor(thread_pool_executor())
             )
 
-            print(_subtractions)
-            raise
+            assert len(_subtractions) == len(mock_subtractions)
+
+            for subtraction, subtraction_document in zip(_subtractions, mock_subtractions.values()):
+                assert subtraction.name == subtraction_document["name"]
+                assert subtraction.nickname == subtraction_document["nickname"]
+                assert subtraction.path == subtraction_path/subtraction_document["id"]
+                assert subtraction.fasta_path == subtraction.path/"subtraction.fa.gz"
+                assert subtraction.bowtie2_index_path == f"{subtraction.path}/reference"
 
 
 
