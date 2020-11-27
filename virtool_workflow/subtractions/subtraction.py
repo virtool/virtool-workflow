@@ -9,16 +9,36 @@ from virtool_workflow.execute import FunctionExecutor
 
 @dataclass
 class Subtraction:
+    """A dataclass representing a subtraction in Virtool."""
     name: str
     nickname: str
     path: Path
+    """The Path locating the directory containing the subtraction data."""
     fasta_path: Path
+    """The Path locating the compressed FASTA data."""
     bowtie2_index_path: str
-    sequence_count: int
+    """The prefix of all Paths locating the Bowtie2 index data."""
+    chromosome_count: int
+    """The number of chromosomes contained in the subtraction data."""
     gc: Dict[str, float]
+    """A dict containing the percentage of occurrence for each nucleotide in the FASTA data."""
 
     @staticmethod
     def from_document(document: Dict[str, Any], subtraction_path: Path):
+        """
+        Create a new `Subtraction` object based on the data from the subtractions database document.
+
+        :param document: The subtraction document from the database. It is expected to have;
+
+
+            * name: The scientific name for the subtraction.
+            * nickname: The shortened name for the subtraction.
+            * count: The chromosome count of the subtraction.
+            * gc: The percentage of occurrence of each nucleotide within the FASTA data of the subtraction.
+
+        :param subtraction_path: The path to subtraction data.
+        :return: A `Subtraction` instance representing the subtraction given by the subtraction document.
+        """
         path = subtraction_path / document["id"]
 
         return Subtraction(
@@ -27,7 +47,7 @@ class Subtraction:
             path=path,
             fasta_path=path / "subtraction.fa.gz",
             bowtie2_index_path=f"{path}/reference",
-            sequence_count=document["count"],
+            chromosome_count=document["count"],
             gc=document["gc"]
         )
 
