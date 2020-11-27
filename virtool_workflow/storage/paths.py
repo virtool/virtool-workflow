@@ -12,8 +12,7 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     """
     Context manager for a temporary directory.
 
-    A new directory is created at the given path and will
-    be deleted on exit.
+    A new directory is created at the given path and will be deleted on exit.
 
     :param path: The path of a directory to create.
     :return: The Path of the newly created directory.
