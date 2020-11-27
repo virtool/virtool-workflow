@@ -21,9 +21,17 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     if not isinstance(path, Path):
         path = Path(path)
 
+    root_path = path
+    while not root_path.parent.exists():
+        root_path = root_path.parent
+
     path.mkdir(parents=True, exist_ok=True)
-    yield path
-    rmtree(path)
+
+    try:
+        yield path
+    finally:
+        rmtree(root_path)
+
 
 @fixture
 def data_path(data_path_str: str):
