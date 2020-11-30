@@ -3,7 +3,7 @@ import asyncio
 from virtool_workflow.execution.workflow_executor import WorkflowError
 
 from virtool_workflow.execution.run_subprocess import run_subprocess
-from virtool_workflow_runtime import hooks
+from virtool_workflow import hooks
 
 
 @pytest.fixture

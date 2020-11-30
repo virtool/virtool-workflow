@@ -1,4 +1,4 @@
-from virtool_workflow_runtime import hooks
+from virtool_workflow import hooks
 from virtool_workflow_runtime import runtime
 from virtool_workflow import Workflow
 
