@@ -12,8 +12,9 @@ from virtool_workflow_runtime.config.configuration import redis_connection_strin
     redis_job_list_name, \
     db_name, \
     db_connection_string
-from virtool_workflow_runtime.runtime import execute_from_redis, hooks, \
+from virtool_workflow_runtime.runtime import execute_from_redis,\
     execute_while_watching_for_cancellation
+from virtool_workflow import hooks
 from virtool_workflow_runtime.db import VirtoolDatabase
 
 

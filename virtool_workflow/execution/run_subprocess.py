@@ -65,7 +65,7 @@ def run_subprocess():
             cwd=cwd
         )
 
-        @hooks.on_workflow_failure
+        @hooks.on_workflow_failure(until=hooks.on_f)
         def terminate_subprocess():
             process.terminate()
 
