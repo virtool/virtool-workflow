@@ -18,7 +18,7 @@ class Subtraction:
     """The Path locating the compressed FASTA data."""
     bowtie2_index_path: str
     """The prefix of all Paths locating the Bowtie2 index data."""
-    chromosome_count: int
+    count: int
     """The number of chromosomes contained in the subtraction data."""
     gc: Dict[str, float]
     """A dict containing the percentage of occurrence for each nucleotide in the FASTA data."""
@@ -47,7 +47,7 @@ class Subtraction:
             path=path,
             fasta_path=path / "subtraction.fa.gz",
             bowtie2_index_path=f"{path}/reference",
-            chromosome_count=document["count"],
+            count=document["count"],
             gc=document["gc"]
         )
 

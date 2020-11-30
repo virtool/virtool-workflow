@@ -1,7 +1,6 @@
-import pytest
+from virtool_workflow.execute import run_in_executor, thread_pool_executor
 from virtool_workflow.storage.paths import context_directory
 from virtool_workflow.subtractions.subtraction import subtractions
-from virtool_workflow.execute import run_in_executor, thread_pool_executor
 
 mock_subtraction_base = dict(
     name="foobar",
@@ -23,14 +22,14 @@ subtraction_data_filenames = [
 ]
 
 
-async def _fetch_subtraction_document(id: str):
-    return mock_subtractions[id]
+async def _fetch_subtraction_document(id_: str):
+    return mock_subtractions[id_]
 
 
 async def test_subtractions(monkeypatch):
     monkeypatch.setattr("virtool_workflow.db.db.fetch_subtraction_document", _fetch_subtraction_document)
 
-    with context_directory(f"data/subtractions") as subtraction_data_path:
+    with context_directory("data/subtractions") as subtraction_data_path:
 
         for subtraction in mock_subtractions.values():
             current_subtraction_data_path = subtraction_data_path/subtraction["id"]
@@ -39,7 +38,7 @@ async def test_subtractions(monkeypatch):
             for name in subtraction_data_filenames:
                 (current_subtraction_data_path/name).touch()
 
-        with context_directory(f"temp/subtractions") as subtraction_path:
+        with context_directory("temp/subtractions") as subtraction_path:
 
             _subtractions = await subtractions(
                 job_args=dict(subtraction_id=[s["id"] for s in mock_subtractions.values()]),
