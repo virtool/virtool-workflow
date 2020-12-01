@@ -1,7 +1,10 @@
+import asyncio
+from concurrent import futures
 from typing import Dict, Any
 
 from .hooks import Hook
 from virtool_workflow.workflow import Workflow
+from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.execution.workflow_executor import WorkflowError, State, WorkflowExecution
 
 
