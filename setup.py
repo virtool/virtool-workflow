@@ -14,7 +14,7 @@ PACKAGES = find_packages(exclude="tests")
 
 
 INSTALL_REQUIRES = [
-    "virtool-core==0.1.0",
+    "virtool-core==0.1.1",
     "click==7.1.2",
     "motor==2.3.0",
     "aiohttp==3.7.3",
