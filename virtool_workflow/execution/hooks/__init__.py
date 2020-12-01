@@ -170,8 +170,8 @@ async def _trigger_on_cancelled(error: WorkflowError):
 
 on_load_fixtures = Hook("on_load_fixtures", [WorkflowFixtureScope], return_type=None)
 """
-Triggered after runtime fixtures have been added to the #WorkflowFixtureScope, but 
-before the workflow is executed. 
+Triggered after runtime fixtures have been added to the #WorkflowFixtureScope, but
+before the workflow is executed.
 
 Enables modification or injection of specific fixtures before a workflow is executed.
 
