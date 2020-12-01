@@ -1,4 +1,4 @@
-from virtool_workflow.execute import run_in_executor, thread_pool_executor
+from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor
 from virtool_workflow.storage.paths import context_directory
 from virtool_workflow.subtractions.subtraction import subtractions
 
