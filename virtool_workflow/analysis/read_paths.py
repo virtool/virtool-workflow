@@ -8,7 +8,7 @@ import virtool_workflow
 from virtool_workflow.analysis import utils, fastqc
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.analysis.cache import fetch_cache, create_cache
-from virtool_workflow.execute import FunctionExecutor
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow_runtime.db import VirtoolDatabase

@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from typing import Iterable
 
-from virtool_workflow.execute import run_shell_command
+from virtool_workflow.execution.run_in_executor import run_shell_command
 
 
 async def run_fastqc(number_of_processes: int, read_paths: Iterable[Path], fastqc_path: Path):
