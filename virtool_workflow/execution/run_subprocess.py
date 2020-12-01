@@ -1,7 +1,7 @@
 import asyncio
 import asyncio.subprocess
 from logging import getLogger
-from typing import Optional, Callable, Awaitable, List
+from typing import Optional, Callable, Awaitable, List, Coroutine
 
 from virtool_workflow import fixture, hooks
 
@@ -10,7 +10,7 @@ logger = getLogger(__name__)
 
 async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]):
     """
-    Watch stdout and stderr streams and pass lines to the #`handler` callback function.
+    Watch the stdout or stderr stream and pass lines to the `handler` callback function.
 
     :param stream: a stdout or stderr file object
     :param handler: a handler coroutine for output lines
@@ -26,6 +26,7 @@ async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Aw
 
 
 async def watch_subprocess(process, stdout_handler, stderr_handler):
+    """Watch both stderr and stdout using #watch_pipe."""
     coros = [
         watch_pipe(process.stderr, stderr_handler)
     ]
@@ -38,14 +39,31 @@ async def watch_subprocess(process, stdout_handler, stderr_handler):
 
 @fixture
 def run_subprocess():
+    """Fixture to run subprocesses and handle stdin and stderr output line-by-line."""
     async def _run_subprocess(
             command: List[str],
-            stdout_handler: Optional[Callable] = None,
-            stderr_handler=None,
+            stdout_handler: Optional[Callable[[str], Coroutine]] = None,
+            stderr_handler: Optional[Callable[[str], Coroutine]] = None,
             env: Optional[dict] = None,
-            cwd: Optional[str] = None
+            cwd: Optional[str] = None,
+            wait: bool = True,
     ):
+        """
+        Run a command as a subprocess and handle stdin and stderr output line-by-line.
+
+        :param command: The command to run as a subprocess.
+        :param stdout_handler: A function to handle stdout lines.
+        :param stderr_handler: A function to handle stderr lines.
+        :param env: Environment variables to set for the subprocess.
+        :param cwd: Current working directory for the subprocess.
+        :param wait: Flag indicating to wait for the subprocess to finish before returning.
+
+        :return
+        """
         logger.info(f"Running command in subprocess: {' '.join(command)}")
+
+        # Ensure the asyncio child watcher has a reference to the running loop, prevents `process.wait` from hanging.
+        asyncio.get_child_watcher().attach_loop(asyncio.get_running_loop())
 
         stdout = asyncio.subprocess.PIPE if stdout_handler else asyncio.subprocess.DEVNULL
 
@@ -65,13 +83,16 @@ def run_subprocess():
             cwd=cwd
         )
 
-        @hooks.on_workflow_failure(until=hooks.on_f)
-        def terminate_subprocess():
-            process.terminate()
+        _watch_subprocess = asyncio.create_task(watch_subprocess(process, stdout_handler, _stderr_handler))
 
-        await watch_subprocess(process, stdout_handler, _stderr_handler)
+        @hooks.on_failure
+        def _terminate_process():
+            if process.returncode is None:
+                process.terminate()
+            _watch_subprocess.cancel()
 
-        await process.wait()
+        if wait:
+            await process.wait()
 
         return process
 
