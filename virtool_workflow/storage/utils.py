@@ -18,7 +18,7 @@ async def copy_paths(
         a separate thread and return a coroutine.
     """
     coroutines = [
-        run_in_executor(shutil.copy, source, destination)
+        run_in_executor(shutil.copytree, source, destination)
         for source, destination in paths
     ]
     await asyncio.gather(*coroutines)

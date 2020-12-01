@@ -12,8 +12,7 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     """
     Context manager for a temporary directory.
 
-    A new directory is created at the given path and will
-    be deleted on exit.
+    A new directory is created at the given path and will be deleted on exit.
 
     :param path: The path of a directory to create.
     :return: The Path of the newly created directory.
@@ -21,9 +20,16 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     if not isinstance(path, Path):
         path = Path(path)
 
+    root_path = path
+    while not root_path.parent.exists():
+        root_path = root_path.parent
+
     path.mkdir(parents=True, exist_ok=True)
-    yield path
-    rmtree(path)
+
+    try:
+        yield path
+    finally:
+        rmtree(root_path)
 
 
 @fixture
@@ -49,3 +55,19 @@ def cache_path(data_path: Path):
     if not _cache_path.exists():
         _cache_path.mkdir()
     return _cache_path
+
+
+@fixture
+def subtraction_data_path(data_path: Path):
+    """The path locating subtraction data."""
+    path = data_path/"subtractions"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+@fixture
+def subtraction_path(temp_path: Path):
+    path = temp_path/"subtractions"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
