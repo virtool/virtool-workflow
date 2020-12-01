@@ -12,8 +12,7 @@ from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
-from virtool_workflow_runtime.db import VirtoolDatabase
-from virtool_workflow_runtime.db.fixtures import Collection
+from virtool_workflow.db import db
 
 TRIMMING_PROGRAM = "skewer-0.2.2"
 
@@ -22,14 +21,13 @@ TRIMMING_PROGRAM = "skewer-0.2.2"
 async def cache_document(
         trimming_parameters: Dict[str, Any],
         sample_id: str,
-        caches: Collection,
 ) -> Optional[Dict[str, Any]]:
     """
     The cache document for the current analysis.
 
     If no cache exists (ie. the current analysis job is not a re-try) then None is returned.
     """
-    cache_document = await caches.find_one({
+    cache_document = await db.find_cache_document({
         "hash": virtool_core.caches.db.calculate_cache_hash(trimming_parameters),
         "missing": False,
         "program": TRIMMING_PROGRAM,
@@ -61,7 +59,6 @@ async def fetch_cache(
 
 
 async def create_cache_document(
-        database: VirtoolDatabase,
         analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -70,25 +67,13 @@ async def create_cache_document(
 
     This document will be used to check for the presence of cached prepared reads.
 
-    :param database: The Virtool database object
     :param analysis_args: The AnalysisArguments fixture
     :param trimming_parameters: The trimming parameters (see virtool_workflow.analysis.trimming)
     :return: The cache document which was created.
     """
-    cache = await virtool_core.caches.db.create(
-        database,
-        analysis_args.sample_id,
-        trimming_parameters,
-        analysis_args.paired
-    )
+    cache = await db.create_cache_document(analysis_args.sample_id, trimming_parameters, analysis_args.paired)
 
-    await database["analyses"].update_one({"_id": analysis_args.analysis_id}, {
-        "$set": {
-            "cache": {
-                "id": cache["id"]
-            }
-        }
-    })
+    await db.update_analysis_with_cache_id(analysis_args.analysis_id, cache["id"])
 
     return cache
 
