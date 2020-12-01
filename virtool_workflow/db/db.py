@@ -1,5 +1,6 @@
 """Central module for database access. """
 import virtool_core.caches.db
+import virtool_core.samples.db
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 
@@ -16,14 +17,24 @@ async def fetch_document_by_id(id_: str, collection_name: str) -> Optional[Dict[
     return document
 
 
+async def find_document(collection_name: str, *args, **kwargs):
+    """Find a document in a database collection based on the given query."""
+    return await _db[collection_name].find_one(*args, **kwargs)
+
 async def find_cache_document(query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Find a cache document using the given query."""
     return await _db["caches"].find_one(query)
 
 
-async def create_cache_document(sample_id: str, trimming_parameters: Dict[str, Any], paired: bool):
+async def create_cache_document(sample_id: str, trimming_parameters: Dict[str, Any],
+                                paired: bool, quality: Dict = None):
     """Create a new cache document."""
-    return await virtool_core.caches.db.create(_db, sample_id, trimming_parameters, paired)
+    document = await virtool_core.caches.db.create(_db, sample_id, trimming_parameters, paired)
+
+    if quality:
+        await _db["caches"].update_one(dict(_id=document["id"]), {"$set": {
+            "quality": quality
+        }})
 
 
 async def update_analysis_with_cache_id(analysis_id: str, cache_id: str):
@@ -36,4 +47,18 @@ async def update_analysis_with_cache_id(analysis_id: str, cache_id: str):
         }
     })
 
+
+async def delete_cache(cache_id: str):
+    """Delete the cache with the given id."""
+    return await _db["caches"].delete_one({"_id": cache_id})
+
+
+async def delete_analysis(analysis_id: str):
+    """Delete the analysis with the given id."""
+    return await _db["analyses"].delete_one({"_id": analysis_id})
+
+
+async def recalculate_workflow_tags_for_sample(sample_id):
+    """Recalculate the workflow tags for a sample."""
+    return await virtool_core.samples.db.recalculate_workflow_tags(_db, sample_id)
 
