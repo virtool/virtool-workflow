@@ -2,7 +2,7 @@ from virtool_workflow import fixture, Workflow
 
 __fixtures__ = [
     ("virtool_workflow.storage.paths", "data_path", "temp_path"),
-    "virtool_workflow.execute"
+    "virtool_workflow.execution.run_in_executor"
 ]
 
 
