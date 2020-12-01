@@ -10,7 +10,7 @@ import virtool_core.samples.db
 from virtool_workflow import fixture
 from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
-from virtool_workflow.execute import FunctionExecutor
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.db.fixtures import Collection
