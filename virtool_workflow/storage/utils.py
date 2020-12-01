@@ -2,7 +2,7 @@ import asyncio
 import shutil
 from typing import Iterable, Tuple
 from pathlib import Path
-from virtool_workflow.execute import FunctionExecutor
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
 async def copy_paths(

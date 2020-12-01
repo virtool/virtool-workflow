@@ -4,7 +4,7 @@ from typing import Dict, Any, Iterable, List, Tuple
 
 from virtool_workflow.analysis import utils, analysis_info
 from virtool_workflow.storage.utils import copy_paths
-from virtool_workflow.execute import run_shell_command, FunctionExecutor
+from virtool_workflow.execution.run_in_executor import run_shell_command, FunctionExecutor
 from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
