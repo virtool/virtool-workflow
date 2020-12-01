@@ -1,12 +1,16 @@
 """Execute workflows and manage the execution context."""
 import sys
 import traceback
+import logging
+import pprint
 from enum import Enum
 from typing import Optional, Callable, Coroutine, Any, Dict
 
 from virtool_workflow.workflow import Workflow
 from virtool_workflow.execution import hooks
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowError(Exception):
@@ -73,6 +77,7 @@ class WorkflowExecution:
 
         :param update: A string update to send.
         """
+        logger.debug(f"Sending update: {update}")
         self._updates.append(update)
         await hooks.on_update.trigger(self, update)
 
@@ -88,6 +93,7 @@ class WorkflowExecution:
 
         :param new_state: The new state that should be applied.
         """
+        logger.debug(f"Changing the execution state from {self._state} to {new_state}")
         await hooks.on_state_change.trigger(self._state, new_state)
         self._state = new_state
         return new_state
@@ -97,6 +103,7 @@ class WorkflowExecution:
             step: Callable[[], Coroutine[Any, Any, Optional[str]]],
     ):
         try:
+            logger.info(f"Beginning step #{self.current_step}: {step.__name__}")
             return await step()
         except Exception as exception:
             self.error = exception
@@ -130,6 +137,7 @@ class WorkflowExecution:
             raise e
 
     async def _execute(self) -> Dict[str, Any]:
+        logger.info(f"Starting execution of {self.workflow}.")
 
         self.scope["workflow"] = self.workflow
         self.scope["execution"] = self
@@ -147,11 +155,12 @@ class WorkflowExecution:
 
         result = self.scope["results"]
 
+        logger.info("Workflow finished")
+        logger.info(f"Result: \n{pprint.pformat(result)}")
+
         await hooks.on_result.trigger(self.workflow, result)
 
         return result
 
     def __await__(self):
         return self.execute().__await__()
-
-
