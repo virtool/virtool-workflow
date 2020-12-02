@@ -51,7 +51,7 @@ analysis document in the database when the workflow runs successfully (via the `
 
 ```python
 from virtool_workflow import step
-from virtool_workflow.analysis.read_paths import reads_path
+from virtool_workflow.analysis.read_prep import reads_path
 
 @step
 def use_reads_path(reads_path):
@@ -71,7 +71,7 @@ If the `reads_path` fixture has already been used within your workflow then the 
 have been instantiated, and the `fastqc` and trimming steps will not be executed a second time.
 
 ```python
-    from virtool_workflow.analysis.read_paths import parsed_fastqc
+    from virtool_workflow.analysis.read_prep import parsed_fastqc
     @step
     def use_fastqc(parsed_fastqc):
         ...
