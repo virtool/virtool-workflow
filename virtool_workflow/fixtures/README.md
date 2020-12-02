@@ -21,9 +21,7 @@ The fixtures which are automatically imported by the runtime for any type of wor
 
 The `job_id`, `job_document`, and `job_args` fixtures are not available when running a workflow using `workflow run-local`.
 
-## Additional Fixtures
-
-### Configuration
+## Configuration
 
 The configuration fixtures are loaded in by the CLI when the `worklflow run` or `workflow run-local` commands are used. 
 Each of them corresponds to a command line argument provided by the CLI. Each also has an environment variable whose value
@@ -40,7 +38,7 @@ These are available automatically and do not need to be imported.
 | memory_usage_limit  | The number of GB of ram allocated for the workflow. | `--memory-usage-limit` | `int` | `VT_MEM` | `8` |
 | dev_mode | Flag indicating that the runtime is in `dev_mode` (debugging mode). | `--dev-mode` | `bool` | `VT_DEV` | `False` |
 
-#### `workflow print-config` and  `workflow create-env-script`
+### `workflow print-config` and  `workflow create-env-script`
 
 To test that the correct configuration is being loaded you can use `workflow print-config`. It accepts options for 
 all of the above fixtures which will take precedent over the environment variable's value. 
@@ -66,7 +64,7 @@ Use it to update the environment variables in the current shell with;
 
 ```source <(workflow create-env-script [OPTIONS])```
 
-### The `run_subprocess` Fixture
+## `virtool_workflow.execution.run_subprocess.run_subprocess`
 
 `virtool_workflow.execution.run_subprocess.run_subprocess` fixture provides a function for running shell commands in a
 subprocess. The signature of that function is as follows;
@@ -114,11 +112,11 @@ def use_run_subprocess(run_subprocess):
 
 `run_subprocess` is imported by the runtime and thus does not need to be imported to be used within a workflow.
 
-### Storage
+## Storage
 
 The `virtool_workflow.storage` package provides the following fixtures; 
 
-#### Data Path
+### `virtool_workflow.storage.paths.data_path`
 
 The data path is provided by `virtool_workflow.storage.paths.data_path`. The
 `data_path` fixture gives a `pathlib.Path` object which is created using the
@@ -135,7 +133,7 @@ def use_data_path(data_path, data_path_str):
     print(str(data_path) == data_path_str) # True
  ```
 
-#### Temp Path
+### `virtool_workflow.storage.paths.temp_path`
 
 The `virtool_workflow.storage.paths.temp_path` fixture initializes a 
 temporary directory at the path of `temp_path_str` and returns a `pathlib.Path`
@@ -154,7 +152,7 @@ def use_temp_path(temp_path):
  ```
 
 
-#### Cache Path
+### `virtool_workflow.storage.paths.cache_path`
 
 `virtool_workflow.storage.paths.cache_path` provides a `pathlib.Path` object locating a directory
 containing any cached read data. When read prep steps for an analysis workflow are performed a cache is 
@@ -172,16 +170,16 @@ def use_temp_path(cache_path):
     print(cache_path.exists()) # True
  ```
 
-#### Subtraction Path and Subtraction Data Path
+### `virtool_workflow.storage.paths.subtraction_data_path` and `virtool_workflow.storage.paths.subtraction_path`
 
 `virtool_workflow.storage.paths.subtraction_data_path` locates the subtraction data. In
 contrast, `virtool_workflow.storage.paths.subtraction_path` locates the temporary directory 
 where a copy of the subtraction data required by a workflow will be stored when the 
 `subtractions` fixture is used. 
 
-### Subtractions
+## `virtool_workflow.subtractions.subtractions`     
 
-The `subtractions` (`virtool_workflow.subtractions.subtractions`) fixture provides access to the subtraction data 
+The `subtractions` fixture provides access to the subtraction data 
 for a workflow (which is specified by the `job_args["subtraction_id"]` field). It will fetch the appropriate subtraction
 data and populate a directory located by the `storage.paths.sample_path` fixture. 
 
@@ -220,7 +218,7 @@ def use_subtractions(subtractions: List[Subtraction]):
 ```
 
 
-### Analysis Arguments
+## `virtool_workflow.analysis.analysis_info.AnalysisArguments`
 
 The `analysis_args` (virtool_workflow.analysis.analysis_info.AnalysisArguments) fixture provides access to various 
 parameters used within analysis workflows which were provided by the frontend application via the database. 
@@ -265,7 +263,7 @@ def use_analysis_args(analysis_args: AnalysisArguments, sample: dict):
 ```
 
 
-### Reads
+## `virtool_workflow.analysis.read_prep.reads`
 
 The prepared read data for an analysis workflow is accessed using the `virtool_workflow.analysis.read_prep.reads` fixture.
 It yields an instance of the `virtool_workflow.analysis.reads.Reads` dataclass. 
@@ -311,19 +309,19 @@ def use_reads(reads: Reads):
 
 The raw sample data to be prepared is expected to be present under the `sample_path`.
 
-#### `virtool_workflow.analysis.read_prep.unprepared_reads`
+### `virtool_workflow.analysis.read_prep.unprepared_reads`
 
 This fixture returns the same `virtool_workflow.analysis.reads.Reads` object as the `reads` fixture, but does not 
 trigger the read preparation steps
 
-#### `virtool_workflow.analysis.read_prep.parsed_fastqc`
+### `virtool_workflow.analysis.read_prep.parsed_fastqc`
 
 `parsed_fastqc` provides access to the `fastqc` data which is produced as part of the read preparation. If used after
 the `reads` fixture it will return immediately, since it is used by the `reads` fixture. 
 
-### Writing Tests For Fixtures And Functions Which Use Them
+## Writing Tests For Fixtures And Functions Which Use Them
 
-#### Direct Instantiation
+### Direct Instantiation
 
 All fixtures can be called as functions and directly provided their parameters as they are declared. This can be useful
 for testing that a fixture provides the correct value. 
@@ -341,7 +339,7 @@ def test_my_fixture_without_my_other_fixture():
     result = await my_fixture(mock_value_for_my_other_fixture)
 ```
 
-#### Create An Empty WorkflowFixtureScope
+### Create An Empty WorkflowFixtureScope
 
 To test fixtures or functions that depend on many other fixtures it is best to create a fresh 
 `virtool_workflow.fixtures.scope.WorkflowFixtureScope`. 
@@ -380,7 +378,7 @@ def test_fixture_and_function_with_mocks():
         ...
 ```
 
-##### Using A Pytest Fixture For The WorkflowFixtureScope
+### Using A Pytest Fixture For The WorkflowFixtureScope
 
 Often when writing tests there are many different fixtures which need to be mocked, including the built-in fixtures 
 provided by the runtime such as the `job_args`. It is helpful to use a pytest fixture to perform the initialization
