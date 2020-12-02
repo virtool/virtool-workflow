@@ -2,7 +2,7 @@ import pytest
 
 from virtool_workflow.analysis.analysis_info import AnalysisInfo, AnalysisArguments
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow.analysis.read_paths import unprepared_reads
+from virtool_workflow.analysis.read_prep import unprepared_reads
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.storage.paths import context_directory
 
