@@ -1,10 +1,13 @@
 """Fixtures and tools relating to paths."""
+import logging
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union, AnyStr
 from shutil import rmtree
 
 from virtool_workflow.fixtures.workflow_fixture import fixture
+
+logger = logging.getLogger(__name__)
 
 
 @contextmanager
@@ -26,10 +29,13 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
 
     path.mkdir(parents=True, exist_ok=True)
 
+    logger.info(f"Created temporary directory at {path}")
+
     try:
         yield path
     finally:
         rmtree(root_path)
+        logger.info(f"Deleted temporary directory at {root_path}")
 
 
 @fixture
