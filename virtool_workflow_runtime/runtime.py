@@ -1,10 +1,11 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
+import logging
 import asyncio
 import aioredis
 from typing import Dict, Any
 from concurrent import futures
 
-from virtool_workflow.execution.hooks import on_update, on_workflow_finish
+from virtool_workflow.execution.hooks import on_update, on_workflow_finish, on_load_config
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
@@ -12,6 +13,16 @@ from virtool_workflow import hooks
 from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
+
+logger = logging.getLogger(__name__)
+
+
+@on_load_config
+def set_log_level_to_debug(config):
+    if config.dev_mode:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
 
 async def execute(
@@ -29,9 +40,11 @@ async def execute(
     """
 
     if not scope:
+        logger.debug("Creating a new WorkflowFixtureScope")
         scope = WorkflowFixtureScope()
 
     with scope as fixtures:
+        logger.debug("Creating a new WorkflowExecution")
         executor = WorkflowExecution(workflow, fixtures)
         try:
             result = await _execute(job_id, workflow, fixtures, executor)
@@ -57,6 +70,7 @@ async def _execute(job_id: str,
 
     database: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
 
+    logger.info("Fetching job document.")
     job_document = await database["jobs"].find_one(dict(_id=job_id))
 
     executor = WorkflowExecution(workflow, fixtures)

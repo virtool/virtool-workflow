@@ -1,6 +1,9 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
+import logging
 from abc import abstractmethod, ABC
 from typing import Callable, Optional, Type
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowFixture(ABC):
@@ -27,6 +30,8 @@ class WorkflowFixture(ABC):
             raise ValueError("Must provide `param_name` argument to subclass")
 
         cls.param_name = param_name
+
+        logger.debug(f"Defined a new fixture `{param_name}`")
 
     @staticmethod
     @abstractmethod
