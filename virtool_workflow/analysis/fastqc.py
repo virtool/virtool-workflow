@@ -1,22 +1,6 @@
 import os
 import shutil
 from pathlib import Path
-from typing import Iterable
-
-from virtool_workflow.execution.run_in_executor import run_shell_command
-
-
-async def run_fastqc(number_of_processes: int, read_paths: Iterable[Path], fastqc_path: Path):
-    command = [
-        "fastqc",
-        "-f", "fastq",
-        "-o", str(fastqc_path),
-        "-t", str(number_of_processes),
-        "--extract",
-        *[str(path) for path in read_paths]
-    ]
-
-    await run_shell_command(command)
 
 
 def handle_base_quality_nan(split_line: list) -> list:

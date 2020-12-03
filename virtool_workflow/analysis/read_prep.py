@@ -9,6 +9,7 @@ from virtool_workflow.analysis import utils, fastqc
 from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.analysis.cache import fetch_cache, create_cache
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow_runtime.db import VirtoolDatabase
@@ -47,7 +48,8 @@ def rename_trimming_results(path: Path):
 
 @virtool_workflow.fixture
 async def parsed_fastqc(
-        trimming_output: Tuple[Path, str],
+        run_subprocess: RunSubprocess,
+        trimming_output: Path,
         analysis_args: AnalysisArguments,
         number_of_processes: int,
 ) -> Dict[str, Any]:
@@ -56,7 +58,7 @@ async def parsed_fastqc(
 
     To be executed after the reads have been trimmed.
     """
-    trimming_output_path, _ = trimming_output
+    trimming_output_path = trimming_output
 
     rename_trimming_results(trimming_output_path)
 
@@ -65,7 +67,16 @@ async def parsed_fastqc(
     fastqc_path = analysis_args.temp_cache_path/"fastqc"
     fastqc_path.mkdir()
 
-    await fastqc.run_fastqc(number_of_processes, read_paths, fastqc_path)
+    command = [
+        "fastqc",
+        "-f", "fastq",
+        "-o", str(fastqc_path),
+        "-t", str(number_of_processes),
+        "--extract",
+        *[str(path) for path in read_paths]
+    ]
+
+    await run_subprocess(command)
 
     return fastqc.parse_fastqc(fastqc_path, analysis_args.sample_path)
 
@@ -82,7 +93,7 @@ async def fetch_legacy_paths(
 @virtool_workflow.fixture
 async def prepared_reads_and_fastqc(
         analysis_args: AnalysisArguments,
-        trimming_output: Tuple[Path, str],
+        trimming_output: Path,
         parsed_fastqc: Dict[str, Any],
 ) -> Tuple[Path, Dict[str, Any]]:
     """
@@ -93,9 +104,7 @@ async def prepared_reads_and_fastqc(
     :param analysis_args: The AnalysisArguments for the current job.
     :param trimming_output: The trimmed reads. See #virtool_workflow.analysis.trimming.trimming_output.
     """
-
-    path, _ = trimming_output
-    shutil.copytree(path, analysis_args.reads_path)
+    shutil.copytree(trimming_output, analysis_args.reads_path)
 
     return analysis_args.reads_path, parsed_fastqc
 

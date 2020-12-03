@@ -7,6 +7,17 @@ from virtool_workflow import fixture, hooks
 
 logger = getLogger(__name__)
 
+RunSubprocessHandler = Callable[[str], Awaitable[None]]
+RunSubprocess = Callable[
+    [List[str],
+     Optional[RunSubprocessHandler],
+     Optional[RunSubprocessHandler],
+     Optional[dict],
+     Optional[str],
+     Optional[bool]],
+    Awaitable[asyncio.subprocess.Process]
+]
+
 
 async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]):
     """
@@ -38,11 +49,12 @@ async def watch_subprocess(process, stdout_handler, stderr_handler):
 
 
 @fixture
-def run_subprocess():
+def run_subprocess() -> RunSubprocess:
     """Fixture to run subprocesses and handle stdin and stderr output line-by-line."""
+
     async def _run_subprocess(
             command: List[str],
-            stdout_handler: Optional[Callable[[str], Coroutine]] = None,
+            stdout_handler: Optional[RunSubprocessHandler] = None,
             stderr_handler: Optional[Callable[[str], Coroutine]] = None,
             env: Optional[dict] = None,
             cwd: Optional[str] = None,

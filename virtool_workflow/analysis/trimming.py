@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
-from typing import Dict, Any, Iterable, List, Tuple
+from typing import Dict, Any, Iterable, List
 
 from virtool_workflow.analysis import utils, analysis_info
-from virtool_workflow.storage.utils import copy_paths
-from virtool_workflow.execution.run_in_executor import run_shell_command, FunctionExecutor
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.fixtures.workflow_fixture import fixture
+from virtool_workflow.storage.utils import copy_paths
 
 
 @fixture
@@ -98,10 +98,12 @@ def trimming_command(
 
 @fixture
 async def trimming_output(
+        run_subprocess,
         trimming_command: List[str],
         trimming_input_paths: utils.ReadPaths,
         trimming_output_path: Path
-) -> Tuple[Path, str]:
+
+) -> Path:
     """
     The `trimming_output_path` provided  along with the shell output from the trimming command.
 
@@ -111,9 +113,6 @@ async def trimming_output(
     """
     env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
 
-    out, err = await run_shell_command(trimming_command, env=env)
+    await run_subprocess(trimming_command, env=env)
 
-    if err:
-        raise RuntimeError("trimming command failed", err, trimming_command)
-
-    return trimming_output_path, out
+    return trimming_output_path
