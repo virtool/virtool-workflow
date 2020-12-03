@@ -126,7 +126,7 @@ class Hook:
         else:
             cb = self._callback
 
-        logger.info(f"Registered callback {callback_} onto hook {self.name}.")
+        logger.debug(f"Registered callback {callback_} onto hook {self.name}.")
         return cb
 
     __call__ = callback
@@ -172,7 +172,7 @@ class Hook:
         :param kwargs: Keyword arguments for this Hook.
         :return List[Any]: The results of each callback function.
         """
-        logger.info(f"Triggering {self.name} hook with callback functions: {pprint.pformat(self.callbacks)}")
+        logger.debug(f"Triggering {self.name} hook with callback functions: {pprint.pformat(self.callbacks)}")
         return [await callback(*args, **kwargs) for callback in self.callbacks]
 
 

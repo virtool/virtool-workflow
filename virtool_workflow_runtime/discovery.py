@@ -97,7 +97,7 @@ def discover_workflow(path: Path) -> Workflow:
     workflow = next((attr for attr in module.__dict__.values() if isinstance(attr, Workflow)), None)
 
     if not workflow:
-        logger.info("No Workflow instance found, collecting startup, step, and cleanup functions.")
+        logger.debug("No Workflow instance found, collecting startup, step, and cleanup functions.")
         return collect(module)
 
     return workflow

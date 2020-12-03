@@ -31,7 +31,7 @@ class WorkflowFixture(ABC):
 
         cls.param_name = param_name
 
-        logger.info(f"Defined a new fixture `{param_name}`")
+        logger.debug(f"Defined a new fixture `{param_name}`")
 
     @staticmethod
     @abstractmethod

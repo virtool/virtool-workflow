@@ -85,7 +85,7 @@ async def create_cache_document(
         trimming_parameters,
         analysis_args.paired
     )
-    logger.info(f"Created a new cache document {cache}")
+    logger.info(f"Created a new cache document")
 
     await database["analyses"].update_one({"_id": analysis_args.analysis_id}, {
         "$set": {

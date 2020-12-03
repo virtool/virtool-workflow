@@ -156,7 +156,7 @@ class WorkflowExecution:
         result = self.scope["results"]
 
         logger.info("Workflow finished")
-        logger.info(f"Result: \n{pprint.pformat(result)}")
+        logger.debug(f"Result: \n{pprint.pformat(result)}")
 
         await hooks.on_result.trigger(self.workflow, result)
 

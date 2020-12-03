@@ -56,7 +56,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         self._instances = {}
         # return control to the generator fixtures which are still left open
         for gen in self._generators:
-            logger.info(f"Returning control to generator fixture {gen}")
+            logger.debug(f"Returning control to generator fixture {gen}")
             none = next(gen, None)
             if none is not None:
                 raise WorkflowFixtureMultipleYield("Fixture must only yield once")
@@ -90,7 +90,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
         self._instances[fixture_.param_name] = instance
 
-        logger.info(f"Instantiated {fixture_} as {instance}")
+        logger.debug(f"Instantiated {fixture_} as {instance}")
 
         return instance
 

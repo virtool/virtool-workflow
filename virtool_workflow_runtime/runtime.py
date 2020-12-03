@@ -32,11 +32,11 @@ async def execute(
     """
 
     if not scope:
-        logger.info("Creating a new WorkflowFixtureScope")
+        logger.debug("Creating a new WorkflowFixtureScope")
         scope = WorkflowFixtureScope()
 
     with scope as fixtures:
-        logger.info("Creating a new WorkflowExecution")
+        logger.debug("Creating a new WorkflowExecution")
         executor = WorkflowExecution(workflow, fixtures)
         try:
             result = await _execute(job_id, workflow, fixtures, executor)
