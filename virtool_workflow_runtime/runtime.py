@@ -54,9 +54,9 @@ async def execute(
             return result
         except Exception as e:
             if isinstance(e, WorkflowError):
-                await hooks.on_failure.trigger(e)
+                await hooks.on_failure.trigger(scope, e)
             else:
-                await hooks.on_failure.trigger(WorkflowError(cause=e, context=executor, workflow=workflow))
+                await hooks.on_failure.trigger(scope, WorkflowError(cause=e, context=executor, workflow=workflow))
 
             raise e
 
@@ -76,7 +76,7 @@ async def _execute(job_id: str,
     executor = WorkflowExecution(workflow, fixtures)
 
     @on_update(until=on_workflow_finish)
-    async def send_database_updates(_, update: str):
+    async def send_database_updates(update: str):
         await database.send_update(job_id, executor, update)
 
     fixtures["job_id"] = job_id
@@ -88,14 +88,16 @@ async def _execute(job_id: str,
 
 async def execute_catching_cancellation(job_id, workflow):
     """Execute while catching `asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
-    try:
-        return await execute(job_id, workflow)
-    except (asyncio.CancelledError, futures._base.CancelledError) as error:
-        await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=None))
-        raise error
+    with WorkflowFixtureScope() as scope:
+        try:
+            return await execute(job_id, workflow, scope)
+        except (asyncio.CancelledError, futures._base.CancelledError) as error:
+            await hooks.on_failure.trigger(scope, WorkflowError(cause=error, workflow=workflow, context=None))
+            raise error
 
 
-async def execute_while_watching_for_cancellation(job_id: str, workflow: Workflow, redis: aioredis.Redis):
+async def execute_while_watching_for_cancellation(job_id: str, workflow: Workflow,
+                                                  redis: aioredis.Redis):
     """Start a task which watches for and handles cancellation while the workflow executes."""
     exec_workflow = asyncio.create_task(execute_catching_cancellation(job_id, workflow))
     watch_for_cancel = asyncio.create_task(monitor_cancel(redis, job_id, exec_workflow))

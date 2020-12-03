@@ -153,7 +153,6 @@ class Hook:
 
             @hook_._callback
             def remove_callback():
-                print(f"removing {callback_}")
                 self.callbacks.remove(callback_)
                 hook_.callbacks.remove(remove_callback)
 

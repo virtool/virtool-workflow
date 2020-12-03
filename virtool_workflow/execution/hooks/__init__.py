@@ -94,13 +94,13 @@ async def perform_on_success(workflow: Workflow):
 
 
 @on_workflow_failure
-async def _trigger_finish_from_failure(_, execution):
-    await on_workflow_finish.trigger(execution.workflow)
+async def _trigger_finish_from_failure(_, execution, scope):
+    await on_workflow_finish.trigger(scope, execution.workflow)
 
 
 @on_result
-async def _trigger_finish_from_success(workflow, _):
-    await on_workflow_finish.trigger(workflow)
+async def _trigger_finish_from_success(workflow, scope):
+    await on_workflow_finish.trigger(scope, workflow)
 
 
 on_success = WorkflowFixtureHook("on_success", parameters=[], return_type=None)
