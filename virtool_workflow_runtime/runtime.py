@@ -5,7 +5,7 @@ import aioredis
 from typing import Dict, Any
 from concurrent import futures
 
-from virtool_workflow.execution.hooks import on_update, on_workflow_finish
+from virtool_workflow.execution.hooks import on_update, on_workflow_finish, on_load_config
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
@@ -15,6 +15,14 @@ from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 
 logger = logging.getLogger(__name__)
+
+
+@on_load_config
+def set_log_level_to_debug(config):
+    if config.dev_mode:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
 
 async def execute(
