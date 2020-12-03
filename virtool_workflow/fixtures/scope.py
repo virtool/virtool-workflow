@@ -51,7 +51,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         Return execution to each of the generator fixtures and remove
         references to them.
         """
-        logger.debug(f"Closing {WorkflowFixtureScope.__name__} {self}.")
+        logger.debug(f"Closing {WorkflowFixtureScope.__name__} {self}")
         logger.debug("Clearing instances")
         self._instances = {}
         # return control to the generator fixtures which are still left open

@@ -137,7 +137,7 @@ class WorkflowExecution:
             raise e
 
     async def _execute(self) -> Dict[str, Any]:
-        logger.info(f"Starting execution of {self.workflow}.")
+        logger.info(f"Starting execution of {self.workflow}")
 
         self.scope["workflow"] = self.workflow
         self.scope["execution"] = self

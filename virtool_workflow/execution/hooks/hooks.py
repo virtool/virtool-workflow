@@ -126,7 +126,7 @@ class Hook:
         else:
             cb = self._callback
 
-        logger.debug(f"Registered callback {callback_} onto hook {self.name}.")
+        logger.debug(f"Registered callback {callback_} onto hook {self.name}")
         return cb
 
     __call__ = callback
