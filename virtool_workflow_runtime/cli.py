@@ -1,8 +1,7 @@
 """Command Line Interface to virtool_workflow"""
-from pathlib import Path
-
-import click
 import asyncio
+import click
+from pathlib import Path
 
 from virtool_workflow.execution.execution import execute
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope

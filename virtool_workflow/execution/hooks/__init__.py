@@ -1,6 +1,7 @@
 import asyncio
 from concurrent import futures
 from typing import Dict, Any
+from types import SimpleNamespace
 
 from virtool_workflow.execution.workflow_executor import WorkflowError, State, WorkflowExecution
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
@@ -180,6 +181,20 @@ async def change_fixture_values(fixtures: WorkflowFixtureScope):
     fixtures["some_fixture"] = SOME_VALUE
     await fixtures.get_or_instantiate("name_of_some_other_fixture)
     ...
+```
+"""
+
+on_load_config = Hook("on_load_config", [SimpleNamespace], None)
+"""
+Triggered after the config is loaded from the CLI arguments and environment variables. A SimpleNamespace object
+is provided which has an attribute (sharing the same name as the fixture) for each configuration fixture in
+`virtool_workflow_runtime.config.configuration`. 
+
+```python
+@on_load_config
+def use_config(config: SimpleNamespace):
+    if config.dev_mode:
+        ...
 ```
 """
 
