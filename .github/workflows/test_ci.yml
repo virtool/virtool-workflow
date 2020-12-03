@@ -29,6 +29,17 @@ jobs:
 
       - name: Install tox
         run: pip install tox
+
+      - name: Install hmmer
+        run: |
+          wget http://eddylab.org/software/hmmer/hmmer-3.3.2.tar.gz
+          tar -xvf hmmer-3.3.2.tar.gz
+          cd hmmer-3.3.2
+          ./configure --prefix $GITHUB_WORKSPACE/hmmer
+          make
+          make install
+          cd ..
+          ln -s $GITHUB_WORKSPACE/hmmer/bin/hmm* /usr/local/bin
         
       - name: Run tox
         run: tox

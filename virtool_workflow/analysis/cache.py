@@ -1,6 +1,7 @@
 """Create caches of read-prep steps for Virtool analysis workflows."""
 # pylint: disable=redefined-outer-name
 # pylint: disable=too-many-arguments
+import logging
 import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
@@ -13,6 +14,9 @@ from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.db import db
+
+
+logger = logging.getLogger(__name__)
 
 TRIMMING_PROGRAM = "skewer-0.2.2"
 
@@ -121,6 +125,7 @@ async def delete_analysis(analysis_id: str, analysis_path: Path, sample_id: str)
     :param analysis_path: The virtool analysis path.
     :param sample_id: The id of the sample associated with this analysis.
     """
+    logger.info("Deleting analysis document")
 
     await db.delete_analysis(analysis_id)
 

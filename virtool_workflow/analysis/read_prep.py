@@ -1,5 +1,6 @@
 """Perform read prep before accessing Virtool reads_path."""
 # pylint: disable=redefined-outer-name
+import logging
 import shutil
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
@@ -16,6 +17,8 @@ from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow import hooks
 from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 from virtool_workflow.analysis.reads import Reads
+
+logger = logging.getLogger(__name__)
 
 
 def rename_trimming_results(path: Path):

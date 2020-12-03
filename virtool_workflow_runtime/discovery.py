@@ -1,4 +1,5 @@
 """Find workflows and fixtures from python modules."""
+import logging
 import sys
 from importlib import import_module
 from importlib.util import spec_from_file_location, module_from_spec
@@ -8,6 +9,9 @@ from typing import List, Union, Iterable, Tuple, Optional
 
 from virtool_workflow import Workflow, WorkflowFixture
 from virtool_workflow.decorator_api import collect
+
+
+logger = logging.getLogger(__name__)
 
 FixtureImportType = Iterable[
     Union[
@@ -87,16 +91,16 @@ def discover_workflow(path: Path) -> Workflow:
 
     :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
     """
+    logger.info(f"Importing module from {path}")
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
 
-    print([attr for attr in module.__dict__.items() if isinstance(attr[1], Workflow)])
     workflow = next((attr for attr in module.__dict__.values() if isinstance(attr, Workflow)), None)
 
     if not workflow:
+        logger.debug("No Workflow instance found, collecting startup, step, and cleanup functions.")
         return collect(module)
 
     return workflow
-
 
 
 def run_discovery(
@@ -116,13 +120,22 @@ def run_discovery(
     :param fixture_path: A Path locating a file containing #WorkflowFixture instances
     :return: The Workflow instance from `path` and a list of discovered fixtures.
     """
+    logger.info("Beginning workflow discovery.")
     fixtures = load_fixtures_from__fixtures__(Path(__file__).parent/"autoload.py")
 
+    logger.info("Loaded fixtures from `autoload.py`")
+
     fixtures.extend(load_fixtures_from__fixtures__(path))
+
+    logger.info(f"Loaded fixtures from __fixtures__ in {path}")
 
     if fixture_path and fixture_path.exists():
         fixtures.extend(discover_fixtures(fixture_path))
 
+        logger.info(f"Loaded {fixture_path}")
+
     workflow = discover_workflow(path)
+
+    logger.info(f"Discovered Workflow {workflow}")
 
     return workflow, fixtures

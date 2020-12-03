@@ -1,8 +1,12 @@
 """Create hooks for triggering and responding to events."""
+import logging
+import pprint
 import inspect
 from typing import List, Any, Callable, Type
 
 from virtool_workflow import utils
+
+logger = logging.getLogger(__name__)
 
 
 class IncompatibleCallback(ValueError):
@@ -122,6 +126,7 @@ class Hook:
         else:
             cb = self._callback
 
+        logger.debug(f"Registered callback {callback_} onto hook {self.name}")
         return cb
 
     __call__ = callback
@@ -167,6 +172,7 @@ class Hook:
         :param kwargs: Keyword arguments for this Hook.
         :return List[Any]: The results of each callback function.
         """
+        logger.debug(f"Triggering {self.name} hook with callback functions: {pprint.pformat(self.callbacks)}")
         return [await callback(*args, **kwargs) for callback in self.callbacks]
 
 
