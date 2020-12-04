@@ -40,10 +40,10 @@ async def execute(
     """
 
     logger.debug("Creating a new WorkflowExecution")
-    executor = WorkflowExecution(workflow, fixtures)
+    executor = WorkflowExecution(workflow, scope)
     try:
-        result = await _execute(job_id, workflow, fixtures, executor)
-        await hooks.on_success.trigger(workflow, result)
+        result = await _execute(job_id, workflow, scope, executor)
+        await hooks.on_success.trigger(scope)
 
         return result
     except Exception as e:
