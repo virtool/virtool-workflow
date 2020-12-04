@@ -28,7 +28,7 @@ def set_log_level_to_debug(config):
 async def execute(
         job_id: str,
         workflow: Workflow,
-        scope: WorkflowFixtureScope = None,
+        scope: WorkflowFixtureScope,
 ) -> Dict[str, Any]:
     """
     Execute a workflow as a Virtool Job.
@@ -39,26 +39,20 @@ async def execute(
     :return: A dictionary containing the results from the workflow (the results fixture).
     """
 
-    if not scope:
-        logger.debug("Creating a new WorkflowFixtureScope")
-        scope = WorkflowFixtureScope()
+    logger.debug("Creating a new WorkflowExecution")
+    executor = WorkflowExecution(workflow, fixtures)
+    try:
+        result = await _execute(job_id, workflow, fixtures, executor)
+        await hooks.on_success.trigger(workflow, result)
 
-    with scope as fixtures:
-        logger.debug("Creating a new WorkflowExecution")
-        executor = WorkflowExecution(workflow, fixtures)
-        try:
-            result = await _execute(job_id, workflow, fixtures, executor)
+        return result
+    except Exception as e:
+        if isinstance(e, WorkflowError):
+            await hooks.on_failure.trigger(scope, e)
+        else:
+            await hooks.on_failure.trigger(scope, WorkflowError(cause=e, context=executor, workflow=workflow))
 
-            await hooks.on_success.trigger(workflow, result)
-
-            return result
-        except Exception as e:
-            if isinstance(e, WorkflowError):
-                await hooks.on_failure.trigger(scope, e)
-            else:
-                await hooks.on_failure.trigger(scope, WorkflowError(cause=e, context=executor, workflow=workflow))
-
-            raise e
+        raise e
 
 
 async def _execute(job_id: str,
