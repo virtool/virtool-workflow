@@ -1,4 +1,4 @@
-from virtool_workflow import Workflow, hooks, hook
+from virtool_workflow import hooks, hook
 from virtool_workflow.execution.hooks.hooks import IncompatibleCallback
 
 
@@ -7,13 +7,13 @@ async def example_hook_without_params():
     pass
 
 
-async def test_hook(empty_scope):
+async def test_hook():
 
     @example_hook_without_params.callback
     async def callback():
         callback.called = True
 
-    await example_hook_without_params.trigger(empty_scope)
+    await example_hook_without_params.trigger()
 
     assert callback.called
 

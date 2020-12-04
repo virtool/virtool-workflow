@@ -94,13 +94,13 @@ async def perform_on_success(workflow: Workflow):
 
 
 @on_workflow_failure
-async def _trigger_finish_from_failure(_, execution, scope):
-    await on_workflow_finish.trigger(scope, execution.workflow)
+async def _trigger_finish_from_failure(_, scope):
+    await on_workflow_finish.trigger(scope)
 
 
 @on_result
-async def _trigger_finish_from_success(workflow, scope):
-    await on_workflow_finish.trigger(scope, workflow)
+async def _trigger_finish_from_success(scope):
+    await on_workflow_finish.trigger(scope)
 
 
 on_success = WorkflowFixtureHook("on_success", parameters=[], return_type=None)
@@ -164,9 +164,9 @@ async def on_cancelled(error: asyncio.CancelledError):
 
 
 @on_failure
-async def _trigger_on_cancelled(error: WorkflowError):
+async def _trigger_on_cancelled(error: WorkflowError, scope: WorkflowFixtureScope):
     if isinstance(error.cause, asyncio.CancelledError) or isinstance(error.cause, futures.CancelledError):
-        await on_cancelled.trigger(error.workflow, error.cause)
+        await on_cancelled.trigger(scope, error.cause)
 
 
 on_load_fixtures = WorkflowFixtureHook("on_load_fixtures", [WorkflowFixtureScope], return_type=None)

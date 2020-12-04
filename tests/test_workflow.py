@@ -24,7 +24,7 @@ async def test_respond_errors(test_workflow):
     updates = []
 
     @hooks.on_update(until=hooks.on_workflow_finish)
-    async def receive_updates(_, update):
+    async def receive_updates(update):
         updates.append(update)
 
     await execute(test_workflow)
