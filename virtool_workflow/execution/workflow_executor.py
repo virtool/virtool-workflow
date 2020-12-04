@@ -79,7 +79,7 @@ class WorkflowExecution:
         """
         logger.debug(f"Sending update: {update}")
         self._updates.append(update)
-        await hooks.on_update.trigger(self, update)
+        await hooks.on_update.trigger(self.scope, update)
 
     @property
     def state(self):
@@ -94,7 +94,7 @@ class WorkflowExecution:
         :param new_state: The new state that should be applied.
         """
         logger.debug(f"Changing the execution state from {self._state} to {new_state}")
-        await hooks.on_state_change.trigger(self._state, new_state)
+        await hooks.on_state_change.trigger(self.scope, self._state, new_state)
         self._state = new_state
         return new_state
 
@@ -108,7 +108,7 @@ class WorkflowExecution:
         except Exception as exception:
             self.error = exception
             error = WorkflowError(cause=exception, workflow=self.workflow, context=self)
-            callback_results = await hooks.on_error.trigger(error)
+            callback_results = await hooks.on_error.trigger(self.scope, error)
 
             if callback_results:
                 return callback_results[0]
@@ -122,7 +122,7 @@ class WorkflowExecution:
                 self.progress = float(self.current_step) / float(len(self.workflow.steps))
             update = await self._run_step(step)
             if count_steps:
-                await hooks.on_workflow_step.trigger(self, update)
+                await hooks.on_workflow_step.trigger(self.scope, update)
             if update:
                 await self.send_update(update)
 
@@ -133,7 +133,7 @@ class WorkflowExecution:
         except Exception as e:
             if not isinstance(e, WorkflowError):
                 e = WorkflowError(cause=e, workflow=self.workflow, context=self)
-            await hooks.on_workflow_failure.trigger(self.workflow, e)
+            await hooks.on_workflow_failure.trigger(self.scope, e)
             raise e
 
     async def _execute(self) -> Dict[str, Any]:
@@ -158,7 +158,7 @@ class WorkflowExecution:
         logger.info("Workflow finished")
         logger.debug(f"Result: \n{pprint.pformat(result)}")
 
-        await hooks.on_result.trigger(self.workflow, result)
+        await hooks.on_result.trigger(self.scope)
 
         return result
 
