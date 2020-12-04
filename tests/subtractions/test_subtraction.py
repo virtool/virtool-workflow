@@ -22,12 +22,12 @@ subtraction_data_filenames = [
 ]
 
 
-async def _fetch_subtraction_document(id_: str):
+async def _fetch_subtraction_document(id_: str, _):
     return mock_subtractions[id_]
 
 
 async def test_subtractions(monkeypatch):
-    monkeypatch.setattr("virtool_workflow.db.db.fetch_subtraction_document", _fetch_subtraction_document)
+    monkeypatch.setattr("virtool_workflow.db.db.fetch_document_by_id", _fetch_subtraction_document)
 
     with context_directory("data/subtractions") as subtraction_data_path:
 

@@ -49,9 +49,8 @@ async def test_run_discovery():
 async def test_fixtures_from_autoload_py():
     discovery.run_discovery(FIXTURE_TEST_FILE)
 
-    assert "jobs" in WorkflowFixture.types()
-    assert "analyses" in WorkflowFixture.types()
-    assert "samples" in WorkflowFixture.types()
+    assert "data_path" in WorkflowFixture.types()
+    assert "temp_path" in WorkflowFixture.types()
 
 
 async def test_import_workflow_with_other_imports():
