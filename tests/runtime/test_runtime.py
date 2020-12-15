@@ -9,7 +9,7 @@ async def test_execute(test_workflow):
 
     await db["jobs"].insert_one(dict(_id="1", args=dict()))
 
-    await runtime.execute("1", test_workflow)
+    await runtime.execute(test_workflow, runtime.DirectDatabaseAccessRuntime("1"))
 
 
 async def test_fixtures_loaded(test_workflow):
