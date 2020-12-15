@@ -1,7 +1,7 @@
 import asyncio
 import asyncio.subprocess
 from logging import getLogger
-from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol
+from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol, Any
 
 from virtool_workflow import fixture, hooks
 
@@ -17,7 +17,7 @@ class RunSubprocess(Protocol):
                  stderr_handler: Optional[Callable[[str], Coroutine]] = None,
                  env: Optional[dict] = None,
                  cwd: Optional[str] = None,
-                 wait: bool = True) -> Awaitable[asyncio.subprocess.Process]:
+                 wait: bool = True) -> Coroutine[Any, Any, asyncio.subprocess.Process]:
         ...
 
 
@@ -61,7 +61,7 @@ def run_subprocess() -> RunSubprocess:
             env: Optional[dict] = None,
             cwd: Optional[str] = None,
             wait: bool = True,
-    ):
+    ) -> asyncio.subprocess.Process:
         """
         Run a command as a subprocess and handle stdin and stderr output line-by-line.
 
