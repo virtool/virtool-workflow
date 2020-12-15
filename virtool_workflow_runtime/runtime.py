@@ -1,5 +1,6 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
 import asyncio
+import logging
 from concurrent import futures
 from typing import Dict, Any, Callable, Awaitable
 
@@ -14,6 +15,15 @@ from virtool_workflow_runtime.config.configuration import redis_connection_strin
 from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
 from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
+
+
+@hooks.on_load_config
+def set_log_level_to_debug(config):
+    if config.dev_mode:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
 
 runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow_runtime.config.configuration",

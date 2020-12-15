@@ -1,9 +1,10 @@
+from typing import Callable, Dict, Any
+
 import pytest
 
 from virtool_workflow import WorkflowExecution, WorkflowFixtureScope, Workflow
-from virtool_workflow_runtime.runtime import runtime_scope, execute
 from virtool_workflow_runtime.abc.runtime import AbstractRuntime
-from typing import Callable, Dict, Any
+from virtool_workflow_runtime.runtime import runtime_scope
 
 
 class TestRuntime(AbstractRuntime):
