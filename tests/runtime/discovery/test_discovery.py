@@ -46,13 +46,6 @@ async def test_run_discovery():
     assert result["run_in_executor"]
 
 
-async def test_fixtures_from_autoload_py():
-    discovery.run_discovery(FIXTURE_TEST_FILE)
-
-    assert "data_path" in WorkflowFixture.types()
-    assert "temp_path" in WorkflowFixture.types()
-
-
 async def test_import_workflow_with_other_imports():
     workflow = discovery.discover_workflow(IMPORT_TEST_FILE)
 
