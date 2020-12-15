@@ -18,7 +18,7 @@ class HMMs:
 
 @fixture
 async def cluster_annotation_map(database: VirtoolDatabase) -> Dict[int, str]:
-    cursor = database.hmm.find({}, ["cluster"])
+    cursor = database["hmm"].find({}, ["cluster"])
     return {int(document["cluster"]): document["_id"] async for document in cursor}
 
 
