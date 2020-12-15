@@ -1,4 +1,3 @@
-import pprint
 from virtool_workflow import WorkflowFixture
 from virtool_workflow_runtime import runtime
 from virtool_workflow_runtime.db import VirtoolDatabase
@@ -69,3 +68,5 @@ async def test_fixtures_loaded(test_workflow):
                         'unprepared_reads',
                         'reads']:
             assert fixture in types
+
+
