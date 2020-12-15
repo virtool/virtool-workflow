@@ -32,72 +32,88 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
 
     def __init__(self, job_id: str):
         self.job_id = job_id
+        self._execution = None
+        self._scope_initialized = False
 
-    async def execute(self, workflow: Workflow) -> Dict[str, Any]:
-        pass
+    async def _init_scope(self):
+        database: VirtoolDatabase = await self.scope.instantiate(VirtoolDatabase)
+
+        job_document = await database["jobs"].find_one(dict(_id=self.job_id))
+
+        @on_update(until=on_workflow_finish)
+        async def send_database_updates(_, update: str):
+            await database.send_update(self.job_id, self.execution, update)
+
+        self.scope["job_id"] = self.job_id
+        self.scope["job_document"] = job_document
+        self.scope["job_args"] = job_document["args"]
+
+        self._scope_initialized = True
+
+    async def execute(self, execution: WorkflowExecution = None) -> Dict[str, Any]:
+        if not self._scope_initialized:
+            await self._init_scope()
+
+        if not execution:
+            return await self.execution.execute()
+        else:
+            return await execution.execute()
 
     async def execute_function(self, func: Callable[..., Awaitable[Any]]) -> Any:
-        pass
+        if not self._scope_initialized:
+            await self._init_scope()
+
+        bound_func = await self.scope.bind(func)
+
+        return bound_func()
+
+    @property
+    def scope(self):
+        return runtime_scope
+
+    @property
+    def execution(self) -> WorkflowExecution:
+        return self._execution
+
+    @execution.setter
+    def execution(self, _execution: WorkflowExecution):
+        self._execution = _execution
 
 
 async def execute(
-        job_id: str,
         workflow: Workflow,
+        runtime: AbstractRuntime,
 ) -> Dict[str, Any]:
     """
     Execute a workflow as a Virtool Job.
 
-    :param job_id: The id of the job in the Virtool jobs database.
+    :param runtime: The `AbstractRuntime` implementation.
     :param workflow: The workflow to be executed.
-    :param scope: The WorkflowFixtureScope to use.
     :return: A dictionary containing the results from the workflow (the results fixture).
     """
 
-    with runtime_scope as fixtures:
-        executor = WorkflowExecution(workflow, fixtures)
-        try:
-            result = await _execute(job_id, workflow, fixtures, executor)
+    runtime.execution = WorkflowExecution(workflow, runtime.scope)
 
-            await hooks.on_success.trigger(workflow, result)
+    await hooks.on_load_fixtures.trigger(runtime.scope)
+    try:
+        result = await runtime.execute(workflow)
+        await hooks.on_success.trigger(workflow, result)
 
-            return result
-        except Exception as e:
-            if isinstance(e, WorkflowError):
-                await hooks.on_failure.trigger(e)
-            else:
-                await hooks.on_failure.trigger(WorkflowError(cause=e, context=executor, workflow=workflow))
+        return result
+    except Exception as e:
+        if isinstance(e, WorkflowError):
+            await hooks.on_failure.trigger(e)
+        else:
+            await hooks.on_failure.trigger(WorkflowError(cause=e, context=runtime.execution, workflow=workflow))
 
-            raise e
-
-
-async def _execute(job_id: str,
-                   workflow: Workflow,
-                   fixtures: WorkflowFixtureScope,
-                   executor: WorkflowExecution) -> Dict[str, Any]:
-
-    await hooks.on_load_fixtures.trigger(fixtures)
-
-    database: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
-
-    job_document = await database["jobs"].find_one(dict(_id=job_id))
-
-    executor = WorkflowExecution(workflow, fixtures)
-
-    @on_update(until=on_workflow_finish)
-    async def send_database_updates(_, update: str):
-        await database.send_update(job_id, executor, update)
-
-    fixtures["job_id"] = job_id
-    fixtures["job_document"] = job_document
-    fixtures["job_args"] = job_document["args"]
-
-    return await executor
+        raise e
 
 
 async def execute_catching_cancellation(job_id, workflow):
     """Execute while catching `asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
+    runtime = DirectDatabaseAccessRuntime(job_id)
     try:
-        return await execute(job_id, workflow)
+        return await execute(workflow, runtime)
     except (asyncio.CancelledError, futures._base.CancelledError) as error:
         await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=None))
         raise error

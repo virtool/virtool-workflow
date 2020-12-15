@@ -39,7 +39,7 @@ async def _run(file: str, job_id: str, **kwargs):
         config = await create_config(scope, **kwargs)
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
 
-        result = await runtime.execute(job_id, workflow, scope)
+        result = await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime(job_id))
         if config.dev_mode:
             print(result)
 
