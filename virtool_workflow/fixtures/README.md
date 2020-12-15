@@ -385,6 +385,20 @@ The `virtool_workflow_runtime.test_utils` package provides utilities for testing
 `runtime` fixture provides a harness for running workflows and functions which use
 runtime fixtures.
 
+```python
+from virtool_workflow_runtime.test_utils import runtime
+from ... import function_to_test
+
+async def test_function(runtime):
+
+    result = await runtime.execute_function(function_to_test)
+    assert ...
+
+async def test_workflow(runtime):
+    runtime.scope["job_args"] = {...}
+    result = await runtime.execute(workflow)
+```
+
 ### Using A Pytest Fixture For The WorkflowFixtureScope
 
 Often when writing tests there are many different fixtures which need to be mocked, including the built-in fixtures 
