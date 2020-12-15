@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from virtool_workflow import Workflow, WorkflowExecution, WorkflowFixtureScope
 from typing import Dict, Any, Callable, Awaitable
+
+from virtool_workflow import Workflow, WorkflowExecution, WorkflowFixtureScope
 
 
 class AbstractRuntime(ABC):

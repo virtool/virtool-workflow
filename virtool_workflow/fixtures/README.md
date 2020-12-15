@@ -387,7 +387,10 @@ runtime fixtures.
 
 ```python
 from virtool_workflow_runtime.test_utils import runtime
+from virtool_workflow_runtime.runtime import execute
+
 from ... import function_to_test
+from ... import workflow_to_test
 
 async def test_function(runtime):
 
@@ -396,7 +399,11 @@ async def test_function(runtime):
 
 async def test_workflow(runtime):
     runtime.scope["job_args"] = {...}
-    result = await runtime.execute(workflow)
+    result = await runtime.execute(workflow_to_test)
+
+
+async def test_workflow_and_hooks(runtime):
+    result = await execute(workflow_to_test, runtime)
 ```
 
 ### Using A Pytest Fixture For The WorkflowFixtureScope

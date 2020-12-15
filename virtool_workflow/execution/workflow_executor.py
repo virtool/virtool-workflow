@@ -1,14 +1,14 @@
 """Execute workflows and manage the execution context."""
-import sys
-import traceback
 import logging
 import pprint
+import sys
+import traceback
 from enum import Enum
 from typing import Optional, Callable, Coroutine, Any, Dict
 
-from virtool_workflow.workflow import Workflow
 from virtool_workflow.execution import hooks
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
