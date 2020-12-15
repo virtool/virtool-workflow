@@ -13,6 +13,18 @@ from virtool_workflow import hooks
 from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
+from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
+
+runtime_scope = InitializedWorkflowFixtureScope([
+    "virtool_workflow_runtime.config.configuration",
+    "virtool_workflow.execution.run_in_executor",
+    "virtool_workflow.execution.run_subprocess",
+    "virtool_workflow.storage.paths",
+    "virtool_workflow.subtractions.subtractions",
+    "virtool_workflow.analysis.analysis_info",
+    "virtool_workflow.analysis.trimming",
+    "virtool_workflow.analysis.read_prep",
+])
 
 logger = logging.getLogger(__name__)
 

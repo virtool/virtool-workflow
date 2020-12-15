@@ -55,7 +55,7 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[WorkflowFixture]:
     return [attr for attr in module.__dict__.values() if isinstance(attr, WorkflowFixture)]
 
 
-def load_fixture_plugins(fixture_modules: List[str]):
+def load_fixture_plugins(fixture_modules: Iterable[str]):
     """
     Load fixtures from a set of modules.
 
