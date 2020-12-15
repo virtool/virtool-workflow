@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Iterable, List
 
-from virtool_workflow.analysis import utils, analysis_info
+from virtool_workflow.analysis import utils
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.fixtures.workflow_fixture import fixture
 from virtool_workflow.storage.utils import copy_paths
@@ -21,23 +21,28 @@ def trimming_output_path(cache_path: Path):
 
 
 @fixture
-async def trimming_input_paths(analysis_args: analysis_info.AnalysisArguments,
+async def trimming_input_paths(paired: bool,
+                               sample_path: Path,
+                               raw_path: Path,
+                               reads_path: Path,
                                run_in_executor: FunctionExecutor) -> utils.ReadPaths:
     """
     The input path for the trimming command.
 
     Sample data will be copied to the raw_path and read_paths before returning.
     """
-    sample_paths = utils.make_read_paths(analysis_args.sample_path, analysis_args.paired)
-    raw_read_paths = {path: analysis_args.raw_path / path.name for path in sample_paths}
+    sample_paths = utils.make_read_paths(sample_path, paired)
+    raw_read_paths = {path: raw_path / path.name for path in sample_paths}
     await copy_paths(raw_read_paths.items(), run_in_executor)
 
+    read_paths = utils.make_read_paths(reads_path)
+
     await copy_paths(
-        zip(sample_paths, analysis_args.read_paths),
+        zip(sample_paths, read_paths),
         run_in_executor
     )
 
-    return analysis_args.read_paths
+    return read_paths
 
 
 def compose_trimming_command(

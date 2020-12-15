@@ -1,6 +1,7 @@
 from typing import Dict, Any
 
 from virtool_workflow import fixture
+from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.db import db
 
 
@@ -13,3 +14,8 @@ def sample(job_args: Dict[str, Any]):
 @fixture
 def paired(sample) -> bool:
     return sample["paired"]
+
+
+@fixture
+def library_type(sample) -> LibraryType:
+    return sample["library_type"]

@@ -7,7 +7,6 @@ from typing import List, Dict, Any, Tuple
 
 import virtool_workflow
 from virtool_workflow.analysis import utils, fastqc
-from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.analysis.cache import fetch_cache, create_cache
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
@@ -51,9 +50,11 @@ def rename_trimming_results(path: Path):
 
 @virtool_workflow.fixture
 async def parsed_fastqc(
+        paired: bool,
+        temp_cache_path: Path,
+        sample_path: Path,
         run_subprocess: RunSubprocess,
         trimming_output: Path,
-        analysis_args: AnalysisArguments,
         number_of_processes: int,
 ) -> Dict[str, Any]:
     """
@@ -65,9 +66,9 @@ async def parsed_fastqc(
 
     rename_trimming_results(trimming_output_path)
 
-    read_paths = utils.make_read_paths(trimming_output_path, analysis_args.paired)
+    read_paths = utils.make_read_paths(trimming_output_path, paired)
 
-    fastqc_path = analysis_args.temp_cache_path/"fastqc"
+    fastqc_path = temp_cache_path/"fastqc"
     fastqc_path.mkdir()
 
     command = [
@@ -81,7 +82,7 @@ async def parsed_fastqc(
 
     await run_subprocess(command)
 
-    return fastqc.parse_fastqc(fastqc_path, analysis_args.sample_path)
+    return fastqc.parse_fastqc(fastqc_path, sample_path)
 
 
 async def fetch_legacy_paths(
@@ -95,7 +96,7 @@ async def fetch_legacy_paths(
 
 @virtool_workflow.fixture
 async def prepared_reads_and_fastqc(
-        analysis_args: AnalysisArguments,
+        reads_path: Path,
         trimming_output: Path,
         parsed_fastqc: Dict[str, Any],
 ) -> Tuple[Path, Dict[str, Any]]:
@@ -103,31 +104,37 @@ async def prepared_reads_and_fastqc(
     The reads_path and parsed fastqc output for the sample being analyzed.
 
     The raw reads are trimmed and moved to the reads path before returning.
-
-    :param analysis_args: The AnalysisArguments for the current job.
-    :param trimming_output: The trimmed reads. See #virtool_workflow.analysis.trimming.trimming_output.
     """
-    shutil.copytree(trimming_output, analysis_args.reads_path)
+    shutil.copytree(trimming_output, reads_path)
 
-    return analysis_args.reads_path, parsed_fastqc
+    return reads_path, parsed_fastqc
 
 
 @virtool_workflow.fixture
-def unprepared_reads(analysis_args: AnalysisArguments):
+def unprepared_reads(
+        paired: bool,
+        sample: Dict[str, Any],
+        reads_path: Path
+):
     """The unprepared reads for the current analysis job."""
-    min_length, max_length = analysis_args.sample["quality"]["length"]
+    min_length, max_length = sample["quality"]["length"]
 
-    return Reads(paired=analysis_args.paired,
+    return Reads(paired=paired,
                  min_length=min_length,
                  max_length=max_length,
-                 count=analysis_args.sample["quality"]["count"],
-                 paths=analysis_args.read_paths)
+                 count=sample["quality"]["count"],
+                 paths=utils.make_read_paths(reads_path, paired))
 
 
 @virtool_workflow.fixture
 async def reads(
+        job_args: Dict[str, Any],
         scope: WorkflowFixtureScope,
-        analysis_args: AnalysisArguments,
+        reads_path: Path,
+        sample: Dict[str, Any],
+        sample_path: Path,
+        paired: bool,
+        analysis_path: Path,
         cache_path: Path,
         cache_document: Dict[str, Any],
         database: VirtoolDatabase,
@@ -141,18 +148,16 @@ async def reads(
 
     The trimming and fastqc check for the sample is completed before returning.
     """
-    analysis_args.reads_path.mkdir(parents=True, exist_ok=True)
-
     if cache_document:
         await fetch_cache(cache_document,
                           cache_path,
-                          analysis_args.reads_path,
+                          reads_path,
                           run_in_executor)
 
-    elif not all(f["raw"] for f in analysis_args.sample["files"]):
-        legacy_paths = utils.make_legacy_read_paths(analysis_args.sample_path, analysis_args.paired)
+    elif not all(f["raw"] for f in sample["files"]):
+        legacy_paths = utils.make_legacy_read_paths(sample_path, paired)
 
-        paths_to_copy = {path: analysis_args.reads_path/path.name
+        paths_to_copy = {path: reads_path/path.name
                          for path in legacy_paths}
 
         await copy_paths(paths_to_copy.items(), run_in_executor)
@@ -161,11 +166,11 @@ async def reads(
         hooks.on_workflow_failure(delete_analysis, once=True)
 
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
-        await create_cache(fq, database, analysis_args, trimming_parameters, trimming_output_path, cache_path)
+        await create_cache(job_args, paired, fq, database, trimming_parameters, trimming_output_path, cache_path)
 
-    hooks.on_result(VirtoolDatabase.store_result_callback(analysis_args.analysis_id,
+    hooks.on_result(VirtoolDatabase.store_result_callback(job_args["analysis_id"],
                                                           database["analyses"],
-                                                          analysis_args.path), once=True)
+                                                          analysis_path), once=True)
 
     return unprepared_reads
 

@@ -35,9 +35,26 @@ def raw_path(temp_path: Path) -> Path:
     return path
 
 
+@fixture
+def temp_cache_path(temp_path: Path) -> Path:
+    """The temp cache path for the current job."""
+    path = temp_path/"cache"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+@fixture
+def reads_path(temp_path: Path) -> Path:
+    path = temp_path/"reads"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 __all__ = [
     "sample_path",
     "analysis_path",
     "raw_path",
     "index_path",
+    "temp_cache_path",
+    "reads_path"
 ]
