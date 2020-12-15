@@ -3,7 +3,7 @@ from virtool_workflow_runtime import runtime
 from virtool_workflow import Workflow
 
 
-async def test_on_finish_triggered(empty_scope):
+async def test_on_finish_triggered():
 
     success_called = False
     finish_called = False
@@ -18,13 +18,13 @@ async def test_on_finish_triggered(empty_scope):
         nonlocal finish_called
         finish_called = True
 
-    await runtime.execute("1", Workflow(), empty_scope)
+    await runtime.execute(Workflow(), runtime.DirectDatabaseAccessRuntime("1"))
 
     assert success_called
     assert finish_called
 
 
-async def test_on_failure_triggered(empty_scope):
+async def test_on_failure_triggered():
 
     failure_called = False
 
@@ -42,14 +42,14 @@ async def test_on_failure_triggered(empty_scope):
         raise ValueError("test error")
 
     try:
-        await runtime.execute("1", workflow, empty_scope)
+        await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime("1"))
     except Exception:
         pass
 
     assert failure_called
 
 
-async def test_on_failure_not_triggered_when_successful(empty_scope):
+async def test_on_failure_not_triggered_when_successful():
 
     @hooks.on_success
     def success_callback(results):
@@ -61,7 +61,7 @@ async def test_on_failure_not_triggered_when_successful(empty_scope):
 
     workflow = Workflow()
 
-    result = await runtime.execute("1", workflow, empty_scope)
+    result = await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime("1"))
 
     assert result["SUCCESS"]
 

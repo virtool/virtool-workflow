@@ -1,19 +1,19 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
 import asyncio
-import aioredis
-from typing import Dict, Any, Callable, Awaitable
 from concurrent import futures
+from typing import Dict, Any, Callable, Awaitable
 
+import aioredis
+
+from virtool_workflow import hooks
 from virtool_workflow.execution.hooks import on_update, on_workflow_finish
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
-from virtool_workflow import hooks
-from ._redis import monitor_cancel, redis_list, connect
-from .db import VirtoolDatabase
+from virtool_workflow_runtime.abc.runtime import AbstractRuntime
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
-from virtool_workflow_runtime.abc.runtime import AbstractRuntime
+from ._redis import monitor_cancel, redis_list, connect
+from .db import VirtoolDatabase
 
 runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow_runtime.config.configuration",
@@ -24,6 +24,7 @@ runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow.analysis.analysis_info",
     "virtool_workflow.analysis.trimming",
     "virtool_workflow.analysis.read_prep",
+    "virtool_workflow.analysis.cache",
 ])
 
 
@@ -41,7 +42,7 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
         job_document = await database["jobs"].find_one(dict(_id=self.job_id))
 
         @on_update(until=on_workflow_finish)
-        async def send_database_updates(_, update: str):
+        async def send_database_updates(update: str):
             await database.send_update(self.job_id, self.execution, update)
 
         self.scope["job_id"] = self.job_id
@@ -50,21 +51,18 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
 
         self._scope_initialized = True
 
-    async def execute(self, execution: WorkflowExecution = None) -> Dict[str, Any]:
+    async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         if not self._scope_initialized:
             await self._init_scope()
 
-        if not execution:
-            return await self.execution.execute()
-        else:
-            return await execution.execute()
+        self._execution = WorkflowExecution(workflow, self.scope)
+        return await self.execution.execute()
 
     async def execute_function(self, func: Callable[..., Awaitable[Any]]) -> Any:
         if not self._scope_initialized:
             await self._init_scope()
 
         bound_func = await self.scope.bind(func)
-
         return bound_func()
 
     @property
@@ -74,10 +72,6 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
     @property
     def execution(self) -> WorkflowExecution:
         return self._execution
-
-    @execution.setter
-    def execution(self, _execution: WorkflowExecution):
-        self._execution = _execution
 
 
 async def execute(
@@ -92,19 +86,17 @@ async def execute(
     :return: A dictionary containing the results from the workflow (the results fixture).
     """
 
-    runtime.execution = WorkflowExecution(workflow, runtime.scope)
-
     await hooks.on_load_fixtures.trigger(runtime.scope)
     try:
         result = await runtime.execute(workflow)
-        await hooks.on_success.trigger(workflow, result)
+        await hooks.on_success.trigger(runtime.scope)
 
         return result
     except Exception as e:
         if isinstance(e, WorkflowError):
-            await hooks.on_failure.trigger(e)
+            await hooks.on_failure.trigger(runtime.scope, e)
         else:
-            await hooks.on_failure.trigger(WorkflowError(cause=e, context=runtime.execution, workflow=workflow))
+            await hooks.on_failure.trigger(runtime.scope, WorkflowError(cause=e, context=runtime.execution, workflow=workflow))
 
         raise e
 
@@ -115,7 +107,7 @@ async def execute_catching_cancellation(job_id, workflow):
     try:
         return await execute(workflow, runtime)
     except (asyncio.CancelledError, futures._base.CancelledError) as error:
-        await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=None))
+        await hooks.on_failure.trigger(runtime.scope, WorkflowError(cause=error, workflow=workflow, context=None))
         raise error
 
 
