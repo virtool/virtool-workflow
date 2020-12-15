@@ -11,7 +11,7 @@ from virtool_workflow_runtime.discovery import discover_workflow
 EXAMPLE_WORKFLOW_PATH = Path(sys.path[0]).joinpath("tests/example_workflow.py")
 
 
-async def test_updates_sent_to_mongo(empty_scope):
+async def test_updates_sent_to_mongo():
     name = db_name()
     conn = db_connection_string()
 
@@ -20,7 +20,7 @@ async def test_updates_sent_to_mongo(empty_scope):
 
     workflow = discover_workflow(EXAMPLE_WORKFLOW_PATH)
 
-    await runtime.execute("1", workflow, empty_scope)
+    await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime("1"))
 
     document = await db._db.jobs.find_one({"_id": "1"})
 
