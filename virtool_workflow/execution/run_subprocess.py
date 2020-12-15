@@ -1,22 +1,24 @@
 import asyncio
 import asyncio.subprocess
 from logging import getLogger
-from typing import Optional, Callable, Awaitable, List, Coroutine
+from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol
 
 from virtool_workflow import fixture, hooks
 
 logger = getLogger(__name__)
 
 RunSubprocessHandler = Callable[[str], Awaitable[None]]
-RunSubprocess = Callable[
-    [List[str],
-     Optional[RunSubprocessHandler],
-     Optional[RunSubprocessHandler],
-     Optional[dict],
-     Optional[str],
-     Optional[bool]],
-    Awaitable[asyncio.subprocess.Process]
-]
+
+
+class RunSubprocess(Protocol):
+    def __call__(self,
+                 command: List[str],
+                 stdout_handler: Optional[RunSubprocessHandler] = None,
+                 stderr_handler: Optional[Callable[[str], Coroutine]] = None,
+                 env: Optional[dict] = None,
+                 cwd: Optional[str] = None,
+                 wait: bool = True) -> Awaitable[asyncio.subprocess.Process]:
+        ...
 
 
 async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]):
