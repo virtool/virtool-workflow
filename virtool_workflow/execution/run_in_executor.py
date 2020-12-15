@@ -1,6 +1,6 @@
 """Helper functions for threading and running subprocesses within Virtool Workflows."""
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Any, Coroutine
+from typing import Callable, Any, Protocol, Coroutine
 
 from virtool_workflow.fixtures.workflow_fixture import fixture
 
@@ -11,7 +11,9 @@ def thread_pool_executor() -> ThreadPoolExecutor:
     return ThreadPoolExecutor()
 
 
-FunctionExecutor = Callable[..., Coroutine[Any, Any, Any]]
+class FunctionExecutor(Protocol):
+    def __call__(self, func: Callable[[Any], Any], *args: Any, **kwargs: Any) -> Coroutine:
+        ...
 
 
 @fixture
@@ -21,7 +23,7 @@ def run_in_executor(thread_pool_executor: ThreadPoolExecutor) -> FunctionExecuto
 
     Wraps #concurrent.futures.ThreadPoolExecutor.submit() as an async function.
     """
-    async def _run_in_executor(func, *args, **kwargs):
+    async def _run_in_executor(func: Callable, *args, **kwargs):
         future = thread_pool_executor.submit(func, *args, **kwargs)
         return future.result()
 
