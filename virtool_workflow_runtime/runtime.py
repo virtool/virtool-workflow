@@ -1,7 +1,7 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
 import asyncio
 import aioredis
-from typing import Dict, Any
+from typing import Dict, Any, Callable, Awaitable
 from concurrent import futures
 
 from virtool_workflow.execution.hooks import on_update, on_workflow_finish
@@ -13,6 +13,7 @@ from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
+from virtool_workflow_runtime.abc.runtime import AbstractRuntime
 
 runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow_runtime.config.configuration",
@@ -24,6 +25,19 @@ runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow.analysis.trimming",
     "virtool_workflow.analysis.read_prep",
 ])
+
+
+class DirectDatabaseAccessRuntime(AbstractRuntime):
+    """Runtime implementation that uses the database directly."""
+
+    def __init__(self, job_id: str):
+        self.job_id = job_id
+
+    async def execute(self, workflow: Workflow) -> Dict[str, Any]:
+        pass
+
+    async def execute_function(self, func: Callable[..., Awaitable[Any]]) -> Any:
+        pass
 
 
 async def execute(
