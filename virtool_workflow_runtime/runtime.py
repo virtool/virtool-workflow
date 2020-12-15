@@ -1,11 +1,10 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
-import logging
 import asyncio
 import aioredis
 from typing import Dict, Any
 from concurrent import futures
 
-from virtool_workflow.execution.hooks import on_update, on_workflow_finish, on_load_config
+from virtool_workflow.execution.hooks import on_update, on_workflow_finish
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow.workflow import Workflow
@@ -26,21 +25,10 @@ runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow.analysis.read_prep",
 ])
 
-logger = logging.getLogger(__name__)
-
-
-@on_load_config
-def set_log_level_to_debug(config):
-    if config.dev_mode:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
 
 async def execute(
         job_id: str,
         workflow: Workflow,
-        scope: WorkflowFixtureScope,
 ) -> Dict[str, Any]:
     """
     Execute a workflow as a Virtool Job.
@@ -51,20 +39,21 @@ async def execute(
     :return: A dictionary containing the results from the workflow (the results fixture).
     """
 
-    logger.debug("Creating a new WorkflowExecution")
-    executor = WorkflowExecution(workflow, scope)
-    try:
-        result = await _execute(job_id, workflow, scope, executor)
-        await hooks.on_success.trigger(scope)
+    with runtime_scope as fixtures:
+        executor = WorkflowExecution(workflow, fixtures)
+        try:
+            result = await _execute(job_id, workflow, fixtures, executor)
 
-        return result
-    except Exception as e:
-        if isinstance(e, WorkflowError):
-            await hooks.on_failure.trigger(scope, e)
-        else:
-            await hooks.on_failure.trigger(scope, WorkflowError(cause=e, context=executor, workflow=workflow))
+            await hooks.on_success.trigger(workflow, result)
 
-        raise e
+            return result
+        except Exception as e:
+            if isinstance(e, WorkflowError):
+                await hooks.on_failure.trigger(e)
+            else:
+                await hooks.on_failure.trigger(WorkflowError(cause=e, context=executor, workflow=workflow))
+
+            raise e
 
 
 async def _execute(job_id: str,
@@ -76,13 +65,12 @@ async def _execute(job_id: str,
 
     database: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
 
-    logger.info("Fetching job document.")
     job_document = await database["jobs"].find_one(dict(_id=job_id))
 
     executor = WorkflowExecution(workflow, fixtures)
 
     @on_update(until=on_workflow_finish)
-    async def send_database_updates(update: str):
+    async def send_database_updates(_, update: str):
         await database.send_update(job_id, executor, update)
 
     fixtures["job_id"] = job_id
@@ -94,16 +82,14 @@ async def _execute(job_id: str,
 
 async def execute_catching_cancellation(job_id, workflow):
     """Execute while catching `asyncio.CancelledError` and triggering `on_failure` and `on_cancelled` hooks."""
-    with WorkflowFixtureScope() as scope:
-        try:
-            return await execute(job_id, workflow, scope)
-        except (asyncio.CancelledError, futures._base.CancelledError) as error:
-            await hooks.on_failure.trigger(scope, WorkflowError(cause=error, workflow=workflow, context=None))
-            raise error
+    try:
+        return await execute(job_id, workflow)
+    except (asyncio.CancelledError, futures._base.CancelledError) as error:
+        await hooks.on_failure.trigger(WorkflowError(cause=error, workflow=workflow, context=None))
+        raise error
 
 
-async def execute_while_watching_for_cancellation(job_id: str, workflow: Workflow,
-                                                  redis: aioredis.Redis):
+async def execute_while_watching_for_cancellation(job_id: str, workflow: Workflow, redis: aioredis.Redis):
     """Start a task which watches for and handles cancellation while the workflow executes."""
     exec_workflow = asyncio.create_task(execute_catching_cancellation(job_id, workflow))
     watch_for_cancel = asyncio.create_task(monitor_cancel(redis, job_id, exec_workflow))
