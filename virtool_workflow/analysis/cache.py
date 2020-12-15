@@ -10,7 +10,6 @@ import virtool_core.caches.db
 import virtool_core.samples.db
 from virtool_workflow import fixture
 from virtool_workflow.analysis import utils
-from virtool_workflow.analysis.analysis_info import AnalysisArguments
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.db import db
@@ -63,7 +62,8 @@ async def fetch_cache(
 
 
 async def create_cache_document(
-        analysis_args: AnalysisArguments,
+        job_args: Dict[str, Any],
+        paired: bool,
         trimming_parameters: Dict[str, Any],
         quality: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -72,27 +72,25 @@ async def create_cache_document(
 
     This document will be used to check for the presence of cached prepared reads.
 
-    :param analysis_args: The AnalysisArguments fixture
-    :param trimming_parameters: The trimming parameters (see virtool_workflow.analysis.trimming)
-    :param quality: The parsed fastqc output.
     :return: The cache document which was created.
     """
-    cache = await db.create_cache_document(analysis_args.sample_id, trimming_parameters, analysis_args.paired, quality)
+    cache = await db.create_cache_document(job_args["sample_id"], trimming_parameters, paired, quality)
 
-    await db.update_analysis_with_cache_id(analysis_args.analysis_id, cache["id"])
+    await db.update_analysis_with_cache_id(job_args["analysis_id"], cache["id"])
 
     return cache
 
 
 async def create_cache(
+        job_args: Dict[str, Any],
+        paired: bool,
         fastq: Dict[str, Any],
-        analysis_args: AnalysisArguments,
         trimming_parameters: Dict[str, Any],
         trimming_output_path: Path,
         cache_path: Path,
 ):
     """Cache the trimmed reads and parsed fastqc data."""
-    cache = await create_cache_document(analysis_args, trimming_parameters, quality=fastq)
+    cache = await create_cache_document(job_args, paired, trimming_parameters, quality=fastq)
 
     shutil.copytree(trimming_output_path, cache_path/cache["id"])
 
