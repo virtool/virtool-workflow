@@ -55,6 +55,26 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[WorkflowFixture]:
     return [attr for attr in module.__dict__.values() if isinstance(attr, WorkflowFixture)]
 
 
+def load_fixture_plugins(fixture_modules: List[str]):
+    """
+    Load fixtures from a set of modules.
+
+    :param fixture_modules: A list of python module names
+    :return: A list containing all fixtures present across the given modules.
+    """
+    fixtures = []
+    for fixture_set in fixture_modules:
+        if isinstance(fixture_set, str):
+            fixtures.extend(discover_fixtures(import_module(fixture_set)))
+        else:
+            iter_ = iter(fixture_set)
+            module = import_module(next(iter_))
+            fixtures.extend(getattr(module, name) for name in iter_
+                            if isinstance(getattr(module, name), WorkflowFixture))
+
+    return fixtures
+
+
 def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
     """
     Load all fixtures specified by the __fixtures__ attribute of a module.
@@ -69,18 +89,7 @@ def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
     if not __fixtures__:
         return []
 
-    fixtures = []
-    for fixture_set in __fixtures__:
-        if isinstance(fixture_set, str):
-            fixtures.extend(discover_fixtures(import_module(fixture_set)))
-        else:
-            iter_ = iter(fixture_set)
-            module = import_module(next(iter_))
-            fixtures.extend(getattr(module, name) for name in iter_
-                            if isinstance(getattr(module, name), WorkflowFixture))
-
-    return fixtures
-
+    return load_fixture_plugins(__fixtures__)
 
 def discover_workflow(path: Path) -> Workflow:
     """
