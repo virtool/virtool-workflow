@@ -64,5 +64,5 @@ async def test_fixtures_loaded(test_workflow):
                              'unprepared_reads',
                              'reads'}
 
-        assert expected_fixtures - types == set()
+        assert expected_fixtures <= types
 
