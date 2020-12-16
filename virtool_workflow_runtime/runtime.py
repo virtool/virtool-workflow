@@ -72,8 +72,7 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
         if not self._scope_initialized:
             await self._init_scope()
 
-        bound_func = await self.scope.bind(func)
-        return bound_func()
+        return (await self.scope.bind(func))()
 
     @property
     def scope(self):
