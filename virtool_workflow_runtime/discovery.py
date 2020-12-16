@@ -80,8 +80,7 @@ def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
     Load all fixtures specified by the __fixtures__ attribute of a module.
 
     :param path: The path to a python module containing __fixtures__: FixtureImportType attribute
-    :return: A list of discovered fixtures
-    :raise AttributeError: When the imported module does not have an __fixtures__ attribute
+    :return: A list of discovered fixtures, or an empty list if the `__fixtures__` attribute is absent
     """
     module = _import_module_from_file(path.name.rstrip(path.suffix), path)
 
@@ -90,6 +89,7 @@ def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
         return []
 
     return load_fixture_plugins(__fixtures__)
+
 
 def discover_workflow(path: Path) -> Workflow:
     """
