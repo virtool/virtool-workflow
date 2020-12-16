@@ -16,6 +16,7 @@ from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow import hooks
 from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 from virtool_workflow.analysis.reads import Reads
+from virtool_workflow.abc.db import AbstractDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +138,7 @@ async def reads(
         analysis_path: Path,
         cache_path: Path,
         cache_document: Dict[str, Any],
-        database: VirtoolDatabase,
+        database: AbstractDatabase,
         trimming_parameters: Dict[str, Any],
         trimming_output_path: Path,
         run_in_executor: FunctionExecutor,
@@ -167,10 +168,6 @@ async def reads(
 
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
         await create_cache(job_args, paired, fq, database, trimming_parameters, trimming_output_path, cache_path)
-
-    hooks.on_result(VirtoolDatabase.store_result_callback(job_args["analysis_id"],
-                                                          database["analyses"],
-                                                          analysis_path), once=True)
 
     return unprepared_reads
 

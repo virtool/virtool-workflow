@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+import virtool_core.db.core
 import virtool_core.caches.db
 import virtool_core.samples.db
 from virtool_workflow import fixture
