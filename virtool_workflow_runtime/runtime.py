@@ -30,11 +30,7 @@ runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow.execution.run_in_executor",
     "virtool_workflow.execution.run_subprocess",
     "virtool_workflow.storage.paths",
-    "virtool_workflow.subtractions.subtraction",
-    "virtool_workflow.analysis.analysis_info",
-    "virtool_workflow.analysis.trimming",
-    "virtool_workflow.analysis.read_prep",
-    "virtool_workflow.analysis.cache",
+    "virtool_workflow.analysis.fixtures"
 ])
 
 
