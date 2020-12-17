@@ -1,10 +1,9 @@
 """Command Line Interface to virtool_workflow"""
+import asyncio
 from pathlib import Path
 
 import click
-import asyncio
 
-from virtool_workflow.execution.execution import execute
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 from virtool_workflow_runtime.config.configuration import create_config, options
 from . import discovery
@@ -40,7 +39,7 @@ async def _run(file: str, job_id: str, **kwargs):
         config = await create_config(scope, **kwargs)
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
 
-        result = await runtime.execute(job_id, workflow, scope)
+        result = await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime(job_id))
         if config.dev_mode:
             print(result)
 
@@ -52,23 +51,6 @@ async def _run(file: str, job_id: str, **kwargs):
 def run(f: str, job_id: str, **kwargs):
     """Run a workflow and send updates to Virtool."""
     asyncio.run(_run(f, job_id, **kwargs))
-
-
-async def _run_local(f: str, **kwargs):
-    with WorkflowFixtureScope() as scope:
-        config = await create_config(scope=scope, **kwargs)
-        result = await execute(discovery.discover_workflow(Path(f).absolute()), scope)
-
-        if config.dev_mode:
-            print(result)
-
-
-@apply_config_options
-@workflow_file_option
-@cli.command()
-def run_local(f: str, **kwargs):
-    """Run a workflow locally, without runtime specific dependencies."""
-    asyncio.run(_run_local(f, **kwargs))
 
 
 async def _print_config(**kwargs):

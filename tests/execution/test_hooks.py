@@ -1,4 +1,4 @@
-from virtool_workflow import Workflow, hooks, hook
+from virtool_workflow import hooks, hook
 from virtool_workflow.execution.hooks.hooks import IncompatibleCallback
 
 
@@ -18,7 +18,7 @@ async def test_hook():
     assert callback.called
 
 
-async def test_temporary_callback():
+async def test_temporary_callback(empty_scope):
 
     @example_hook_without_params.callback(until=hooks.on_result)
     def temporary_callback():
@@ -26,7 +26,7 @@ async def test_temporary_callback():
 
     assert temporary_callback in example_hook_without_params.callbacks
 
-    await hooks.on_result.trigger(Workflow(), {})
+    await hooks.on_result.trigger(empty_scope)
 
     assert "remove_callback" not in [f.__name__ for f in example_hook_without_params.callbacks]
     assert temporary_callback not in example_hook_without_params.callbacks

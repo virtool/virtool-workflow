@@ -12,7 +12,7 @@ from typing import Dict, Any
 from virtool_workflow import fixture, WorkflowFixture
 from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow_runtime.db.fixtures import Collection
+from virtool_workflow.db.db import fetch_document_by_id
 
 
 @dataclass(frozen=True)
@@ -28,15 +28,11 @@ class AnalysisInfo(WorkflowFixture, param_name="analysis_info"):
     @staticmethod
     async def __fixture__(
             job_document: Dict[str, Any],
-            samples: Collection,
-            analyses: Collection,
     ) -> "AnalysisInfo":
         """
         Fetch data related to an analysis job from the virtool database.
 
         :param job_document: The jobs document from the virtool database
-        :param samples: The samples collection from the virtool database
-        :param analyses: The analyses collection from the virtool database
         :return: A tuple containing the sample id, analysis id, reference id,
             index id, sample document, and analysis document.
         """
@@ -45,8 +41,8 @@ class AnalysisInfo(WorkflowFixture, param_name="analysis_info"):
         ref_id = job_document["ref_id"]
         index_id = job_document["index_id"]
 
-        sample = await samples.find_one(dict(_id=sample_id))
-        analysis_ = await analyses.find_one(dict(_id=analysis_id))
+        sample = await fetch_document_by_id(sample_id, "samples")
+        analysis_ = await fetch_document_by_id(analysis_id, "analyses")
 
         return AnalysisInfo(
             sample_id=sample_id,

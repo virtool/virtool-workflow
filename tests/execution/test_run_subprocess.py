@@ -67,18 +67,18 @@ async def test_stderr_is_handled(bash):
     assert lines == [b"bash: /foo/bar: No such file or directory\n"]
 
 
-async def trigger_finish(test_workflow):
+async def trigger_finish(test_workflow, scope):
     try:
         await asyncio.sleep(1)
         raise Exception("Foo")
     except Exception as exc:
-        await hooks.on_failure.trigger(WorkflowError(exc, workflow=test_workflow, context=None))
+        await hooks.on_failure.trigger(scope, WorkflowError(exc, workflow=test_workflow, context=None))
 
 
-async def test_command_can_be_terminated(bash_sleep, test_workflow):
+async def test_command_can_be_terminated(bash_sleep, test_workflow, empty_scope):
     sh_path, txt_path = bash_sleep
 
-    t1 = asyncio.create_task(trigger_finish(test_workflow))
+    t1 = asyncio.create_task(trigger_finish(test_workflow, empty_scope))
     t2 = asyncio.create_task(run_subprocess(["bash", str(sh_path)]))
 
     await asyncio.gather(t1, t2)

@@ -1,7 +1,8 @@
 from pathlib import Path
-from virtool_workflow_runtime import discovery
+
 from virtool_workflow import Workflow, WorkflowFixture
 from virtool_workflow.execution import execution
+from virtool_workflow_runtime import discovery
 
 cwd = Path(__file__).parent
 TEST_FILE = cwd/"discoverable_workflow.py"
@@ -44,14 +45,6 @@ async def test_run_discovery():
     assert result["temp_path"]
     assert result["thread_pool_executor"]
     assert result["run_in_executor"]
-
-
-async def test_fixtures_from_autoload_py():
-    discovery.run_discovery(FIXTURE_TEST_FILE)
-
-    assert "jobs" in WorkflowFixture.types()
-    assert "analyses" in WorkflowFixture.types()
-    assert "samples" in WorkflowFixture.types()
 
 
 async def test_import_workflow_with_other_imports():

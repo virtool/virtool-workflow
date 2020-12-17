@@ -1,12 +1,16 @@
 """Execute workflows and manage the execution context."""
+import logging
+import pprint
 import sys
 import traceback
 from enum import Enum
 from typing import Optional, Callable, Coroutine, Any, Dict
 
-from virtool_workflow.workflow import Workflow
 from virtool_workflow.execution import hooks
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.workflow import Workflow
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowError(Exception):
@@ -73,8 +77,9 @@ class WorkflowExecution:
 
         :param update: A string update to send.
         """
+        logger.debug(f"Sending update: {update}")
         self._updates.append(update)
-        await hooks.on_update.trigger(self, update)
+        await hooks.on_update.trigger(self.scope, update)
 
     @property
     def state(self):
@@ -88,7 +93,8 @@ class WorkflowExecution:
 
         :param new_state: The new state that should be applied.
         """
-        await hooks.on_state_change.trigger(self._state, new_state)
+        logger.debug(f"Changing the execution state from {self._state} to {new_state}")
+        await hooks.on_state_change.trigger(self.scope, self._state, new_state)
         self._state = new_state
         return new_state
 
@@ -97,11 +103,12 @@ class WorkflowExecution:
             step: Callable[[], Coroutine[Any, Any, Optional[str]]],
     ):
         try:
+            logger.info(f"Beginning step #{self.current_step}: {step.__name__}")
             return await step()
         except Exception as exception:
             self.error = exception
             error = WorkflowError(cause=exception, workflow=self.workflow, context=self)
-            callback_results = await hooks.on_error.trigger(error)
+            callback_results = await hooks.on_error.trigger(self.scope, error)
 
             if callback_results:
                 return callback_results[0]
@@ -115,7 +122,7 @@ class WorkflowExecution:
                 self.progress = float(self.current_step) / float(len(self.workflow.steps))
             update = await self._run_step(step)
             if count_steps:
-                await hooks.on_workflow_step.trigger(self, update)
+                await hooks.on_workflow_step.trigger(self.scope, update)
             if update:
                 await self.send_update(update)
 
@@ -126,10 +133,11 @@ class WorkflowExecution:
         except Exception as e:
             if not isinstance(e, WorkflowError):
                 e = WorkflowError(cause=e, workflow=self.workflow, context=self)
-            await hooks.on_workflow_failure.trigger(self.workflow, e)
+            await hooks.on_workflow_failure.trigger(self.scope, e)
             raise e
 
     async def _execute(self) -> Dict[str, Any]:
+        logger.info(f"Starting execution of {self.workflow}")
 
         self.scope["workflow"] = self.workflow
         self.scope["execution"] = self
@@ -147,11 +155,12 @@ class WorkflowExecution:
 
         result = self.scope["results"]
 
-        await hooks.on_result.trigger(self.workflow, result)
+        logger.info("Workflow finished")
+        logger.debug(f"Result: \n{pprint.pformat(result)}")
+
+        await hooks.on_result.trigger(self.scope)
 
         return result
 
     def __await__(self):
         return self.execute().__await__()
-
-

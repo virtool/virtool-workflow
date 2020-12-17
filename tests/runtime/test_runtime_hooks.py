@@ -18,7 +18,7 @@ async def test_on_finish_triggered():
         nonlocal finish_called
         finish_called = True
 
-    await runtime.execute("1", Workflow())
+    await runtime.execute(Workflow(), runtime.DirectDatabaseAccessRuntime("1"))
 
     assert success_called
     assert finish_called
@@ -42,7 +42,7 @@ async def test_on_failure_triggered():
         raise ValueError("test error")
 
     try:
-        await runtime.execute("1", workflow)
+        await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime("1"))
     except Exception:
         pass
 
@@ -52,16 +52,16 @@ async def test_on_failure_triggered():
 async def test_on_failure_not_triggered_when_successful():
 
     @hooks.on_success
-    def success_callback(_, results):
+    def success_callback(results):
         results["SUCCESS"] = True
 
     @hooks.on_failure
-    def failure_callback(_):
+    def failure_callback():
         raise RuntimeError("Failure hook incorrectly triggered.")
 
     workflow = Workflow()
 
-    result = await runtime.execute("1", workflow)
+    result = await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime("1"))
 
     assert result["SUCCESS"]
 

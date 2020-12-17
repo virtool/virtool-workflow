@@ -1,8 +1,8 @@
 import os
-from typing import Any, Iterable, Type, List, Tuple, Optional
 from types import SimpleNamespace
+from typing import Any, Type, List, Tuple, Optional
 
-from virtool_workflow import WorkflowFixtureScope, WorkflowFixture
+from virtool_workflow import WorkflowFixtureScope, WorkflowFixture, hooks
 from virtool_workflow_runtime.config.environment import environment_variable_fixture, ENV_VARIABLE_TYPE
 
 DATA_PATH_ENV = "VT_DATA_PATH"
@@ -70,7 +70,9 @@ async def create_config(scope: WorkflowFixtureScope, **kwargs) -> SimpleNamespac
         else:
             setattr(config, name, await scope.instantiate(fixture))
 
-    scope.add_instance(config, "config", "configuration")
+    await hooks.on_load_config.trigger(config)
+
+    scope.add_instance(config, "config")
     return config
 
 

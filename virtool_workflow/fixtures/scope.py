@@ -1,4 +1,5 @@
 """Scoping and injection of workflow fixtures."""
+import logging
 import pprint
 from contextlib import AbstractContextManager
 from functools import wraps
@@ -8,6 +9,8 @@ from typing import Optional, Dict, Any, Type, Callable, Iterator, Union
 from virtool_workflow.workflow import Workflow
 from virtool_workflow.fixtures.workflow_fixture import WorkflowFixture
 from virtool_workflow.fixtures.errors import WorkflowFixtureMultipleYield, WorkflowFixtureNotAvailable
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowFixtureScope(AbstractContextManager):
@@ -38,6 +41,7 @@ class WorkflowFixtureScope(AbstractContextManager):
 
     def __enter__(self):
         """Return this instance when `with` statement is used."""
+        logger.debug(f"Opening a new {WorkflowFixtureScope.__name__}")
         return self
 
     def __exit__(self, *args, **kwargs):
@@ -47,12 +51,16 @@ class WorkflowFixtureScope(AbstractContextManager):
         Return execution to each of the generator fixtures and remove
         references to them.
         """
+        logger.debug(f"Closing {WorkflowFixtureScope.__name__} {self}")
+        logger.debug("Clearing instances")
         self._instances = {}
         # return control to the generator fixtures which are still left open
         for gen in self._generators:
+            logger.debug(f"Returning control to generator fixture {gen}")
             none = next(gen, None)
             if none is not None:
                 raise WorkflowFixtureMultipleYield("Fixture must only yield once")
+        logger.debug("Clearing generators")
         self._generators = []
 
     async def instantiate(self, fixture_: Union[WorkflowFixture, Type[WorkflowFixture]]) -> Any:
@@ -81,6 +89,8 @@ class WorkflowFixtureScope(AbstractContextManager):
             instance = bound()
 
         self._instances[fixture_.param_name] = instance
+
+        logger.debug(f"Instantiated {fixture_} as {instance}")
 
         return instance
 
@@ -137,7 +147,7 @@ class WorkflowFixtureScope(AbstractContextManager):
         for name in names:
             self.__setitem__(name, instance)
 
-    async def bind(self, func: Callable[..., Any]) -> Callable[[], Any]:
+    async def bind(self, func: Callable[..., Any], strict: bool = True) -> Callable[[], Any]:
         """
         Bind fixtures to the parameters of a function.
 
@@ -146,18 +156,21 @@ class WorkflowFixtureScope(AbstractContextManager):
         arguments given are added as keyword arguments to the function.
 
         :param func: The function requiring workflow fixtures to be bound
+        :param strict: A flag indicating that all parameters must be bound to a fixture, defaults to True
         :return: A new function with it's arguments appropriately bound
         :raise WorkflowFixtureNotAvailable: When `func` requires an argument
             which cannot be bound due to no fixture of it's name being available.
         """
         sig = signature(func)
 
-        try:
-            fixtures = {param: await self.get_or_instantiate(param)
-                        for param in sig.parameters}
-        except KeyError as key_error:
-            missing_param = key_error.args[0]
-            raise WorkflowFixtureNotAvailable(param_name=missing_param, signature=sig, func=func)
+        fixtures = {}
+        for param in sig.parameters:
+            try:
+                fixtures[param] = await self.get_or_instantiate(param)
+            except KeyError as key_error:
+                if strict:
+                    missing_param = key_error.args[0]
+                    raise WorkflowFixtureNotAvailable(param_name=missing_param, signature=sig, func=func)
 
         if iscoroutinefunction(func):
             @wraps(func)

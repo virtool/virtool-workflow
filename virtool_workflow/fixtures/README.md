@@ -321,6 +321,7 @@ the `reads` fixture it will return immediately, since it is used by the `reads` 
 
 ## Writing Tests For Fixtures And Functions Which Use Them
 
+
 ### Direct Instantiation
 
 All fixtures can be called as functions and directly provided their parameters as they are declared. This can be useful
@@ -376,6 +377,33 @@ def test_fixture_and_function_with_mocks():
         bound_function = await scope.bind(function_using_fixture)
         bound_function()
         ...
+```
+
+### The `runtime` pytest fixture.
+
+The `virtool_workflow_runtime.test_utils` package provides utilities for testing Virtool workflows. The 
+`runtime` fixture provides a harness for running workflows and functions which use
+runtime fixtures.
+
+```python
+from virtool_workflow_runtime.test_utils import runtime
+from virtool_workflow_runtime.runtime import execute
+
+from ... import function_to_test
+from ... import workflow_to_test
+
+async def test_function(runtime):
+
+    result = await runtime.execute_function(function_to_test)
+    assert ...
+
+async def test_workflow(runtime):
+    runtime.scope["job_args"] = {...}
+    result = await runtime.execute(workflow_to_test)
+
+
+async def test_workflow_and_hooks(runtime):
+    result = await execute(workflow_to_test, runtime)
 ```
 
 ### Using A Pytest Fixture For The WorkflowFixtureScope
