@@ -306,15 +306,33 @@ def use_reads(reads: Reads):
 
 The raw sample data to be prepared is expected to be present under the `sample_path`.
 
-### `virtool_workflow.analysis.read_prep.unprepared_reads`
+## `virtool_workflow.analysis.read_prep.unprepared_reads`
 
 This fixture returns the same `virtool_workflow.analysis.reads.Reads` object as the `reads` fixture, but does not 
 trigger the read preparation steps
 
-### `virtool_workflow.analysis.read_prep.parsed_fastqc`
+## `virtool_workflow.analysis.read_prep.parsed_fastqc`
 
 `parsed_fastqc` provides access to the `fastqc` data which is produced as part of the read preparation. If used after
 the `reads` fixture it will return immediately, since it is used by the `reads` fixture. 
+
+## `virtool_workflow.analysis.hmms.hmms`
+
+A fixture for accessing `HMM` data. It provides an `HMM` object containing the path to the 
+HMM profile, and a `Dict[int, str]` mapping HMM cluster numbers to their associated database ID's
+
+```python
+@dataclass
+class HMMs:
+    cluster_annotation_map: Dict[int, str]
+    path: Path
+```
+
+```python
+@step
+def use_hmms(hmms):
+    ...
+```
 
 ## Writing Tests For Fixtures And Functions Which Use Them
 
