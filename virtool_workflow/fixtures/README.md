@@ -1,34 +1,175 @@
 # Workflow Fixtures
 
-## Build-in Fixtures
+Workflow fixtures are a mechanism for injecting dependencies into Virtool's workflows inspired by pytest's 
+[fixtures](https://docs.pytest.org/en/stable/fixture.html). See the [README](../README.md) for basic usage information.
 
-The fixtures which are automatically imported by the runtime for any type of workflow are: 
+Though full module names will be given for each fixture, all fixtures documented here are imported implicitly by 
+`virtool_workflow`'s runtime.
 
-| Fixture     | Description                           | Type |
-|-------------|---------------------------------------|------|
-| results     | The results dictionary                | `dict` |
-| execution   | The current WorkflowExecution         | `virtool_workflow.WorkflowExecution` |
-| workflow    | The Workflow instance being executed  | `virtool_workflow.Workflow` |
-| data_path   | The root path for data                | `pathlib.Path` |
-| temp_path   | The root path for temporary files     |`pathlib.Path` |
-| proc        | The number of allowable processes for the current job  | `int` |
-| mem         | The amount of RAM available for the current job, in GB | `int` |
-| job_id      | The ID of the current job       | `str` |
-| job_document| The database document (dict) for the current job | `dict` |
-| job_args    | The arguments provided for the job from the front end application. | `dict` |
-| run_in_executor | A function which runs functions in a `concurrent.futures.ThreadPoolExecutor` | `Callable[[Callable, Iterable[Any], dict], Coroutine` |
-| scope       | The `WorkflowFixtureScope` object being used to bind fixtures for this workflow | `virtool_workflow.fixtures.scope.WorkflowFixtureScope` |
+## `results`
 
-The `job_id`, `job_document`, and `job_args` fixtures are not available when running a workflow using `workflow run-local`.
+The `results` fixture provides a dictionary for storing the results of a workflow. Upon completion of the workflow
+the contents of this dictionary will be stored in Virtool's database.
 
-## Configuration
+```python
+from virtool_workflow import step, hooks
+@step
+def use_results_dict(results):
+    results["result"] = "value"
 
-The configuration fixtures are loaded in by the CLI when the `worklflow run` or `workflow run-local` commands are used. 
-Each of them corresponds to a command line argument provided by the CLI. Each also has an environment variable whose value
-will be used if there is no argument provided, and optionally a default value that will be used if the environment
-variable is not set. 
+@hooks.on_result
+def print_results(results):
+    print(results["value"]) # "value"
+```
 
-These are available automatically and do not need to be imported. 
+
+## `execution`
+
+The `execution` fixture provides a reference to the `virtool_workflow.WorkflowExecution` object responsible for 
+executing the current workflow. This object can be used to inquire about the current state of the workflow and to send
+additional updates.
+
+```python
+@step 
+async def use_execution_object(execution):
+    await execution.send_update("Additional Update")
+    print(execution.current_step) # The current step number of the workflow
+    print(execution.progress) # The current percentage of completion as a float
+```
+
+## `workflow`
+
+This fixture provides a reference to the `virtool_workflow.Workflow` class which is being executed. 
+
+```python
+@step
+def use_workflow_reference(workflow):
+    ...
+```
+
+## `job_args`
+
+`job_args` is a dictionary containing a job's arguments. It's fields will vary depending on the specific 
+workflow being executed.
+
+```python
+@step
+def use_job_args(job_args):
+    some_argument = job_args["argument_name"]
+    ...
+```
+
+## `run_in_executor`
+
+The `run_in_executor` fixture provides a function for executing a `Callable` in the context of a `concurrent.futures
+.ThreadPoolExecutor`.
+
+```python
+@step
+async def run_some_code_in_executor(run_in_executor):
+    def run_in_background(...):
+        ...
+
+    await run_in_executor(run_in_background, ...)
+```
+
+## `run_subprocess`
+
+This fixture provides a function for running shell commands as a subprocess. It ensures that the subprocess will
+be killed upon failure, or completion, of the workflow. It also accepts functions for handling stdout, and stderr,
+output line-by-line.
+
+```python
+async def handle_stdout(line):
+    ...
+
+async def handle_stderr(line):
+    ...
+
+
+@step
+async def run_a_subprocess(run_subprocess):
+    process = await run_subprocess(["some_shell_command"], handle_stdout, handle_stderr)
+    ...
+```
+
+## Path Fixtures
+
+All path fixtures provide a `pathlib.Path` object and ensure that the directory located by that path exists. Any
+temporary directory fixtures, such as `temp_path` and `temp_analysis_path`, are automatically cleared once the workflow
+completes, or fails.
+
+### `virtool_workflow.storage.paths.data_path`
+
+This provides the root data path for Virtool. Files under this path may be shared between multiple running workflows
+and should be considered read only. Files under the data_path are persisted after the workflow finishes.
+
+```
+@step
+def sore_some_data(data_path):
+    path_to_my_data = data_path/"some_file.txt" 
+
+    with path_to_my_data.open('r') as some_file:
+        ...
+```
+
+The location of the `data_path` can be configured using the `--data-path-str` CLI argument, or the `VT_DATA_PATH`
+environment variable.
+
+### `virtool_workflow.storage.paths.temp_path`
+
+The contents of the `temp_path` are automatically removed when the workflow finishes. Use the `temp_path` to store
+data which does not need to persist past the workflow's lifecycle. It is also used to store a local copy, which can
+be modified, of shared files stored under the `data_path`.
+
+The location of the temp path can be configured via the `--temp-path-str` CLI argument or the `VT_TEMP_PATH` 
+environment variable.
+
+```python
+@step
+def store_some_temp_data(temp_path):
+    (temp_path/"temp.txt").write_text("foobar")
+    ...
+```
+
+### `virtool_workflow.analysis.paths`
+
+This package defines several path fixtures which depend on the context of the current job.
+
+#### `sample_path`
+
+The sample path locates the sample data being to be analyzed for the current job.
+
+#### `analysis_path`
+
+The analysis path for the current job.
+
+#### `temp_analysis_path`
+
+The path locating the temporary directory which is used for trimming and preparing read data.
+
+#### `index path`
+
+The path locating index data for the current job.
+
+#### `reads_path`
+
+The path where trimmed and quality checked read data is stored for the current analysis.
+
+
+## Configuration Fixtures
+
+The configuration fixtures, located in `virtool_workflow_runtime.config.configuration`, provide access to the current 
+configuration of the workflow runtime. Configuration fixtures each have an associated environment variable and may also
+have a default value.
+
+The value of a configuration fixture is determined by the following resolution order:
+
+1. The option provided to the `workflow` CLI
+2. The value of the associated environment variable
+3. The default value for the fixture
+
+If no default value is set for the fixture, and a value was not otherwise provided, then an exception is raised.
 
 | Fixture     | Description                           | CLI Option | Type | Env | Default | 
 |-------------|---------------------------------------|------|-------------|------|-------|
@@ -64,36 +205,6 @@ Use it to update the environment variables in the current shell with;
 
 ```source <(workflow create-env-script [OPTIONS])```
 
-## `virtool_workflow.execution.run_subprocess.run_subprocess`
-
-`virtool_workflow.execution.run_subprocess.run_subprocess` fixture provides a function for running shell commands in a
-subprocess. The signature of that function is as follows;
-
-```python
- async def run_subprocess(
-            command: List[str],
-            stdout_handler: Optional[Callable[[str], Coroutine]] = None,
-            stderr_handler: Optional[Callable[[str], Coroutine]] = None,
-            env: Optional[dict] = None,
-            cwd: Optional[str] = None,
-            wait: bool = True,
-    ):
-        """
-        Run a command as a subprocess and handle stdin and stderr output line-by-line.
-
-        :param command: The command to run as a subprocess.
-        :param stdout_handler: A function to handle stdout lines.
-        :param stderr_handler: A function to handle stderr lines.
-        :param env: Environment variables to set for the subprocess.
-        :param cwd: Current working directory for the subprocess.
-        :param wait: Flag indicating to wait for the subprocess to finish before returning.
-
-        :return: A asyncio.subprocess.Process object.
-        """
-        ...
-```
-
-`run_subprocess` also ensures that the process will be terminated in the event of a failure. 
 
 ```python
 from virtool_workflow import step
@@ -112,70 +223,6 @@ def use_run_subprocess(run_subprocess):
 
 `run_subprocess` is imported by the runtime and thus does not need to be imported to be used within a workflow.
 
-## Storage
-
-The `virtool_workflow.storage` package provides the following fixtures; 
-
-### `virtool_workflow.storage.paths.data_path`
-
-The data path is provided by `virtool_workflow.storage.paths.data_path`. The
-`data_path` fixture gives a `pathlib.Path` object which is created using the
-`data_path_str` fixture. The directory located by the `data_path` will be created 
-if it does not exist. 
-
-```python
-from virtool_workflow import step
-from virtool_workflow.storage.paths import data_path
-
-@step
-def use_data_path(data_path, data_path_str):
-    print(data_path.exists()) # True
-    print(str(data_path) == data_path_str) # True
- ```
-
-### `virtool_workflow.storage.paths.temp_path`
-
-The `virtool_workflow.storage.paths.temp_path` fixture initializes a 
-temporary directory at the path of `temp_path_str` and returns a `pathlib.Path`
-object locating it.  
-
-Once the workflow finishes executing the `temp_path` directory and it's contents
-will be destroyed. 
-
-```python
-from virtool_workflow import step
-from virtool_workflow.storage.paths import temp_path
-
-@step
-def use_temp_path(temp_path):
-    print(temp_path.exists()) # True
- ```
-
-
-### `virtool_workflow.storage.paths.cache_path`
-
-`virtool_workflow.storage.paths.cache_path` provides a `pathlib.Path` object locating a directory
-containing any cached read data. When read prep steps for an analysis workflow are performed a cache is 
-created to be used in the event that the workflow fails and is restarted. 
-
-The `cache_path` is located under the `data_path` and is not cleared when 
-the workflow finishes. 
-
-```python
-from virtool_workflow import step
-from virtool_workflow.storage.paths import cache_path
-
-@step
-def use_temp_path(cache_path):
-    print(cache_path.exists()) # True
- ```
-
-### `virtool_workflow.storage.paths.subtraction_data_path` and `virtool_workflow.storage.paths.subtraction_path`
-
-`virtool_workflow.storage.paths.subtraction_data_path` locates the subtraction data. In
-contrast, `virtool_workflow.storage.paths.subtraction_path` locates the temporary directory 
-where a copy of the subtraction data required by a workflow will be stored when the 
-`subtractions` fixture is used. 
 
 ## `virtool_workflow.subtractions.subtractions`     
 
@@ -207,59 +254,10 @@ The `subtractions` fixture yields a `List[Subtraction]`.
 
 
 ```python
-from typing import List
-from virtool_workflow import step
-from virtool_workflow.subtractions import subtractions, Subtraction
-
 @step
-def use_subtractions(subtractions: List[Subtraction]):
+def use_subtractions(subtractions):
     for subtraction in subtractions:
         ...
-```
-
-
-## `virtool_workflow.analysis.analysis_info.AnalysisArguments`
-
-The `analysis_args` (virtool_workflow.analysis.analysis_info.AnalysisArguments) fixture provides access to various 
-parameters used within analysis workflows which were provided by the frontend application via the database. 
-It provides an instance of the `virtool_workflow.analysis.analysis_info.AnalysisArguments` dataclass.
-
-```python
-@dataclass(frozen=True)
-class AnalysisArguments(WorkflowFixture, param_name="analysis_args"):
-    """Dataclass containing standard arguments required for Virtool analysis workflows."""
-    path: Path
-    sample_path: Path
-    index_path: Path
-    reads_path: Path
-    read_paths: utils.ReadPaths
-    subtraction_path: Path
-    raw_path: Path
-    temp_cache_path: Path
-    temp_analysis_path: Path
-    paired: bool
-    read_count: int
-    sample_read_length: int
-    library_type: LibraryType
-    sample: Dict[str, Any]
-    analysis: Dict[str, Any]
-    sample_id: str
-    analysis_id: str
-    ref_id: str
-    index_id: str
-```
-
-Each field of the dataclass is also available as a fixture on it's own. For example, the `virtool_workflow.analysis.analsysis_info.sample`
-fixture has exactly the same value as `analysis_args.sample`.
-
-```python
-from virtool_workflow import step
-from virtool_workflow.analysis.analysis_info import AnalysisArguments, sample
-
-@step
-def use_analysis_args(analysis_args: AnalysisArguments, sample: dict):
-    assert analysis_args.sample == sample # True
-
 ```
 
 
@@ -280,7 +278,7 @@ class Reads:
     """The maximum sequence length."""
     count: int
     """The number of sequences in the sample."""
-    paths: ReadPaths
+    paths: Iterable[Path]
     """The paths locating the trimmed read data."""
 ```
 
@@ -288,13 +286,12 @@ Using the `reads` fixture within a workflow triggers the read preparation steps 
 before the fixture returns. This replaces what would have previously been done using the `make_analysis_directory` and 
 `prepare_reads` functions in `virtool.jobs.analysis`. 
 
-Additionally, if there is a cache of the trimmed reads available under the `cache_path` that will be used and the read
+Additionally, if there is a cache of the trimmed reads available it will be used and the read
 preparation will be avoided. If no cache is available a new one will be made once the read prep completes. 
 
 
 ```python
 from virtool_workflow import step
-from virtool_workflow.analysis.read_prep import reads
 from virtool_workflow.analysis.reads import Reads
 
 
