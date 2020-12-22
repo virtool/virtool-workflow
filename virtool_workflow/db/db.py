@@ -1,5 +1,7 @@
 """Central module for database access. """
 from virtool_core.db.bindings import BINDINGS
+import arrow
+import virtool_core.utils
 import virtool_core.caches.db
 import virtool_core.db.core
 import virtool_core.samples.db
@@ -9,6 +11,7 @@ from typing import Dict, Any, Optional
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow import WorkflowFixture
+from virtool_workflow.uploads.files import FileUpload
 
 COLLECTION_NAMES = [binding.collection_name for binding in BINDINGS]
 
@@ -74,4 +77,51 @@ class DirectAccessDatabase(WorkflowFixture, param_name="database"):
     async def store_result(self, id_: str, result: Dict[str, Any], collection: str, file_results_location: Path):
         """Store the result onto the document specified by `id_` in the collection specified by `collection`."""
         await self.db.store_result(id_, self.db[collection], result, file_results_location)
+
+    async def _generate_file_id(self, filename: str) -> str:
+        """
+        Generate a unique id for a new file. File ids comprise a unique prefix joined to the filename by a dash
+        (eg. abc123-reads.fq.gz).
+
+        :param db: the application database object
+        :param filename: the filename to generate an id with
+        :return: the file id
+
+        """
+        files = self.db["files"]
+
+        excluded = await files.distinct("_id")
+        prefix = virtool_core.utils.random_alphanumeric(length=8, excluded=excluded)
+
+        file_id = f"{prefix}-{filename}"
+
+        if await files.count_documents({"_id": file_id}):
+            return await self._generate_file_id(filename)
+
+        return file_id
+
+    async def create_upload_document(self, file_upload: FileUpload, reserved: bool = False):
+        file_id = await self._generate_file_id(file_upload.path.name)
+
+        uploaded_at = virtool_core.utils.timestamp()
+        expires_at = None
+
+        if file_upload.format == "otus":
+            expires_at = arrow.get(uploaded_at).shift(hours=+5).datetime
+
+        document = {
+            "_id": file_id,
+            "name": file_upload.name,
+            "type": file_upload.format,
+            "user": None,
+            "uploaded_at": uploaded_at,
+            "expires_at": expires_at,
+            "created": False,
+            "reserved": reserved,
+            "ready": False
+        }
+
+        await self.db["files"].insert_one(document)
+
+        return document
 
