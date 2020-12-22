@@ -1,8 +1,14 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 
-VirtoolFileFormat = str
+VirtoolFileFormat = Literal[
+    "reference",
+    "reads",
+    "hmm",
+    "subtraction"
+]
 
 
 @dataclass(frozen=True)

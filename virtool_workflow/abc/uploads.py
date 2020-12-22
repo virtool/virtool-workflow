@@ -9,6 +9,7 @@ class AbstractFileUploader(ABC):
         """Mark a file for uploading."""
         ...
 
+    @abstractmethod
     async def upload(self):
         """Upload marked files."""
         ...

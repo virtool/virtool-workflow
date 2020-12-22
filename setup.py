@@ -19,6 +19,7 @@ INSTALL_REQUIRES = [
     "motor==2.3.0",
     "aiohttp==3.7.3",
     "aioredis==1.3.1",
+    "arrow>=0.15.5"
 ]
 
 
