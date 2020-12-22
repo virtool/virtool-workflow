@@ -77,3 +77,10 @@ def subtraction_path(temp_path: Path):
     path.mkdir(parents=True, exist_ok=True)
     return path
 
+
+@fixture
+def upload_path(temp_path):
+    path = temp_path/"uploads"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
