@@ -20,6 +20,7 @@ INSTALL_REQUIRES = [
     "aiohttp==3.7.3",
     "aioredis==1.3.1",
     "arrow>=0.15.5"
+    "aiofiles==0.6.0"
 ]
 
 
