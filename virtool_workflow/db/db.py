@@ -74,27 +74,6 @@ class DirectAccessDatabase(virtool_workflow.abc.AbstractDatabase):
         """Store the result onto the document specified by `id_` in the collection specified by `collection`."""
         await self.db.store_result(id_, self.db[collection], result, file_results_location)
 
-    async def _generate_file_id(self, filename: str) -> str:
-        """
-        Generate a unique id for a new file. File ids comprise a unique prefix joined to the filename by a dash
-        (eg. abc123-reads.fq.gz).
-
-        :param filename: the filename to generate an id with
-        :return: the file id
-
-        """
-        files = self.db["files"]
-
-        excluded = await files.distinct("_id")
-        prefix = virtool_core.utils.random_alphanumeric(length=8, excluded=excluded)
-
-        file_id = f"{prefix}-{filename}"
-
-        if await files.count_documents({"_id": file_id}):
-            return await self._generate_file_id(filename)
-
-        return file_id
-
     async def set_files_on_analysis(self, files: Iterable[Tuple[FileUpload, Path]], analysis_id: str):
         await self.db["analyses"].update_one(dict(_id=analysis_id), {
             "$set": {
