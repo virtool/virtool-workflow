@@ -78,7 +78,7 @@ class DirectAccessDatabase(virtool_workflow.abc.AbstractDatabase):
         await self.db["analyses"].update_one(dict(_id=analysis_id), {
             "$set": {
                 "files": [{
-                    "name": file_upload.name,
+                    "name": destination_path.name,
                     "description": file_upload.description,
                     "format": file_upload.format,
                     "size": destination_path.stat().st_size

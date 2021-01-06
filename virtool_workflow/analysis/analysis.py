@@ -1,12 +1,11 @@
 from pathlib import Path
-from virtool_workflow import hooks
 
 import virtool_workflow.abc
 import virtool_workflow.storage.utils
-from virtool_workflow.uploads.files import FileUpload
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow_runtime.db.db import Collection
+from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractDatabase
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.uploads.files import FileUpload
 
 
 class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
@@ -31,7 +30,7 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
     async def upload(self):
         """Move marked files to the :obj:`AnalysisUploader.analysis_path` and create database entries."""
         source_paths = [file_upload.path for file_upload in self._marks]
-        target_paths = [self.analysis_path/source_path.name for source_path in source_paths]
+        target_paths = [self.analysis_path/f"{n}_{source_path.name}" for n, source_path in enumerate(source_paths)]
 
         await virtool_workflow.storage.utils.move_paths(
             zip(source_paths, target_paths),
