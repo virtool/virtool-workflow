@@ -17,3 +17,4 @@ class FileUpload:
     description: str
     path: Path
     format: VirtoolFileFormat
+    reserved: bool
