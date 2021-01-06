@@ -31,7 +31,7 @@ async def test_fixtures_loaded(test_workflow):
                              'run_in_executor',
                              'run_subprocess',
                              'data_path',
-                             'temp_path',
+                             'work_path',
                              'cache_path',
                              'subtraction_data_path',
                              'subtraction_path',

@@ -76,7 +76,7 @@ async def create_config(scope: WorkflowFixtureScope, **kwargs) -> SimpleNamespac
     return config
 
 
-temp_path_str = config_option("temp_path_str", TEMP_PATH_ENV, default=f"{os.getcwd()}/temp",
+work_path_str = config_option("temp_path_str", TEMP_PATH_ENV, default=f"{os.getcwd()}/temp",
                               help_="The path where temporary data should be stored.")
 """A fixture for the Virtool temp path as a string."""
 

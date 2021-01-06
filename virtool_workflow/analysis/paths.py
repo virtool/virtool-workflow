@@ -28,24 +28,24 @@ def index_path(data_path: Path, job_args: Dict[str, Any]) -> Path:
 
 
 @fixture
-def raw_path(temp_path: Path) -> Path:
+def raw_path(work_path) -> Path:
     """The raw path for the current job."""
-    path = temp_path/"raw"
+    path = work_path / "raw"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
 @fixture
-def temp_cache_path(temp_path: Path) -> Path:
+def temp_cache_path(work_path) -> Path:
     """The temp cache path for the current job."""
-    path = temp_path/"cache"
+    path = work_path / "cache"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
 @fixture
-def reads_path(temp_path: Path) -> Path:
-    path = temp_path/"reads"
+def reads_path(work_path) -> Path:
+    path = work_path / "reads"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
