@@ -41,9 +41,5 @@ class AbstractDatabase(ABC):
         """Store the result onto the document specified by `id_` in the collection specified by `collection`."""
         ...
 
-    async def create_upload_document(self, file_upload: FileUpload, reserved: bool = False):
-        """Create a document in the database for a file upload."""
-        ...
-
     async def set_files_on_analysis(self, files: Iterable[Tuple[FileUpload, Path]], analysis_id: str):
         ...
