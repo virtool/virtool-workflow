@@ -1,12 +1,12 @@
 """Central module for database access. """
 from virtool_core.db.bindings import BINDINGS
-import arrow
 import virtool_core.utils
 import virtool_core.caches.db
 import virtool_core.db.core
 import virtool_core.samples.db
+import virtool_workflow.abc
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Iterable, Tuple
 
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow_runtime.db import VirtoolDatabase
@@ -16,14 +16,10 @@ from virtool_workflow.uploads.files import FileUpload
 COLLECTION_NAMES = [binding.collection_name for binding in BINDINGS]
 
 
-class DirectAccessDatabase(WorkflowFixture, param_name="database"):
+class DirectAccessDatabase(virtool_workflow.abc.AbstractDatabase):
 
     def __init__(self, db_name: str, db_connection_string: str):
         self.db = VirtoolDatabase(db_name, db_connection_string)
-
-    @staticmethod
-    def __fixture__() -> WorkflowFixture:
-        return DirectAccessDatabase(db_name(), db_connection_string())
 
     async def fetch_document_by_id(self, id_: str, collection_name: str) -> Optional[Dict[str, Any]]:
         """Fetch the document with the given ID from a specific Virtool database collection."""
@@ -99,23 +95,15 @@ class DirectAccessDatabase(WorkflowFixture, param_name="database"):
 
         return file_id
 
-    async def add_upload_on_analysis_document(self, file_upload: FileUpload, reserved: bool = False):
-        file_id = await self._generate_file_id(file_upload.path.name)
-
-        uploaded_at = virtool_core.utils.timestamp()
-
-        document = {
-            "_id": file_id,
-            "name": file_upload.name,
-            "type": file_upload.format,
-            "user": None,
-            "uploaded_at": uploaded_at,
-            "created": False,
-            "reserved": reserved,
-            "ready": False
-        }
-
-        await self.db["analysis"].update_one(document)
-
-        return document
+    async def set_files_on_analysis(self, files: Iterable[Tuple[FileUpload, Path]], analysis_id: str):
+        await self.db["analyses"].update_one(dict(_id=analysis_id), {
+            "$set": {
+                "files": [{
+                    "name": file_upload.name,
+                    "description": file_upload.description,
+                    "format": file_upload.format,
+                    "size": destination_path.stat().st_size
+                } for file_upload, destination_path in files]
+            }
+        })
 

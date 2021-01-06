@@ -6,6 +6,7 @@ import virtool_workflow.storage.utils
 from virtool_workflow.uploads.files import FileUpload
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow_runtime.db.db import Collection
+from virtool_workflow.abc import AbstractDatabase
 
 
 class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
@@ -16,7 +17,7 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
     """
 
     def __init__(self, analysis_path: Path, run_in_executor: FunctionExecutor,
-                 analyses: Collection, analysis_id: str):
+                 analyses: AbstractDatabase, analysis_id: str):
         self.analysis_path = analysis_path
         self.run_in_executor = run_in_executor
         self.analyses_db = analyses
@@ -36,16 +37,7 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
             self.run_in_executor
         )
 
-        await self.analyses_db.update_one(dict(_id=self.analysis_id), {
-            "$set": {
-                "files": [{
-                            "name": file_upload.name,
-                            "description": file_upload.description,
-                            "format": file_upload.format,
-                            "size": destination_path.stat().st_size
-                        } for file_upload, destination_path in zip(self._marks, target_paths)]
-            }
-        })
+        await self.analyses_db.set_files_on_analysis(zip(self._marks, target_paths), self.analysis_id)
 
 
 class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
@@ -60,7 +52,7 @@ class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
     @staticmethod
     def __fixture__(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
         analysis_id = job_args["analysis_id"]
-        uploader = AnalysisUploader(analysis_path, run_in_executor, database["analyses"], analysis_id)
+        uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
         hooks.before_result_upload(uploader.upload, once=True)
 
