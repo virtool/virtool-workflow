@@ -48,7 +48,7 @@ def data_path(data_path_str: str):
 
 
 @fixture
-def temp_path(temp_path_str: str):
+def work_path(temp_path_str: str):
     """The virtool temp path."""
     with context_directory(temp_path_str) as temp:
         yield temp
@@ -72,8 +72,8 @@ def subtraction_data_path(data_path: Path):
 
 
 @fixture
-def subtraction_path(temp_path: Path):
-    path = temp_path/"subtractions"
+def subtraction_path(work_path):
+    path = work_path / "subtractions"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

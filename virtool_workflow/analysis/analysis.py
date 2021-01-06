@@ -25,6 +25,7 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
         self._marks = []
 
     def mark(self, upload: FileUpload):
+        """Mark a file for upload."""
         self._marks.append(upload)
 
     async def upload(self):

@@ -29,7 +29,7 @@ def test_load_fixtures():
     discovery.load_fixtures_from__fixtures__(FIXTURE_TEST_FILE)
 
     assert "data_path" in WorkflowFixture.types()
-    assert "temp_path" in WorkflowFixture.types()
+    assert "work_path" in WorkflowFixture.types()
     assert "thread_pool_executor" in WorkflowFixture.types()
 
 
@@ -42,7 +42,7 @@ async def test_run_discovery():
     assert result["fixture_b"] == "ab"
     assert result["fixture_c"] == "c"
     assert result["data_path"]
-    assert result["temp_path"]
+    assert result["work_path"]
     assert result["thread_pool_executor"]
     assert result["run_in_executor"]
 

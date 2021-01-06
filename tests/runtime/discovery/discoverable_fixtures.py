@@ -1,7 +1,7 @@
 from virtool_workflow import fixture, Workflow
 
 __fixtures__ = [
-    ("virtool_workflow.storage.paths", "data_path", "temp_path"),
+    ("virtool_workflow.storage.paths", "data_path", "work_path"),
     "virtool_workflow.execution.run_in_executor"
 ]
 
@@ -34,9 +34,9 @@ def start(fixture_a, fixture_b, fixture_c, results):
 
 
 @wf.step
-def step(data_path, temp_path, thread_pool_executor, run_in_executor, results):
+def step(data_path, work_path, thread_pool_executor, run_in_executor, results):
     results["data_path"] = data_path
-    results["temp_path"] = temp_path
+    results["work_path"] = work_path
     results["thread_pool_executor"] = thread_pool_executor
     results["run_in_executor"] = run_in_executor
 

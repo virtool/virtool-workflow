@@ -49,7 +49,7 @@ async def test_unprepared_reads_fixture(fixtures):
     await fixtures.instantiate(paired)
     reads = await fixtures.instantiate(unprepared_reads)
 
-    assert reads.paths[0] == fixtures["temp_path"]/"reads"/"reads_1.fq.gz"
+    assert reads.paths[0] == fixtures["work_path"]/"reads"/"reads_1.fq.gz"
     assert reads.paths == utils.make_read_paths(fixtures["reads_path"], fixtures["paired"])
     assert reads.min_length == 0
     assert reads.max_length == 100

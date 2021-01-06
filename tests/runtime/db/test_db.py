@@ -36,7 +36,7 @@ async def test_results_stored_when_callback_set(empty_scope):
         db: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
         await db["analyses"].insert_one({"_id": "1"})
 
-        callback = db.store_result_callback("1", db["analyses"], await fixtures.get_or_instantiate("temp_path"))
+        callback = db.store_result_callback("1", db["analyses"], await fixtures.get_or_instantiate("work_path"))
 
         hooks.on_result(callback, once=True)
 
