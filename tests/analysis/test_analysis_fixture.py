@@ -36,14 +36,15 @@ async def test_upload_file(runtime: TestRuntime):
         await hooks.before_result_upload.trigger(runtime.scope)
 
         assert not test_file.exists()
-        assert (analysis_path/test_file.name).exists()
+        assert (analysis_path/f"0_{test_file.name}").exists()
 
     await runtime.execute_function(use_analysis_fixture)
 
     analysis_document = await db["analyses"].find_one(dict(_id="1"))
 
-    file_entry = analysis_document["files"][0]
-    assert file_entry["name"] == upload.name
-    assert file_entry["description"] == upload.description
-    assert file_entry["format"] == upload.format
-    assert file_entry["size"] == test_file_size
+    assert analysis_document["files"][0] == {
+        "name": f"0_{upload.name}",
+        "description": upload.description,
+        "format": upload.format,
+        "size": test_file_size,
+    }
