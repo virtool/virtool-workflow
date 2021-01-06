@@ -4,10 +4,14 @@ from typing import Literal
 
 
 VirtoolFileFormat = Literal[
-    "reference",
-    "reads",
-    "hmm",
-    "subtraction"
+    "sam",
+    "bam",
+    "fasta",
+    "fastq",
+    "csv",
+    "tsv",
+    "json",
+    "unknown",
 ]
 
 
