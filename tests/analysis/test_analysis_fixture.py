@@ -1,9 +1,10 @@
 from pathlib import Path
-from virtool_workflow_runtime.test_utils import runtime, TestRuntime
+
+from virtool_workflow import hooks
 from virtool_workflow.analysis.analysis import Analysis, FileUpload
-from virtool_workflow import hooks, WorkflowFixtureScope
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow_runtime.db.db import VirtoolDatabase
+from virtool_workflow_runtime.test_utils import TestRuntime
 
 
 async def test_upload_file(runtime: TestRuntime):
