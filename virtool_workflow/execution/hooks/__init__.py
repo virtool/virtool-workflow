@@ -197,4 +197,5 @@ def use_config(config: SimpleNamespace):
 ```
 """
 
-before_result_upload = Hook
+before_result_upload = WorkflowFixtureHook("before_result_upload", [], None)
+"""Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
