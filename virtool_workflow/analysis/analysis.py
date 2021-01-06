@@ -1,10 +1,8 @@
-import shutil
 from pathlib import Path
 from virtool_workflow import hooks
 
 import virtool_workflow.abc
 import virtool_workflow.storage.utils
-import virtool_core.utils
 from virtool_workflow.uploads.files import FileUpload
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow_runtime.db.db import Collection
@@ -62,9 +60,9 @@ class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
     @staticmethod
     def __fixture__(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
         analysis_id = job_args["analysis_id"]
-        uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
+        uploader = AnalysisUploader(analysis_path, run_in_executor, database["analyses"], analysis_id)
 
-        hooks.on_result(uploader.upload, once=True)
+        hooks.before_result_upload(uploader.upload, once=True)
 
         return Analysis(job_args["analysis_id"], uploader)
 

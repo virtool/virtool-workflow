@@ -1,6 +1,7 @@
 from typing import Callable, Dict, Any
 
 import pytest
+import inspect
 
 from virtool_workflow import WorkflowExecution, WorkflowFixtureScope, Workflow
 from virtool_workflow_runtime.abc.runtime import AbstractRuntime
@@ -16,7 +17,11 @@ class TestRuntime(AbstractRuntime):
 
     async def execute_function(self, func: Callable):
         """Bind runtime fixtures to a function and execute it."""
-        return (await self.scope.bind(func))()
+        bound = await self.scope.bind(func)
+        if inspect.iscoroutinefunction(func):
+            return await bound()
+
+        return bound()
 
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         self._execution = WorkflowExecution(workflow, self.scope)
