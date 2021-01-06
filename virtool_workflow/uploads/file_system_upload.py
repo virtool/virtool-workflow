@@ -8,13 +8,6 @@ from virtool_workflow.uploads.files import FileUpload
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
-@fixture
-def upload_path(data_path):
-    path = data_path/"uploads"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
 class DirectoryFileUploader(AbstractFileUploader):
     """Move marked files to a directory."""
 

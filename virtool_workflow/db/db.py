@@ -83,7 +83,6 @@ class DirectAccessDatabase(WorkflowFixture, param_name="database"):
         Generate a unique id for a new file. File ids comprise a unique prefix joined to the filename by a dash
         (eg. abc123-reads.fq.gz).
 
-        :param db: the application database object
         :param filename: the filename to generate an id with
         :return: the file id
 
@@ -100,14 +99,10 @@ class DirectAccessDatabase(WorkflowFixture, param_name="database"):
 
         return file_id
 
-    async def create_upload_document(self, file_upload: FileUpload, reserved: bool = False):
+    async def add_upload_on_analysis_document(self, file_upload: FileUpload, reserved: bool = False):
         file_id = await self._generate_file_id(file_upload.path.name)
 
         uploaded_at = virtool_core.utils.timestamp()
-        expires_at = None
-
-        if file_upload.format == "otus":
-            expires_at = arrow.get(uploaded_at).shift(hours=+5).datetime
 
         document = {
             "_id": file_id,
@@ -115,13 +110,12 @@ class DirectAccessDatabase(WorkflowFixture, param_name="database"):
             "type": file_upload.format,
             "user": None,
             "uploaded_at": uploaded_at,
-            "expires_at": expires_at,
             "created": False,
             "reserved": reserved,
             "ready": False
         }
 
-        await self.db["files"].insert_one(document)
+        await self.db["analysis"].update_one(document)
 
         return document
 
