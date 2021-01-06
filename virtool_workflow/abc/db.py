@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Iterable, Tuple
 from virtool_workflow.uploads.files import FileUpload
 
 
@@ -43,4 +43,7 @@ class AbstractDatabase(ABC):
 
     async def create_upload_document(self, file_upload: FileUpload, reserved: bool = False):
         """Create a document in the database for a file upload."""
+        ...
+
+    async def set_files_on_analysis(self, files: Iterable[Tuple[FileUpload, Path]], analysis_id: str):
         ...

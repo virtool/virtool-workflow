@@ -41,7 +41,6 @@ async def test_fixtures_loaded(test_workflow):
                              'index_path',
                              'raw_path',
                              'temp_cache_path',
-                             'temp_analysis_path',
                              'paired',
                              'library_type',
                              'sample',
