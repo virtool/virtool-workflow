@@ -20,13 +20,6 @@ def analysis_path(sample_path: Path, job_args: Dict[str, Any]) -> Path:
 
 
 @fixture
-def temp_analysis_path(temp_path: Path, job_args: Dict[str, Any]) -> Path:
-    path = temp_path/"analysis"/job_args["analysis_id"]
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
-@fixture
 def index_path(data_path: Path, job_args: Dict[str, Any]) -> Path:
     """The index path for the current job."""
     path = data_path/f"references/{job_args['ref_id']}/{job_args['index_id']}/reference"
