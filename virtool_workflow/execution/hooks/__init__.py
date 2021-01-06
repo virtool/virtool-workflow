@@ -196,3 +196,5 @@ def use_config(config: SimpleNamespace):
         ...
 ```
 """
+
+before_result_upload = Hook
