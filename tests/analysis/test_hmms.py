@@ -5,13 +5,11 @@ from shutil import copy
 import sys
 
 from virtool_workflow.analysis.hmms import hmms
-from virtool_workflow.execution.run_in_executor import run_in_executor
-from virtool_workflow.execution.run_subprocess import run_subprocess
 
 FAKE_PROFILES_PATH = Path(sys.path[0]) / "tests/analysis/profiles.hmm"
 
 
-async def test_hmms(tmpdir):
+async def test_hmms(run_in_executor, run_subprocess, tmpdir):
     temp_analysis_path = tmpdir.mkdir("temp")
 
     data_path = tmpdir.mkdir("data")
@@ -19,15 +17,12 @@ async def test_hmms(tmpdir):
 
     copy(FAKE_PROFILES_PATH, hmms_path)
 
-    run_subprocess_ = run_subprocess()
-    run_in_executor_ = run_in_executor(ThreadPoolExecutor())
-
     cluster_annotation_map = {
         1: "foo",
         3: "bar"
     }
 
-    hmms_obj = await hmms(cluster_annotation_map, data_path, temp_analysis_path, run_in_executor_, run_subprocess_)
+    hmms_obj = await hmms(cluster_annotation_map, data_path, temp_analysis_path, run_in_executor, run_subprocess)
 
     assert hmms_obj.cluster_annotation_map == cluster_annotation_map
 
