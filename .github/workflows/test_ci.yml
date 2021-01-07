@@ -30,7 +30,14 @@ jobs:
       - name: Install tox
         run: pip install tox
 
-      - name: Install hmmer
+      - name: Install Bowtie2
+        run: |
+          wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2-2.3.2-legacy-linux-x86_64.zip && \
+          unzip bowtie2-2.3.2-legacy-linux-x86_64.zip && \
+          mkdir bowtie2 && \
+          cp bowtie2-2.3.2-legacy/bowtie2* bowtie2
+
+      - name: Install HMMER
         run: |
           wget http://eddylab.org/software/hmmer/hmmer-3.3.2.tar.gz
           tar -xvf hmmer-3.3.2.tar.gz
