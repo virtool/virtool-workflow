@@ -43,7 +43,8 @@ async def test_upload_file(runtime: TestRuntime):
     analysis_document = await db["analyses"].find_one(dict(_id="1"))
 
     assert analysis_document["files"][0] == {
-        "name": f"0_{upload.name}",
+        "id": f"0_{upload.name}",
+        "name": upload.name,
         "description": upload.description,
         "format": upload.format,
         "size": test_file_size,
