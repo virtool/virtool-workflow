@@ -12,7 +12,6 @@ from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.storage.utils import copy_paths
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow import hooks
 from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 from virtool_workflow.analysis.reads import Reads

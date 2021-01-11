@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 from virtool_workflow.uploads.files import FileUpload
-from virtool_workflow.abc.db.cache import CacheEntry
+from virtool_workflow.abc.providers.cache import CacheEntry
 
 
 class AbstractAnalysisProvider(ABC):
