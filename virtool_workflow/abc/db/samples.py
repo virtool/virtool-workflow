@@ -23,6 +23,11 @@ class AbstractSampleProvider(ABC):
         ...
 
     @abstractmethod
+    async def set_prune(self, prune: bool):
+        """Set the prune flag indicating that old files should be automatically removed for the current sample."""
+        ...
+
+    @abstractmethod
     async def delete_files(self):
         """Delete files associated with the current sample."""
 
