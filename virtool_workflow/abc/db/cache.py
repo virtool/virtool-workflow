@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 
 @dataclass(frozen=True)
@@ -8,13 +8,29 @@ class CacheEntry:
     database_id: Optional[str]
     trimming_parameters: Dict[str, Any]
     trimming_program: Dict[str, Any]
+    files: List[dict]
 
 
 class AbstractCacheProvider(ABC):
 
     @abstractmethod
-    async def create(self):
-        """Create and store a new cache entry."""
+    async def create(self, cache: CacheEntry):
+        """Store a new cache entry."""
+        ...
+
+    @abstractmethod
+    async def set_files(self, files: List[dict]):
+        """Set the files included in the current cache."""
+        ...
+
+    @abstractmethod
+    async def set_ready(self):
+        """Mark the cache associated with the current analysis as ready."""
+        ...
+
+    @abstractmethod
+    async def set_quality(self):
+        """Set the quality for the current cache."""
         ...
 
     @abstractmethod
@@ -35,4 +51,9 @@ class AbstractCacheProvider(ABC):
     @abstractmethod
     async def clear_caches(self):
         """Delete all caches associated with the sample being analyzed by the current job."""
+        ...
+
+    @abstractmethod
+    async def unset_caches_for_analyses(self):
+        """Invalidate all caches associated with this sample."""
         ...
