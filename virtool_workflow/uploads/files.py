@@ -21,3 +21,10 @@ class FileUpload:
     description: str
     path: Path
     format: VirtoolFileFormat
+
+
+@dataclass(frozen=True)
+class DownloadableFileUpload(FileUpload):
+    download_url: str
+
+
