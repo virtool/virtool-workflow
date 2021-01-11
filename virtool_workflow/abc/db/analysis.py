@@ -35,6 +35,7 @@ class AbstractAnalysisProvider(ABC):
         ...
 
     @abstractmethod
-    async def add_cache(self, cache_entry: CacheEntry):
-        """Add a cache entry to the analysis, to be used if the current analysis job is restarted."""
+    async def set_cache(self, cache_entry: CacheEntry):
+        """Set the cache to be used if the current analysis job is restarted."""
         ...
+
