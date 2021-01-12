@@ -11,8 +11,8 @@ class WorkflowFixture(ABC):
     Abstract base class for all workflow fixtures. This class is used primarily to keep
     track of all available fixtures via :func:`WorkflowFixture.__subclasses__`.
 
-    The #fixture decorator function creates a new subclass of WorkflowFixture with
-    the same name as the function passed to #fixture. The decorator
+    The :func:`fixture` decorator function creates a new subclass of WorkflowFixture with
+    the same name as the function passed to :func:`fixture`. The decorator
     returns an instance of the newly created class, which is callable with the same
     parameters as the function passed to the decorator.
     """
@@ -47,7 +47,7 @@ class WorkflowFixture(ABC):
         Get all currently available types of workflow fixtures.
 
         :return: A dict mapping workflow fixture names to
-                 their respective #WorkflowFixture subclasses
+                 their respective :class:`WorkflowFixture` subclasses
         """
         return {cls.param_name: cls for cls in WorkflowFixture.__subclasses__()}
 

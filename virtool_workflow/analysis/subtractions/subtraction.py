@@ -11,7 +11,9 @@ from virtool_workflow.execution.run_in_executor import FunctionExecutor
 class Subtraction:
     """A dataclass representing a subtraction in Virtool."""
     name: str
+    """The scientific name for the subtraction."""
     nickname: str
+    """The human readable name for the subtraction."""
     path: Path
     """The Path locating the directory containing the subtraction data."""
     fasta_path: Path
@@ -26,10 +28,9 @@ class Subtraction:
     @staticmethod
     def from_document(document: Dict[str, Any], subtraction_path: Path):
         """
-        Create a new `Subtraction` object based on the data from the subtractions database document.
+        Create a new :class:`Subtraction` object based on the data from the subtractions database document.
 
         :param document: The subtraction document from the database. It is expected to have;
-
 
             * name: The scientific name for the subtraction.
             * nickname: The shortened name for the subtraction.

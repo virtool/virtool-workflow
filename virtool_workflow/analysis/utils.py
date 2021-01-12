@@ -17,6 +17,13 @@ def make_read_paths(
         reads_dir_path: Path,
         paired: bool
 ) -> ReadPaths:
+    """
+    Get the path(s) locating the compressed fastq files containing the read data.
+
+    :param reads_dir_path: The directory containing the fastq file(s).
+    :param paired: A boolean indicating if the sequence is paired (two fastq files).
+    :return: A :class:`Tuple[Path]` if :obj:`paired` is `False`, else a :class:`Tuple[Path, Path]`.
+    """
     return _make_paired_paths(reads_dir_path, paired, lambda n: f"reads_{n}.fq.gz")
 
 

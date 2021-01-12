@@ -17,7 +17,7 @@ class WorkflowFixtureScope(AbstractContextManager):
     """
     A scope maintaining instances of workflow fixtures.
 
-    Fixture instances can be bound to functions using the #.bind() method.
+    Fixture instances can be bound to functions using the :func:`.bind()` method.
     """
 
     def __init__(self,

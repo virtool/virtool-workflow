@@ -1,14 +1,9 @@
-from typing import List, Any, Type, Optional, Callable
 from inspect import signature
+from typing import List, Any, Callable
 
 from virtool_workflow import utils
 from virtool_workflow.execution.hooks import Hook
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-
-
-class HookRequirementNotProvided(Exception):
-    def __init__(self, hook: Hook, name: str, type: Optional[Type]):
-        super().__init__(f"The {hook.name} hook's `.trigger` method requires keyword argument {name}: {type}")
 
 
 class WorkflowFixtureHook(Hook):

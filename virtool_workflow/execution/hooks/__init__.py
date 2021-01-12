@@ -12,11 +12,11 @@ on_result = WorkflowFixtureHook("on_result", [], None)
 """
 Triggered when a workflow has completed and a result is available.
 
-```python
-@on_result
-async def use_result(workflow: Workflow, results: Dict[str, Any]):
-    ...
-```
+.. code-block:: python
+
+    @on_result
+    async def use_result(workflow: Workflow, results: Dict[str, Any]):
+        ...
 
 This Hook is triggered before the result of the workflow is stored. As 
 such the result can be mutated within the callback and that change will be 
@@ -28,67 +28,68 @@ on_update = WorkflowFixtureHook("on_update", [str], None)
 Triggered when an update is sent from a Workflow. 
 
 This occurs both when a (*str*) value is returned from a workflow step and when
-#WorkflowExecution.send_update() is invoked directly. 
+:func:`virtool_workflow.WorkflowExecution.send_update()` is invoked directly. 
 
-```python
-@on_update
-async def use_updates(execution: WorkflowExecution, update: str):
-    ...
-```
+.. code-block:: python
+
+    @on_update
+    async def use_updates(execution: WorkflowExecution, update: str):
+        ...
 """
 
 on_workflow_step = WorkflowFixtureHook("on_workflow_step", [], None)
 """
 Triggered on each workflow step.
 
-```python
-@on_workflow_step
-async def do_something_on_step(execution: WorkflowExecution):
-    ...
-```
+.. code-block:: python
+
+    @on_workflow_step
+    async def do_something_on_step(execution: WorkflowExecution):
+        ...
 """
 
 on_state_change = WorkflowFixtureHook("on_state_change", [State, State], None)
 """
 Triggered on a change of state during workflow execution.
 
-```python
-@on_workflow_step
-async def do_something_on_state_change(old_state, new_state):
-    ...
-```
+.. code-block:: python
+
+    @on_workflow_step
+    async def do_something_on_state_change(old_state, new_state):
+        ...
 """
 
 on_error = WorkflowFixtureHook("on_error", [WorkflowError], None)
 """
 Triggered when an exception occurs during a workflow.
 
-```python
-@on_error
-async def perform_on_error(error: WorkflowError):
-    ...
-```
+.. code-block:: python
+
+    @on_error
+    async def perform_on_error(error: WorkflowError):
+        ...
 """
 
 on_workflow_failure = WorkflowFixtureHook("on_workflow_finish", [Exception], None)
 """
 Triggered when a workflow fails to complete.
 
-```python
-async def perform_on_failure(cause: Exception, execution: WorkflowExecution):
-    ...
-```
+.. code-block:: python
+
+    @on_on_workflow_failure
+    async def perform_on_failure(cause: Exception, execution: WorkflowExecution):
+        ...
 """
 
 on_workflow_finish = WorkflowFixtureHook("on_workflow_finish", [], None)
 """
 Triggered when a workflow finishes, regardless of it's success.
 
-```python
-@on_workflow_finish
-async def perform_on_success(workflow: Workflow):
-    ...
-```
+.. code-block:: python
+
+    @on_workflow_finish
+    async def perform_on_success(workflow: Workflow):
+        ...
 """
 
 
@@ -108,11 +109,11 @@ Triggered when a job completes successfully.
 
 Parameters supplied are the `Workflow` instance and the results dict.
 
-```python
-@on_success
-async def perform_on_success(workflow: Workflow, results: Dict[str, Any]):
-    ...
-```
+.. code-block:: python
+
+    @on_success
+    async def perform_on_success(workflow: Workflow, results: Dict[str, Any]):
+        ...
 """
 
 
@@ -120,11 +121,11 @@ on_failure = WorkflowFixtureHook("on_failure", parameters=[WorkflowError], retur
 """
 Triggered when a job fails to complete.
 
-```python
-@on_failure
-async def perform_on_failure(error: WorkflowError):
-    ...
-```
+.. code-block:: python
+
+    @on_failure
+    async def perform_on_failure(error: WorkflowError):
+        ...
 """
 
 
@@ -132,11 +133,11 @@ on_finish = WorkflowFixtureHook("on_finish", parameters=[], return_type=None)
 """
 Triggered when a job finishes, regardless of success or failure.
 
-```python
-@on_finish
-async def perform_on_finish(workflow: Workflow):
-    ...
-```
+.. code-block:: python
+
+    @on_finish
+    async def perform_on_finish(workflow: Workflow):
+        ...
 """
 
 
@@ -154,11 +155,11 @@ on_cancelled = WorkflowFixtureHook("on_cancelled", [asyncio.CancelledError], Non
 """
 Triggered when a job is cancelled.
 
-```python
-@on_cancelled
-async def on_cancelled(error: asyncio.CancelledError):
-    ...
-```
+.. code-block:: python
+
+    @on_cancelled
+    async def on_cancelled(error: asyncio.CancelledError):
+        ...
 """
 
 
@@ -175,27 +176,46 @@ before the workflow is executed.
 
 Enables modification or injection of specific fixtures before a workflow is executed.
 
-```python
-@on_load_fixtures
-async def change_fixture_values(fixtures: WorkflowFixtureScope):
-    fixtures["some_fixture"] = SOME_VALUE
-    await fixtures.get_or_instantiate("name_of_some_other_fixture)
-    ...
-```
+.. code-block:: python
+
+    @on_load_fixtures
+    async def change_fixture_values(fixtures: WorkflowFixtureScope):
+        fixtures["some_fixture"] = SOME_VALUE
+        await fixtures.get_or_instantiate("name_of_some_other_fixture)
+        ...
 """
 
 on_load_config = Hook("on_load_config", [SimpleNamespace], None)
 """
 Triggered after the config is loaded from the CLI arguments and environment variables. A SimpleNamespace object
 is provided which has an attribute (sharing the same name as the fixture) for each configuration fixture in
-`virtool_workflow_runtime.config.configuration`. 
-```python
-@on_load_config
-def use_config(config: SimpleNamespace):
-    if config.dev_mode:
-        ...
-```
+:mod:`virtool_workflow_runtime.config.configuration`. 
+
+.. code-block:: python
+
+    @on_load_config
+    def use_config(config: SimpleNamespace):
+        if config.dev_mode:
+            ...
 """
 
 before_result_upload = WorkflowFixtureHook("before_result_upload", [], None)
 """Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
+
+__all__ = [
+    "on_result",
+    "on_update",
+    "on_workflow_step",
+    "on_success",
+    "on_failure",
+    "on_workflow_failure",
+    "on_workflow_finish",
+    "on_finish",
+    "on_load_config",
+    "on_load_fixtures",
+    "before_result_upload",
+    "on_cancelled",
+    "on_state_change",
+    "Hook",
+    "WorkflowFixtureHook",
+]

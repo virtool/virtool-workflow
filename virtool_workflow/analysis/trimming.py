@@ -52,7 +52,7 @@ def compose_trimming_command(
         input_paths: Iterable[Path]
 ) -> List[str]:
     """
-    Compose a shell command to run skewer on the read data located by the `input_paths`.
+    Compose a shell command to run skewer on the read data located by the :obj:`input_paths`.
 
     :param output_path: The Path to a directory where the output from skewer should be stored
     :param trimming_parameters: The trimming parameters
@@ -110,7 +110,7 @@ async def trimming_output(
 
 ) -> Path:
     """
-    The `trimming_output_path` provided  along with the shell output from the trimming command.
+    The :obj:`trimming_output_path` provided  along with the shell output from the trimming command.
 
     :param trimming_command: The trimming command.
     :param trimming_input_paths: The input paths locating the un-trimmed reads.

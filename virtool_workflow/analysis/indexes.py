@@ -16,14 +16,14 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 @dataclass
 class Reference:
     """Represents a Virtool reference"""
-
     id: str
     data_type: str
     name: str
 
 
 class Index:
-    """Represents a reference index assigned to the workflow run.
+    """
+    Represents a reference index assigned to the workflow run.
 
     :param index_id: the unique ID for the index
     :param path: the path at which the workflow index data will be stored
@@ -133,7 +133,6 @@ class Index:
         otus = [otu for otu in data["otus"] if otu["_id"] in unique_otu_ids]
 
         lengths = dict()
-        sequence_otu_dict = dict()
 
         async with aiofiles.open(path, "w") as f:
             for otu in otus:
@@ -153,7 +152,8 @@ class Index:
         :param otu_ids: the list of OTU IDs for which to generate and index
         :param path: the path to the reference index directory
         :param processes: how many processes are available for external program calls
-        :return: a tuple containing the path to the Bowtie2 index, FASTA files, and a dictionary of the lengths of all sequences keyed by their IDS
+        :return: a tuple containing the path to the Bowtie2 index, FASTA files, and a dictionary of the lengths
+            of all sequences keyed by their IDS
 
         """
         fasta_path = Path(f"{path}.fa")
@@ -182,10 +182,7 @@ async def indexes(
     run_in_executor: FunctionExecutor,
     run_subprocess: RunSubprocess,
 ) -> List[Index]:
-    """
-    A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects.
-
-    """
+    """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
     index_document = await database.fetch_document_by_id(
         job_args["index_id"], "indexes"
     )
