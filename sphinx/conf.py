@@ -32,11 +32,15 @@ release = '0.0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["recommonmark", "sphinx.ext.autodoc", "autoapi.extension", "sphinx_rtd_theme"]
-
+extensions = ["myst_parser", "sphinx.ext.autodoc", "autoapi.extension", "sphinx_rtd_theme"]
 autoapi_type = "python"
-autoapi_dirs = ["../virtool_workflow"]
+autoapi_dirs = ["../virtool_workflow", "../virtool_workflow_runtime"]
 
+
+autoapi_add_toctree_entry = False
+autoapi_root = "autoapi"
+
+html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
