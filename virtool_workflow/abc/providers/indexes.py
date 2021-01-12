@@ -10,10 +10,6 @@ class AbstractIndexProvider(ABC):
         ...
 
     @abstractmethod
-    def set_ready(self):
-        """Mark the index associated with the current job as ready."""
-        ...
-
     def set_has_json(self):
         """Mark that the index associated with the current job has a json representation of the reference available."""
         ...
