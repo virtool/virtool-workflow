@@ -7,10 +7,12 @@ Welcome to virtool_workflow's documentation!
 ============================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents
+   :maxdepth: 3
+   :caption: Index
 
-   ../README.md
+   README.md
+   autoapi/virtool_workflow/index.rst
+   autoapi/virtool_workflow_runtime/index.rst
 
 
 
