@@ -24,13 +24,8 @@ class AbstractCacheProvider(ABC):
         ...
 
     @abstractmethod
-    async def set_ready(self):
-        """Mark the cache associated with the current analysis as ready."""
-        ...
-
-    @abstractmethod
-    async def set_quality(self):
-        """Set the quality for the current cache."""
+    async def set_quality(self, quality: Dict[str, Any]):
+        """Set the quality for the current cache and mark it as ready."""
         ...
 
     @abstractmethod
