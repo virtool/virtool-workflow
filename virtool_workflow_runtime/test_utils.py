@@ -6,6 +6,7 @@ import inspect
 from virtool_workflow import WorkflowExecution, WorkflowFixtureScope, Workflow
 from virtool_workflow_runtime.abc.runtime import AbstractRuntime
 from virtool_workflow_runtime.runtime import runtime_scope
+from virtool_workflow.storage.paths import data_path, context_directory
 
 
 class TestRuntime(AbstractRuntime):
@@ -29,6 +30,12 @@ class TestRuntime(AbstractRuntime):
 
     @property
     def scope(self) -> WorkflowFixtureScope:
+        def temp_data_path(data_path_str):
+            with context_directory(data_path_str) as path:
+                yield path
+
+        # Use a temporary directory for the data_path during tests.
+        data_path.__fixture__ = temp_data_path
         return runtime_scope
 
     @property

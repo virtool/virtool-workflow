@@ -28,7 +28,7 @@ async def test_upload_file(runtime: TestRuntime):
         "foo",
         "A test file",
         test_file,
-        "reads",
+        "fasta",
     )
 
     async def use_analysis_fixture(analysis: Analysis, analysis_path: Path):
