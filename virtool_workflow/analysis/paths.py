@@ -45,6 +45,7 @@ def temp_cache_path(work_path) -> Path:
 
 @fixture
 def reads_path(work_path) -> Path:
+    """The reads path for the current job."""
     path = work_path / "reads"
     path.mkdir(parents=True, exist_ok=True)
     return path

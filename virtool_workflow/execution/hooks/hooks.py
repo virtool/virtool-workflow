@@ -85,7 +85,7 @@ class Hook:
         """
         A set of functions to be called as a group upon a particular event.
 
-        The signature of any functions added (via #Hook.callback or #Hook.__call__)
+        The signature of any functions added (via :func:`Hook.callback` or :func:`Hook.__call__`)
         are validated to match the types provided.
 
         :param hook_name: The name of this hook.
@@ -103,17 +103,17 @@ class Hook:
 
     def callback(self, callback_: Callable = None, until=None, once=False):
         """
-        Add a callback function to this Hook, to be invoked on `.trigger()`
+        Add a callback function to this Hook, to be invoked on :func:`.trigger()`
 
         :param callback_: The callback function to register.
 
-        :param until: Another #Hook which signals that the registered callback
+        :param until: Another :class:`Hook` which signals that the registered callback
             function should no longer be called by this hook. When the other hook is
             triggered, the callback function `callback_` will be removed from the set of callbacks.
 
         :param once: Only execute the callback the next time this Hook is triggered.
         :return: The original value of `callback_` if it was a coroutine function, else a coroutine
-            wrapping `callback_`.
+            wrapping :func:`callback_`.
         """
         if once:
             until = self
@@ -146,7 +146,7 @@ class Hook:
         return callback_
 
     def _callback_until(self, hook_: "Hook"):
-        """Add a callback to this hook and have it removed once `hook_` is triggered. """
+        """Add a callback to this hook and have it removed once :func:`hook_` is triggered. """
 
         def _temporary_callback(callback_):
             callback_ = self._callback(callback_)
@@ -164,7 +164,7 @@ class Hook:
         """
         Trigger this Hook.
 
-        Each callback function registered by #Hook.callback or #Hook.__call__
+        Each callback function registered by :func:`Hook.callback` or :func:`Hook.__call__`
         will be called using the arguments supplied to this function.
 
         :param args: Positional Arguments for this Hook.

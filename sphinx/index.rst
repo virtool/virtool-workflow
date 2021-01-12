@@ -11,6 +11,7 @@ Welcome to virtool_workflow's documentation!
    :caption: Index
 
    README.md
+   FIXTURE_README.md
    autoapi/virtool_workflow/index.rst
    autoapi/virtool_workflow_runtime/index.rst
 

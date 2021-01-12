@@ -17,6 +17,7 @@ COLLECTION_NAMES = [binding.collection_name for binding in BINDINGS]
 
 
 class DirectAccessDatabase(virtool_workflow.abc.AbstractDatabase):
+    """A :class:`virtool_workflow.abc.AbstractDatabase` implementation which uses a MongoDB database directly."""
 
     def __init__(self, db_name: str, db_connection_string: str):
         self.db = VirtoolDatabase(db_name, db_connection_string)

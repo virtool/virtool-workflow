@@ -7,7 +7,7 @@ from virtool_workflow.fixtures.workflow_fixture import fixture
 
 @fixture
 def thread_pool_executor() -> ThreadPoolExecutor:
-    """A fixture for a #concurrent.futures.ThreadPoolExecutor to be used by #run_in_executor()."""
+    """A fixture for a :class:`concurrent.futures.ThreadPoolExecutor` to be used by :func:`run_in_executor`."""
     return ThreadPoolExecutor()
 
 
@@ -21,7 +21,7 @@ def run_in_executor(thread_pool_executor: ThreadPoolExecutor) -> FunctionExecuto
     """
     Fixture to execute functions in a #concurrent.futures.ThreadPoolExecutor.
 
-    Wraps #concurrent.futures.ThreadPoolExecutor.submit() as an async function.
+    Wraps :func:`concurrent.futures.ThreadPoolExecutor.submit()` as an async function.
     """
     async def _run_in_executor(func: Callable, *args, **kwargs):
         future = thread_pool_executor.submit(func, *args, **kwargs)

@@ -116,7 +116,7 @@ async def delete_cache_if_not_ready(cache_id: str, cache_path: Path):
 
 async def delete_analysis(analysis_id: str, analysis_path: Path, sample_id: str):
     """
-    Delete the analysis associated to `analysis_id`.
+    Delete the analysis associated to :obj:`analysis_id`.
 
     Intended to be called upon failure of an analysis workflow.
 

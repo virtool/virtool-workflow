@@ -41,12 +41,14 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
 
 
 class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
+    """Operations relating to the current analysis, including file uploads."""
 
     def __init__(self, _id: str, uploader: virtool_workflow.abc.AbstractFileUploader):
         self._id = _id
         self.uploader = uploader
 
     async def upload_file(self, file_upload: FileUpload):
+        """Mark a file to be uploaded at the end of a workflow run."""
         self.uploader.mark(file_upload)
 
     @staticmethod
