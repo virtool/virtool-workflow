@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Literal
+
+from typing import Literal
 
 DataType = Literal["barcode", "genome"]
 
