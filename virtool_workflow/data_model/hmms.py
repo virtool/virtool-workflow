@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from abc import ABC
 from typing import List, Dict, Tuple
 
 
@@ -12,7 +11,7 @@ class HMMEntry:
 
 
 @dataclass(frozen=True)
-class HMM(ABC):
+class HMM:
     _id: str
     cluster: int
     count: int
