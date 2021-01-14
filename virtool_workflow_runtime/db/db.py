@@ -10,11 +10,10 @@ from pymongo.errors import DocumentTooLarge
 from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
-from virtool_workflow import WorkflowFixture
 from virtool_workflow.execution.workflow_executor import WorkflowExecution
 
 
-class VirtoolDatabase(WorkflowFixture, param_name="database"):
+class VirtoolDatabase:
     """
     An interface to the Virtool database.
 
@@ -42,11 +41,6 @@ class VirtoolDatabase(WorkflowFixture, param_name="database"):
 
         for binding in BINDINGS:
             setattr(self, binding.collection_name, getattr(self._db, binding.collection_name))
-
-    @staticmethod
-    def __fixture__(db_name: str, db_connection_string: str) -> Any:
-        """Return an instance of :class:`VirtoolDatabase` to be used as a workflow fixture."""
-        return VirtoolDatabase(db_name, db_connection_string)
 
     def __getitem__(self, item) -> Collection:
         """Get a particular database collection."""

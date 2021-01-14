@@ -7,8 +7,9 @@ from pathlib import Path
 from types import ModuleType
 from typing import List, Union, Iterable, Tuple, Optional
 
-from virtool_workflow import Workflow, WorkflowFixture
+from virtool_workflow import Workflow
 from virtool_workflow.decorator_api import collect
+from typing import Callable
 
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ def _import_module_from_file(module_name: str, path: Path) -> ModuleType:
     return module
 
 
-def discover_fixtures(module: Union[Path, ModuleType]) -> List[WorkflowFixture]:
+def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
     """
     Find all instances of #execution.fixtures.workflow_fixture.WorkflowFixture in a python module.
 
@@ -52,7 +53,7 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[WorkflowFixture]:
     if isinstance(module, Path):
         module = _import_module_from_file(module.name.rstrip(module.suffix), module)
 
-    return [attr for attr in module.__dict__.values() if isinstance(attr, WorkflowFixture)]
+    return [attr for attr in module.__dict__.values() if isinstance(attr, Callable)]
 
 
 def load_fixture_plugins(fixture_modules: Iterable[str]):
@@ -70,12 +71,12 @@ def load_fixture_plugins(fixture_modules: Iterable[str]):
             iter_ = iter(fixture_set)
             module = import_module(next(iter_))
             fixtures.extend(getattr(module, name) for name in iter_
-                            if isinstance(getattr(module, name), WorkflowFixture))
+                            if isinstance(getattr(module, name), Callable))
 
     return fixtures
 
 
-def load_fixtures_from__fixtures__(path: Path) -> List[WorkflowFixture]:
+def load_fixtures_from__fixtures__(path: Path) -> List[Callable]:
     """
     Load all fixtures specified by the __fixtures__ attribute of a module.
 
@@ -115,7 +116,7 @@ def discover_workflow(path: Path) -> Workflow:
 def run_discovery(
         path: Path,
         fixture_path: Optional[Path] = None
-) -> Tuple[Workflow, List[WorkflowFixture]]:
+) -> Tuple[Workflow, List[Callable]]:
     """
     Discover a workflow and fixtures from the given path(s).
 
