@@ -11,6 +11,12 @@ class FixtureMultipleYield(ValueError):
 class FixtureNotAvailable(RuntimeError):
     """Raised when a required fixture is not available."""
 
+    def _get_source_location(self, func: Callable):
+        source, lineno = getsourcelines(func)
+        source_file = getsourcefile(func)
+
+        return source, f"{source_file}:{lineno}"
+
     def __init__(self, param_name: str, signature: Signature, func: Callable, scope, *args):
         """
         :param param_name: The name of the parameter/fixture which
@@ -23,17 +29,17 @@ class FixtureNotAvailable(RuntimeError):
         self.param_name = param_name
         self.signature = signature
         self.func = func
-        self.available_fixtures = scope.available
+        self.available_fixtures = {name: self._get_source_location(callable_)[1]
+                                   for name, callable_ in scope.available.items()}
         super().__init__(*args)
 
     def __str__(self):
-        source, lineno = getsourcelines(self.func)
-        source = "".join(source)
+        _, location = self._get_source_location(self.func)
+        available_fixture_lines = "\n".join(f'{name}: \n {loc}'
+                                            for name, loc in self.available_fixtures.items())
         return f"'{self.param_name}' is not available as a workflow fixture.\n" \
-               f"Ensure that the corresponding fixture has been imported.\n\n" \
-               f"{getsourcefile(self.func)}:{lineno}\n"\
-               f"{source}\n\n" \
-               f"Available fixtures:\n {pprint.pformat(self.available_fixtures)}\n"
+               f"{location}\n"\
+               f"Available fixtures:\n {available_fixture_lines}\n"
 
 
 
