@@ -2,17 +2,16 @@
 import pprint
 from inspect import Signature, getsourcefile, getsourcelines
 from typing import Callable
-from virtool_workflow.fixtures.workflow_fixture import WorkflowFixture
 
 
-class WorkflowFixtureMultipleYield(ValueError):
+class FixtureMultipleYield(ValueError):
     """Raised when a generator workflow fixture yields more than once."""
 
 
-class WorkflowFixtureNotAvailable(RuntimeError):
+class FixtureNotAvailable(RuntimeError):
     """Raised when a required fixture is not available."""
 
-    def __init__(self, param_name: str, signature: Signature, func: Callable, *args):
+    def __init__(self, param_name: str, signature: Signature, func: Callable, scope, *args):
         """
         :param param_name: The name of the parameter/fixture which
             was not available
@@ -24,7 +23,7 @@ class WorkflowFixtureNotAvailable(RuntimeError):
         self.param_name = param_name
         self.signature = signature
         self.func = func
-        self.available_fixtures = WorkflowFixture.types()
+        self.available_fixtures = scope.available
         super().__init__(*args)
 
     def __str__(self):
