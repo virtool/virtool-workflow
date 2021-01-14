@@ -1,8 +1,7 @@
 """Create fixtures for environment variable values."""
 import os
-from typing import Optional, Iterable, Type, Union
+from typing import Optional, Type, Union, Callable
 
-from virtool_workflow import WorkflowFixture
 
 ENV_VARIABLE_TYPE = Union[str, int, bool]
 
@@ -12,7 +11,7 @@ def environment_variable_fixture(
         variable: str,
         default: Optional[ENV_VARIABLE_TYPE] = None,
         type_: Type[ENV_VARIABLE_TYPE] = str,
-) -> WorkflowFixture:
+) -> Callable:
     """
     Create a fixture exposing the value of an environment variable.
 
@@ -40,17 +39,8 @@ def environment_variable_fixture(
 
         return var
 
-    _fixture.__name__ = _fixture.__qualname__ = name
+    return _fixture
 
-    class _Fixture(WorkflowFixture, param_name=name):
-        default_value = default
-        environment_variable = variable
-
-        __fixture__ = _fixture
-
-    _Fixture.__name__ = _Fixture.__qualname__ = name
-
-    return _Fixture()
 
 
 

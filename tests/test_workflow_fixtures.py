@@ -2,9 +2,9 @@ import inspect
 from typing import Dict
 
 from virtool_workflow.execution.execution import execute
-from virtool_workflow.fixtures.workflow_fixture import fixture, WorkflowFixture
+from virtool_workflow.fixtures.workflow_fixture import fixture, workflow_fixtures
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-from virtool_workflow.fixtures.errors import WorkflowFixtureNotAvailable
+from virtool_workflow.fixtures.errors import FixtureNotAvailable
 
 
 @fixture
@@ -13,8 +13,7 @@ def my_fixture():
 
 
 def test_workflow_fixture_is_registered():
-    assert my_fixture.__class__.__name__ in WorkflowFixture.types()
-    assert my_fixture.__class__ in WorkflowFixture.types().values()
+    assert my_fixture.__name__ in workflow_fixtures
 
 
 async def test_workflow_fixture_injection():
@@ -116,7 +115,7 @@ async def test_exception_is_raised_when_fixture_not_available():
         try:
             await scope.bind(non_resolvable_fixture_function)
             assert False
-        except WorkflowFixtureNotAvailable as not_available:
+        except FixtureNotAvailable as not_available:
             assert not_available.param_name == "fixture_that_doesnt_exist"
             assert inspect.signature(non_resolvable_fixture_function) == not_available.signature
 

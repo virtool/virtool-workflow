@@ -1,17 +1,15 @@
 """Central module for database access. """
-from virtool_core.db.bindings import BINDINGS
-import virtool_core.utils
 import virtool_core.caches.db
 import virtool_core.db.core
 import virtool_core.samples.db
-import virtool_workflow.abc
+import virtool_core.utils
 from pathlib import Path
 from typing import Dict, Any, Optional, Iterable, Tuple
+from virtool_core.db.bindings import BINDINGS
 
-from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
-from virtool_workflow_runtime.db import VirtoolDatabase
-from virtool_workflow import WorkflowFixture
+import virtool_workflow.abc
 from virtool_workflow.uploads.files import FileUpload
+from virtool_workflow_runtime.db import VirtoolDatabase
 
 COLLECTION_NAMES = [binding.collection_name for binding in BINDINGS]
 
