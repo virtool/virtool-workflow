@@ -1,8 +1,8 @@
 import os
 from types import SimpleNamespace
-from typing import Any, Type, List, Tuple, Optional
+from typing import Any, Type, List, Tuple, Optional, Callable
 
-from virtool_workflow import WorkflowFixtureScope, WorkflowFixture, hooks
+from virtool_workflow import WorkflowFixtureScope, hooks
 from virtool_workflow_runtime.config.environment import environment_variable_fixture, ENV_VARIABLE_TYPE
 
 DATA_PATH_ENV = "VT_DATA_PATH"
@@ -17,7 +17,7 @@ MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 
 
-options: List[Tuple[str, str, Type[ENV_VARIABLE_TYPE], Optional[Any], str, WorkflowFixture]] = []
+options: List[Tuple[str, str, Type[ENV_VARIABLE_TYPE], Optional[Any], str, Callable]] = []
 
 
 def config_option(
@@ -26,7 +26,7 @@ def config_option(
         default: Any = None,
         type_: Type[ENV_VARIABLE_TYPE] = str,
         help_: str = "",
-) -> WorkflowFixture:
+) -> Callable:
     """
     Create a configuration option.
 

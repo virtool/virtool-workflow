@@ -2,6 +2,7 @@ from pathlib import Path
 
 import virtool_workflow.abc
 import virtool_workflow.storage.utils
+from virtool_workflow import fixture
 from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractDatabase
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
@@ -40,7 +41,8 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
         await self.analyses_db.set_files_on_analysis(zip(self._marks, target_paths), self.analysis_id)
 
 
-class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
+@fixture
+class Analysis:
     """Operations relating to the current analysis, including file uploads."""
 
     def __init__(self, _id: str, uploader: virtool_workflow.abc.AbstractFileUploader):
@@ -52,7 +54,7 @@ class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
         self.uploader.mark(file_upload)
 
     @staticmethod
-    def __fixture__(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
+    def __call__(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
         analysis_id = job_args["analysis_id"]
         uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
