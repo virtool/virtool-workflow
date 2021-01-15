@@ -92,6 +92,8 @@ def config_fixture(
 
         config_fixtures[fixture.name] = fixture
 
+        return fixture
+
     return _config_fixture
 
 
@@ -106,13 +108,13 @@ async def create_config(scope, **kwargs) -> SimpleNamespace:
     :return SimpleNamespace: A namespace containing any available config options.
     """
     config = SimpleNamespace()
-    for name, _, _, _, _, fixture in options:
-        if name in kwargs and kwargs[name] is not None:
-            setattr(config, name, kwargs[name])
-            options[name].fixture.override_value = kwargs[name]
+    for option in options.values():
+        if option.name in kwargs and kwargs[option.name] is not None:
+            setattr(config, option.name, kwargs[option.name])
+            option.fixture.override_value = kwargs[option.name]
         else:
-            value = await scope.instantiate(options[name])
-            setattr(config, name, value)
+            value = await scope.instantiate(option.fixture)
+            setattr(config, option.name, value)
 
     await hooks.on_load_config.trigger(config)
 

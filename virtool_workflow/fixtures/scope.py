@@ -62,7 +62,11 @@ class FixtureScope(AbstractContextManager, MutableMapping):
 
     @property
     def available(self):
-        return {**self._instances.fixtures(), **workflow_fixtures_dict}
+        _available = {**self._instances.fixtures()}
+        for provider in self._providers:
+            if isinstance(provider, DictProvider):
+                _available.update(**provider)
+        return _available
 
     async def instantiate(self, fixture_: Callable) -> Any:
         """
