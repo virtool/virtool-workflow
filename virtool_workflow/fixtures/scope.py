@@ -5,11 +5,12 @@ import logging
 import pprint
 from collections.abc import MutableMapping
 from functools import wraps
-from inspect import isgeneratorfunction, iscoroutinefunction, signature
+from inspect import iscoroutinefunction, signature
 from typing import Any, Callable, Iterator
+from types import GeneratorType
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
-from virtool_workflow.fixtures.providers import FixtureProvider, DictProvider
+from virtool_workflow.fixtures.providers import FixtureProvider, DictProvider, CallableProviderDict
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class FixtureScope(AbstractContextManager, MutableMapping):
             fixtures will take precedence over those provided by the elements of :obj:`providers`.
         """
         self._instances = DictProvider(scope=self, **instances)
-        self._providers = [self._instances, *providers]
+        self._overrides = CallableProviderDict()
+        self._providers = [self._instances, self._overrides, *providers]
         self._generators = []
 
     def __enter__(self):
@@ -65,7 +67,7 @@ class FixtureScope(AbstractContextManager, MutableMapping):
         _available = {**self._instances.fixtures()}
         for provider in self._providers:
             if isinstance(provider, DictProvider):
-                _available.update(**provider)
+                _available.update(**provider.fixtures())
         return _available
 
     async def instantiate(self, fixture_: Callable) -> Any:
@@ -81,14 +83,16 @@ class FixtureScope(AbstractContextManager, MutableMapping):
 
         bound = await self.bind(fixture_)
 
-        if isgeneratorfunction(fixture_):
+        if iscoroutinefunction(fixture_):
+            instance = await bound()
+        else:
+            print(fixture_)
+            instance = bound()
+
+        if isinstance(instance, GeneratorType):
             generator = bound()
             self._generators.append(generator)
             instance = next(generator)
-        elif iscoroutinefunction(fixture_):
-            instance = await bound()
-        else:
-            instance = bound()
 
         self._instances[fixture_.__name__] = instance
 
@@ -202,3 +206,6 @@ class FixtureScope(AbstractContextManager, MutableMapping):
         bound_workflow.on_cleanup = [await self.bind(f) for f in workflow.on_cleanup]
         bound_workflow.steps = [await self.bind(f) for f in workflow.steps]
         return bound_workflow
+
+    def override(self, name: str, callable_: Callable):
+        self._overrides[name] = callable_

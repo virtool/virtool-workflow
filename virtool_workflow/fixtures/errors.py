@@ -12,8 +12,15 @@ class FixtureNotAvailable(RuntimeError):
     """Raised when a required fixture is not available."""
 
     def _get_source_location(self, func: Callable):
-        source, lineno = getsourcelines(func)
-        source_file = getsourcefile(func)
+        try:
+            source, lineno = getsourcelines(func)
+            source_file = getsourcefile(func)
+        except TypeError: # func is a Callable class
+            if hasattr(func, "__call__"):
+                source, lineno = getsourcelines(func.__call__)
+                source_file = getsourcefile(func.__call__)
+            else:
+                raise
 
         return source, f"{source_file}:{lineno}"
 

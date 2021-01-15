@@ -8,8 +8,7 @@ from typing import Any, Type, Callable, Union
 import virtool_workflow
 import virtool_workflow.storage.paths
 from virtool_workflow import hooks
-from virtool_workflow.fixtures.providers import DictProvider
-from virtool_workflow_runtime.config.environment import ENV_VARIABLE_TYPE
+from virtool_workflow.fixtures.providers import CallableProviderDict
 
 DATA_PATH_ENV = "VT_DATA_PATH"
 TEMP_PATH_ENV = "VT_TEMP_PATH"
@@ -36,7 +35,7 @@ class ConfigOption:
 
 
 options = {}
-config_fixtures = DictProvider()
+config_fixtures = CallableProviderDict()
 
 
 class ConfigFixture(Callable):
@@ -51,9 +50,11 @@ class ConfigFixture(Callable):
         self.override_value = None
         self.transform = transform if transform else lambda x: x
 
+        self.__name__ = self.name
+
         options[name] = ConfigOption(name=name, type=type_, help=help_, fixture=self)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self):
         if self.override_value:
             return self.override_value
 
@@ -75,7 +76,7 @@ class ConfigFixture(Callable):
 
 def config_fixture(
         env: str,
-        type_: Type[ENV_VARIABLE_TYPE] = str,
+        type_: Type[Union[str, int, bool]] = str,
         default: Any = None,
         help_: str = "",
 ) -> Callable:
