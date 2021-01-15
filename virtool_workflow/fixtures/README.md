@@ -362,7 +362,7 @@ To test fixtures or functions that depend on many other fixtures it is best to c
 
 ```python
 import virtool_workflow
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 
 @virtool_workflow.fixture
 def my_fixture(...):
@@ -373,7 +373,7 @@ def function_using_fixture(my_fixture, ...):
 
 
 def test_fixture_and_function():
-    with WorkflowFixtureScope as scope:
+    with FixtureScope as scope:
         await scope.instantiate(my_fixture)
         
         bound_function = await scope.bind(function_using_fixture)
@@ -429,12 +429,12 @@ which is common between different tests.
 
 ```python
 import pytest
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 from ... import function_to_test
 
 @pytest.yield_fixture()
 def workflow_fixtures():
-    with WorkflowFixtureScope as scope:
+    with FixtureScope as scope:
         scope["job_args"] = {...}
         scope["job_id"] = "1"
         ...

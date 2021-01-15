@@ -155,7 +155,7 @@ The `.trigger` method is the most changed from the `Hook` class. It expects a `W
 the first parameter, followed by the positional parameters expected by the hook. 
 
 ```python
-from virtool_workflow import fixture, WorkflowFixtureScope
+from virtool_workflow import fixture, FixtureScope
 
 @fixture
 def some_fixture():

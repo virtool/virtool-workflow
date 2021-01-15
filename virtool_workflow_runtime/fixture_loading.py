@@ -1,13 +1,13 @@
 from typing import Iterable
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import discovery
 
 
-class InitializedWorkflowFixtureScope(WorkflowFixtureScope):
+class InitializedWorkflowFixtureScope(FixtureScope):
     """A WorkflowFixtureScope that imports fixtures from a set of modules upon `__enter__`."""
-    def __init__(self, fixture_plugins: Iterable[str]):
+    def __init__(self, fixture_plugins: Iterable[str], *providers, **instances):
         self.fixture_plugins = fixture_plugins
-        super().__init__()
+        super().__init__(*providers, **instances)
 
     def __enter__(self):
         discovery.load_fixture_plugins(self.fixture_plugins)

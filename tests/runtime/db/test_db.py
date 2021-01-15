@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from virtool_workflow import hooks, Workflow
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import runtime
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow_runtime.db import VirtoolDatabase
@@ -32,7 +32,7 @@ async def test_updates_sent_to_mongo():
 
 async def test_results_stored_when_callback_set(empty_scope):
 
-    with WorkflowFixtureScope() as fixtures:
+    with FixtureScope() as fixtures:
         db: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
         await db["analyses"].insert_one({"_id": "1"})
 

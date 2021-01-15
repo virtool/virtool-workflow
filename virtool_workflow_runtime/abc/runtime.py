@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Callable, Awaitable
 
-from virtool_workflow import Workflow, WorkflowExecution, WorkflowFixtureScope
+from virtool_workflow import Workflow, WorkflowExecution, FixtureScope
 
 
 class AbstractRuntime(ABC):
@@ -18,7 +18,7 @@ class AbstractRuntime(ABC):
 
     @property
     @abstractmethod
-    def scope(self) -> WorkflowFixtureScope:
+    def scope(self) -> FixtureScope:
         """The initialized `WorkflowFixtureScope`"""
         ...
 

@@ -1,9 +1,15 @@
-import os
-from types import SimpleNamespace
-from typing import Any, Type, List, Tuple, Optional, Callable
+from dataclasses import dataclass
 
-from virtool_workflow import WorkflowFixtureScope, hooks
-from virtool_workflow_runtime.config.environment import environment_variable_fixture, ENV_VARIABLE_TYPE
+import os
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, Type, Callable, Union
+
+import virtool_workflow
+import virtool_workflow.storage.paths
+from virtool_workflow import hooks
+from virtool_workflow.fixtures.providers import DictProvider
+from virtool_workflow_runtime.config.environment import ENV_VARIABLE_TYPE
 
 DATA_PATH_ENV = "VT_DATA_PATH"
 TEMP_PATH_ENV = "VT_TEMP_PATH"
@@ -17,42 +23,79 @@ MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 
 
-options: List[Tuple[str, str, Type[ENV_VARIABLE_TYPE], Optional[Any], str, Callable]] = []
+@dataclass(frozen=True)
+class ConfigOption:
+    name: str
+    type: Type[Union[str, int, bool]]
+    help: str
+    fixture: "ConfigFixture"
+
+    @property
+    def option_name(self):
+        return f"--{self.name}".replace("_", "-")
 
 
-def config_option(
-        name,
-        env,
-        default: Any = None,
+options = {}
+config_fixtures = DictProvider()
+
+
+class ConfigFixture(Callable):
+    def __init__(self, name: str, env: str,
+                 type_: Type[Union[str, int, bool]],
+                 default: Any, help_: str, transform: Callable = None):
+        self.name = name
+        self.env = env
+        self.type = type_
+        self.default = default
+        self.help = help_
+        self.override_value = None
+        self.transform = transform if transform else lambda x: x
+
+        options[name] = ConfigOption(name=name, type=type_, help=help_, fixture=self)
+
+    def __call__(self, *args, **kwargs):
+        if self.override_value:
+            return self.override_value
+
+        value = os.getenv(self.env, default=self.default)
+
+        if self.type == bool:
+            if value in ("True", "true", "Yes", "yes", "y", "Y"):
+                return True
+            else:
+                return False
+
+        if self.type == int:
+            return int(value)
+
+        transformed = self.transform(value)
+
+        return transformed if transformed else value
+
+
+def config_fixture(
+        env: str,
         type_: Type[ENV_VARIABLE_TYPE] = str,
+        default: Any = None,
         help_: str = "",
 ) -> Callable:
-    """
-    Create a configuration option.
 
-    This creates a fixture for the option with the given name and type. The value
-    of the fixture is determined by the environment variable `env`. The option will
-    also be added to the virtool_workflow CLI.
+    def _config_fixture(transform: Callable[[Union[str, int, bool]], Any]):
+        fixture = ConfigFixture(
+            name=transform.__name__,
+            env=env,
+            type_=type_,
+            default=default,
+            help_=help_ if help_ else transform.__doc__,
+            transform=transform
+        )
 
-    :param name: The name to be used for the workflow fixture. The name used for the CLI option
-        will be this name with `_` replaced by `-`. For example, the CLI option for the name
-        `workflow_config_option` would be `--workflow-config-option`.
-    :param env: The name of an environment variable backing this option.
-    :param default: The default value for the fixture if the environment variable is not set.
-    :param type_: The expected type of the environment variable. Supported types are `str`, `int`, and `bool`.
-    :param help_: A string which is used for the `--help` command in the CLI.
-    """
+        config_fixtures[fixture.name] = fixture
 
-    option_name = f"--{name}".replace("_", "-")
-
-    fixture = environment_variable_fixture(name, env, default, type_=type_)
-
-    options.append((name, option_name, type_, default, help_, fixture))
-
-    return fixture
+    return _config_fixture
 
 
-async def create_config(scope: WorkflowFixtureScope, **kwargs) -> SimpleNamespace:
+async def create_config(scope, **kwargs) -> SimpleNamespace:
     """
     Create a namespace containing all config options which have been defined.
 
@@ -66,66 +109,77 @@ async def create_config(scope: WorkflowFixtureScope, **kwargs) -> SimpleNamespac
     for name, _, _, _, _, fixture in options:
         if name in kwargs and kwargs[name] is not None:
             setattr(config, name, kwargs[name])
-            scope.add_instance(kwargs[name], fixture.param_name)
+            options[name].fixture.override_value = kwargs[name]
         else:
-            setattr(config, name, await scope.instantiate(fixture))
+            value = await scope.instantiate(options[name])
+            setattr(config, name, value)
 
     await hooks.on_load_config.trigger(config)
 
-    scope.add_instance(config, "config")
     return config
 
 
-work_path_str = config_option("temp_path_str", TEMP_PATH_ENV, default=f"{os.getcwd()}/temp",
-                              help_="The path where temporary data should be stored.")
-"""A fixture for the Virtool temp path as a string."""
+@config_fixture(env=TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
+def work_path(value: str) -> Path:
+    """The path where temporary data should be stored."""
+    with virtool_workflow.storage.paths.context_directory(value) as temp:
+        yield temp
 
-data_path_str = config_option("data_path_str", DATA_PATH_ENV, default=f"{os.getcwd()}/virtool",
-                              help_="The path where persistent data should be stored.")
-"""A fixture for the Virtool data path as a string"""
 
-proc = config_option("number_of_processes",
-                     PROC_ENV,
-                     default=2,
-                     type_=int,
-                     help_="The number of cores available for a workflow.")
-"""A fixture for the number of processes as an integer."""
+@config_fixture(DATA_PATH_ENV, default=f"{os.getcwd()}/virtool")
+def data_path(value: str) -> Path:
+    """The path where persistent data should be stored."""
+    _data_path = Path(value)
+    if not _data_path.exists():
+        _data_path.mkdir()
+    return _data_path
 
-mem = config_option("memory_usage_limit",
-                    MEM_ENV,
-                    default=8,
-                    type_=int,
-                    help_="The amount of RAM in GB available for use in a workflow.")
-"""A fixture for the maximum amount of RAM usage allowable in GB."""
 
-redis_connection_string = config_option(
-    "redis_connection_string",
-    REDIS_CONNECTION_STRING_ENV,
-    default="redis://localhost:6379",
-    help_="The URL used to connect to redis.",
-)
-"""A fixture for the redis connection string/url."""
+@config_fixture(env=PROC_ENV, default=2, type_=int)
+def proc(_):
+    """The number of processes as an integer."""
+    ...
 
-redis_job_list_name = config_option("job_list_name", REDIS_JOB_LIST_NAME_ENV, default="job_list",
-                                    help_="The name of the job list in redis.")
-"""A fixture for the name of the redis list from which jobs should be taken."""
 
-no_sentry = config_option("no_sentry", NO_SENTRY_ENV, default=True, help_="Disable sentry reporting.")
-"""A fixture for a flag indicating whether or not to run sentry checks."""
+@config_fixture(env=MEM_ENV, default=8, type_=int)
+def mem(_):
+    """The amount of RAM in GB available for use."""
+    ...
 
-dev_mode = config_option("dev_mode", DEVELOPMENT_MODE_ENV, default=False,
-                         help_="enable development mode for more detailed logging.")
-"""A fixture for a flag indicating that development mode is enabled."""
 
-db_name = config_option("db_name", MONGO_DATABASE_NAME_ENV, default="virtool",
-                        help_="""The name to use for the MongoDB database.""")
-"""A fixture for the MongoDB database name."""
+@config_fixture(env=REDIS_CONNECTION_STRING_ENV, default="redis://localhost:6379")
+def redis_connection_string(_):
+    """A fixture for the redis connection string/url."""
+    ...
 
-db_connection_string = config_option(
-    "db_connection_string",
-    MONGO_DATABASE_CONNECTION_STRING_ENV,
-    default="mongodb://localhost:27017",
-    help_="The URL used to connect to MongoDB.")
-"""A fixture for the MongoDB database connection string/url."""
+
+@config_fixture(REDIS_JOB_LIST_NAME_ENV, default="job_list")
+def redis_job_list_name(_):
+    """The name of the job list in redis."""
+    ...
+
+
+@config_fixture(env=NO_SENTRY_ENV, default=True)
+def no_sentry(_):
+    """A flag indicating whether or not to run sentry checks."""
+    ...
+
+
+@config_fixture(env=DEVELOPMENT_MODE_ENV, default=False)
+def dev_mode(_):
+    """A flag indicating that development mode is enabled."""
+    ...
+
+
+@config_fixture(env=MONGO_DATABASE_NAME_ENV, default="virtool")
+def db_name(_):
+    """The MongoDB database name."""
+    ...
+
+
+@config_fixture(env=MONGO_DATABASE_CONNECTION_STRING_ENV, default="mongodb://localhost:27017")
+def db_connection_string(_):
+    """The MongoDB database connection string/url."""
+    ...
 
 
