@@ -3,7 +3,7 @@ from typing import Callable, Dict, Any
 import pytest
 import inspect
 
-from virtool_workflow import WorkflowExecution, WorkflowFixtureScope, Workflow
+from virtool_workflow import WorkflowExecution, FixtureScope, Workflow
 from virtool_workflow_runtime.abc.runtime import AbstractRuntime
 from virtool_workflow_runtime.runtime import runtime_scope
 from virtool_workflow.storage.paths import data_path, context_directory
@@ -29,7 +29,7 @@ class TestRuntime(AbstractRuntime):
         return await self.execution.execute()
 
     @property
-    def scope(self) -> WorkflowFixtureScope:
+    def scope(self) -> FixtureScope:
         def temp_data_path(data_path_str):
             with context_directory(data_path_str) as path:
                 yield path

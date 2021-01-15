@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Optional, Callable, Coroutine, Any, Dict
 
 from virtool_workflow.execution import hooks
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
 class WorkflowExecution:
     """An awaitable object providing access to the results of a workflow."""
 
-    def __init__(self, workflow: Workflow, scope: WorkflowFixtureScope):
+    def __init__(self, workflow: Workflow, scope: FixtureScope):
         """
         :param workflow: The Workflow to be executed
         :param scope: The WorkflowFixtureScope used to bind fixtures to the workflow.

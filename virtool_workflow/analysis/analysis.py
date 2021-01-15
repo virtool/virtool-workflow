@@ -41,7 +41,6 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
         await self.analyses_db.set_files_on_analysis(zip(self._marks, target_paths), self.analysis_id)
 
 
-@fixture
 class Analysis:
     """Operations relating to the current analysis, including file uploads."""
 
@@ -53,12 +52,13 @@ class Analysis:
         """Mark a file to be uploaded at the end of a workflow run."""
         self.uploader.mark(file_upload)
 
-    @staticmethod
-    def __call__(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
-        analysis_id = job_args["analysis_id"]
-        uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
-        hooks.before_result_upload(uploader.upload, once=True)
+@fixture
+def analysis(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
+    analysis_id = job_args["analysis_id"]
+    uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
-        return Analysis(job_args["analysis_id"], uploader)
+    hooks.before_result_upload(uploader.upload, once=True)
+
+    return Analysis(job_args["analysis_id"], uploader)
 

@@ -11,7 +11,9 @@ from virtool_workflow.execution.hooks import on_update, on_workflow_finish
 from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
 from virtool_workflow.workflow import Workflow
 from virtool_workflow_runtime.abc.runtime import AbstractRuntime
-from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
+from virtool_workflow_runtime.config.configuration import config_fixtures
+from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
+from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name, create_config
 from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
 from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
@@ -31,7 +33,7 @@ runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow.execution.run_subprocess",
     "virtool_workflow.storage.paths",
     "virtool_workflow.analysis.fixtures"
-])
+], workflow_fixtures, config_fixtures)
 
 
 class DirectDatabaseAccessRuntime(AbstractRuntime):
@@ -43,6 +45,9 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
         self._scope_initialized = False
 
     async def _init_scope(self):
+        if "config" not in self.scope:
+            await create_config(self.scope)
+
         database: VirtoolDatabase = await self.scope.instantiate(VirtoolDatabase)
 
         job_document = await database["jobs"].find_one(dict(_id=self.job_id))

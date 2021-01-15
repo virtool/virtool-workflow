@@ -1,5 +1,4 @@
 from typing import Protocol, Callable, Optional, Dict
-from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures as workflow_fixtures_dict
 
 
 class FixtureProvider(Protocol):
@@ -15,12 +14,6 @@ class FixtureProvider(Protocol):
         :return: The fixture function with the given name, or None if it is not in this grouping
         """
         ...
-
-
-def workflow_fixtures(name: str, _=None):
-    """Return the workflow fixture function with the given name, if it exists."""
-    if name in workflow_fixtures_dict:
-        return workflow_fixtures_dict[name]
 
 
 def for_fixtures(*receivers: Callable, **fixtures: Dict[str, Callable]):
@@ -41,3 +34,6 @@ class DictProvider(FixtureProvider, dict):
     def __call__(self, name: str, _: Callable = None):
         if name in self:
             return lambda: self[name]
+
+    def fixtures(self):
+        return {name: self(name) for name in self}

@@ -9,13 +9,13 @@ from inspect import isgeneratorfunction, iscoroutinefunction, signature
 from typing import Any, Callable, Iterator
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
-from virtool_workflow.fixtures.providers import FixtureProvider, DictProvider, workflow_fixtures, workflow_fixtures_dict
+from virtool_workflow.fixtures.providers import FixtureProvider, DictProvider
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
 
-class WorkflowFixtureScope(AbstractContextManager, MutableMapping):
+class FixtureScope(AbstractContextManager, MutableMapping):
     """
     A scope maintaining instances of workflow fixtures.
 
@@ -33,12 +33,12 @@ class WorkflowFixtureScope(AbstractContextManager, MutableMapping):
             fixtures will take precedence over those provided by the elements of :obj:`providers`.
         """
         self._instances = DictProvider(scope=self, **instances)
-        self._providers = [self._instances, workflow_fixtures, *providers]
+        self._providers = [self._instances, *providers]
         self._generators = []
 
     def __enter__(self):
         """Return this instance when `with` statement is used."""
-        logger.debug(f"Opening a new {WorkflowFixtureScope.__name__}")
+        logger.debug(f"Opening a new {FixtureScope.__name__}")
         return self
 
     def __exit__(self, *args, **kwargs):
@@ -48,7 +48,7 @@ class WorkflowFixtureScope(AbstractContextManager, MutableMapping):
         Return execution to each of the generator fixtures and remove
         references to them.
         """
-        logger.debug(f"Closing {WorkflowFixtureScope.__name__} {self}")
+        logger.debug(f"Closing {FixtureScope.__name__} {self}")
         logger.debug("Clearing instances")
         # return control to the generator fixtures which are still left open
         self._instances.clear()
@@ -62,7 +62,7 @@ class WorkflowFixtureScope(AbstractContextManager, MutableMapping):
 
     @property
     def available(self):
-        return {**self._instances, **workflow_fixtures_dict}
+        return {**self._instances.fixtures(), **workflow_fixtures_dict}
 
     async def instantiate(self, fixture_: Callable) -> Any:
         """
