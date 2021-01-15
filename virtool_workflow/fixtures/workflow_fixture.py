@@ -1,12 +1,12 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
 import logging
 from typing import Callable
-from .providers import DictProvider
+from .providers import CallableProviderDict
 
 logger = logging.getLogger(__name__)
 
 
-workflow_fixtures = DictProvider()
+workflow_fixtures = CallableProviderDict()
 """Global dict containing all defined workflow fixtures."""
 
 

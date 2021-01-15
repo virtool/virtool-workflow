@@ -21,7 +21,7 @@ async def test_workflow_fixture_injection():
         assert my_fixture == "FIXTURE"
         uses_fixture.called = True
 
-    with FixtureScope() as scope:
+    with FixtureScope(workflow_fixtures) as scope:
         (await scope.bind(uses_fixture))()
 
     assert uses_fixture.called
@@ -32,7 +32,7 @@ async def test_workflow_fixture_injection_on_async_function():
         assert my_fixture == "FIXTURE"
         uses_fixture.called = True
 
-    with FixtureScope() as fixtures:
+    with FixtureScope(workflow_fixtures) as fixtures:
         await (await fixtures.bind(uses_fixture))()
 
     assert uses_fixture.called
@@ -48,7 +48,7 @@ async def test_fixtures_used_by_fixtures():
         assert fixture_using_fixture == "FIXTURE_USING_FIXTURE"
         use_fixture_using_fixture.called = True
 
-    with FixtureScope() as scope:
+    with FixtureScope(workflow_fixtures) as scope:
         (await scope.bind(use_fixture_using_fixture))()
 
     assert use_fixture_using_fixture.called
@@ -60,7 +60,7 @@ async def test_same_instance_is_used():
     def dictionary():
         return {}
 
-    with FixtureScope() as scope:
+    with FixtureScope(workflow_fixtures) as scope:
 
         def func1(dictionary: Dict[str, str]):
             dictionary["item"] = "item"
@@ -88,7 +88,7 @@ async def test_generator_fixtures_cleanup():
         nonlocal cleanup_executed
         cleanup_executed = True
 
-    with FixtureScope() as scope:
+    with FixtureScope(workflow_fixtures) as scope:
 
         def use_generator_fixture(generator_fixture):
             assert generator_fixture == "FIXTURE"
@@ -111,7 +111,7 @@ async def test_exception_is_raised_when_fixture_not_available():
     async def non_resolvable_fixture_function(fixture_that_doesnt_exist):
         pass
 
-    with FixtureScope() as scope:
+    with FixtureScope(workflow_fixtures) as scope:
         try:
             await scope.bind(non_resolvable_fixture_function)
             assert False

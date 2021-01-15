@@ -4,6 +4,7 @@ from virtool_workflow import Workflow
 from virtool_workflow.execution import execution
 from virtool_workflow_runtime import discovery
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
+from virtool_workflow_runtime.config.configuration import config_fixtures
 
 cwd = Path(__file__).parent
 TEST_FILE = cwd/"discoverable_workflow.py"
@@ -29,8 +30,8 @@ def test_discover_fixtures():
 def test_load_fixtures():
     discovery.load_fixtures_from__fixtures__(FIXTURE_TEST_FILE)
 
-    assert "data_path" in workflow_fixtures
-    assert "work_path" in workflow_fixtures
+    assert "data_path" in config_fixtures
+    assert "work_path" in config_fixtures
     assert "thread_pool_executor" in workflow_fixtures
 
 

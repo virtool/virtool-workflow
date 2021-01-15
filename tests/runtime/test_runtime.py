@@ -14,15 +14,12 @@ async def test_execute(test_workflow):
 
 async def test_fixtures_loaded(test_workflow):
     with runtime.runtime_scope:
-        types = set(workflow_fixtures)
+        types = set(runtime.runtime_scope.available)
         expected_fixtures = {'state',
-                             'database',
-                             'temp_path_str',
-                             'data_path_str',
-                             'number_of_processes',
-                             'memory_usage_limit',
+                             'proc',
+                             'mem',
                              'redis_connection_string',
-                             'job_list_name',
+                             'redis_job_list_name',
                              'no_sentry',
                              'dev_mode',
                              'db_name',

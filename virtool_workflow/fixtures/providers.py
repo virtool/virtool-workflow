@@ -37,3 +37,10 @@ class DictProvider(FixtureProvider, dict):
 
     def fixtures(self):
         return {name: self(name) for name in self}
+
+
+class CallableProviderDict(DictProvider):
+
+    def __call__(self, name: str, _: Callable = None):
+        if name in self:
+            return self[name]

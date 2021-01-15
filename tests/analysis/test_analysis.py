@@ -9,8 +9,8 @@ from virtool_workflow.analysis import utils
 
 
 @pytest.yield_fixture
-async def fixtures():
-    with FixtureScope() as _fixtures:
+async def fixtures(runtime):
+    with runtime.scope as _fixtures:
         _fixtures["job_id"] = "1"
         _fixtures["job_document"] = dict(_id="1")
         _fixtures["job_args"] = dict(

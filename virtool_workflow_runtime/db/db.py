@@ -28,15 +28,15 @@ class VirtoolDatabase:
 
     def __init__(self,
                  db_name: Optional[str],
-                 db_conn_url: Optional[str]):
+                 db_connection_string: Optional[str]):
         """
         :param db_name: The name of the MongoDB database. 'virtool' will
             be used if None is provided.
-        :param db_conn_url: The MongoDB connection URL. If None is provided
+        :param db_connection_string: The MongoDB connection URL. If None is provided
             the value of the 'DATABASE_CONNECTION_URL` environment variable
             is used. If the variable is not set then 'mongodb://localhost:27017' is used.
         """
-        self._client = AsyncIOMotorClient(db_conn_url, io_loop=asyncio.get_event_loop())[db_name]
+        self._client = AsyncIOMotorClient(db_connection_string, io_loop=asyncio.get_event_loop())[db_name]
         self._db = DB(self._client, None)
 
         for binding in BINDINGS:
