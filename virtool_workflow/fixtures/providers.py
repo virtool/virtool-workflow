@@ -2,7 +2,7 @@ from typing import Protocol, Callable, Optional, Dict
 
 
 class FixtureProvider(Protocol):
-    """A callable which retrieves instances of :class:`AbstractFixture` if they are part of a particular group."""
+    """A callable which retrieves fixtures by name."""
 
     def __call__(self, name: str, request_from: Callable = None) -> Optional[Callable]:
         """
@@ -28,8 +28,8 @@ def for_fixtures(*receivers: Callable, **fixtures: Dict[str, Callable]):
     return _grouping
 
 
-class DictProvider(FixtureProvider, dict):
-    """A dict which acts as a :class:`FixtureProvider`, providing it's values."""
+class InstanceFixtureGroup(FixtureProvider, dict):
+    """A dict which acts as a :class:`FixtureProvider`, providing it's instances as fixture values."""
 
     def __call__(self, name: str, _: Callable = None):
         if name in self:
@@ -39,7 +39,8 @@ class DictProvider(FixtureProvider, dict):
         return {name: self(name) for name in self}
 
 
-class CallableProviderDict(DictProvider):
+class FixtureGroup(InstanceFixtureGroup):
+    """A dict defining a group of fixture functions."""
 
     def __call__(self, name: str, _: Callable = None):
         if name in self:

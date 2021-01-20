@@ -8,7 +8,7 @@ from typing import Any, Type, Callable, Union
 import virtool_workflow
 import virtool_workflow.storage.paths
 from virtool_workflow import hooks
-from virtool_workflow.fixtures.providers import CallableProviderDict
+from virtool_workflow.fixtures.providers import FixtureGroup
 
 DATA_PATH_ENV = "VT_DATA_PATH"
 TEMP_PATH_ENV = "VT_TEMP_PATH"
@@ -35,7 +35,7 @@ class ConfigOption:
 
 
 options = {}
-config_fixtures = CallableProviderDict()
+config_fixtures = FixtureGroup()
 
 
 class ConfigFixture(Callable):
