@@ -10,7 +10,7 @@ from typing import Any, Callable, Iterator
 from types import GeneratorType
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
-from virtool_workflow.fixtures.providers import FixtureProvider, DictProvider, CallableProviderDict
+from virtool_workflow.fixtures.providers import FixtureProvider, InstanceFixtureGroup, FixtureGroup
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -33,8 +33,8 @@ class FixtureScope(AbstractContextManager, MutableMapping):
             Values in this dictionary will be accessible as fixtures by their key. Also note that these
             fixtures will take precedence over those provided by the elements of :obj:`providers`.
         """
-        self._instances = DictProvider(scope=self, **instances)
-        self._overrides = CallableProviderDict()
+        self._instances = InstanceFixtureGroup(scope=self, **instances)
+        self._overrides = FixtureGroup()
         self._providers = [self._instances, self._overrides, *providers]
         self._generators = []
 
@@ -66,7 +66,7 @@ class FixtureScope(AbstractContextManager, MutableMapping):
     def available(self):
         _available = {**self._instances.fixtures()}
         for provider in self._providers:
-            if isinstance(provider, DictProvider):
+            if isinstance(provider, InstanceFixtureGroup):
                 _available.update(**provider.fixtures())
         return _available
 
