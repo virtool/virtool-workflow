@@ -6,8 +6,8 @@ import pprint
 from collections.abc import MutableMapping
 from functools import wraps
 from inspect import iscoroutinefunction, signature
-from typing import Any, Callable, Iterator
 from types import GeneratorType
+from typing import Any, Callable, Iterator
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
 from virtool_workflow.fixtures.providers import FixtureProvider, InstanceFixtureGroup, FixtureGroup
@@ -16,7 +16,7 @@ from virtool_workflow.workflow import Workflow
 logger = logging.getLogger(__name__)
 
 
-class FixtureScope(AbstractContextManager, MutableMapping):
+class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
     """
     A scope maintaining instances of workflow fixtures.
 
@@ -33,17 +33,19 @@ class FixtureScope(AbstractContextManager, MutableMapping):
             Values in this dictionary will be accessible as fixtures by their key. Also note that these
             fixtures will take precedence over those provided by the elements of :obj:`providers`.
         """
-        self._instances = InstanceFixtureGroup(scope=self, **instances)
+        self.update(**instances)
         self._overrides = FixtureGroup()
-        self._providers = [self._instances, self._overrides, *providers]
+        self._providers = [self, self._overrides, *providers]
         self._generators = []
+
+        super(InstanceFixtureGroup, self).__init__()
 
     def __enter__(self):
         """Return this instance when `with` statement is used."""
         logger.debug(f"Opening a new {FixtureScope.__name__}")
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def close(self):
         """
         Remove references to any instances managed by this WorkflowFixtureScope.
 
@@ -53,7 +55,7 @@ class FixtureScope(AbstractContextManager, MutableMapping):
         logger.debug(f"Closing {FixtureScope.__name__} {self}")
         logger.debug("Clearing instances")
         # return control to the generator fixtures which are still left open
-        self._instances.clear()
+        self.clear()
         for gen in self._generators:
             logger.debug(f"Returning control to generator fixture {gen}")
             none = next(gen, None)
@@ -62,9 +64,13 @@ class FixtureScope(AbstractContextManager, MutableMapping):
         logger.debug("Clearing generators")
         self._generators = []
 
+    def __exit__(self, *args, **kwargs):
+        """Close the :class:`FixtureScope` on exit."""
+        self.close()
+
     @property
     def available(self):
-        _available = {**self._instances.fixtures()}
+        _available = {**self.fixtures()}
         for provider in self._providers:
             if isinstance(provider, InstanceFixtureGroup):
                 _available.update(**provider.fixtures())
@@ -86,7 +92,6 @@ class FixtureScope(AbstractContextManager, MutableMapping):
         if iscoroutinefunction(fixture_):
             instance = await bound()
         else:
-            print(fixture_)
             instance = bound()
 
         if isinstance(instance, GeneratorType):
@@ -94,7 +99,7 @@ class FixtureScope(AbstractContextManager, MutableMapping):
             self._generators.append(generator)
             instance = next(generator)
 
-        self._instances[fixture_.__name__] = instance
+        self[fixture_.__name__] = instance
 
         logger.debug(f"Instantiated {fixture_} as {instance}")
 
@@ -109,18 +114,17 @@ class FixtureScope(AbstractContextManager, MutableMapping):
 
     async def get_or_instantiate(self, name: str, requested_by: Callable = None):
         """
-        Get an instance of the workflow fixture with a given name. If there exists an
-        instance cached in this WorkflowFixtureScope it will returned, else a new instance
+        Get an instance of the fixture with a given name. If there exists an
+        instance cached in this :class:`FixtureScope` it will be returned, else a new instance
         will be created and cached.
 
         :param name: The name of the workflow fixture to get
-        :param requested_by: The callable for which the fixture is being fetched. Some :class:`FixtureProviders`
-            will only provide fixtures for specific Callables.
-        :return: The workflow fixture instance for this WorkflowFixtureScope
+        :param requested_by: The callable from which the fixture is being fetched.
+        :return: The workflow fixture instance for this :class:`FixtureScope`
         :raise KeyError: When the given name does not correspond to a defined workflow fixture.
         """
-        if name in self._instances:
-            return self._instances[name]
+        if name in self:
+            return self[name]
 
         fixture = self._get_fixture_from_providers(name, requested_by)
         if fixture:
@@ -128,33 +132,15 @@ class FixtureScope(AbstractContextManager, MutableMapping):
 
         raise KeyError(name, f"{name} is not a fixture within this WorkflowFixtureScope.")
 
-    def __iter__(self):
-        return iter(self._instances)
-
-    def __len__(self) -> int:
-        return len(self._instances)
-
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
         try:
-            return self._instances[item]
+            return super().__getitem__(item)
         except KeyError as error:
             raise ValueError(
                 f"{error} is not available within this scope.\n"
-                f"Available instances are: \n {pprint.pformat(self._instances)}"
+                f"Available instances are: \n {pprint.pformat(dict(self))}"
             )
-
-    def __setitem__(self, key: str, value: Any):
-        """Add an instance as a fixture with this WorkflowFixtureScope."""
-        self._instances[key] = value
-
-    def __delitem__(self, key: str):
-        """Support `del` keyword."""
-        del self._instances[key]
-
-    def __contains__(self, item):
-        """Support `in` operator."""
-        return item in self._instances
 
     async def bind(self, func: Callable[..., Any], strict: bool = True) -> Callable[[], Any]:
         """
@@ -208,4 +194,11 @@ class FixtureScope(AbstractContextManager, MutableMapping):
         return bound_workflow
 
     def override(self, name: str, callable_: Callable):
+        """
+        Override a fixture within this scope.
+
+        :param name: The name of the fixture to override
+        :param callable_: A :class:`Callable` to use as the fixture
+
+        """
         self._overrides[name] = callable_
