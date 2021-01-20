@@ -64,6 +64,10 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         logger.debug("Clearing generators")
         self._generators = []
 
+        for provider in self._providers:
+            if isinstance(provider, FixtureScope):
+                provider.close()
+
     def __exit__(self, *args, **kwargs):
         """Close the :class:`FixtureScope` on exit."""
         self.close()
