@@ -75,7 +75,7 @@ async def test_same_instance_is_used():
         func1()
         func2()
 
-        assert scope._instances["dictionary"]["item"] == "different item"
+        assert scope["dictionary"]["item"] == "different item"
 
 
 async def test_generator_fixtures_cleanup():

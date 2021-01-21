@@ -3,7 +3,6 @@ from contextlib import AbstractContextManager
 
 import logging
 import pprint
-from collections.abc import MutableMapping
 from functools import wraps
 from inspect import iscoroutinefunction, signature
 from types import GeneratorType
@@ -37,6 +36,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         self._overrides = FixtureGroup()
         self._providers = [self, self._overrides, *providers]
         self._generators = []
+        self.add_provider = self._providers.append
 
         super(InstanceFixtureGroup, self).__init__()
 
@@ -65,7 +65,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         self._generators = []
 
         for provider in self._providers:
-            if isinstance(provider, FixtureScope):
+            if isinstance(provider, FixtureScope) and id(provider) != id(self):
                 provider.close()
 
     def __exit__(self, *args, **kwargs):
