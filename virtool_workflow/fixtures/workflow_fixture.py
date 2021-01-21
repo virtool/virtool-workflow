@@ -1,6 +1,7 @@
 """Pytest-style fixtures for use in Virtool Workflows."""
 import logging
 from typing import Callable
+
 from .providers import FixtureGroup
 
 logger = logging.getLogger(__name__)
