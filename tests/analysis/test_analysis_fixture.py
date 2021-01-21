@@ -32,7 +32,7 @@ async def test_upload_file(runtime: TestRuntime):
     )
 
     async def use_analysis_fixture(analysis: Analysis, analysis_path: Path):
-        await analysis.upload_file(upload)
+        analysis.upload_file(upload.name, upload.description, upload.path, upload.format)
         await hooks.before_result_upload.trigger(runtime.scope)
 
         assert not test_file.exists()

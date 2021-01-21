@@ -49,8 +49,6 @@ class Analysis:
         self._id = _id
         self.uploader = uploader
 
-        self.upload_file = self.uploader.mark
-
     def upload_file(self, name: str, description: str, path: Path, format: VirtoolFileFormat):
         """Mark a file to be uploaded at the end of a workflow run."""
         self.uploader.mark(FileUpload(name, description, path, format))
