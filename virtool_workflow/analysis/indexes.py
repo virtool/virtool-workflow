@@ -19,6 +19,8 @@ class Reference:
     id: str
     data_type: str
     name: str
+    organism: str
+    targets: List[str]
 
 
 class Index:
@@ -200,6 +202,8 @@ async def indexes(
         ref_document["_id"],
         ref_document["data_type"],
         ref_document["name"],
+        ref_document["organism"],
+        ref_document["targets"]
     )
 
     index = Index(
