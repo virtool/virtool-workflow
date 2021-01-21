@@ -113,34 +113,13 @@ def my_workflow_fixture():
 The above defines a fixture with a value of `"my_workflow_fixture"`.
 
 When a startup, cleanup, or step function of a workflow declares a parameter, the appropriate fixture instance will be 
-supplied when the function is executed, as long as the fixture is defined within the 
-current scope (or global/module scope)
+supplied when the function is executed.
 
 ```python
 @step
 def step(my_workflow_fixture: str):
     print(my_workflow_fixture) # "my_workflow_fixture"
 ```
-
-
-#### Fixture Classes
-
-Under the hood, workflow fixtures are subclasses of the [virtool_workflow.WorkflowFixture](#) class. The `WorkflowFixture`
-class is an abstract base class which requires a static method `__fixture__` to be implemented. When the `@fixture` 
-decorator is invoked a new subclass is created and the decorated function is used as the `__fixture__` static method. 
-
-```python
-from virtool_workflow import WorkflowFixture 
-
-class MyWorkflowFixture(WorkflowFixture, param_name="my_workflow_fixture"):
-
-    @staticmethod
-    def __fixture__():
-        return "my_workflow_fixture"
-
-```
-
-The fixture will be available within workflows by the name specified by `param_name`.
 
 
 ### Fixtures Using Other Fixtures
