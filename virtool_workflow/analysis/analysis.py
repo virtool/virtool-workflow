@@ -1,11 +1,13 @@
 from pathlib import Path
+from typing import overload
 
 import virtool_workflow.abc
 import virtool_workflow.storage.utils
+from virtool_workflow import fixture
 from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractDatabase
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.uploads.files import FileUpload
+from virtool_workflow.uploads.files import FileUpload, VirtoolFileFormat
 
 
 class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
@@ -40,23 +42,26 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
         await self.analyses_db.set_files_on_analysis(zip(self._marks, target_paths), self.analysis_id)
 
 
-class Analysis(virtool_workflow.WorkflowFixture, param_name="analysis"):
+class Analysis:
     """Operations relating to the current analysis, including file uploads."""
 
     def __init__(self, _id: str, uploader: virtool_workflow.abc.AbstractFileUploader):
         self._id = _id
         self.uploader = uploader
 
-    async def upload_file(self, file_upload: FileUpload):
+        self.upload_file = self.uploader.mark
+
+    def upload_file(self, name: str, description: str, path: Path, format: VirtoolFileFormat):
         """Mark a file to be uploaded at the end of a workflow run."""
-        self.uploader.mark(file_upload)
+        self.uploader.mark(FileUpload(name, description, path, format))
 
-    @staticmethod
-    def __fixture__(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
-        analysis_id = job_args["analysis_id"]
-        uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
-        hooks.before_result_upload(uploader.upload, once=True)
+@fixture
+def analysis(job_args, run_in_executor, analysis_path: Path, database) -> Analysis:
+    analysis_id = job_args["analysis_id"]
+    uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
-        return Analysis(job_args["analysis_id"], uploader)
+    hooks.before_result_upload(uploader.upload, once=True)
+
+    return Analysis(job_args["analysis_id"], uploader)
 
