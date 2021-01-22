@@ -6,9 +6,9 @@ from types import SimpleNamespace
 from virtool_workflow.execution.workflow_executor import WorkflowError, State
 from virtool_workflow.fixtures.scope import FixtureScope
 from .hooks import Hook
-from .fixture_hooks import WorkflowFixtureHook
+from .fixture_hooks import FixtureHook
 
-on_result = WorkflowFixtureHook("on_result", [], None)
+on_result = FixtureHook("on_result", [], None)
 """
 Triggered when a workflow has completed and a result is available.
 
@@ -23,7 +23,7 @@ such the result can be mutated within the callback and that change will be
 reflected in the final result. 
 """
 
-on_update = WorkflowFixtureHook("on_update", [str], None)
+on_update = FixtureHook("on_update", [str], None)
 """
 Triggered when an update is sent from a Workflow. 
 
@@ -37,7 +37,7 @@ This occurs both when a (*str*) value is returned from a workflow step and when
         ...
 """
 
-on_workflow_step = WorkflowFixtureHook("on_workflow_step", [], None)
+on_workflow_step = FixtureHook("on_workflow_step", [], None)
 """
 Triggered on each workflow step.
 
@@ -48,7 +48,7 @@ Triggered on each workflow step.
         ...
 """
 
-on_state_change = WorkflowFixtureHook("on_state_change", [State, State], None)
+on_state_change = FixtureHook("on_state_change", [State, State], None)
 """
 Triggered on a change of state during workflow execution.
 
@@ -59,7 +59,7 @@ Triggered on a change of state during workflow execution.
         ...
 """
 
-on_error = WorkflowFixtureHook("on_error", [WorkflowError], None)
+on_error = FixtureHook("on_error", [WorkflowError], None)
 """
 Triggered when an exception occurs during a workflow.
 
@@ -70,7 +70,7 @@ Triggered when an exception occurs during a workflow.
         ...
 """
 
-on_workflow_failure = WorkflowFixtureHook("on_workflow_finish", [Exception], None)
+on_workflow_failure = FixtureHook("on_workflow_finish", [Exception], None)
 """
 Triggered when a workflow fails to complete.
 
@@ -81,7 +81,7 @@ Triggered when a workflow fails to complete.
         ...
 """
 
-on_workflow_finish = WorkflowFixtureHook("on_workflow_finish", [], None)
+on_workflow_finish = FixtureHook("on_workflow_finish", [], None)
 """
 Triggered when a workflow finishes, regardless of it's success.
 
@@ -103,7 +103,7 @@ async def _trigger_finish_from_success(scope):
     await on_workflow_finish.trigger(scope)
 
 
-on_success = WorkflowFixtureHook("on_success", parameters=[], return_type=None)
+on_success = FixtureHook("on_success", parameters=[], return_type=None)
 """
 Triggered when a job completes successfully.
 
@@ -117,7 +117,7 @@ Parameters supplied are the `Workflow` instance and the results dict.
 """
 
 
-on_failure = WorkflowFixtureHook("on_failure", parameters=[WorkflowError], return_type=None)
+on_failure = FixtureHook("on_failure", parameters=[WorkflowError], return_type=None)
 """
 Triggered when a job fails to complete.
 
@@ -129,7 +129,7 @@ Triggered when a job fails to complete.
 """
 
 
-on_finish = WorkflowFixtureHook("on_finish", parameters=[], return_type=None)
+on_finish = FixtureHook("on_finish", parameters=[], return_type=None)
 """
 Triggered when a job finishes, regardless of success or failure.
 
@@ -151,7 +151,7 @@ async def _trigger_on_finish_from_on_failure(error: WorkflowError, scope: Fixtur
     await on_finish.trigger(scope, error.workflow)
 
 
-on_cancelled = WorkflowFixtureHook("on_cancelled", [asyncio.CancelledError], None)
+on_cancelled = FixtureHook("on_cancelled", [asyncio.CancelledError], None)
 """
 Triggered when a job is cancelled.
 
@@ -169,7 +169,7 @@ async def _trigger_on_cancelled(error: WorkflowError, scope: FixtureScope):
         await on_cancelled.trigger(scope, error.cause)
 
 
-on_load_fixtures = WorkflowFixtureHook("on_load_fixtures", [FixtureScope], return_type=None)
+on_load_fixtures = FixtureHook("on_load_fixtures", [FixtureScope], return_type=None)
 """
 Triggered after runtime fixtures have been added to the #WorkflowFixtureScope, but
 before the workflow is executed.
@@ -199,7 +199,7 @@ is provided which has an attribute (sharing the same name as the fixture) for ea
             ...
 """
 
-before_result_upload = WorkflowFixtureHook("before_result_upload", [], None)
+before_result_upload = FixtureHook("before_result_upload", [], None)
 """Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
 
 __all__ = [
@@ -217,5 +217,5 @@ __all__ = [
     "on_cancelled",
     "on_state_change",
     "Hook",
-    "WorkflowFixtureHook",
+    "FixtureHook",
 ]

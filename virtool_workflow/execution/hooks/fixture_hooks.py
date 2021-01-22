@@ -6,7 +6,7 @@ from virtool_workflow.execution.hooks import Hook
 from virtool_workflow.fixtures.scope import FixtureScope
 
 
-class WorkflowFixtureHook(Hook):
+class FixtureHook(Hook):
     """A Hook which binds fixtures to it's callback functions before invoking them."""
 
     def _callback(self, callback_: Callable):
