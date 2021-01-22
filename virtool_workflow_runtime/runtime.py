@@ -8,7 +8,7 @@ import aioredis
 
 from virtool_workflow import hooks
 from virtool_workflow.execution.hooks import on_update, on_workflow_finish
-from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
+from virtool_workflow.execution.workflow_execution import WorkflowExecution, WorkflowError
 from virtool_workflow.workflow import Workflow
 from virtool_workflow_runtime.abc.runtime import AbstractRuntime
 from virtool_workflow_runtime.config.configuration import config_fixtures

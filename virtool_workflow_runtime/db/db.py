@@ -10,7 +10,7 @@ from pymongo.errors import DocumentTooLarge
 from virtool_core.db.bindings import BINDINGS
 from virtool_core.db.core import DB, Collection
 from virtool_core.utils import timestamp
-from virtool_workflow.execution.workflow_executor import WorkflowExecution
+from virtool_workflow.execution.workflow_execution import WorkflowExecution
 
 
 class VirtoolDatabase:
