@@ -84,3 +84,12 @@ async def _trigger_finish_from_failure(_, scope):
 async def _trigger_finish_from_success(scope):
     await on_workflow_finish.trigger(scope)
 
+
+__all__ = [
+    "on_result",
+    "on_update",
+    "on_workflow_step",
+    "on_workflow_failure",
+    "on_workflow_finish",
+    "on_state_change",
+]

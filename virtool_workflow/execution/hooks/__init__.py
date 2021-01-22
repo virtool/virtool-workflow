@@ -10,7 +10,6 @@ from .fixture_hooks import FixtureHook
 from .workflow_hooks import *
 
 
-
 on_success = FixtureHook("on_success", parameters=[], return_type=None)
 """
 Triggered when a job completes successfully.
