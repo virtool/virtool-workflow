@@ -123,6 +123,4 @@ __all__ = [
     "before_result_upload",
     "on_cancelled",
     "on_state_change",
-    "Hook",
-    "FixtureHook",
 ]
