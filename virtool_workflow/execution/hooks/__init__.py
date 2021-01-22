@@ -3,44 +3,12 @@ from concurrent import futures
 import asyncio
 from types import SimpleNamespace
 
-from virtool_workflow.execution.workflow_executor import WorkflowError, State
+from virtool_workflow.execution.workflow_execution import WorkflowError, State
 from virtool_workflow.fixtures.scope import FixtureScope
 from .hooks import Hook
 from .fixture_hooks import FixtureHook
 from .workflow_hooks import *
 
-
-on_workflow_failure = FixtureHook("on_workflow_finish", [Exception], None)
-"""
-Triggered when a workflow fails to complete.
-
-.. code-block:: python
-
-    @on_on_workflow_failure
-    async def perform_on_failure(cause: Exception, execution: WorkflowExecution):
-        ...
-"""
-
-on_workflow_finish = FixtureHook("on_workflow_finish", [], None)
-"""
-Triggered when a workflow finishes, regardless of it's success.
-
-.. code-block:: python
-
-    @on_workflow_finish
-    async def perform_on_success(workflow: Workflow):
-        ...
-"""
-
-
-@on_workflow_failure
-async def _trigger_finish_from_failure(_, scope):
-    await on_workflow_finish.trigger(scope)
-
-
-@on_result
-async def _trigger_finish_from_success(scope):
-    await on_workflow_finish.trigger(scope)
 
 
 on_success = FixtureHook("on_success", parameters=[], return_type=None)

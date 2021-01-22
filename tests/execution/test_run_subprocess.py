@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from virtool_workflow.execution.workflow_executor import WorkflowError
+from virtool_workflow.execution.workflow_execution import WorkflowError
 
 from virtool_workflow.execution.run_subprocess import run_subprocess as _run_subprocess
 from virtool_workflow import hooks
