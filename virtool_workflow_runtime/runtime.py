@@ -2,18 +2,17 @@
 import asyncio
 import logging
 from concurrent import futures
-from typing import Dict, Any, Callable, Awaitable
+from typing import Dict, Any, Callable, Awaitable, List
 
 import aioredis
 
 from virtool_workflow import hooks
 from virtool_workflow.execution.hooks import on_update, on_workflow_finish
-from virtool_workflow.execution.workflow_execution import WorkflowExecution, WorkflowError
+from virtool_workflow.execution.workflow_executor import WorkflowExecution, WorkflowError
 from virtool_workflow.workflow import Workflow
-from virtool_workflow_runtime.abc.runtime import AbstractRuntime
-from virtool_workflow_runtime.config.configuration import config_fixtures
-from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
-from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name, create_config
+from virtool_workflow.data_model import Job, Index, Analysis, Sample, Reference, Subtraction, HMM, Status
+from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
+from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
 from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
@@ -33,21 +32,76 @@ runtime_scope = InitializedWorkflowFixtureScope([
     "virtool_workflow.execution.run_subprocess",
     "virtool_workflow.storage.paths",
     "virtool_workflow.analysis.fixtures"
-], workflow_fixtures, config_fixtures)
+])
 
 
-class DirectDatabaseAccessRuntime(AbstractRuntime):
+class DirectDatabaseAccessRuntime(AnalysisWorkflowRuntime):
     """Runtime implementation that uses the database directly."""
 
-    def __init__(self, job_id: str):
-        self.job_id = job_id
+    def __init__(self, database: VirtoolDatabase,
+                 job: Job,
+                 analysis: Analysis = None,
+                 sample: Sample = None,
+                 reference: Reference = None,
+                 indexes: List[Index] = None,
+                 subtractions: List[Subtraction] = None,
+                 hmms: HMM = None):
+        self.db = database
         self._execution = None
         self._scope_initialized = False
+        super(AnalysisWorkflowRuntime, self).__init__(job, analysis, sample,
+                                                      reference, indexes,
+                                                      subtractions, hmms)
+
+    @staticmethod
+    async def create(job_id: str, db_name: str, db_connection_string: str):
+        db = VirtoolDatabase(db_name, db_connection_string)
+        job_document = db["jobs"].find_one(dict(_id=job_id))
+
+        statuses = [
+            Status(status["error"], status["progress"], status["stage"], status["state"], status["timestamp"])
+            for status in job_document["status"]
+        ]
+
+        job = Job(
+            job_document["_id"],
+            args=job_document["args"],
+            mem=job_document["mem"],
+            proc=job_document["proc"],
+            task=job_document["task"],
+            status=statuses,
+        )
+
+        if "analysis_id" in job.args:
+            #TODO: build Analysis instance
+            ...
+
+        if "sample_id" in job.args:
+            #TODO: build Sample instance
+            ...
+
+        if "ref_id" in job.args:
+            #TODO: build Reference instance
+            ...
+
+        if "index_id" in job.args:
+            #TODO: build Reference instance
+            ...
+
+        if "subtraction_id" in job.args:
+            #TODO: build Subtraction instances
+            ...
+
+        if ...:
+            #TODO: build HMMs
+            ...
+
+
+        return DirectDatabaseAccessRuntime(db, job)
+
+
 
     async def _init_scope(self):
-        if "config" not in self.scope:
-            await create_config(self.scope)
-
         database: VirtoolDatabase = await self.scope.instantiate(VirtoolDatabase)
 
         job_document = await database["jobs"].find_one(dict(_id=self.job_id))
@@ -58,9 +112,7 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
 
         self.scope["job_id"] = self.job_id
         self.scope["job_document"] = job_document
-
-        if "args" in job_document:
-            self.scope["job_args"] = job_document["args"]
+        self.scope["job_args"] = job_document["args"]
 
         self._scope_initialized = True
 
@@ -88,7 +140,7 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
 
 async def execute(
         workflow: Workflow,
-        runtime: AbstractRuntime,
+        runtime: AnalysisWorkflowRuntime,
 ) -> Dict[str, Any]:
     """
     Execute a workflow as a Virtool Job.

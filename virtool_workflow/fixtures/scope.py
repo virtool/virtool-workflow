@@ -38,7 +38,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         self._generators = []
         self.add_provider = self._providers.append
 
-        super(InstanceFixtureGroup, self).__init__()
+        super(FixtureScope, self).__init__()
 
     def __enter__(self):
         """Return this instance when `with` statement is used."""
@@ -76,8 +76,10 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
     def available(self):
         _available = {**self.fixtures()}
         for provider in self._providers:
-            if isinstance(provider, InstanceFixtureGroup):
+            if isinstance(provider, FixtureGroup):
                 _available.update(**provider.fixtures())
+            elif isinstance(provider, InstanceFixtureGroup):
+                _available.update(**provider)
         return _available
 
     async def instantiate(self, fixture_: Callable) -> Any:

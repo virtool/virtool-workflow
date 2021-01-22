@@ -24,6 +24,5 @@ def fixture(func: Callable):
     :return: The unchanged :obj:`func` function.
     """
     logger.debug(f"Defined a new fixture `{func.__name__}`")
-    workflow_fixtures[func.__name__] = func
-    return func
+    return workflow_fixtures.fixture(func)
 

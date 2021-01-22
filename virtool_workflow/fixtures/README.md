@@ -363,7 +363,7 @@ The `virtool_workflow_runtime.test_utils` package provides utilities for testing
 runtime fixtures.
 
 ```python
-from virtool_workflow_runtime.test_utils import runtime
+from virtool_workflow.test_utils import runtime
 from virtool_workflow_runtime.runtime import execute
 
 from ... import function_to_test
