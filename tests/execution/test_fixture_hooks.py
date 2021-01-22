@@ -1,7 +1,7 @@
-from virtool_workflow.execution.hooks.fixture_hooks import WorkflowFixtureHook
+from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 from virtool_workflow.fixtures.scope import FixtureScope
 
-test_hook = WorkflowFixtureHook("test_hook", [str, str], None)
+test_hook = FixtureHook("test_hook", [str, str], None)
 
 
 async def test_trigger():

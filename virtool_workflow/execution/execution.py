@@ -1,11 +1,10 @@
 """Functional API for workflow execution."""
-from . import workflow_executor
-from ..workflow import Workflow
-from ..fixtures.scope import FixtureScope
-from ..fixtures.workflow_fixture import workflow_fixtures
-from virtool_workflow_runtime.config.configuration import config_fixtures
-from virtool_workflow_runtime.runtime import runtime_scope
 from typing import Dict, Any
+
+from virtool_workflow_runtime.runtime import runtime_scope
+from . import workflow_executor
+from ..fixtures.scope import FixtureScope
+from ..workflow import Workflow
 
 
 async def execute(workflow: Workflow, scope: FixtureScope = None) -> Dict[str, Any]:
