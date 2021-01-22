@@ -17,14 +17,6 @@ class AbstractRuntime(ABC, FixtureScope):
             subtractions: List[Subtraction] = None,
             hmms: HMM = None,
     ):
-        self.job = job
-        self.analysis = analysis
-        self.sample = sample
-        self.indexes = indexes
-        self.reference = reference
-        self.subtractions = subtractions
-        self.hmms = hmms
-
         self["job"] = job
 
         if analysis:
