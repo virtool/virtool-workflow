@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import overload
 
 import virtool_workflow.abc
 import virtool_workflow.storage.utils
@@ -6,7 +7,7 @@ from virtool_workflow import fixture
 from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractDatabase
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.uploads.files import FileUpload
+from virtool_workflow.uploads.files import FileUpload, VirtoolFileFormat
 
 
 class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
@@ -48,13 +49,13 @@ class Analysis:
         self._id = _id
         self.uploader = uploader
 
-    async def upload_file(self, file_upload: FileUpload):
+    def upload_file(self, name: str, description: str, path: Path, format: VirtoolFileFormat):
         """Mark a file to be uploaded at the end of a workflow run."""
-        self.uploader.mark(file_upload)
+        self.uploader.mark(FileUpload(name, description, path, format))
 
 
 @fixture
-def analysis(job_args, run_in_executor, analysis_path: Path, database) -> "Analysis":
+def analysis(job_args, run_in_executor, analysis_path: Path, database) -> Analysis:
     analysis_id = job_args["analysis_id"]
     uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
 
