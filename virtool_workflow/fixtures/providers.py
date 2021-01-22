@@ -1,4 +1,7 @@
-from typing import Protocol, Callable, Optional, Dict
+import logging
+from typing import Protocol, Callable, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class FixtureProvider(Protocol):
@@ -16,7 +19,7 @@ class FixtureProvider(Protocol):
         ...
 
 
-def for_fixtures(*receivers: Callable, **fixtures: Dict[str, Callable]):
+def for_fixtures(*receivers: Callable, **fixtures):
     """
     Create a new fixture provider which only returns fixtures from :obj:`fixtures`
     if they are requested by particular fixtures.
@@ -28,20 +31,27 @@ def for_fixtures(*receivers: Callable, **fixtures: Dict[str, Callable]):
     return _grouping
 
 
-class InstanceFixtureGroup(FixtureProvider, dict):
+class FixtureGroup(FixtureProvider, dict):
+    """A dict defining a group of fixture functions."""
+
+    def __call__(self, name: str, _: Callable = None):
+        if name in self:
+            return self[name]
+
+    def fixture(self, func: callable):
+        self[func.__name__] = func
+        return func
+
+    def fixtures(self):
+        return {name: self[name] for name in self}
+
+
+class InstanceFixtureGroup(FixtureGroup):
     """A dict which acts as a :class:`FixtureProvider`, providing it's instances as fixture values."""
 
     def __call__(self, name: str, _: Callable = None):
         if name in self:
             return lambda: self[name]
 
-    def fixtures(self):
-        return {name: self(name) for name in self}
 
 
-class FixtureGroup(InstanceFixtureGroup):
-    """A dict defining a group of fixture functions."""
-
-    def __call__(self, name: str, _: Callable = None):
-        if name in self:
-            return self[name]

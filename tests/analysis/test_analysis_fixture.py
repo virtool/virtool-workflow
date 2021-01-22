@@ -4,7 +4,7 @@ from virtool_workflow import hooks
 from virtool_workflow.analysis.analysis import Analysis, FileUpload
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow_runtime.db.db import VirtoolDatabase
-from virtool_workflow_runtime.test_utils import TestRuntime
+from virtool_workflow.test_utils import TestRuntime
 from virtool_workflow.db.db import DirectAccessDatabase
 
 
