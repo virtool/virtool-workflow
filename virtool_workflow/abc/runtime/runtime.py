@@ -25,20 +25,20 @@ class AbstractRuntime(ABC, FixtureScope):
         self.subtractions = subtractions
         self.hmms = hmms
 
-        self.scope["job"] = job
+        self["job"] = job
 
         if analysis:
-            self.scope["analysis"] = analysis
+            self["analysis"] = analysis
         if sample:
-            self.scope["sample"] = sample
+            self["sample"] = sample
         if reference:
-            self.scope["reference"] = reference
+            self["reference"] = reference
         if indexes:
-            self.scope["indexes"] = indexes
+            self["indexes"] = indexes
         if subtractions:
-            self.scope["subtractions"] = subtractions
+            self["subtractions"] = subtractions
         if hmms:
-            self.scope["hmms"] = hmms
+            self["hmms"] = hmms
 
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""
