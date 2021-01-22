@@ -4,7 +4,7 @@ import asyncio
 from types import SimpleNamespace
 
 from virtool_workflow.execution.workflow_executor import WorkflowError, State
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 from .hooks import Hook
 from .fixture_hooks import WorkflowFixtureHook
 
@@ -142,12 +142,12 @@ Triggered when a job finishes, regardless of success or failure.
 
 
 @on_success
-async def _trigger_on_finish_from_on_success(scope: WorkflowFixtureScope):
+async def _trigger_on_finish_from_on_success(scope: FixtureScope):
     await on_finish.trigger(scope)
 
 
 @on_failure
-async def _trigger_on_finish_from_on_failure(error: WorkflowError, scope: WorkflowFixtureScope):
+async def _trigger_on_finish_from_on_failure(error: WorkflowError, scope: FixtureScope):
     await on_finish.trigger(scope, error.workflow)
 
 
@@ -164,12 +164,12 @@ Triggered when a job is cancelled.
 
 
 @on_failure
-async def _trigger_on_cancelled(error: WorkflowError, scope: WorkflowFixtureScope):
+async def _trigger_on_cancelled(error: WorkflowError, scope: FixtureScope):
     if isinstance(error.cause, asyncio.CancelledError) or isinstance(error.cause, futures.CancelledError):
         await on_cancelled.trigger(scope, error.cause)
 
 
-on_load_fixtures = WorkflowFixtureHook("on_load_fixtures", [WorkflowFixtureScope], return_type=None)
+on_load_fixtures = WorkflowFixtureHook("on_load_fixtures", [FixtureScope], return_type=None)
 """
 Triggered after runtime fixtures have been added to the #WorkflowFixtureScope, but
 before the workflow is executed.

@@ -1,5 +1,5 @@
 from virtool_workflow.execution.hooks.fixture_hooks import WorkflowFixtureHook
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 
 test_hook = WorkflowFixtureHook("test_hook", [str, str], None)
 
@@ -16,7 +16,7 @@ async def test_trigger():
         assert item2 == "item2"
         assert some_fixture == "some_fixture"
 
-    with WorkflowFixtureScope() as scope:
+    with FixtureScope() as scope:
         scope["some_fixture"] = "some_fixture"
 
         await test_hook.trigger(scope, "item1", "item2")

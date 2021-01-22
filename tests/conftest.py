@@ -1,4 +1,3 @@
-from virtool_workflow.storage.paths import data_path, context_directory
 
 pytest_plugins = [
     "tests.fixtures.workflow",

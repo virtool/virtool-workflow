@@ -2,17 +2,29 @@
 import pprint
 from inspect import Signature, getsourcefile, getsourcelines
 from typing import Callable
-from virtool_workflow.fixtures.workflow_fixture import WorkflowFixture
 
 
-class WorkflowFixtureMultipleYield(ValueError):
+class FixtureMultipleYield(ValueError):
     """Raised when a generator workflow fixture yields more than once."""
 
 
-class WorkflowFixtureNotAvailable(RuntimeError):
+class FixtureNotAvailable(RuntimeError):
     """Raised when a required fixture is not available."""
 
-    def __init__(self, param_name: str, signature: Signature, func: Callable, *args):
+    def _get_source_location(self, func: Callable):
+        try:
+            source, lineno = getsourcelines(func)
+            source_file = getsourcefile(func)
+        except TypeError: # func is a Callable class
+            if hasattr(func, "__call__"):
+                source, lineno = getsourcelines(func.__call__)
+                source_file = getsourcefile(func.__call__)
+            else:
+                raise
+
+        return source, f"{source_file}:{lineno}"
+
+    def __init__(self, param_name: str, signature: Signature, func: Callable, scope, *args):
         """
         :param param_name: The name of the parameter/fixture which
             was not available
@@ -24,17 +36,17 @@ class WorkflowFixtureNotAvailable(RuntimeError):
         self.param_name = param_name
         self.signature = signature
         self.func = func
-        self.available_fixtures = WorkflowFixture.types()
+        self.available_fixtures = {name: self._get_source_location(callable_)[1]
+                                   for name, callable_ in scope.available.items()}
         super().__init__(*args)
 
     def __str__(self):
-        source, lineno = getsourcelines(self.func)
-        source = "".join(source)
+        _, location = self._get_source_location(self.func)
+        available_fixture_lines = "\n".join(f'{name}: \n {loc}'
+                                            for name, loc in self.available_fixtures.items())
         return f"'{self.param_name}' is not available as a workflow fixture.\n" \
-               f"Ensure that the corresponding fixture has been imported.\n\n" \
-               f"{getsourcefile(self.func)}:{lineno}\n"\
-               f"{source}\n\n" \
-               f"Available fixtures:\n {pprint.pformat(self.available_fixtures)}\n"
+               f"{location}\n"\
+               f"Available fixtures:\n {available_fixture_lines}\n"
 
 
 

@@ -1,7 +1,7 @@
-from virtool_workflow import WorkflowFixture
 from virtool_workflow_runtime import runtime
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
+from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
 
 
 async def test_execute(test_workflow):
@@ -14,15 +14,12 @@ async def test_execute(test_workflow):
 
 async def test_fixtures_loaded(test_workflow):
     with runtime.runtime_scope:
-        types = set(WorkflowFixture.types())
+        types = set(runtime.runtime_scope.available)
         expected_fixtures = {'state',
-                             'database',
-                             'temp_path_str',
-                             'data_path_str',
-                             'number_of_processes',
-                             'memory_usage_limit',
+                             'proc',
+                             'mem',
                              'redis_connection_string',
-                             'job_list_name',
+                             'redis_job_list_name',
                              'no_sentry',
                              'dev_mode',
                              'db_name',

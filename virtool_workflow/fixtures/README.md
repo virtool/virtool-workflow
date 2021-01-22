@@ -355,44 +355,6 @@ def test_my_fixture_without_my_other_fixture():
     result = await my_fixture(mock_value_for_my_other_fixture)
 ```
 
-### Create An Empty WorkflowFixtureScope
-
-To test fixtures or functions that depend on many other fixtures it is best to create a fresh 
-`virtool_workflow.fixtures.scope.WorkflowFixtureScope`. 
-
-```python
-import virtool_workflow
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-
-@virtool_workflow.fixture
-def my_fixture(...):
-    ...
-
-def function_using_fixture(my_fixture, ...):
-    ...
-
-
-def test_fixture_and_function():
-    with WorkflowFixtureScope as scope:
-        await scope.instantiate(my_fixture)
-        
-        bound_function = await scope.bind(function_using_fixture)
-        bound_function()
-        ...
-```
-
-To inject specific instances into the scope for testing purposes you can simply use the `WorkflowFixtureScope` as a dict.
-
-```python
-def test_fixture_and_function_with_mocks():
-    with WorkflowFixtureScope as scope:
-        scope["mocked_fixture"] = "mock_value"
-        await scope.instantiate(my_fixture)
-        
-        bound_function = await scope.bind(function_using_fixture)
-        bound_function()
-        ...
-```
 
 ### The `runtime` pytest fixture.
 
@@ -419,31 +381,4 @@ async def test_workflow(runtime):
 
 async def test_workflow_and_hooks(runtime):
     result = await execute(workflow_to_test, runtime)
-```
-
-### Using A Pytest Fixture For The WorkflowFixtureScope
-
-Often when writing tests there are many different fixtures which need to be mocked, including the built-in fixtures 
-provided by the runtime such as the `job_args`. It is helpful to use a pytest fixture to perform the initialization
-which is common between different tests.
-
-```python
-import pytest
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
-from ... import function_to_test
-
-@pytest.yield_fixture()
-def workflow_fixtures():
-    with WorkflowFixtureScope as scope:
-        scope["job_args"] = {...}
-        scope["job_id"] = "1"
-        ...
-        yield scope
-
-
-def test_using_fixtures(workflow_fixtures):
-    bound = await workflow_fixtures.bind(function_to_test)
-    ret = bound()
-
-    assert ...
 ```

@@ -1,7 +1,7 @@
 import pytest
 
 from virtool_workflow.analysis.read_prep import unprepared_reads
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.storage.paths import context_directory
 from virtool_workflow.analysis.fixtures import paired
 from virtool_workflow.analysis.library_types import LibraryType
@@ -9,8 +9,8 @@ from virtool_workflow.analysis import utils
 
 
 @pytest.yield_fixture
-async def fixtures():
-    with WorkflowFixtureScope() as _fixtures:
+async def fixtures(runtime):
+    with runtime.scope as _fixtures:
         _fixtures["job_id"] = "1"
         _fixtures["job_document"] = dict(_id="1")
         _fixtures["job_args"] = dict(

@@ -3,7 +3,7 @@ from typing import List, Any, Callable
 
 from virtool_workflow import utils
 from virtool_workflow.execution.hooks import Hook
-from virtool_workflow.fixtures.scope import WorkflowFixtureScope
+from virtool_workflow.fixtures.scope import FixtureScope
 
 
 class WorkflowFixtureHook(Hook):
@@ -15,7 +15,7 @@ class WorkflowFixtureHook(Hook):
         self.callbacks.append(callback_)
         return callback_
 
-    async def trigger(self, scope: WorkflowFixtureScope, *args, **kwargs) -> List[Any]:
+    async def trigger(self, scope: FixtureScope, *args, **kwargs) -> List[Any]:
         """Bind fixtures from `scope` to each callback function and invoke them."""
         scope["scope"] = scope
 

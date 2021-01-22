@@ -1,6 +1,6 @@
 """Fixtures and tools relating to paths."""
 import logging
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from pathlib import Path
 from typing import Union, AnyStr
 from shutil import rmtree
@@ -34,24 +34,9 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
     try:
         yield path
     finally:
-        rmtree(root_path)
-        logger.info(f"Deleted temporary directory at {root_path}")
-
-
-@fixture
-def data_path(data_path_str: str):
-    """Fetch the virtool data path."""
-    _data_path = Path(data_path_str)
-    if not _data_path.exists():
-        _data_path.mkdir()
-    return _data_path
-
-
-@fixture
-def work_path(temp_path_str: str):
-    """The virtool temp path."""
-    with context_directory(temp_path_str) as temp:
-        yield temp
+        with suppress(FileNotFoundError):
+            rmtree(root_path)
+            logger.info(f"Deleted temporary directory at {root_path}")
 
 
 @fixture
