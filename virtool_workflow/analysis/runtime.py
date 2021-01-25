@@ -4,6 +4,11 @@ from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.data_model import Job, Analysis, Sample, Reference, Index, Subtraction, HMM
 from virtool_workflow.fixtures import providers
 from virtool_workflow.runtime import WorkflowEnvironment
+from virtool_workflow.analysis.analysis import analysis
+from virtool_workflow.analysis.samples.sample import sample
+from virtool_workflow.analysis.references.reference import reference
+from virtool_workflow.analysis.indexes import indexes
+from virtool_workflow.analysis.subtractions.subtraction import subtractions
 
 
 class AnalysisWorkflowRuntime(WorkflowEnvironment):
@@ -11,30 +16,17 @@ class AnalysisWorkflowRuntime(WorkflowEnvironment):
     def __init__(
             self,
             job: Job,
-            analysis: Analysis = None,
-            sample: Sample = None,
-            reference: Reference = None,
-            indexes: List[Index] = None,
-            subtractions: List[Subtraction] = None,
-            hmms_list: HMM = None,
     ):
         super(AnalysisWorkflowRuntime, self).__init__(job=job)
 
         self.load_plugins("virtool_workflow.analysis.fixtures")
 
-        if analysis:
-            self["analysis"] = analysis
-        if sample:
-            self["sample"] = sample
-        if reference:
-            self["reference"] = reference
-        if indexes:
-            self["indexes"] = indexes
-        if subtractions:
-            self["subtractions"] = subtractions
-        if hmms_list:
-            self.add_provider(
-                providers.for_fixtures(hmms, hmms_list=lambda: hmms_list)
-            )
-
+        self.add_providers((
+            providers.for_fixtures(analysis, analysis_provider=lambda: self.analysis_provider),
+            providers.for_fixtures(sample, sample_provider=lambda: self.sample_provider),
+            providers.for_fixtures(reference, reference_provider=lambda: self.reference_provider),
+            providers.for_fixtures(indexes, index_provider=lambda: self.index_provider),
+            providers.for_fixtures(subtractions, subtraction_providers=lambda: self.subtraction_providers),
+            providers.for_fixtures(hmms, hmms_provider=lambda: self.hmms_provider)
+        ))
 
