@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Iterable
 from .analysis import AbstractAnalysisProvider
 from .cache import AbstractCacheProvider
@@ -11,28 +11,45 @@ from .hmms import AbstractHmmsProvider
 
 
 class AbstractDataProvider(ABC):
-    def __new__(
-            cls,
-            *args,
-            analysis_provider: AbstractAnalysisProvider = None,
-            caches_provider: AbstractCacheProvider = None,
-            index_provider: AbstractIndexProvider = None,
-            otus_provider: AbstractOTUsProvider = None,
-            reference_provider: AbstractReferenceProvider = None,
-            sample_provider: AbstractSampleProvider = None,
-            subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
-            hmms_provider: AbstractHmmsProvider = None,
-            **kwargs
-    ):
-        obj = super(AbstractDataProvider, cls).__new__(*args, **kwargs)
-        obj.analysis_provider = analysis_provider
-        obj.caches_provider = caches_provider
-        obj.index_provider = index_provider
-        obj.otus_provider = otus_provider
-        obj.reference_provider = reference_provider
-        obj.sample_provider = sample_provider
-        obj.subtraction_providers = subtraction_providers
-        obj.hmms_provider = hmms_provider
-        return obj
+
+    @property
+    @abstractmethod
+    def analysis_provider(self) -> AbstractAnalysisProvider:
+        ...
+
+    @property
+    @abstractmethod
+    def caches_provider(self) -> AbstractCacheProvider:
+        ...
+
+    @property
+    @abstractmethod
+    def index_provider(self) -> AbstractIndexProvider:
+        ...
+
+    @property
+    @abstractmethod
+    def otus_provider(self) -> AbstractOTUsProvider:
+        ...
+
+    @property
+    @abstractmethod
+    def reference_provider(self) -> AbstractReferenceProvider:
+        ...
+
+    @property
+    @abstractmethod
+    def sample_provider(self) -> AbstractSampleProvider:
+        ...
+
+    @property
+    @abstractmethod
+    def subtraction_providers(self) -> Iterable[AbstractSubtractionProvider]:
+        ...
+
+    @property
+    @abstractmethod
+    def hmms_provider(self) -> AbstractHmmsProvider:
+        ...
 
 
