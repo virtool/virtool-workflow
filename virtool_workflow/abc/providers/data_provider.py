@@ -7,17 +7,10 @@ from .indexes import AbstractIndexProvider
 from .otus import AbstractOTUsProvider
 from .subtractions import AbstractSubtractionProvider
 from .references import AbstractReferenceProvider
+from .hmms import AbstractHmmsProvider
 
 
 class AbstractDataProvider(ABC):
-    analysis_provider: AbstractAnalysisProvider
-    caches_provider: AbstractCacheProvider
-    index_provider: AbstractIndexProvider
-    otus_provider: AbstractOTUsProvider
-    reference_provider: AbstractReferenceProvider
-    sample_provider: AbstractSampleProvider
-    subtraction_providers: Iterable[AbstractSubtractionProvider]
-
     def __new__(
             cls,
             *args,
@@ -28,6 +21,7 @@ class AbstractDataProvider(ABC):
             reference_provider: AbstractReferenceProvider = None,
             sample_provider: AbstractSampleProvider = None,
             subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
+            hmms_provider: AbstractHmmsProvider = None,
             **kwargs
     ):
         obj = super(AbstractDataProvider, cls).__new__(*args, **kwargs)
@@ -38,6 +32,7 @@ class AbstractDataProvider(ABC):
         obj.reference_provider = reference_provider
         obj.sample_provider = sample_provider
         obj.subtraction_providers = subtraction_providers
+        obj.hmms_provider = hmms_provider
         return obj
 
 
