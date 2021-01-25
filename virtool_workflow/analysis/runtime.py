@@ -1,22 +1,17 @@
-from typing import List
-
+from virtool_workflow.analysis.analysis import analysis
 from virtool_workflow.analysis.hmms import hmms
-from virtool_workflow.data_model import Job, Analysis, Sample, Reference, Index, Subtraction, HMM
+from virtool_workflow.analysis.indexes import indexes
+from virtool_workflow.analysis.references.reference import reference
+from virtool_workflow.analysis.samples.sample import sample
+from virtool_workflow.analysis.subtractions.subtraction import subtractions
+from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures import providers
 from virtool_workflow.runtime import WorkflowEnvironment
-from virtool_workflow.analysis.analysis import analysis
-from virtool_workflow.analysis.samples.sample import sample
-from virtool_workflow.analysis.references.reference import reference
-from virtool_workflow.analysis.indexes import indexes
-from virtool_workflow.analysis.subtractions.subtraction import subtractions
 
 
 class AnalysisWorkflowRuntime(WorkflowEnvironment):
 
-    def __init__(
-            self,
-            job: Job,
-    ):
+    def __init__(self, job: Job):
         super(AnalysisWorkflowRuntime, self).__init__(job=job)
 
         self.load_plugins("virtool_workflow.analysis.fixtures")
