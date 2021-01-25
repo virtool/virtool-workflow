@@ -24,7 +24,11 @@ class MockDatabase(AbstractDatabase):
             return {"_id": "foo", "reference": {"id": "bar"}}
 
         if id_ == "bar" and collection_name == "references":
-            return {"_id": "bar", "name": "Bar", "data_type": "barcode"}
+            return {"_id": "bar",
+                    "name": "Bar",
+                    "data_type": "barcode",
+                    "organism": "virus",
+                    "targets": []}
 
 
 @pytest.fixture
