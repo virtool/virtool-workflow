@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import overload
 
 import virtool_workflow.abc
 import virtool_workflow.storage.utils
 from virtool_workflow import fixture
 from virtool_workflow import hooks
-from virtool_workflow.abc import AbstractDatabase
+from virtool_workflow.abc.providers.analysis import AbstractAnalysisProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.uploads.files import FileUpload, VirtoolFileFormat
 
@@ -18,10 +17,10 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
     """
 
     def __init__(self, analysis_path: Path, run_in_executor: FunctionExecutor,
-                 analyses: AbstractDatabase, analysis_id: str):
+                 analysis_provider: AbstractAnalysisProvider, analysis_id: str):
         self.analysis_path = analysis_path
         self.run_in_executor = run_in_executor
-        self.analyses_db = analyses
+        self.provider = analysis_provider
         self.analysis_id = analysis_id
         self._marks = []
 
@@ -39,7 +38,8 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
             self.run_in_executor
         )
 
-        await self.analyses_db.set_files_on_analysis(zip(self._marks, target_paths), self.analysis_id)
+        for mark in self._marks:
+            await self.provider.register_file_upload(mark)
 
 
 class Analysis:

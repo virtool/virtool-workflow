@@ -19,12 +19,9 @@ async def test_upload_file(runtime: WorkflowEnvironment):
             "analysis_id": "1",
             "sample_id": "2"
         },
-        mem=8,
-        proc=3
     )
 
-
-    runtime.scope["database"] = DirectAccessDatabase(db_name(), db_connection_string())
+    runtime["database"] = DirectAccessDatabase(db_name(), db_connection_string())
 
     test_file = Path("foo")
     test_file.write_text("test file")
