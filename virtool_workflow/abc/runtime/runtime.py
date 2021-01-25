@@ -1,12 +1,11 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import Dict, Any
 
 from virtool_workflow import Workflow
-from virtool_workflow.abc.providers.data_provider import AbstractDataProvider
 from virtool_workflow_runtime.discovery import load_fixture_plugins
 
 
-class AbstractWorkflowEnvironment(AbstractDataProvider):
+class AbstractWorkflowEnvironment(ABC):
 
     @staticmethod
     def load_plugins(*plugin_modules: str):
