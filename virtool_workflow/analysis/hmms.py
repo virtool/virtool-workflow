@@ -26,7 +26,7 @@ class HMMs(UserList):
 
 
 @fixture
-def hmms(hmms_list: List[HMM], work_path: Path, data_path: Path,
+async def hmms(hmms_list: List[HMM], work_path: Path, data_path: Path,
          run_in_executor: FunctionExecutor, run_subprocess: RunSubprocess):
     """
     A fixture for accessing HMM data.
