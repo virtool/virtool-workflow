@@ -37,6 +37,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         self._providers = [self, self._overrides, *providers]
         self._generators = []
         self.add_provider = self._providers.append
+        self.add_providers = self._providers.extend
 
         super(FixtureScope, self).__init__()
 
