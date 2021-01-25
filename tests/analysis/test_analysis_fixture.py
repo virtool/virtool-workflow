@@ -4,18 +4,25 @@ from virtool_workflow import hooks
 from virtool_workflow.analysis.analysis import Analysis, FileUpload
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow_runtime.db.db import VirtoolDatabase
-from virtool_workflow.test_utils import TestRuntime
+from virtool_workflow.runtime import WorkflowEnvironment
 from virtool_workflow.db.db import DirectAccessDatabase
+from virtool_workflow.data_model import Job
 
 
-async def test_upload_file(runtime: TestRuntime):
+async def test_upload_file(runtime: WorkflowEnvironment):
     db = VirtoolDatabase(db_name(), db_connection_string())
     await db["analyses"].insert_one(dict(_id="1"))
 
-    runtime.scope["job_args"] = {
-        "analysis_id": "1",
-        "sample_id": "2"
-    }
+    runtime["job"] = Job(
+        _id="test_upload_file",
+        args={
+            "analysis_id": "1",
+            "sample_id": "2"
+        },
+        mem=8,
+        proc=3
+    )
+
 
     runtime.scope["database"] = DirectAccessDatabase(db_name(), db_connection_string())
 

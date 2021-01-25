@@ -25,7 +25,6 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             job=job,
             **instances)
 
-
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""
         return await WorkflowExecution(workflow, self)
