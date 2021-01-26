@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from virtool_workflow import Workflow
-from virtool_workflow.test import WorkflowEnvironment
+from virtool_workflow.testing import WorkflowEnvironment
 from virtool_workflow_runtime import discovery
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
 from virtool_workflow_runtime.config.configuration import config_fixtures
