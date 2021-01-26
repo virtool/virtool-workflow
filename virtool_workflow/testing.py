@@ -27,10 +27,11 @@ class MockAnalysisProvider(AbstractAnalysisProvider):
 
 @pytest.fixture
 def runtime():
-    return AnalysisWorkflowRuntime(
+    with AnalysisWorkflowRuntime(
         Job("test_job", {}),
         analysis_provider=MockAnalysisProvider()
-    )
+    ) as _runtime:
+        yield _runtime
 
 
 __all__ = [
