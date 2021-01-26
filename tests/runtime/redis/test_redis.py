@@ -16,6 +16,8 @@ from virtool_workflow_runtime.runtime import execute_from_redis,\
     execute_while_watching_for_cancellation
 from virtool_workflow import hooks
 from virtool_workflow_runtime.db import VirtoolDatabase
+from virtool_workflow.db import utils
+from virtool_workflow.data_model import Job
 
 
 @pytest.fixture()
@@ -25,7 +27,7 @@ async def job_ids():
     jobs = VirtoolDatabase(db_name(), db_connection_string())["jobs"]
 
     for id_ in _job_ids:
-        await jobs.insert_one(dict(_id=id_, args=dict()))
+        await jobs.insert_one(utils.convert_job_to_job_document(Job(id_, {})))
 
     return _job_ids
 

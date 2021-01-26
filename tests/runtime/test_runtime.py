@@ -2,12 +2,14 @@ from virtool_workflow_runtime import runtime
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
+from virtool_workflow.db.utils import convert_job_to_job_document
+from virtool_workflow.data_model import Job
 
 
 async def test_execute(test_workflow):
     db = VirtoolDatabase(db_name(), db_connection_string())
 
-    await db["jobs"].insert_one(dict(_id="1", args=dict()))
+    await db["jobs"].insert_one(convert_job_to_job_document(Job("1", {})))
 
     await runtime.execute(test_workflow, runtime.DirectDatabaseAccessRuntime("1"))
 

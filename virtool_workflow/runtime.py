@@ -25,10 +25,19 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             job=job,
             **instances)
 
+        self["job_args"] = job.args
+
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""
         return await WorkflowExecution(workflow, self)
 
     async def execute_function(self, func: callable):
         """Execute a function in the runtime context."""
-        return await (await self.bind(func))()
+        result = (await self.bind(func))()
+
+        if hasattr(result, "__await__"):
+            result = await result
+
+        return result
+
+
