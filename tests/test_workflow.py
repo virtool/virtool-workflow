@@ -1,4 +1,3 @@
-from virtool_workflow.execution.execution import execute
 from virtool_workflow import hooks, WorkflowError
 
 

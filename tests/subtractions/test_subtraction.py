@@ -1,10 +1,7 @@
 from typing import Optional, Dict, Any
 
-from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor
-from virtool_workflow.storage.paths import context_directory
-from virtool_workflow.analysis.subtractions.subtraction import subtractions
-from virtool_workflow.db.db import DirectAccessDatabase
 from virtool_workflow.abc.db import AbstractDatabase
+from virtool_workflow.analysis.subtractions.subtraction import subtractions
 
 mock_subtraction_base = dict(
     name="foobar",
@@ -31,35 +28,32 @@ class MockDatabase(AbstractDatabase):
         return mock_subtractions[id_]
 
 
-async def test_subtractions(monkeypatch):
+async def setup_sample_data_path(runtime):
+    subtraction_path = await runtime.get_or_instantiate("subtraction_data_path")
 
-    with context_directory("data/subtractions") as subtraction_data_path:
+    for subtraction in mock_subtractions.values():
+        current_subtraction_data_path = subtraction_path / subtraction["id"]
+        current_subtraction_data_path.mkdir()
 
-        for subtraction in mock_subtractions.values():
-            current_subtraction_data_path = subtraction_data_path/subtraction["id"]
-            current_subtraction_data_path.mkdir()
+        for name in subtraction_data_filenames:
+            (current_subtraction_data_path / name).touch()
 
-            for name in subtraction_data_filenames:
-                (current_subtraction_data_path/name).touch()
 
-        with context_directory("temp/subtractions") as subtraction_path:
+async def test_subtractions(monkeypatch, runtime):
+    runtime["job_args"]["subtraction_id"] = [s["id"] for s in mock_subtractions.values()]
+    runtime["database"] = MockDatabase()
 
-            _subtractions = await subtractions(
-                job_args=dict(subtraction_id=[s["id"] for s in mock_subtractions.values()]),
-                subtraction_data_path=subtraction_data_path,
-                subtraction_path=subtraction_path,
-                run_in_executor=run_in_executor(thread_pool_executor()),
-                database=MockDatabase()
-            )
+    await setup_sample_data_path(runtime)
+    _subtractions = await runtime.instantiate(subtractions)
 
-            assert len(_subtractions) == len(mock_subtractions)
+    assert len(_subtractions) == len(mock_subtractions)
 
-            for subtraction, subtraction_document in zip(_subtractions, mock_subtractions.values()):
-                assert subtraction.name == subtraction_document["name"]
-                assert subtraction.nickname == subtraction_document["nickname"]
-                assert subtraction.path == subtraction_path/subtraction_document["id"]
-                assert subtraction.fasta_path == subtraction.path/"subtraction.fa.gz"
-                assert subtraction.bowtie2_index_path == f"{subtraction.path}/reference"
+    for subtraction, subtraction_document in zip(_subtractions, mock_subtractions.values()):
+        assert subtraction.name == subtraction_document["name"]
+        assert subtraction.nickname == subtraction_document["nickname"]
+        assert subtraction.path == runtime["subtraction_path"]/subtraction_document["id"]
+        assert subtraction.fasta_path == subtraction.path/"subtraction.fa.gz"
+        assert subtraction.bowtie2_index_path == f"{subtraction.path}/reference"
 
 
 

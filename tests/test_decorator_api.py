@@ -2,7 +2,6 @@ import sys
 
 from virtool_workflow import startup, cleanup, step
 from virtool_workflow.decorator_api import collect
-from virtool_workflow.execution.execution import execute
 
 
 @startup
@@ -26,10 +25,10 @@ def last(results: dict):
     results["cleanup"] = True
 
 
-async def test_decorator_api_workflow():
+async def test_decorator_api_workflow(runtime):
     workflow = collect(sys.modules[__name__])
 
-    result = await execute(workflow)
+    result = await runtime.execute(workflow)
 
     assert result["startup"]
     assert result["step"]
