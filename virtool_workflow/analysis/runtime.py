@@ -81,9 +81,23 @@ class ScopedDataProvider(AbstractDataProvider):
 
 class AnalysisWorkflowRuntime(WorkflowEnvironment):
 
-    def __init__(self, job: Job):
+    def __init__(self, job: Job,
+                 analysis_provider: AbstractAnalysisProvider = None,
+                 caches_provider: AbstractCacheProvider = None,
+                 index_provider: AbstractIndexProvider = None,
+                 otus_provider: AbstractOTUsProvider = None,
+                 reference_provider: AbstractReferenceProvider = None,
+                 sample_provider: AbstractSampleProvider = None,
+                 subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
+                 hmms_provider: AbstractHmmsProvider = None):
         super(AnalysisWorkflowRuntime, self).__init__(job=job)
-
         self.load_plugins("virtool_workflow.analysis.fixtures")
-
-
+        self.data_providers = ScopedDataProvider(self,
+                                                 analysis_provider,
+                                                 caches_provider,
+                                                 index_provider,
+                                                 otus_provider,
+                                                 reference_provider,
+                                                 sample_provider,
+                                                 subtraction_providers,
+                                                 hmms_provider)
