@@ -1,121 +1,86 @@
-import inspect
-from typing import Dict
-
-from virtool_workflow.execution.execution import execute
-from virtool_workflow.fixtures.workflow_fixture import fixture, workflow_fixtures
-from virtool_workflow.fixtures.scope import FixtureScope
+from virtool_workflow import Workflow
 from virtool_workflow.fixtures.errors import FixtureNotAvailable
+from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
 @fixture
 def my_fixture():
-    return "FIXTURE"
+    return True
 
 
-def test_workflow_fixture_is_registered():
-    assert my_fixture.__name__ in workflow_fixtures
+def test_workflow_fixture_is_registered(runtime):
+    assert my_fixture.__name__ in runtime.available
 
 
-async def test_workflow_fixture_injection():
-    def uses_fixture(my_fixture: str):
-        assert my_fixture == "FIXTURE"
-        uses_fixture.called = True
-
-    with FixtureScope(workflow_fixtures) as scope:
-        (await scope.bind(uses_fixture))()
-
-    assert uses_fixture.called
+async def test_workflow_fixture_injection(runtime):
+    assert await runtime.execute_function(lambda my_fixture: my_fixture)
 
 
-async def test_workflow_fixture_injection_on_async_function():
+async def test_workflow_fixture_injection_on_async_function(runtime):
     async def uses_fixture(my_fixture: str):
-        assert my_fixture == "FIXTURE"
-        uses_fixture.called = True
+        return my_fixture
 
-    with FixtureScope(workflow_fixtures) as fixtures:
-        await (await fixtures.bind(uses_fixture))()
-
-    assert uses_fixture.called
+    assert await runtime.execute_function(uses_fixture)
 
 
-async def test_fixtures_used_by_fixtures():
-
+async def test_fixtures_used_by_fixtures(runtime):
     @fixture
     def fixture_using_fixture(my_fixture: str):
-        return f"FIXTURE_USING_{my_fixture}"
+        return my_fixture
 
-    def use_fixture_using_fixture(fixture_using_fixture: str):
-        assert fixture_using_fixture == "FIXTURE_USING_FIXTURE"
-        use_fixture_using_fixture.called = True
-
-    with FixtureScope(workflow_fixtures) as scope:
-        (await scope.bind(use_fixture_using_fixture))()
-
-    assert use_fixture_using_fixture.called
+    assert await runtime.execute_function(lambda fixture_using_fixture: fixture_using_fixture)
 
 
-async def test_same_instance_is_used():
-
+async def test_same_instance_is_used(runtime):
     @fixture
     def dictionary():
         return {}
 
-    with FixtureScope(workflow_fixtures) as scope:
+    def func1(dictionary):
+        return dictionary
 
-        def func1(dictionary: Dict[str, str]):
-            dictionary["item"] = "item"
+    def func2(dictionary):
+        return dictionary
 
-        def func2(dictionary: Dict[str, str]):
-            assert dictionary["item"] == "item"
-            dictionary["item"] = "different item"
+    d1 = await runtime.execute_function(func1)
+    d2 = await runtime.execute_function(func2)
 
-        func1 = await scope.bind(func1)
-        func2 = await scope.bind(func2)
-
-        func1()
-        func2()
-
-        assert scope["dictionary"]["item"] == "different item"
+    assert isinstance(d1, dict) and isinstance(d2, dict)
+    assert id(d1) == id(d2)
 
 
-async def test_generator_fixtures_cleanup():
-
+async def test_generator_fixtures_cleanup(runtime):
     cleanup_executed = False
 
-    @fixture
     def generator_fixture():
-        yield "FIXTURE"
+        yield True
         nonlocal cleanup_executed
         cleanup_executed = True
 
-    with FixtureScope(workflow_fixtures) as scope:
+    await runtime.instantiate(generator_fixture)
 
-        def use_generator_fixture(generator_fixture):
-            assert generator_fixture == "FIXTURE"
+    assert runtime["generator_fixture"]
 
-        await scope.bind(use_generator_fixture)
-
-        assert len(scope._generators) == 1
-
+    assert not cleanup_executed
+    runtime.close()
     assert cleanup_executed
 
 
-async def test_workflow_using_fixtures(workflow_with_fixtures):
-    result = await execute(workflow_with_fixtures)
+async def test_workflow_using_fixtures(runtime):
+    workflow = Workflow()
 
-    assert result["start"] and result["clean"] and result["step"]
+    @workflow.step
+    def startup(results, my_fixture):
+        results["fixture"] = my_fixture
+
+    results = await runtime.execute(workflow)
+
+    assert results["fixture"] and runtime["results"]["fixture"]
 
 
-async def test_exception_is_raised_when_fixture_not_available():
-
-    async def non_resolvable_fixture_function(fixture_that_doesnt_exist):
-        pass
-
-    with FixtureScope(workflow_fixtures) as scope:
-        try:
-            await scope.bind(non_resolvable_fixture_function)
-            assert False
-        except FixtureNotAvailable as not_available:
-            assert not_available.param_name == "fixture_that_doesnt_exist"
-            assert inspect.signature(non_resolvable_fixture_function) == not_available.signature
+async def test_exception_is_raised_when_fixture_not_available(runtime):
+    try:
+        assert await runtime.execute_function(lambda non_existent_fixture: False)
+    except FixtureNotAvailable as not_available:
+        assert not_available.param_name == "non_existent_fixture"
 

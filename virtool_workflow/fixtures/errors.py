@@ -37,12 +37,13 @@ class FixtureNotAvailable(RuntimeError):
         self.signature = signature
         self.func = func
         self.available_fixtures = {name: self._get_source_location(callable_)[1]
+                                   if callable(callable_) else str(callable_)
                                    for name, callable_ in scope.available.items()}
         super().__init__(*args)
 
     def __str__(self):
         _, location = self._get_source_location(self.func)
-        available_fixture_lines = "\n".join(f'{name}: \n {loc}'
+        available_fixture_lines = "\n".join(f'{name}: \n   {loc}'
                                             for name, loc in self.available_fixtures.items())
         return f"'{self.param_name}' is not available as a workflow fixture.\n" \
                f"{location}\n"\
