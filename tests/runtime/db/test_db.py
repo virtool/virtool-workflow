@@ -8,6 +8,8 @@ from virtool_workflow_runtime.config.configuration import config_fixtures, db_na
 from virtool_workflow_runtime.db import VirtoolDatabase
 from virtool_workflow_runtime.discovery import discover_workflow
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
+from virtool_workflow.db.utils import convert_job_to_job_document
+from virtool_workflow.data_model import Job
 
 EXAMPLE_WORKFLOW_PATH = Path(sys.path[0]).joinpath("tests/example_workflow.py")
 
@@ -17,11 +19,11 @@ async def test_updates_sent_to_mongo():
     conn = db_connection_string()
 
     db = VirtoolDatabase(name, conn)
-    await db._db.jobs.insert_one({"_id": "1"})
+    await db._db.jobs.insert_one(convert_job_to_job_document(Job("1", {})))
 
     workflow = discover_workflow(EXAMPLE_WORKFLOW_PATH)
 
-    await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime("1"))
+    await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime(db, Job("1", {})))
 
     document = await db._db.jobs.find_one({"_id": "1"})
 
@@ -35,7 +37,7 @@ async def test_results_stored_when_callback_set(empty_scope):
 
     with FixtureScope(workflow_fixtures, config_fixtures) as fixtures:
         db: VirtoolDatabase = await fixtures.instantiate(VirtoolDatabase)
-        await db["analyses"].insert_one({"_id": "1"})
+        await db["analyses"].insert_one(convert_job_to_job_document(Job("1", {})))
 
         callback = db.store_result_callback("1", db["analyses"], await fixtures.get_or_instantiate("work_path"))
 

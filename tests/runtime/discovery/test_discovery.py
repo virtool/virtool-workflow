@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from virtool_workflow import Workflow
-from virtool_workflow.testing import WorkflowEnvironment
 from virtool_workflow_runtime import discovery
+from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
 from virtool_workflow_runtime.config.configuration import config_fixtures
 
@@ -23,8 +23,8 @@ def test_discover_workflow():
 def test_discover_fixtures():
     discovery.discover_fixtures(FIXTURE_TEST_FILE)
 
-    for letter in ("a", "b", "c"):
-        assert f"fixture_{letter}" in workflow_fixtures
+    assert all(f"fixture_{letter}" in workflow_fixtures
+               for letter in ("a", "b", "c"))
 
 
 def test_load_fixtures():
@@ -35,7 +35,7 @@ def test_load_fixtures():
     assert "thread_pool_executor" in workflow_fixtures
 
 
-async def test_run_discovery(runtime: WorkflowEnvironment):
+async def test_run_discovery(runtime: AnalysisWorkflowRuntime):
     wf = discovery.discover_workflow(FIXTURE_TEST_FILE)
     discovery.load_fixtures_from__fixtures__(FIXTURE_TEST_FILE)
     result = await runtime.execute(wf)
