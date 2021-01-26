@@ -116,7 +116,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         """Get the fixture function with the given name from this :class:`WorkflowFixtureScope`'s providers"""
         for provider in self._providers:
             fixture = provider(name, request_from)
-            if fixture:
+            if fixture is not None:
                 return fixture
 
     async def get_or_instantiate(self, name: str, requested_by: Callable = None):
@@ -206,7 +206,6 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
 
         :param name: The name of the fixture to override
         :param callable_: A :class:`Callable` to use as the fixture
-
         """
         if name in self:
             del self[name]

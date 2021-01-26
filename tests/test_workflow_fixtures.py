@@ -93,3 +93,18 @@ async def test_fixture_override(runtime):
     assert not await runtime.get_or_instantiate('my_fixture')
     assert not await runtime.execute_function(lambda my_fixture: my_fixture)
 
+
+async def test_fixture_from_provider(runtime):
+    @runtime.add_provider
+    def name_provider(name, _):
+        return lambda: name
+
+    assert await runtime.execute_function(lambda does_not_exist: does_not_exist) == "does_not_exist"
+
+    runtime["does_not_exist"] = True
+
+    assert await runtime.execute_function(lambda does_not_exist: does_not_exist)
+
+    del runtime["does_not_exist"]
+
+    assert await runtime.execute_function(lambda does_not_exist: does_not_exist) == "does_not_exist"
