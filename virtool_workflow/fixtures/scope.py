@@ -208,4 +208,6 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         :param callable_: A :class:`Callable` to use as the fixture
 
         """
+        if name in self:
+            del self[name]
         self._overrides[name] = callable_

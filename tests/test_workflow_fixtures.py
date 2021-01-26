@@ -84,3 +84,12 @@ async def test_exception_is_raised_when_fixture_not_available(runtime):
     except FixtureNotAvailable as not_available:
         assert not_available.param_name == "non_existent_fixture"
 
+
+async def test_fixture_override(runtime):
+    assert await runtime.instantiate(my_fixture)
+
+    runtime.override("my_fixture", lambda: False)
+
+    assert not await runtime.get_or_instantiate('my_fixture')
+    assert not await runtime.execute_function(lambda my_fixture: my_fixture)
+
