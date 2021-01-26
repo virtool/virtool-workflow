@@ -2,15 +2,7 @@ from virtool_workflow.execution.execution import execute
 from virtool_workflow import hooks, WorkflowError
 
 
-async def test_execute(test_workflow):
-    result = await execute(test_workflow)
-    assert result["start"]
-    assert result["1"]
-    assert result["2"]
-    assert result["clean"]
-    
-
-async def test_respond_errors(test_workflow):
+async def test_respond_errors(test_workflow, runtime):
 
     @test_workflow.step
     async def throw_error():
@@ -27,11 +19,11 @@ async def test_respond_errors(test_workflow):
     async def receive_updates(update):
         updates.append(update)
 
-    await execute(test_workflow)
+    await runtime.execute(test_workflow)
     assert "Step 3 skipped due to internal error" in updates
 
 
-async def test_correct_traceback_data(test_workflow):
+async def test_correct_traceback_data(test_workflow, runtime):
     arg1, arg2 = "arg1", "arg2"
     
     @test_workflow.step
@@ -44,12 +36,12 @@ async def test_correct_traceback_data(test_workflow):
         assert arg1, arg2 in tb["details"]
 
     try:
-        await execute(test_workflow)
+        await runtime.execute(test_workflow)
     except WorkflowError as error:
         assert_correct_traceback(error)
 
 
-async def test_correct_progress(test_workflow):
+async def test_correct_progress(test_workflow, runtime):
 
     correct_progress = {
         0: 0.0,
@@ -72,23 +64,23 @@ async def test_correct_progress(test_workflow):
     test_workflow.on_startup = []
     test_workflow.on_cleanup = []
 
-    results = await execute(test_workflow)
+    results = await runtime.execute(test_workflow)
 
     for result, progress in zip(results, range(1, 11)):
         assert int(result) == progress
 
 
-async def test_on_update_called(test_workflow):
+async def test_on_update_called(test_workflow, runtime):
 
     calls = 0
     state_calls = 0
 
-    @hooks.on_update
+    @hooks.on_update(until=hooks.on_workflow_finish)
     async def _on_update():
         nonlocal calls
         calls += 1
 
-    @hooks.on_state_change
+    @hooks.on_state_change(until=hooks.on_workflow_finish)
     async def _on_state_change():
         nonlocal state_calls
         state_calls += 1
@@ -96,11 +88,8 @@ async def test_on_update_called(test_workflow):
     _on_update.calls = 0
     _on_state_change.calls = 0
 
-    await execute(test_workflow)
+    await runtime.execute(test_workflow)
 
     assert calls == 4
     assert state_calls == 4
-
-    hooks.on_update.callbacks.remove(_on_update)
-    hooks.on_state_change.callbacks.remove(_on_state_change)
 
