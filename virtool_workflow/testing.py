@@ -6,6 +6,7 @@ from virtool_workflow.abc.providers import AbstractAnalysisProvider
 from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
 from virtool_workflow.data_model import Job
 from virtool_workflow.uploads.files import FileUpload
+from virtool_workflow.storage.paths import context_directory
 
 
 class MockAnalysisProvider(AbstractAnalysisProvider):
@@ -25,12 +26,18 @@ class MockAnalysisProvider(AbstractAnalysisProvider):
         del self.uploads
 
 
+def testing_data_path():
+    with context_directory("virtool") as data_path:
+        yield data_path
+
+
 @pytest.fixture
 def runtime():
     with AnalysisWorkflowRuntime(
         Job("test_job", {}),
         analysis_provider=MockAnalysisProvider()
     ) as _runtime:
+        _runtime.override("data_path", testing_data_path)
         yield _runtime
 
 
