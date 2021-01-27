@@ -18,11 +18,12 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             "virtool_workflow_runtime.config.configuration"
         )
 
+        self.job = job
+
         super(WorkflowEnvironment, self).__init__(
             workflow_fixtures,
             config_fixtures,
             *providers,
-            job=job,
             **instances)
 
         self["job_args"] = job.args
