@@ -6,9 +6,10 @@ from typing import Dict, List, Tuple, Optional, Any
 
 import aiofiles
 from virtool_core.utils import decompress_file
+from virtool_workflow import data_model
 
 from virtool_workflow import fixture
-from virtool_workflow.abc import AbstractDatabase
+from virtool_workflow.abc.providers.indexes import AbstractIndexProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
@@ -19,42 +20,20 @@ class Reference:
     id: str
     data_type: str
     name: str
-    organism: str
-    targets: List[str]
 
 
-class Index:
-    """
-    Represents a reference index assigned to the workflow run.
+@dataclass
+class Index(data_model.Index):
+    _run_in_executor: FunctionExecutor
+    _run_subprocess: RunSubprocess
+    _sequence_lengths: Optional[Dict[str, int]] = None
+    _sequence_otu_map: Optional[Dict[str, str]] = None
 
-    :param index_id: the unique ID for the index
-    :param path: the path at which the workflow index data will be stored
-    :param: reference: the index's parent reference
-    :param: run_in_executor: a function that calls functions in a :class:`ThreadPoolExecutor()`
-    :param: run_subprocess: a function that runs a command as a subprocess
-
-    """
-    def __init__(
-        self,
-        index_id: str,
-        path: Path,
-        reference: Reference,
-        run_in_executor: FunctionExecutor,
-        run_subprocess: RunSubprocess,
-    ):
-        self.id = index_id
-        self.path = path
-        self.reference = reference
-        self._run_in_executor = run_in_executor
-        self._run_subprocess = run_subprocess
-
+    def __post_init__(self):
         self.bowtie_path: Path = self.path / "reference"
         self.fasta_path: Path = self.path / "ref.fa"
         self.compressed_json_path: Path = self.path / "reference.json.gz"
         self.json_path: Path = self.path / "reference.json"
-
-        self._sequence_lengths: Optional[Dict[str, int]] = None
-        self._sequence_otu_map: Optional[Dict[str, str]] = None
 
     async def decompress_json(self, processes: int):
         """
@@ -177,37 +156,26 @@ class Index:
 
 @fixture
 async def indexes(
-    database: AbstractDatabase,
+    index_provider: AbstractIndexProvider,
     job_args: Dict[str, Any],
-    data_path: Path,
-    temp_path: Path,
+    index_path: Path,
+    work_path: Path,
     run_in_executor: FunctionExecutor,
     run_subprocess: RunSubprocess,
 ) -> List[Index]:
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
-    index_document = await database.fetch_document_by_id(
-        job_args["index_id"], "indexes"
-    )
+    index_id = job_args["index_id"]
+    reference = await index_provider.fetch_reference()
 
-    ref_document = await database.fetch_document_by_id(
-        index_document["reference"]["id"], "references"
-    )
-
-    src_path = data_path / "references" / ref_document["_id"] / job_args["index_id"]
-    dst_path = temp_path / "indexes" / job_args["index_id"]
-
-    await run_in_executor(copytree, src_path, dst_path)
-
-    reference = Reference(
-        ref_document["_id"],
-        ref_document["data_type"],
-        ref_document["name"],
-        ref_document["organism"],
-        ref_document["targets"]
-    )
+    index_work_path = work_path / "indexes" / index_id
+    await run_in_executor(copytree, index_path, index_work_path)
 
     index = Index(
-        job_args["index_id"], dst_path, reference, run_in_executor, run_subprocess
+        id=index_id,
+        path=index_work_path,
+        reference=reference,
+        _run_in_executor=run_in_executor,
+        _run_subprocess=run_subprocess
     )
 
     await index.decompress_json(job_args["proc"])

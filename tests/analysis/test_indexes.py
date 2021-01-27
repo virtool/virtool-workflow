@@ -9,6 +9,7 @@ import pytest
 from virtool_workflow.abc import AbstractDatabase
 import virtool_workflow.analysis.indexes
 from virtool_workflow.analysis.indexes import Index
+from virtool_workflow.abc.providers.indexes import AbstractIndexProvider
 
 EXPECTED_PATH = Path(sys.path[0]) / "tests/analysis/expected"
 FAKE_JSON_PATH = Path(sys.path[0]) / "tests/analysis/reference.json.gz"
@@ -31,42 +32,29 @@ class MockDatabase(AbstractDatabase):
                     "targets": []}
 
 
-@pytest.fixture
-def data_path(tmpdir):
-    data = tmpdir.mkdir("data")
-    return Path(data)
+class TestIndexProvider(AbstractIndexProvider):
+
+    def __init__(self):
+        self.has_json = False
+
+    def set_has_json(self):
+        self.has_json = True
 
 
-@pytest.fixture
-def work_path(tmpdir):
-    work = tmpdir.mkdir("work")
-    return Path(work)
+async def test_indexes(runtime):
+    runtime.data_providers.index_provider = TestIndexProvider()
+    runtime.job.args = {"index_id": "foo", "proc": 1}
 
-
-@pytest.fixture
-async def indexes(
-    data_path, work_path, run_in_executor, run_subprocess, tmpdir
-) -> List[Index]:
-    job_args = {"index_id": "foo", "proc": 1}
-
+    data_path = runtime.get_or_instantiate("data_path")
     index_path = data_path / "references/bar/foo"
     index_path.mkdir(parents=True)
 
     copy(FAKE_JSON_PATH, index_path / "reference.json.gz")
 
     database = MockDatabase()
+    indexes = await runtime.instantiate(virtool_workflow.analysis.indexes.indexes)
+    work_path = runtime["work_path"]
 
-    return await virtool_workflow.analysis.indexes.indexes(
-        database,
-        job_args,
-        data_path,
-        work_path,
-        run_in_executor,
-        run_subprocess,
-    )
-
-
-async def test_indexes(work_path, indexes):
     # Check that single index directory was created
     assert set((work_path / "indexes").iterdir()) == {work_path / "indexes/foo"}
 
