@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from virtool_workflow.storage.paths import context_directory
 
 
