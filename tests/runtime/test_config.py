@@ -1,6 +1,6 @@
 import os
+
 from virtool_workflow_runtime.config import configuration
-from virtool_workflow.fixtures.scope import FixtureScope
 
 
 @configuration.config_fixture("EDITOR", type_=str, default="/usr/bin/nano")
@@ -9,38 +9,33 @@ def editor(_):
 
 
 async def test_environment_variable_fixture(runtime):
-    with runtime.scope as fixtures:
-        editor_ = await fixtures.get_or_instantiate("editor")
-        assert editor_ == os.getenv("EDITOR", default="/usr/bin/nano")
+    editor_ = await runtime.get_or_instantiate("editor")
+    assert editor_ == os.getenv("EDITOR", default="/usr/bin/nano")
 
 
 async def test_types(runtime):
-    with runtime.scope as fixtures:
-        @configuration.config_fixture("TEST_ENV_VARIABLE", type_=bool, default=False)
-        def boolean(_):
-            ...
+    @configuration.config_fixture("TEST_ENV_VARIABLE", type_=bool, default=False)
+    def boolean(_):
+        ...
 
-        value = await fixtures.instantiate(boolean)
+    value = await runtime.instantiate(boolean)
+    assert not value
 
-        assert not value
+    os.environ["TEST_ENV_VARIABLE"] = "yes"
+    assert os.getenv("TEST_ENV_VARIABLE") == "yes"
 
-        os.environ["TEST_ENV_VARIABLE"] = "yes"
+    del runtime["boolean"]
 
-        assert os.getenv("TEST_ENV_VARIABLE") == "yes"
+    value = await runtime.instantiate(boolean)
 
-        del fixtures["boolean"]
+    assert value
 
-        value = await fixtures.instantiate(boolean)
+    @configuration.config_fixture("TEST_ENV_VARIABLE", type_=int)
+    def integer(_):
+        ...
 
-        assert value
+    os.environ["TEST_ENV_VARIABLE"] = "49"
+    integer_ = await runtime.instantiate(integer)
 
-    with FixtureScope() as fixtures:
-        @configuration.config_fixture("TEST_ENV_VARIABLE", type_=int)
-        def integer(_):
-            ...
-
-        os.environ["TEST_ENV_VARIABLE"] = "49"
-        integer_ = await fixtures.instantiate(integer)
-
-        assert integer_ == 49
+    assert integer_ == 49
 
