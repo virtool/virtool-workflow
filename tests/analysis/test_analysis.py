@@ -1,43 +1,35 @@
 import pytest
 
-from virtool_workflow.analysis.read_prep import unprepared_reads
-from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow.storage.paths import context_directory
+from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.fixtures import paired
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow.analysis import utils
+from virtool_workflow.analysis.read_prep import unprepared_reads
 
 
-@pytest.yield_fixture
-async def fixtures(runtime):
-    with runtime.scope as _fixtures:
-        _fixtures["job_id"] = "1"
-        _fixtures["job_document"] = dict(_id="1")
-        _fixtures["job_args"] = dict(
-            sample_id="1",
-            index_id="1",
-            ref_id="1",
-            analysis_id="1",
-            analysis=dict(
-                subtraction=dict(id="id with spaces")
-            )
+@pytest.fixture
+def fixtures(runtime):
+    runtime["job"].args = dict(
+        sample_id="1",
+        index_id="1",
+        ref_id="1",
+        analysis_id="1",
+        analysis=dict(
+            subtraction=dict(id="id with spaces")
         )
+    )
 
-        _fixtures["sample"] = dict(
-            _id="1",
-            paired=False,
-            library_type=LibraryType.other,
-            quality=dict(
-                length=[0, 100],
-                count=3
-            ),
-            files=[dict(raw=True)],
-        )
+    runtime["sample"] = dict(
+        _id="1",
+        paired=False,
+        library_type=LibraryType.other,
+        quality=dict(
+            length=[0, 100],
+            count=3
+        ),
+        files=[dict(raw=True)],
+    )
 
-        _fixtures["number_of_processes"] = 3
-        with context_directory("test_virtool") as data_path:
-            _fixtures["data_path"] = data_path
-            yield _fixtures
+    return runtime
 
 
 async def test_unprepared_reads_fixture(fixtures):

@@ -1,17 +1,28 @@
 from pathlib import Path
+from typing import Dict, Any
 
 from virtool_workflow import hooks
-from virtool_workflow.analysis.analysis import Analysis, FileUpload
-from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
-from virtool_workflow_runtime.db.db import VirtoolDatabase
-from virtool_workflow.runtime import WorkflowEnvironment
-from virtool_workflow.db.db import DirectAccessDatabase
+from virtool_workflow.abc.providers.analysis import AbstractAnalysisProvider
+from virtool_workflow.analysis.analysis import FileUpload
 from virtool_workflow.data_model import Job
 
 
-async def test_upload_file(runtime: WorkflowEnvironment):
-    db = VirtoolDatabase(db_name(), db_connection_string())
-    await db["analyses"].insert_one(dict(_id="1"))
+class TestAnalysisProvider(AbstractAnalysisProvider):
+    def __init__(self):
+        self.uploads = []
+
+    async def store_result(self, result: Dict[str, Any]):
+        ...
+
+    async def register_file_upload(self, upload: FileUpload):
+        self.uploads.append(upload)
+
+    async def delete(self):
+        ...
+
+
+async def test_upload_file(runtime):
+    runtime.data_providers.analysis_provider = analysis_provider = TestAnalysisProvider()
 
     runtime["job"] = Job(
         _id="test_upload_file",
@@ -21,35 +32,15 @@ async def test_upload_file(runtime: WorkflowEnvironment):
         },
     )
 
-    runtime["database"] = DirectAccessDatabase(db_name(), db_connection_string())
-
-    test_file = Path("foo")
+    test_file = Path("test_file.txt")
     test_file.write_text("test file")
 
-    test_file_size = test_file.stat().st_size
+    await runtime.execute_function(lambda analysis, analysis_path:
+                                   analysis.upload_file(test_file.name, "A test file", test_file, "fasta"))
 
-    upload = FileUpload(
-        "foo",
-        "A test file",
-        test_file,
-        "fasta",
-    )
+    await hooks.before_result_upload.trigger(runtime.scope)
 
-    async def use_analysis_fixture(analysis: Analysis, analysis_path: Path):
-        analysis.upload_file(upload.name, upload.description, upload.path, upload.format)
-        await hooks.before_result_upload.trigger(runtime.scope)
+    assert not test_file.exists()
+    assert (runtime["analysis_path"] / f"0_{test_file.name}").exists()
 
-        assert not test_file.exists()
-        assert (analysis_path/f"0_{test_file.name}").exists()
-
-    await runtime.execute_function(use_analysis_fixture)
-
-    analysis_document = await db["analyses"].find_one(dict(_id="1"))
-
-    assert analysis_document["files"][0] == {
-        "id": f"0_{upload.name}",
-        "name": upload.name,
-        "description": upload.description,
-        "format": upload.format,
-        "size": test_file_size,
-    }
+    assert test_file.name in [f.name for f in analysis_provider.uploads]
