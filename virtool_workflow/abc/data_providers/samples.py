@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 from virtool_workflow.uploads.files import DownloadableFileUpload
+from virtool_workflow.data_model import Sample
 
 
 class AbstractSampleProvider(ABC):
+
+    @abstractmethod
+    async def fetch_sample(self) -> Sample:
+        """Fetch the sample associated with the current job."""
+        ...
 
     @abstractmethod
     async def recalculate_workflow_tags(self):
