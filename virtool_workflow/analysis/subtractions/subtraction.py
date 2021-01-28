@@ -1,24 +1,25 @@
+from dataclasses import dataclass
+from typing import Dict, Any, List
 from pathlib import Path
-from typing import List
-
 from virtool_workflow import fixture
-from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.data_model import Subtraction
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.storage.utils import copy_paths
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
 # noinspection PyTypeChecker
 @fixture
-async def subtractions(subtraction_data_path: Path,
+async def subtractions(job_args: Dict[str, Any],
+                       subtraction_data_path: Path,
                        subtraction_path: Path,
                        run_in_executor: FunctionExecutor,
-                       subtraction_providers: List[AbstractSubtractionProvider]
-                       ) -> List[Subtraction]:
+                       database: AbstractDatabase) -> List[Subtraction]:
     """The subtractions to be used for the current job."""
-    _subtractions = [await provider.fetch_subtraction(subtraction_path) for provider in subtraction_providers]
+    ids = job_args["subtraction_id"]
+    if isinstance(ids, str):
+        ids = [ids]
 
-    await copy_paths({subtraction_data_path / subtraction.id: subtraction_path / subtraction.id
-                      for subtraction in _subtractions}.items(), run_in_executor)
+    await copy_paths({subtraction_data_path/id_: subtraction_path/id_ for id_ in ids}.items(), run_in_executor)
 
-    return _subtractions
+    return [Subtraction.from_document(await database.fetch_document_by_id(id_, "subtractions"), subtraction_path) for id_ in ids]
