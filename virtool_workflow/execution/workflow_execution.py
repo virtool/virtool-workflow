@@ -93,7 +93,8 @@ class WorkflowExecution:
 
         :param new_state: The new state that should be applied.
         """
-        logger.debug(f"Changing the execution state from {self._state} to {new_state}")
+        logger.debug(
+            f"Changing the execution state from {self._state} to {new_state}")
         await hooks.on_state_change.trigger(self.scope, self._state, new_state)
         self._state = new_state
         return new_state
@@ -103,11 +104,13 @@ class WorkflowExecution:
             step: Callable[[], Coroutine[Any, Any, Optional[str]]],
     ):
         try:
-            logger.info(f"Beginning step #{self.current_step}: {step.__name__}")
+            logger.info(
+                f"Beginning step #{self.current_step}: {step.__name__}")
             return await step()
         except Exception as exception:
             self.error = exception
-            error = WorkflowError(cause=exception, workflow=self.workflow, context=self)
+            error = WorkflowError(
+                cause=exception, workflow=self.workflow, context=self)
             callback_results = await hooks.on_error.trigger(self.scope, error)
 
             if callback_results:
@@ -119,7 +122,8 @@ class WorkflowExecution:
         for step in steps:
             if count_steps:
                 self.current_step += 1
-                self.progress = float(self.current_step) / float(len(self.workflow.steps))
+                self.progress = float(self.current_step) / \
+                    float(len(self.workflow.steps))
             update = await self._run_step(step)
             if count_steps:
                 await hooks.on_workflow_step.trigger(self.scope, update)
@@ -131,9 +135,7 @@ class WorkflowExecution:
         try:
             return await self._execute()
         except Exception as e:
-            if not isinstance(e, WorkflowError):
-                e = WorkflowError(cause=e, workflow=self.workflow, context=self)
-            await hooks.on_workflow_failure.trigger(self.scope, e)
+            await hooks.on_failure.trigger(self.scope, e)
             raise e
 
     async def _execute(self) -> Dict[str, Any]:
@@ -159,6 +161,7 @@ class WorkflowExecution:
         logger.debug(f"Result: \n{pprint.pformat(result)}")
 
         await hooks.on_result.trigger(self.scope)
+        await hooks.on_success.trigger(self.scope)
 
         return result
 

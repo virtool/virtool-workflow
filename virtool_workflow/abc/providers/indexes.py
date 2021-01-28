@@ -1,13 +1,8 @@
 from abc import ABC, abstractmethod
-from virtool_workflow.data_model import Reference, Index
+from virtool_workflow.data_model import Reference
 
 
 class AbstractIndexProvider(ABC):
-
-    @abstractmethod
-    async def fetch_index(self) -> Index:
-        """Get the index associated with the current job."""
-        ...
 
     @abstractmethod
     async def fetch_reference(self) -> Reference:
