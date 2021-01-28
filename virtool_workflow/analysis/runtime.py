@@ -15,7 +15,7 @@ from virtool_workflow.abc.providers import AbstractDataProvider, AbstractHmmsPro
 from virtool_workflow.fixtures.scope import FixtureScope
 
 
-class ScopedDataProvider(AbstractDataProvider):
+class DataProvider:
 
     def __init__(self,
                  scope: FixtureScope,
@@ -28,55 +28,29 @@ class ScopedDataProvider(AbstractDataProvider):
                  subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
                  hmms_provider: AbstractHmmsProvider = None):
         self.scope = scope
-        self._analysis_provider = analysis_provider
-        self._caches_provider = caches_provider
-        self._index_provider = index_provider
-        self._otus_provider = otus_provider
-        self._reference_provider = reference_provider
-        self._sample_provider = sample_provider
-        self._subtraction_providers = subtraction_providers
-        self._hmms_provider = hmms_provider
+        self.analysis_provider = analysis_provider
+        self.caches_provider = caches_provider
+        self.index_provider = index_provider
+        self.otus_provider = otus_provider
+        self.reference_provider = reference_provider
+        self.sample_provider = sample_provider
+        self.subtraction_providers = subtraction_providers
+        self.hmms_provider = hmms_provider
 
         scope.add_providers((
-            providers.for_fixtures(analysis, analysis_provider=lambda: self.analysis_provider),
-            providers.for_fixtures(sample, sample_provider=lambda: self.sample_provider),
-            providers.for_fixtures(reference, reference_provider=lambda: self.reference_provider),
-            providers.for_fixtures(indexes, index_provider=lambda: self.index_provider),
-            providers.for_fixtures(subtractions, subtraction_providers=lambda: self.subtraction_providers),
-            providers.for_fixtures(hmms, hmms_provider=lambda: self.hmms_provider)
+            providers.for_fixtures(
+                analysis, analysis_provider=lambda: self.analysis_provider),
+            providers.for_fixtures(
+                sample, sample_provider=lambda: self.sample_provider),
+            providers.for_fixtures(
+                reference, reference_provider=lambda: self.reference_provider),
+            providers.for_fixtures(
+                indexes, index_provider=lambda: self.index_provider),
+            providers.for_fixtures(
+                subtractions, subtraction_providers=lambda: self.subtraction_providers),
+            providers.for_fixtures(
+                hmms, hmms_provider=lambda: self.hmms_provider)
         ))
-
-    @property
-    def analysis_provider(self) -> AbstractAnalysisProvider:
-        return self._analysis_provider
-
-    @property
-    def caches_provider(self) -> AbstractCacheProvider:
-        return self._caches_provider
-
-    @property
-    def index_provider(self) -> AbstractIndexProvider:
-        return self._index_provider
-
-    @property
-    def otus_provider(self) -> AbstractOTUsProvider:
-        return self._otus_provider
-
-    @property
-    def reference_provider(self) -> AbstractReferenceProvider:
-        return self._reference_provider
-
-    @property
-    def sample_provider(self) -> AbstractSampleProvider:
-        return self._sample_provider
-
-    @property
-    def subtraction_providers(self) -> Iterable[AbstractSubtractionProvider]:
-        return self._subtraction_providers
-
-    @property
-    def hmms_provider(self) -> AbstractHmmsProvider:
-        return self._hmms_provider
 
 
 class AnalysisWorkflowRuntime(WorkflowEnvironment):
@@ -92,12 +66,12 @@ class AnalysisWorkflowRuntime(WorkflowEnvironment):
                  hmms_provider: AbstractHmmsProvider = None):
         super(AnalysisWorkflowRuntime, self).__init__(job=job)
         self.load_plugins("virtool_workflow.analysis.fixtures")
-        self.data_providers = ScopedDataProvider(self,
-                                                 analysis_provider,
-                                                 caches_provider,
-                                                 index_provider,
-                                                 otus_provider,
-                                                 reference_provider,
-                                                 sample_provider,
-                                                 subtraction_providers,
-                                                 hmms_provider)
+        self.data_providers = DataProvider(self,
+                                           analysis_provider,
+                                           caches_provider,
+                                           index_provider,
+                                           otus_provider,
+                                           reference_provider,
+                                           sample_provider,
+                                           subtraction_providers,
+                                           hmms_provider)
