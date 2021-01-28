@@ -12,12 +12,12 @@ async def sample(job_args: Dict[str, Any], database: AbstractDatabase) -> Dict[s
 
 
 @fixture
-def paired(sample: Dict[str, Any]) -> bool:
+def paired(sample: Sample) -> bool:
     """A boolean indicating that the sample data for the current job is paired."""
-    return sample["paired"]
+    return sample.paired
 
 
 @fixture
-def library_type(sample: Dict[str, Any]) -> LibraryType:
+def library_type(sample: Sample) -> LibraryType:
     """The library type for the sample being analyzed."""
-    return sample["library_type"]
+    return sample.library_type
