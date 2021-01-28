@@ -10,16 +10,15 @@ from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 # noinspection PyTypeChecker
 @fixture
-async def subtractions(job_args: Dict[str, Any],
-                       subtraction_data_path: Path,
+async def subtractions(subtraction_data_path: Path,
                        subtraction_path: Path,
                        run_in_executor: FunctionExecutor,
-                       database: AbstractDatabase) -> List[Subtraction]:
+                       subtraction_providers: List[AbstractSubtractionProvider]
+                       ) -> List[Subtraction]:
     """The subtractions to be used for the current job."""
-    ids = job_args["subtraction_id"]
-    if isinstance(ids, str):
-        ids = [ids]
+    _subtractions = [provider.fetch_subtraction(subtraction_path) for provider in subtraction_providers]
 
-    await copy_paths({subtraction_data_path/id_: subtraction_path/id_ for id_ in ids}.items(), run_in_executor)
+    await copy_paths({subtraction_data_path / subtraction.id: subtraction_path / subtraction.id
+                      for subtraction in _subtractions}.items(), run_in_executor)
 
-    return [Subtraction.from_document(await database.fetch_document_by_id(id_, "subtractions"), subtraction_path) for id_ in ids]
+    return _subtractions
