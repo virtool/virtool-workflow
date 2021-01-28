@@ -1,11 +1,11 @@
-from dataclasses import dataclass
-from typing import Dict, Any, List
 from pathlib import Path
+from typing import List
+
 from virtool_workflow import fixture
-from virtool_workflow.data_model import Subtraction
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
-from virtool_workflow.storage.utils import copy_paths
+from virtool_workflow.data_model import Subtraction
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.storage.utils import copy_paths
 
 
 # noinspection PyTypeChecker

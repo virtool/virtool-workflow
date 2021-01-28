@@ -1,20 +1,37 @@
 """Central module for database access. """
-import virtool_core.caches.db
-import virtool_core.db.core
-import virtool_core.samples.db
-import virtool_core.utils
 from pathlib import Path
 from typing import Dict, Any, Optional, Iterable, Tuple
-from virtool_core.db.bindings import BINDINGS
 
-import virtool_workflow.abc
+from virtool_workflow.abc.db import AbstractDatabaseCollection
 from virtool_workflow.uploads.files import FileUpload
-from virtool_workflow_runtime.db import VirtoolDatabase
-
-COLLECTION_NAMES = [binding.collection_name for binding in BINDINGS]
 
 
-class DirectAccessDatabase(virtool_workflow.abc.AbstractDatabase):
+class VirtoolDatabase:
+
+    def __init__(
+            self,
+            jobs: AbstractDatabaseCollection,
+            analyses: AbstractDatabaseCollection,
+            files: AbstractDatabaseCollection,
+            hmms: AbstractDatabaseCollection,
+            indexes: AbstractDatabaseCollection,
+            otus: AbstractDatabaseCollection,
+            references: AbstractDatabaseCollection,
+            samples: AbstractDatabaseCollection,
+            subtractions: AbstractDatabaseCollection,
+    ):
+        self.jobs = jobs
+        self.analyses = analyses
+        self.files = files
+        self.hmms = hmms
+        self.indexes = indexes
+        self.otus = otus
+        self.references = references
+        self.samples = samples
+        self.subtractions = subtractions
+
+
+class DirectAccessDatabase:
     """A :class:`virtool_workflow.abc.AbstractDatabase` implementation which uses a MongoDB database directly."""
 
     def __init__(self, db_name: str, db_connection_string: str):
