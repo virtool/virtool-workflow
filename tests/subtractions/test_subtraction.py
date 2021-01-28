@@ -1,17 +1,12 @@
+from numbers import Number
+
 from typing import Optional, Dict, Any
 
-from virtool_workflow.abc.db import AbstractDatabase
 from virtool_workflow.analysis.subtractions.subtraction import subtractions
+from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
+from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
-mock_subtraction_base = dict(
-    name="foobar",
-    nickname="bar",
-    count="7",
-    gc={"A": 0.2, "T": 0.2, "C": 0.2, "G": 0.4}
-)
-
-mock_subtractions = {str(i): {**mock_subtraction_base,
-                              "id": str(i)} for i in range(5)}
+mock_subtractions = {str(i): {"id": str(i)} for i in range(5)}
 
 subtraction_data_filenames = [
     "subtraction.fa.gz",
@@ -24,9 +19,30 @@ subtraction_data_filenames = [
 ]
 
 
-class MockDatabase(AbstractDatabase):
-    async def fetch_document_by_id(self, id_: str, collection_name: str) -> Optional[Dict[str, Any]]:
-        return mock_subtractions[id_]
+class TestSubtractionProvider(AbstractSubtractionProvider):
+
+    def __init__(self, _id: str):
+        self.id = _id
+
+    async def fetch_subtraction(self, subtraction_path) -> Subtraction:
+        return Subtraction(
+            id=self.id,
+            name="foobar",
+            nickname="bar",
+            count=7,
+            is_host=False,
+            deleted=False,
+            path=subtraction_path,
+            fasta_path=subtraction_path / "subtraction.fa.gz",
+            bowtie2_index_path=f"{subtraction_path}/reference",
+            gc=NucleotideComposition(a=0.2, t=0.2, c=0.2, g=0.4, n=0.0),
+        )
+
+    async def store_count_and_gc(self, count: int, gc: Dict[str, Number]):
+        pass
+
+    async def delete(self):
+        pass
 
 
 async def setup_sample_data_path(runtime):
@@ -41,9 +57,7 @@ async def setup_sample_data_path(runtime):
 
 
 async def test_subtractions(monkeypatch, runtime):
-    runtime.job.args["subtraction_id"] = [s["id"]
-                                          for s in mock_subtractions.values()]
-    runtime["database"] = MockDatabase()
+    runtime.data_providers.subtraction_providers = [TestSubtractionProvider(id_) for id_ in mock_subtractions]
 
     await setup_sample_data_path(runtime)
     _subtractions = await runtime.instantiate(subtractions)
