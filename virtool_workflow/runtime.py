@@ -18,7 +18,7 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             "virtool_workflow_runtime.config.configuration"
         )
 
-        self.job = job
+        self.job = self["job"] = job
 
         super(WorkflowEnvironment, self).__init__(
             workflow_fixtures,
@@ -26,7 +26,7 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             *providers,
             **instances)
 
-        self["job_args"] = job.args
+        self.override("job_args", lambda: job.args)
 
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""

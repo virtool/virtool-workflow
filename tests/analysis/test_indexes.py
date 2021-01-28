@@ -10,6 +10,9 @@ from virtool_workflow.abc import AbstractDatabase
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.analysis.indexes import Index
 from virtool_workflow.data_model import Reference
+from virtool_workflow.fixtures.scope import FixtureScope
+from virtool_workflow_runtime.config.configuration import \
+    work_path as work_path_fixture
 
 EXPECTED_PATH = Path(sys.path[0]) / "tests/analysis/expected"
 FAKE_JSON_PATH = Path(sys.path[0]) / "tests/analysis/reference.json.gz"
@@ -22,24 +25,41 @@ class TestIndexProvider(AbstractIndexProvider):
     def __init__(self):
         self.has_json = False
 
-    def fetch_reference(self):
+    async def fetch_reference(self):
         return Reference("bar", "barcode", "", "Bar", "")
 
-    def set_has_json(self):
+    async def set_has_json(self):
         self.has_json = True
 
 
-async def test_indexes(runtime):
-    runtime.data_providers.index_provider = TestIndexProvider()
-    runtime.job.args = {"index_id": "foo", "proc": 1}
+@pytest.fixture
+async def work_path():
+    with FixtureScope() as scope:
+        yield await scope.instantiate(work_path_fixture)
 
-    data_path = runtime.get_or_instantiate("data_path")
-    index_path = data_path / "references/bar/foo"
-    index_path.mkdir(parents=True)
+
+@pytest.fixture
+async def indexes_and_runtime(runtime):
+    runtime.data_providers.index_provider = TestIndexProvider()
+    runtime["job_args"] = {"index_id": "foo", "ref_id": "bar", "proc": 1}
+
+    index_path = await runtime.get_or_instantiate("index_path")
 
     copy(FAKE_JSON_PATH, index_path / "reference.json.gz")
 
     indexes = await runtime.instantiate(virtool_workflow.analysis.indexes.indexes)
+
+    return indexes, runtime
+
+
+@pytest.fixture
+def indexes(indexes_and_runtime):
+    indexes, _ = indexes_and_runtime
+    return indexes
+
+
+async def test_indexes(indexes_and_runtime):
+    indexes, runtime = indexes_and_runtime
     work_path = runtime["work_path"]
 
     # Check that single index directory was created
