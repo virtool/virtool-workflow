@@ -1,5 +1,6 @@
-from virtool_workflow.abc.db import AbstractDatabaseCollection, AbstractDatabase, DocumentUpdater
-from motor_asyncio import AsyncIOMotorCollection
+from motor.motor_asyncio import AsyncIOMotorCollection
+
+from virtool_workflow.abc.db import AbstractDatabaseCollection, DocumentUpdater
 
 
 class MongoDocumentUpdater(DocumentUpdater):
@@ -10,7 +11,7 @@ class MongoDocumentUpdater(DocumentUpdater):
         self.attrs = {}
         self._db = db
 
-    def set(key, value):
+    def set(self, key, value):
         self.attrs[key] = value
 
     async def update(self):
@@ -28,11 +29,11 @@ class MongoDatabaseCollection(AbstractDatabaseCollection):
     async def get(self, id: str) -> dict:
         return await self._db.find_one(dict(_id=id))
 
-    async def insert(self, value: dict):
+    async def insert(self, value: dict) -> str:
         insert_result = await self._db.insert_one(value)
         return insert_result.inserted_id
 
-    async def update(self, id: str) -> MongoDocumentUpdater:
+    def update(self, id: str) -> MongoDocumentUpdater:
         return MongoDocumentUpdater(id, self._db)
 
     async def delete(self, id: str):

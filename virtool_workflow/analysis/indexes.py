@@ -1,13 +1,13 @@
-import json
 from dataclasses import dataclass
+
+import aiofiles
+import json
 from pathlib import Path
 from shutil import copytree
 from typing import Dict, List, Tuple, Optional, Any
-
-import aiofiles
 from virtool_core.utils import decompress_file
-from virtool_workflow import data_model
 
+from virtool_workflow import data_model
 from virtool_workflow import fixture
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
