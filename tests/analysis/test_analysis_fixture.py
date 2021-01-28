@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Iterable, Tuple
 
 from virtool_workflow import hooks
 from virtool_workflow.abc.data_providers.analysis import AbstractAnalysisProvider
@@ -14,8 +14,8 @@ class TestAnalysisProvider(AbstractAnalysisProvider):
     async def store_result(self, result: Dict[str, Any]):
         ...
 
-    async def register_file_upload(self, upload: FileUpload):
-        self.uploads.append(upload)
+    async def store_files(self, uploads: Iterable[Tuple[FileUpload, Path]]):
+        self.uploads = [upload for upload, path in uploads]
 
     async def delete(self):
         ...

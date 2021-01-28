@@ -1,6 +1,7 @@
 """Test utilities for Virtool Workflows."""
 import pytest
-from typing import Dict, Any
+from typing import Dict, Any, Iterable, Tuple
+from pathlib import Path
 
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
@@ -18,8 +19,8 @@ class MockAnalysisProvider(AbstractAnalysisProvider):
     async def store_result(self, result: Dict[str, Any]):
         self.result = result
 
-    async def register_file_upload(self, upload: FileUpload):
-        self.uploads.append(upload)
+    async def store_files(self, uploads: Iterable[Tuple[FileUpload, Path]]):
+        self.uploads = [file_upload for file_upload, _ in uploads]
 
     async def delete(self):
         del self.result
