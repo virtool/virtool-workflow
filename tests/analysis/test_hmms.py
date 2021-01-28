@@ -29,7 +29,8 @@ async def test_hmms(runtime, run_in_executor, run_subprocess, tmpdir):
     runtime.data_providers.hmms_provider = TestHmmsProvider()
 
     data_path = await runtime.get_or_instantiate("data_path")
-    hmms_path = data_path.mkdir("hmm")
+    hmms_path = data_path / "hmm"
+    hmms_path.mkdir()
 
     copy(FAKE_PROFILES_PATH, hmms_path)
 

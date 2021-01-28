@@ -75,10 +75,10 @@ async def trigger_finish(test_workflow, scope):
         await hooks.on_failure.trigger(scope, WorkflowError(exc, workflow=test_workflow, context=None))
 
 
-async def test_command_can_be_terminated(bash_sleep, test_workflow, empty_scope):
+async def test_command_can_be_terminated(bash_sleep, test_workflow, runtime):
     sh_path, txt_path = bash_sleep
 
-    t1 = asyncio.create_task(trigger_finish(test_workflow, empty_scope))
+    t1 = asyncio.create_task(trigger_finish(test_workflow, runtime))
     t2 = asyncio.create_task(run_subprocess(["bash", str(sh_path)]))
 
     await asyncio.gather(t1, t2)

@@ -31,7 +31,8 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
     async def upload(self):
         """Move marked files to the :obj:`AnalysisUploader.analysis_path` and create database entries."""
         source_paths = [file_upload.path for file_upload in self._marks]
-        target_paths = [self.analysis_path/f"{n}_{source_path.name}" for n, source_path in enumerate(source_paths)]
+        target_paths = [
+            self.analysis_path/f"{n}_{source_path.name}" for n, source_path in enumerate(source_paths)]
 
         await virtool_workflow.storage.utils.move_paths(
             zip(source_paths, target_paths),
@@ -55,11 +56,11 @@ class Analysis:
 
 
 @fixture
-def analysis(job_args, run_in_executor, analysis_path: Path, database) -> Analysis:
-    analysis_id = job_args["analysis_id"]
-    uploader = AnalysisUploader(analysis_path, run_in_executor, database, analysis_id)
+def analysis(job, run_in_executor, analysis_path: Path, analysis_provider: AbstractAnalysisProvider) -> Analysis:
+    analysis_id = job.args["analysis_id"]
+    uploader = AnalysisUploader(
+        analysis_path, run_in_executor, analysis_provider, analysis_id)
 
     hooks.before_result_upload(uploader.upload, once=True)
 
-    return Analysis(job_args["analysis_id"], uploader)
-
+    return Analysis(job.args["analysis_id"], uploader)

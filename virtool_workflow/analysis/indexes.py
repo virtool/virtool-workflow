@@ -46,7 +46,8 @@ class Index(data_model.Index):
 
         """
         if self.json_path.is_file():
-            raise FileExistsError("Index JSON file has already been decompressed")
+            raise FileExistsError(
+                "Index JSON file has already been decompressed")
 
         await self._run_in_executor(
             decompress_file, self.compressed_json_path, self.json_path, processes
@@ -160,6 +161,7 @@ async def indexes(
     job_args: Dict[str, Any],
     index_path: Path,
     work_path: Path,
+    proc: int,
     run_in_executor: FunctionExecutor,
     run_subprocess: RunSubprocess,
 ) -> List[Index]:
@@ -178,6 +180,6 @@ async def indexes(
         _run_subprocess=run_subprocess
     )
 
-    await index.decompress_json(job_args["proc"])
+    await index.decompress_json(proc)
 
     return [index]

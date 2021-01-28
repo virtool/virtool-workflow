@@ -18,7 +18,7 @@ async def test_hook():
     assert callback.called
 
 
-async def test_temporary_callback(empty_scope):
+async def test_temporary_callback(runtime):
 
     @example_hook_without_params.callback(until=hooks.on_result)
     def temporary_callback():
@@ -26,9 +26,10 @@ async def test_temporary_callback(empty_scope):
 
     assert temporary_callback in example_hook_without_params.callbacks
 
-    await hooks.on_result.trigger(empty_scope)
+    await hooks.on_result.trigger(runtime)
 
-    assert "remove_callback" not in [f.__name__ for f in example_hook_without_params.callbacks]
+    assert "remove_callback" not in [
+        f.__name__ for f in example_hook_without_params.callbacks]
     assert temporary_callback not in example_hook_without_params.callbacks
 
 
@@ -63,4 +64,3 @@ async def test_return_type_hint_checking():
     @hook_with_return_hint.callback
     def correct_hint() -> str:
         return ""
-

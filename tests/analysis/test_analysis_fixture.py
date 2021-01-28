@@ -38,7 +38,7 @@ async def test_upload_file(runtime):
     await runtime.execute_function(lambda analysis, analysis_path:
                                    analysis.upload_file(test_file.name, "A test file", test_file, "fasta"))
 
-    await hooks.before_result_upload.trigger(runtime.scope)
+    await hooks.before_result_upload.trigger(runtime)
 
     assert not test_file.exists()
     assert (runtime["analysis_path"] / f"0_{test_file.name}").exists()
