@@ -1,6 +1,7 @@
-from motor.motor_asyncio import AsyncIOMotorCollection
+from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorClient
 
 from virtool_workflow.abc.db import AbstractDatabaseCollection, DocumentUpdater
+from virtool_workflow.db.db import VirtoolDatabase
 
 
 class MongoDocumentUpdater(DocumentUpdater):
@@ -38,3 +39,25 @@ class MongoDatabaseCollection(AbstractDatabaseCollection):
 
     async def delete(self, id: str):
         await self._db.delete_one(dict(_id=id))
+
+
+class VirtoolMongoDB(VirtoolDatabase):
+
+    def __init__(self, db_name: str, db_connection_string: str):
+        client = AsyncIOMotorClient(db_connection_string)
+        db = client[db_name]
+
+        super(VirtoolMongoDB, self).__init__(
+            jobs=MongoDatabaseCollection(db["jobs"]),
+            analyses=MongoDatabaseCollection(db["analyses"]),
+            files=MongoDatabaseCollection(db["files"]),
+            hmms=MongoDatabaseCollection(db["hmms"]),
+            indexes=MongoDatabaseCollection(db["indexes"]),
+            otus=MongoDatabaseCollection(db["otus"]),
+            references=MongoDatabaseCollection(db["references"]),
+            samples=MongoDatabaseCollection(db["samples"]),
+            subtractions=MongoDatabaseCollection(db["subtractions"]),
+        )
+
+
+
