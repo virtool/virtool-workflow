@@ -2,14 +2,14 @@ import filecmp
 import sys
 from pathlib import Path
 from shutil import copy
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 import pytest
-
-from virtool_workflow.abc import AbstractDatabase
 import virtool_workflow.analysis.indexes
-from virtool_workflow.analysis.indexes import Index
+from virtool_workflow.abc import AbstractDatabase
 from virtool_workflow.abc.providers.indexes import AbstractIndexProvider
+from virtool_workflow.analysis.indexes import Index
+from virtool_workflow.data_model import Reference
 
 EXPECTED_PATH = Path(sys.path[0]) / "tests/analysis/expected"
 FAKE_JSON_PATH = Path(sys.path[0]) / "tests/analysis/reference.json.gz"
@@ -17,25 +17,13 @@ FAKE_JSON_PATH = Path(sys.path[0]) / "tests/analysis/reference.json.gz"
 OTU_IDS = ["625nhyu8", "n97b7lup", "uasjtbmg", "d399556a"]
 
 
-class MockDatabase(AbstractDatabase):
-    async def fetch_document_by_id(
-        self, id_: str, collection_name: str
-    ) -> Optional[Dict[str, Any]]:
-        if id_ == "foo" and collection_name == "indexes":
-            return {"_id": "foo", "reference": {"id": "bar"}}
-
-        if id_ == "bar" and collection_name == "references":
-            return {"_id": "bar",
-                    "name": "Bar",
-                    "data_type": "barcode",
-                    "organism": "virus",
-                    "targets": []}
-
-
 class TestIndexProvider(AbstractIndexProvider):
 
     def __init__(self):
         self.has_json = False
+
+    def fetch_reference(self):
+        return Reference("bar", "barcode", "", "Bar", "")
 
     def set_has_json(self):
         self.has_json = True
@@ -51,12 +39,12 @@ async def test_indexes(runtime):
 
     copy(FAKE_JSON_PATH, index_path / "reference.json.gz")
 
-    database = MockDatabase()
     indexes = await runtime.instantiate(virtool_workflow.analysis.indexes.indexes)
     work_path = runtime["work_path"]
 
     # Check that single index directory was created
-    assert set((work_path / "indexes").iterdir()) == {work_path / "indexes/foo"}
+    assert set((work_path / "indexes").iterdir()
+               ) == {work_path / "indexes/foo"}
 
     # Check that single reference directory was created
     assert set((work_path / "indexes/foo").iterdir()) == {
@@ -71,7 +59,8 @@ async def test_indexes(runtime):
     index_dir_path = work_path / "indexes/foo"
 
     assert indexes[0].path == index_dir_path
-    assert indexes[0].compressed_json_path == index_dir_path / "reference.json.gz"
+    assert indexes[0].compressed_json_path == index_dir_path / \
+        "reference.json.gz"
     assert indexes[0].json_path == index_dir_path / "reference.json"
 
 
@@ -115,5 +104,6 @@ async def test_build_index(work_path, indexes):
         "fa",
     ]:
         assert filecmp.cmp(
-            work_path / f"isolates_1.{extension}", f"{EXPECTED_PATH}.{extension}"
+            work_path /
+            f"isolates_1.{extension}", f"{EXPECTED_PATH}.{extension}"
         )
