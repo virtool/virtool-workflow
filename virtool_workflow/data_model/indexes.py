@@ -10,7 +10,7 @@ from virtool_workflow.data_model.references import Reference
 class Index:
     """A Virtool Index."""
     id: str
-    manifest: Dict[str, str]
+    manifest: Dict[str, int]
     path: Path
     reference: Reference
 
