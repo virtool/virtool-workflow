@@ -2,7 +2,7 @@ from inspect import signature
 from typing import List, Any, Callable
 
 from virtool_workflow import utils
-from virtool_workflow.execution.hooks import Hook
+from virtool_workflow.execution.hooks.hooks import Hook
 from virtool_workflow.fixtures.scope import FixtureScope
 
 
