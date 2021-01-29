@@ -2,13 +2,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Dict
+from virtool_workflow.data_model.references import Reference
 
 
-@dataclass(frozen=True)
+@dataclass
 class Index(ABC):
-    manifest: Dict[str, str]
-    has_files: bool
-    version: int
+    id: str
+    path: Path
+    reference: Reference
 
     @abstractmethod
     async def decompress_json(self, processes: int):
@@ -23,7 +24,7 @@ class Index(ABC):
         ...
 
     @abstractmethod
-    def get_otu_by_sequence_id(self, sequence_id: str) -> str:
+    def get_otu_id_by_sequence_id(self, sequence_id: str) -> str:
         """
         Return the OTU ID associated with the given ``sequence_id``.
 
