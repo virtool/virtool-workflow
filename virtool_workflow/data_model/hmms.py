@@ -12,7 +12,7 @@ class HMMEntry:
 
 @dataclass(frozen=True)
 class HMM:
-    _id: str
+    id: str
     cluster: int
     count: int
     entries: List[HMMEntry]
@@ -23,3 +23,4 @@ class HMM:
     mean_entropy: float
     total_entropy: float
     names: Tuple[str, str, str]
+
