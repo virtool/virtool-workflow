@@ -1,20 +1,11 @@
 """Main entrypoint(s) to the Virtool Workflow Runtime."""
-from concurrent import futures
 
-import aioredis
-import asyncio
 import logging
-from typing import Dict, Any
 
 from virtool_workflow import hooks
 from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
 from virtool_workflow.data_model import Job, Status
-from virtool_workflow.execution.workflow_executor import WorkflowError
-from virtool_workflow.workflow import Workflow
-from virtool_workflow_runtime.config.configuration import db_connection_string, db_name
-from virtool_workflow_runtime.config.configuration import redis_connection_string, redis_job_list_name
 from virtool_workflow_runtime.fixture_loading import InitializedWorkflowFixtureScope
-from ._redis import monitor_cancel, redis_list, connect
 from .db import VirtoolDatabase
 
 
