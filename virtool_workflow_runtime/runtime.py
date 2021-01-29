@@ -58,7 +58,9 @@ class DirectDatabaseAccessRuntime(AbstractRuntime):
 
         self.scope["job_id"] = self.job_id
         self.scope["job_document"] = job_document
-        self.scope["job_args"] = job_document["args"]
+
+        if "args" in job_document:
+            self.scope["job_args"] = job_document["args"]
 
         self._scope_initialized = True
 
