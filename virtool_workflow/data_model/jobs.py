@@ -1,6 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
-from datetime import datetime
 
 
 @dataclass(frozen=True)
@@ -9,29 +8,20 @@ class Status:
     progress: float
     stage: str
     state: str
-    timestamp: datetime
+    timestamp: str
 
 
-@dataclass(frozen=True)
-class User:
-    id: str
-
-
-@dataclass(frozen=True)
+@dataclass
 class Job:
     _id: str
     """Unique ID for the job."""
     args: dict
     """Workflow specific arguments."""
-    mem: int
+    mem: int = 8
     """The maximum amount of memory used in GB."""
-    proc: int
+    proc: int = 4
     """The number of processes used."""
-    status: List[Status]
+    status: List[Status] = field(default_factory=lambda: [])
     """The status log for the job."""
-    task: str
+    task: str = None
     """The name of the workflow which should be used."""
-    user: User
-    """Information about the user which requested the job."""
-
-
