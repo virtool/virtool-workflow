@@ -1,21 +1,20 @@
 from dataclasses import dataclass
-from abc import ABC, abstractmethod
-from virtool_workflow.uploads.files import FileUpload
-from typing import Optional
+
+from typing import Optional, List
+
+from virtool_workflow.data_model.references import Reference
+from virtool_workflow.data_model.samples import Sample
+from virtool_workflow.data_model.subtractions import Subtraction
 
 
 @dataclass(frozen=True)
-class Analysis(ABC):
+class Analysis:
     _id: str
     cache: dict
     index: dict
-    reference: dict
-    sample: dict
-    subtraction: dict
+    reference: Reference
+    sample: Sample
+    subtractions: List[Subtraction]
     read_count: Optional[int] = None
     subtracted_count: Optional[int] = None
 
-    @abstractmethod
-    async def upload_file(self, file_upload: FileUpload):
-        """Mark a file to be uploaded at the end of a workflow run."""
-        ...
