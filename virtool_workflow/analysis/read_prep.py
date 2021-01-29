@@ -15,7 +15,6 @@ from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow import hooks
 from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 from virtool_workflow.analysis.reads import Reads
-from virtool_workflow.abc.db import AbstractDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +136,6 @@ async def reads(
         analysis_path: Path,
         cache_path: Path,
         cache_document: Dict[str, Any],
-        database: AbstractDatabase,
         trimming_parameters: Dict[str, Any],
         trimming_output_path: Path,
         run_in_executor: FunctionExecutor,
