@@ -1,18 +1,20 @@
-from .jobs import Job
-from .subtractions import Subtraction, NucleotideComposition
-from .samples import Sample
 from .analysis import Analysis
-from .references import Reference
-from .indexes import Index
 from .hmms import HMM, HMMEntry
+from .indexes import Index
+from .jobs import Job, Status
+from .references import Reference
+from .samples import Sample
+from .subtractions import Subtraction, NucleotideComposition
 
 __all__ = [
     "Analysis",
-    "Job",
-    "Subtraction",
-    "NucleotideComposition",
-    "Sample",
-    "Reference",
-    "HMMEntry",
     "HMM",
+    "HMMEntry",
+    "Index",
+    "Job",
+    "Status",
+    "NucleotideComposition",
+    "Reference",
+    "Sample",
+    "Subtraction",
 ]
