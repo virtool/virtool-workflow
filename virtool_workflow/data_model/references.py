@@ -7,6 +7,7 @@ DataType = Literal["barcode", "genome"]
 
 @dataclass(frozen=True)
 class Reference:
+    """A Virtool Reference."""
     id: str
     data_type: DataType
     description: str

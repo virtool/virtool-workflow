@@ -12,6 +12,7 @@ class HMMEntry:
 
 @dataclass(frozen=True)
 class HMM:
+    """A Virtool HMM (Hidden Markov Model)."""
     id: str
     cluster: int
     count: int
