@@ -114,7 +114,7 @@ class WorkflowExecution:
             callback_results = await hooks.on_error.trigger(self.scope, error)
 
             if callback_results:
-                return callback_results[0]
+                return next(result for result in callback_results if result)
 
             raise error from exception
 

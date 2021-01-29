@@ -14,7 +14,7 @@ class NucleotideComposition:
 
     def __post_init__(self):
         total_percentage = self.a + self.c + self.g + self.t + self.n
-        if total_percentage != 100.0:
+        if total_percentage != 1.0:
             raise ValueError("Nucleotide percentages must equal 100%")
 
 

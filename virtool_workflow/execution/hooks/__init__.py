@@ -3,12 +3,11 @@ from concurrent import futures
 import asyncio
 from types import SimpleNamespace
 
-from virtool_workflow.execution.workflow_execution import WorkflowError, State
+from virtool_workflow.execution.workflow_execution import WorkflowError
 from virtool_workflow.fixtures.scope import FixtureScope
-from .hooks import Hook
 from .fixture_hooks import FixtureHook
+from .hooks import Hook
 from .workflow_hooks import *
-
 
 on_success = FixtureHook("on_success", parameters=[], return_type=None)
 """
@@ -54,8 +53,8 @@ async def _trigger_on_finish_from_on_success(scope: FixtureScope):
 
 
 @on_failure
-async def _trigger_on_finish_from_on_failure(error: WorkflowError, scope: FixtureScope):
-    await on_finish.trigger(scope, error.workflow)
+async def _trigger_on_finish_from_on_failure(_, scope: FixtureScope):
+    await on_finish.trigger(scope)
 
 
 on_cancelled = FixtureHook("on_cancelled", [asyncio.CancelledError], None)
@@ -71,10 +70,11 @@ Triggered when a job is cancelled.
 
 
 @on_failure
-async def _trigger_on_cancelled(error: WorkflowError, scope: FixtureScope):
-    if isinstance(error.cause, asyncio.CancelledError) or isinstance(error.cause, futures.CancelledError):
-        await on_cancelled.trigger(scope, error.cause)
-
+async def _trigger_on_cancelled(error: Exception, scope: FixtureScope):
+    if isinstance(error, WorkflowError):
+        error = error.cause
+    if isinstance(error, asyncio.CancelledError) or isinstance(error, futures.CancelledError):
+        await on_cancelled.trigger(scope, error)
 
 on_load_fixtures = FixtureHook("on_load_fixtures", [FixtureScope], return_type=None)
 """
@@ -112,6 +112,7 @@ before_result_upload = FixtureHook("before_result_upload", [], None)
 __all__ = [
     "on_result",
     "on_update",
+    "on_error",
     "on_workflow_step",
     "on_success",
     "on_failure",
