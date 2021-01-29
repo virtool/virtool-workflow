@@ -9,7 +9,7 @@ from virtool_workflow.analysis.subtractions.subtraction import subtractions
 from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures import providers
 from virtool_workflow.runtime import WorkflowEnvironment
-from virtool_workflow.abc.providers import AbstractDataProvider, AbstractHmmsProvider, AbstractSubtractionProvider, \
+from virtool_workflow.abc.data_providers import AbstractHmmsProvider, AbstractSubtractionProvider, \
     AbstractSampleProvider, AbstractReferenceProvider, AbstractOTUsProvider, AbstractIndexProvider, \
     AbstractCacheProvider, AbstractAnalysisProvider
 from virtool_workflow.fixtures.scope import FixtureScope

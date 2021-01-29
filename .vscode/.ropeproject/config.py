@@ -102,8 +102,8 @@ def set_prefs(prefs):
     # rope.base.oi.type_hinting.interfaces.ITypeHintingFactory In general
     # case, you don't have to change this value, unless you're an rope expert.
     # Change this value to inject you own implementations of interfaces
-    # listed in module rope.base.oi.type_hinting.providers.interfaces
-    # For example, you can add you own providers for Django Models, or disable
+    # listed in module rope.base.oi.type_hinting.data_providers.interfaces
+    # For example, you can add you own data_providers for Django Models, or disable
     # the search type-hinting in a class hierarchy, etc.
     prefs['type_hinting_factory'] = (
         'rope.base.oi.type_hinting.factory.default_type_hinting_factory')

@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 from virtool_workflow import hooks
-from virtool_workflow.abc.providers.analysis import AbstractAnalysisProvider
+from virtool_workflow.abc.data_providers.analysis import AbstractAnalysisProvider
 from virtool_workflow.analysis.analysis import FileUpload
 from virtool_workflow.data_model import Job
 

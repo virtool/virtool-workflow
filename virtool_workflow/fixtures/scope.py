@@ -25,12 +25,12 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
     def __init__(self, *providers: FixtureProvider, **instances):
         """
         :param providers: :class:`FixtureProvider` functions for accessing fixtures. Providers will be checked
-            in the order they are given. The `virtool_workflow.fixtures.providers.workflow_fixture` provider is
+            in the order they are given. The `virtool_workflow.fixtures.data_providers.workflow_fixture` provider is
             already included.
 
         :param instances: Any objects to be maintained as instance fixtures.
             Values in this dictionary will be accessible as fixtures by their key. Also note that these
-            fixtures will take precedence over those provided by the elements of :obj:`providers`.
+            fixtures will take precedence over those provided by the elements of :obj:`data_providers`.
         """
         self.update(**instances)
         self._overrides = FixtureGroup()
@@ -113,7 +113,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         return instance
 
     def _get_fixture_from_providers(self, name, request_from: Callable = None):
-        """Get the fixture function with the given name from this :class:`WorkflowFixtureScope`'s providers"""
+        """Get the fixture function with the given name from this :class:`WorkflowFixtureScope`'s data_providers"""
         for provider in self._providers:
             fixture = provider(name, request_from)
             if fixture is not None:

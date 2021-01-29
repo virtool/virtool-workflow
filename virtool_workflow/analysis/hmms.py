@@ -10,7 +10,7 @@ from virtool_workflow.fixtures import fixture
 from virtool_workflow.data_model import HMM
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
-from virtool_workflow.abc.providers.hmms import AbstractHmmsProvider
+from virtool_workflow.abc.data_providers.hmms import AbstractHmmsProvider
 
 
 class HMMs(UserList):

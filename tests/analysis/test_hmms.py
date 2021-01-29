@@ -4,7 +4,7 @@ from typing import List
 import filecmp
 from pathlib import Path
 from shutil import copy
-from virtool_workflow.abc.providers.hmms import AbstractHmmsProvider
+from virtool_workflow.abc.data_providers.hmms import AbstractHmmsProvider
 
 from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.data_model import HMM
