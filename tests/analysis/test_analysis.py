@@ -4,6 +4,7 @@ from virtool_workflow.analysis import utils
 from virtool_workflow.analysis.fixtures import paired
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.read_prep import unprepared_reads
+from virtool_workflow.data_model import Sample
 
 
 @pytest.fixture
@@ -18,15 +19,19 @@ def fixtures(runtime):
         )
     )
 
-    runtime["sample"] = dict(
-        _id="1",
+    runtime["sample"] = Sample(
+        id="1",
+        name="test_sample",
+        isolate="test_isolate",
+        host="test_host",
+        locale="test_locale",
         paired=False,
         library_type=LibraryType.other,
         quality=dict(
             length=[0, 100],
             count=3
         ),
-        files=[dict(raw=True)],
+        files=[],
     )
 
     return runtime

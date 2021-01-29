@@ -15,6 +15,7 @@ from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow import hooks
 from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 from virtool_workflow.analysis.reads import Reads
+from virtool_workflow.data_model import Sample
 
 logger = logging.getLogger(__name__)
 
@@ -112,16 +113,16 @@ async def prepared_reads_and_fastqc(
 @virtool_workflow.fixture
 def unprepared_reads(
         paired: bool,
-        sample: Dict[str, Any],
+        sample: Sample,
         reads_path: Path
 ):
     """The unprepared reads for the current analysis job."""
-    min_length, max_length = sample["quality"]["length"]
+    min_length, max_length = sample.quality["length"]
 
     return Reads(paired=paired,
                  min_length=min_length,
                  max_length=max_length,
-                 count=sample["quality"]["count"],
+                 count=sample.quality["count"],
                  paths=utils.make_read_paths(reads_path, paired))
 
 
