@@ -14,6 +14,8 @@ class NucleotideComposition:
 
 @dataclass(frozen=True)
 class Subtraction(ABC):
+    """A dataclass representing a subtraction in Virtool."""
+    id: str
     name: str
     nickname: str
     count: int
