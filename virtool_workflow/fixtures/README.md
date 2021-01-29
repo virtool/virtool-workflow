@@ -358,27 +358,23 @@ def test_my_fixture_without_my_other_fixture():
 
 ### The `runtime` pytest fixture.
 
-The `virtool_workflow_runtime.test_utils` package provides utilities for testing Virtool workflows. The 
+The `virtool_workflow.testing` package provides utilities for testing Virtool workflows. The 
 `runtime` fixture provides a harness for running workflows and functions which use
 runtime fixtures.
 
 ```python
-from virtool_workflow.test_utils import runtime
-from virtool_workflow_runtime.runtime import execute
+from virtool_workflow.testing import runtime
 
 from ... import function_to_test
 from ... import workflow_to_test
 
 async def test_function(runtime):
-
     result = await runtime.execute_function(function_to_test)
-    assert ...
+    ...
 
 async def test_workflow(runtime):
-    runtime.scope["job_args"] = {...}
+    runtime.job.args = {...}
     result = await runtime.execute(workflow_to_test)
+    ...
 
-
-async def test_workflow_and_hooks(runtime):
-    result = await execute(workflow_to_test, runtime)
 ```
