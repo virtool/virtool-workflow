@@ -4,7 +4,7 @@ import virtool_workflow.abc
 import virtool_workflow.storage.utils
 from virtool_workflow import fixture
 from virtool_workflow import hooks
-from virtool_workflow.abc.providers.analysis import AbstractAnalysisProvider
+from virtool_workflow.abc.data_providers.analysis import AbstractAnalysisProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.uploads.files import FileUpload, VirtoolFileFormat
 

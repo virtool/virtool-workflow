@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 import virtool_workflow.analysis.indexes
 from virtool_workflow.abc import AbstractDatabase
-from virtool_workflow.abc.providers.indexes import AbstractIndexProvider
+from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.analysis.indexes import Index
 from virtool_workflow.data_model import Reference
 

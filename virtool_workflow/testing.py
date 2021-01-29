@@ -2,7 +2,7 @@
 import pytest
 from typing import Dict, Any
 
-from virtool_workflow.abc.providers import AbstractAnalysisProvider
+from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
 from virtool_workflow.data_model import Job
 from virtool_workflow.uploads.files import FileUpload

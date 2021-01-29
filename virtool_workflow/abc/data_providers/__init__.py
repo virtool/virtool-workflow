@@ -1,6 +1,5 @@
 from .analysis import AbstractAnalysisProvider
 from .cache import AbstractCacheProvider
-from .data_provider import AbstractDataProvider
 from .hmms import AbstractHmmsProvider
 from .indexes import AbstractIndexProvider
 from .otus import AbstractOTUsProvider
@@ -11,7 +10,6 @@ from .subtractions import AbstractSubtractionProvider
 __all__ = [
     "AbstractAnalysisProvider",
     "AbstractCacheProvider",
-    "AbstractDataProvider",
     "AbstractHmmsProvider",
     "AbstractIndexProvider",
     "AbstractOTUsProvider",
