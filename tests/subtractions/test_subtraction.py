@@ -32,9 +32,9 @@ class TestSubtractionProvider(AbstractSubtractionProvider):
             count=7,
             is_host=False,
             deleted=False,
-            path=subtraction_path,
-            fasta_path=subtraction_path / "subtraction.fa.gz",
-            bowtie2_index_path=f"{subtraction_path}/reference",
+            path=subtraction_path / self.id,
+            fasta_path=subtraction_path / self.id / "subtraction.fa.gz",
+            bowtie2_index_path=f"{subtraction_path/self.id}/reference",
             gc=NucleotideComposition(a=0.2, t=0.2, c=0.2, g=0.4, n=0.0),
         )
 
@@ -64,10 +64,7 @@ async def test_subtractions(monkeypatch, runtime):
 
     assert len(_subtractions) == len(mock_subtractions)
 
-    for subtraction, subtraction_document in zip(_subtractions, mock_subtractions.values()):
-        assert subtraction.name == subtraction_document["name"]
-        assert subtraction.nickname == subtraction_document["nickname"]
-        assert subtraction.path == runtime["subtraction_path"] / \
-            subtraction_document["id"]
+    for subtraction in _subtractions:
+        assert subtraction.path == runtime["subtraction_path"] / subtraction.id
         assert subtraction.fasta_path == subtraction.path/"subtraction.fa.gz"
         assert subtraction.bowtie2_index_path == f"{subtraction.path}/reference"

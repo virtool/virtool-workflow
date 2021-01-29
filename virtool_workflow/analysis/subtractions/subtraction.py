@@ -16,7 +16,7 @@ async def subtractions(subtraction_data_path: Path,
                        subtraction_providers: List[AbstractSubtractionProvider]
                        ) -> List[Subtraction]:
     """The subtractions to be used for the current job."""
-    _subtractions = [provider.fetch_subtraction(subtraction_path) for provider in subtraction_providers]
+    _subtractions = [await provider.fetch_subtraction(subtraction_path) for provider in subtraction_providers]
 
     await copy_paths({subtraction_data_path / subtraction.id: subtraction_path / subtraction.id
                       for subtraction in _subtractions}.items(), run_in_executor)
