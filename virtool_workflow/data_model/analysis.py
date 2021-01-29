@@ -10,6 +10,7 @@ from virtool_workflow.data_model.indexes import Index
 
 @dataclass(frozen=True)
 class Analysis:
+    """A Virtool Analysis."""
     _id: str
     cache: dict
     index: Index

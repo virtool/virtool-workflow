@@ -4,6 +4,7 @@ from typing import List
 
 @dataclass(frozen=True)
 class Status:
+    """The status of a Virtool Job."""
     error: str
     progress: float
     stage: str
@@ -13,6 +14,7 @@ class Status:
 
 @dataclass
 class Job:
+    """A Virtool Job."""
     _id: str
     """Unique ID for the job."""
     args: dict
