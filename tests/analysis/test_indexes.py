@@ -1,14 +1,12 @@
-import filecmp
 import sys
+
+import filecmp
+import pytest
 from pathlib import Path
 from shutil import copy
-from typing import Any, Dict, List, Optional
 
-import pytest
 import virtool_workflow.analysis.indexes
-from virtool_workflow.abc import AbstractDatabase
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
-from virtool_workflow.analysis.indexes import Index
 from virtool_workflow.data_model import Reference
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime.config.configuration import \
