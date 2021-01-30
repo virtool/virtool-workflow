@@ -43,11 +43,11 @@ async def test_hmms(runtime, run_in_executor, run_subprocess, tmpdir):
 
     assert filecmp.cmp(hmms_path / "profiles.hmm", hmms_obj.path)
 
-    work_path = runtime["work_path"]
+    work_path: Path = runtime["work_path"]
 
     expected_paths = {
         work_path / "hmms" / f"profiles.hmm{suffix}"
         for suffix in ["", ".h3p", ".h3m", ".h3i", ".h3f"]
     }
 
-    assert set((hmms_path / "hmms").listdir()) == expected_paths
+    assert set((work_path/"hmms").iterdir()) == expected_paths
