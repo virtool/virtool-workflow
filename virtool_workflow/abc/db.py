@@ -1,7 +1,6 @@
 from contextlib import AbstractAsyncContextManager
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
 from typing import Any, Optional
 
 
