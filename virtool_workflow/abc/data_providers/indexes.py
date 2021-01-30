@@ -10,6 +10,10 @@ class AbstractIndexProvider(ABC):
         ...
 
     @abstractmethod
+    async def fetch_manifest(self):
+        """Get the manifest for the index associated with the current job."""
+
+    @abstractmethod
     async def set_has_json(self):
         """Mark that the index associated with the current job has a json representation of the reference available."""
         ...

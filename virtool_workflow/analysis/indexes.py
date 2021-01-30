@@ -168,12 +168,14 @@ async def indexes(
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
     index_id = job_args["index_id"]
     reference = await index_provider.fetch_reference()
+    manifest = await index_provider.fetch_manifest()
 
     index_work_path = work_path / "indexes" / index_id
     await run_in_executor(copytree, index_path, index_work_path)
 
     index = Index(
         id=index_id,
+        manifest=manifest,
         path=index_work_path,
         reference=reference,
         _run_in_executor=run_in_executor,
