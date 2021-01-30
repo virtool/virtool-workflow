@@ -28,6 +28,9 @@ class TestIndexProvider(AbstractIndexProvider):
     async def fetch_reference(self):
         return Reference("bar", "barcode", "", "Bar", "")
 
+    async def fetch_manifest(self):
+        return {}
+
     async def set_has_json(self):
         self.has_json = True
 

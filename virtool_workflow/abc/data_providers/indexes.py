@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import Dict
+
 from virtool_workflow.data_model import Reference
 
 
@@ -10,7 +12,7 @@ class AbstractIndexProvider(ABC):
         ...
 
     @abstractmethod
-    async def fetch_manifest(self):
+    async def fetch_manifest(self) -> Dict[str, int]:
         """Get the manifest for the index associated with the current job."""
 
     @abstractmethod
