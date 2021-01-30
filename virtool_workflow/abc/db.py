@@ -1,45 +1,74 @@
+from contextlib import AbstractAsyncContextManager
+
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, Any, Optional, Iterable, Tuple
-from virtool_workflow.uploads.files import FileUpload
+from collections.abc import Mapping
+from typing import Any, Optional
 
 
-class AbstractDatabase(ABC):
+class DocumentUpdater(AbstractAsyncContextManager):
 
     @abstractmethod
-    async def fetch_document_by_id(self, id_: str, collection_name: str) -> Optional[Dict[str, Any]]:
-        """Fetch the document with the given ID from a specific Virtool database collection."""
+    def set(self, key: str, value: Any):
+        """
+        Set the value of a field.
+
+        The change will be applied when the :func:`update` method is called. 
+        If the field does not exist a new one should be created, or an :obj:`ValueError`
+        should be raised.
+
+        :param key: The key of the field
+        :type key: str
+        :param value: The value to set the field to
+        :type value: Any
+        :raises ValueError: If the field does not exist and a new one cannot be created
+        """
         ...
 
-    async def find_document(self, collection_name: str, *args, **kwargs):
-        """Find a document in a database collection based on the given query."""
+    @abstractmethod
+    async def update(self):
+        """Apply updates to the database."""
         ...
 
-    async def find_cache_document(self, query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Find a cache document using the given query."""
+    async def __aexit__(self, exc_type, exc_value, trace):
+        await self.update()
+
+
+class AbstractDatabaseCollection(ABC):
+
+    @abstractmethod
+    async def get(self, id: str) -> Optional[Any]:
+        """Get the item with the given id."""
         ...
 
-    @staticmethod
-    async def create_cache_document(self, sample_id: str, trimming_parameters: Dict[str, Any],
-                                    paired: bool, quality: Dict = None):
-        """Create a new cache document."""
+    @abstractmethod
+    async def insert(self, value: Any) -> str:
+        """
+        Insert a new document into the database.
+
+        :param value: The item to insert.
+        :return: The id which can be used to access the item.
+        """
         ...
 
-    async def delete_cache(self, cache_id: str):
-        """Delete the cache with the given id."""
+    @abstractmethod
+    def update(self, id: str) -> DocumentUpdater:
+        """
+        Retrieve a :class:`DocumentUpdater` for the document with the given id.
+
+        The :class:`DocumentUpdater` instance can be used to modify the document.
+
+        .. code-block:: python
+
+            db: AbstractDatabaseCollection = ...
+            my_id: str = ...
+            async with db.update(my_id) as document:
+                document.set("field", "value")
+                ...
+        """
         ...
 
-    async def delete_analysis(self, analysis_id: str):
-        """Delete the analysis with the given id."""
+    @abstractmethod
+    async def delete(self, id: str):
+        """Delete the document with the given id."""
         ...
 
-    async def recalculate_workflow_tags_for_sample(self, sample_id):
-        """Recalculate the workflow tags for a sample."""
-        ...
-
-    async def store_result(self, id_: str, result: Dict[str, Any], collection: str, file_results_location: Path):
-        """Store the result onto the document specified by `id_` in the collection specified by `collection`."""
-        ...
-
-    async def set_files_on_analysis(self, files: Iterable[Tuple[FileUpload, Path]], analysis_id: str):
-        ...
