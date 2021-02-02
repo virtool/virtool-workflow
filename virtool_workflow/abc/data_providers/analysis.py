@@ -21,7 +21,7 @@ class AbstractAnalysisProvider(ABC):
         """
         Register that a file is available under the `data_path`.
 
-        :param upload: A FileUpload object representing the file.
+        :param uploads: An Iterable of :class:`FileUpload` and destination path tuples.
         """
         ...
 

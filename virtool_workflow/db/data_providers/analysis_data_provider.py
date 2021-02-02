@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, Any, Iterable, Tuple
 
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
@@ -13,12 +14,7 @@ class AnalysisDataProvider(AbstractAnalysisProvider):
         self.analysis_id = analysis_id
 
     async def store_result(self, result: Dict[str, Any]):
-        """
-        Store the result of a workflow in MongoDB.
-
-        :param result: The result dict from the workflow run.
-        """
-        await self.db.set(self.analysis_id, result=result)
+        await self.db.set(self.analysis_id, results=result)
 
     async def store_files(self, uploads: Iterable[Tuple[FileUpload, Path]]):
         await self.db.set(
