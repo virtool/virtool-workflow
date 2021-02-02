@@ -1,35 +1,5 @@
-from contextlib import AbstractAsyncContextManager
-
 from abc import ABC, abstractmethod
 from typing import Any, Optional
-
-
-class DocumentUpdater(AbstractAsyncContextManager):
-
-    @abstractmethod
-    def set(self, key: str, value: Any):
-        """
-        Set the value of a field.
-
-        The change will be applied when the :func:`update` method is called. 
-        If the field does not exist a new one should be created, or an :obj:`ValueError`
-        should be raised.
-
-        :param key: The key of the field
-        :type key: str
-        :param value: The value to set the field to
-        :type value: Any
-        :raises ValueError: If the field does not exist and a new one cannot be created
-        """
-        ...
-
-    @abstractmethod
-    async def update(self):
-        """Apply updates to the database."""
-        ...
-
-    async def __aexit__(self, exc_type, exc_value, trace):
-        await self.update()
 
 
 class AbstractDatabaseCollection(ABC):
@@ -49,22 +19,13 @@ class AbstractDatabaseCollection(ABC):
         """
         ...
 
-    @abstractmethod
-    def update(self, id: str) -> DocumentUpdater:
+    async def set(self, id: str, **kwargs):
         """
-        Retrieve a :class:`DocumentUpdater` for the document with the given id.
+        Set fields on the document identified by an ID.
 
-        The :class:`DocumentUpdater` instance can be used to modify the document.
-
-        .. code-block:: python
-
-            db: AbstractDatabaseCollection = ...
-            my_id: str = ...
-            async with db.update(my_id) as document:
-                document.set("field", "value")
-                ...
+        :param id: The ID identifying the document.
+        :param kwargs: Key-value pairs to set on the document.
         """
-        ...
 
     @abstractmethod
     async def delete(self, id: str):
