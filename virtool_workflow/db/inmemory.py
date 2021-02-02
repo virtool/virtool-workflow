@@ -21,8 +21,8 @@ class InMemoryDatabaseCollection(AbstractDatabaseCollection):
     async def set(self, id: str, **kwargs):
         self._db[id].update(**kwargs)
 
-    async def insert(self, value: dict) -> str:
-        key = uuid1().hex
+    async def insert(self, value: dict, _id=None) -> str:
+        key = uuid1().hex if not _id else _id
         self._db[key] = value
         value["_id"] = key
         return key
