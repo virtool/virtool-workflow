@@ -5,7 +5,6 @@ from virtool_workflow.data_model import HMM
 
 class AbstractHmmsProvider(ABC):
 
-    @property
     @abstractmethod
-    def hmm_list(self) -> List[HMM]:
+    async def hmm_list(self) -> List[HMM]:
         ...
