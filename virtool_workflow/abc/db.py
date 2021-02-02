@@ -19,6 +19,7 @@ class AbstractDatabaseCollection(ABC):
         """
         ...
 
+    @abstractmethod
     async def set(self, id: str, **kwargs):
         """
         Set fields on the document identified by an ID.
