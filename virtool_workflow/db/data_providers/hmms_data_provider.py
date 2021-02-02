@@ -1,0 +1,1 @@
+from virtool_workflow.abc import AbstractDatabaseCollection
