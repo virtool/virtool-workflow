@@ -52,9 +52,8 @@ async def test_hmm_list():
             "hidden": False
         })
 
-    provider = HmmsDataProvider(hmms=db)
+    provider = HmmsDataProvider(db)
 
     hmm_list = await provider.hmm_list()
 
     assert all(hmm.cluster for hmm in hmm_list)
-
