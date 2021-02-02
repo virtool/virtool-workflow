@@ -1,4 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorClient
+from typing import List
 
 from virtool_workflow.abc.db import AbstractDatabaseCollection
 from virtool_workflow.db.db import VirtoolDatabase
@@ -12,6 +13,9 @@ class MongoDatabaseCollection(AbstractDatabaseCollection):
 
     async def get(self, id: str) -> dict:
         return await self._db.find_one(dict(_id=id))
+
+    async def find_by_projection(self, projection: List[str]) -> List[dict]:
+        return await self._db.find({}, projection)
 
     async def insert(self, value: dict) -> str:
         insert_result = await self._db.insert_one(value)
