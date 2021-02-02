@@ -60,3 +60,12 @@ async def test_delete(db_factory):
     assert not document
 
 
+async def test_find_by_projection(db_factory):
+    db = db_factory()
+    ids = [await db.insert(document) for document in ({"foo": "bar"}, {"foo": "cat"})]
+
+    documents = await db.find_by_projection(["foo"])
+
+    document_ids = {document["_id"] for document in documents}
+
+    assert set(ids) <= document_ids

@@ -15,7 +15,8 @@ class MongoDatabaseCollection(AbstractDatabaseCollection):
         return await self._db.find_one(dict(_id=id))
 
     async def find_by_projection(self, projection: List[str]) -> List[dict]:
-        return await self._db.find({}, projection)
+        cursor = self._db.find({}, projection)
+        return [document async for document in cursor]
 
     async def insert(self, value: dict) -> str:
         insert_result = await self._db.insert_one(value)
