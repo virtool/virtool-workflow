@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, List
 from uuid import uuid1
 
 from virtool_workflow.abc.db import AbstractDatabaseCollection
@@ -14,6 +14,9 @@ class InMemoryDatabaseCollection(AbstractDatabaseCollection):
     async def get(self, id: str) -> Optional[Any]:
         if id in self._db:
             return self._db[id]
+
+    async def find_by_projection(self, projection: List[str]) -> List[dict]:
+        return [document for document in self._db if all(key in document for key in projection)]
 
     async def set(self, id: str, **kwargs):
         self._db[id].update(**kwargs)

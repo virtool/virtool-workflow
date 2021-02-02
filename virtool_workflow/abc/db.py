@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Optional, List, Iterable
 
 
 class AbstractDatabaseCollection(ABC):
@@ -32,4 +32,8 @@ class AbstractDatabaseCollection(ABC):
     async def delete(self, id: str):
         """Delete the document with the given id."""
         ...
+
+    @abstractmethod
+    async def find_by_projection(self, projection: List[str]) -> Iterable[Any]:
+        """Find all documents which have all fields from the given projection."""
 
