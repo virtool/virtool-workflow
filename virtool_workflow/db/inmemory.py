@@ -11,7 +11,8 @@ class InMemoryDatabaseCollection(AbstractDatabaseCollection):
         self._db = {}
 
     async def get(self, id: str) -> Optional[Any]:
-        return self._db[id]
+        if id in self._db:
+            return self._db[id]
 
     async def set(self, id: str, **kwargs):
         self._db[id].update(**kwargs)
