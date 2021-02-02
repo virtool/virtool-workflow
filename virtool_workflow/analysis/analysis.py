@@ -39,8 +39,7 @@ class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
             self.run_in_executor
         )
 
-        for mark in self._marks:
-            await self.provider.register_file_upload(mark)
+        await self.provider.store_files(zip(self._marks, target_paths))
 
 
 class Analysis:

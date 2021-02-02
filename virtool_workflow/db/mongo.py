@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorClient
 
-from virtool_workflow.abc.db import AbstractDatabaseCollection, DocumentUpdater
+from virtool_workflow.abc.db import AbstractDatabaseCollection
 from virtool_workflow.db.db import VirtoolDatabase
 
 

@@ -36,9 +36,7 @@ async def test_update(db_factory):
 
     _id = await db.insert({"foo": "bar"})
 
-    async with db.update(_id) as document:
-        document.set("foo", "cat")
-        document.set("attr", "value")
+    await db.set(_id, foo="cat", attr="value")
 
     document = await db.get(_id)
 
