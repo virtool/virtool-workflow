@@ -1,8 +1,8 @@
 from typing import Dict, Any, Iterable, Tuple
-from virtool-workflow.uploads.files import FileUpload
+
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
-from virtool_workflow.db.db import VirtoolDatabase
 from virtool_workflow.abc.db import AbstractDatabaseCollection
+from virtool_workflow.uploads.files import FileUpload
 
 
 class AnalysisDataProvider(AbstractAnalysisProvider):
