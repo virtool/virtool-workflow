@@ -2,6 +2,7 @@ from typing import Any, Optional
 from uuid import uuid1
 
 from virtool_workflow.abc.db import AbstractDatabaseCollection
+from virtool_workflow.db.db import VirtoolDatabase
 
 
 class InMemoryDatabaseCollection(AbstractDatabaseCollection):
@@ -24,3 +25,13 @@ class InMemoryDatabaseCollection(AbstractDatabaseCollection):
 
     async def delete(self, id: str):
         del self._db[id]
+
+
+class InMemoryDatabase(VirtoolDatabase):
+    """An in-memory database to use for testing."""
+
+    def __init__(self):
+        super(InMemoryDatabase, self).__init__(
+            *((InMemoryDatabaseCollection(),) * 8)
+        )
+
