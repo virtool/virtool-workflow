@@ -15,8 +15,16 @@ class InMemoryDatabaseCollection(AbstractDatabaseCollection):
         if id in self._db:
             return self._db[id]
 
+    async def find(self, projection=None, **kwargs) -> List[dict]:
+        if not projection:
+            projection = []
+        return [document for document in self._db.values()
+                if all(key in document for key in projection)
+                and all(key in document for key in kwargs)
+                and all(document[key] == value for key, value in kwargs.items())]
+
     async def find_by_projection(self, projection: List[str]) -> List[dict]:
-        return [document for document in self._db.values() if all(key in document for key in projection)]
+        return await self.find(projection)
 
     async def set(self, id: str, **kwargs):
         self._db[id].update(**kwargs)
