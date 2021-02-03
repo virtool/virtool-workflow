@@ -1,8 +1,8 @@
 import pytest
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
+from virtool_workflow.config.configuration import db_name, db_connection_string
 from virtool_workflow.db.mongo import MongoDatabaseCollection
-from virtool_workflow_runtime.config.configuration import db_name, db_connection_string
 
 
 @pytest.fixture

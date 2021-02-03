@@ -7,10 +7,10 @@ from shutil import copy
 
 import virtool_workflow.analysis.indexes
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
+from virtool_workflow.config.configuration import \
+    work_path as work_path_fixture
 from virtool_workflow.data_model import Reference
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.config.configuration import \
-    work_path as work_path_fixture
 
 EXPECTED_PATH = Path(sys.path[0]) / "tests/analysis/expected"
 FAKE_JSON_PATH = Path(sys.path[0]) / "tests/analysis/reference.json.gz"
@@ -81,17 +81,20 @@ async def test_indexes(indexes_and_runtime):
 
     assert indexes[0].path == index_dir_path
     assert indexes[0].compressed_json_path == index_dir_path / \
-        "reference.json.gz"
+           "reference.json.gz"
     assert indexes[0].json_path == index_dir_path / "reference.json"
 
 
 class TestGetBySequenceID:
 
-    @pytest.mark.parametrize("method_name,result", [("get_sequence_length", 6508), ("get_otu_id_by_sequence_id", "dpgsl7b4")])
+    @pytest.mark.parametrize("method_name,result",
+                             [("get_sequence_length", 6508), ("get_otu_id_by_sequence_id", "dpgsl7b4")])
     async def test_success(self, method_name, result, indexes):
         assert getattr(indexes[0], method_name)("b5j2i1mz") == result
 
-    @pytest.mark.parametrize("method_name,message", [("get_sequence_length", "The sequence_id does not exist in the index"), ("get_otu_id_by_sequence_id", "fart")])
+    @pytest.mark.parametrize("method_name,message",
+                             [("get_sequence_length", "The sequence_id does not exist in the index"),
+                              ("get_otu_id_by_sequence_id", "fart")])
     async def testS_error(self, method_name, message, indexes):
         with pytest.raises(ValueError) as exc:
             getattr(indexes[0], method_name)("foo")
