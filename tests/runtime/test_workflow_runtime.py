@@ -8,5 +8,5 @@ def make_mock_job():
 
 
 async def test_start():
-    await load_config(dev_mode=True)
+    await load_config(dev_mode=True, is_analysis_workflow=True)
     await runtime.start()
