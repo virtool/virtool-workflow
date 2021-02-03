@@ -97,7 +97,7 @@ class Index(data_model.Index):
             raise ValueError("The sequence_id does not exist in the index")
 
     async def write_isolate_fasta(
-        self, otu_ids: List[str], path: Path
+            self, otu_ids: List[str], path: Path
     ) -> Dict[str, int]:
         """
         Generate a FASTA file for all of the isolates of the OTUs specified by ``otu_ids``.
@@ -126,7 +126,7 @@ class Index(data_model.Index):
         return lengths
 
     async def build_isolate_index(
-        self, otu_ids: List[str], path: Path, processes: int
+            self, otu_ids: List[str], path: Path, processes: int
     ) -> Tuple[Path, Dict[str, int]]:
         """
         Generate a FASTA file and Bowtie2 index for all of the isolates of the OTUs specified by ``otu_ids``.
@@ -157,18 +157,20 @@ class Index(data_model.Index):
 
 @fixture
 async def indexes(
-    index_provider: AbstractIndexProvider,
-    job_args: Dict[str, Any],
-    index_path: Path,
-    work_path: Path,
-    proc: int,
-    run_in_executor: FunctionExecutor,
-    run_subprocess: RunSubprocess,
+        index_provider: AbstractIndexProvider,
+        job_args: Dict[str, Any],
+        data_path: Path,
+        work_path: Path,
+        proc: int,
+        run_in_executor: FunctionExecutor,
+        run_subprocess: RunSubprocess,
 ) -> List[Index]:
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
     index_id = job_args["index_id"]
     reference = await index_provider.fetch_reference()
     manifest = await index_provider.fetch_manifest()
+
+    index_path = data_path / f"references/{reference.id}/{index_id}/reference"
 
     index_work_path = work_path / "indexes" / index_id
     await run_in_executor(copytree, index_path, index_work_path)
