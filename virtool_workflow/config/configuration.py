@@ -6,7 +6,7 @@ from typing import Any, Type, Callable, Union, Literal
 
 import virtool_workflow
 import virtool_workflow.storage.paths
-from virtool_workflow import hooks
+from virtool_workflow import hooks, fixture
 from virtool_workflow.fixtures.providers import FixtureGroup
 from virtool_workflow.fixtures.scope import FixtureScope
 
@@ -117,6 +117,7 @@ async def load_config(**kwargs):
         await hooks.on_load_config.trigger(config_scope)
 
 
+@fixture
 @config_fixture(env=TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
 def work_path(value: str) -> Path:
     """The path where temporary data should be stored."""
@@ -124,6 +125,7 @@ def work_path(value: str) -> Path:
         yield temp
 
 
+@fixture
 @config_fixture(DATA_PATH_ENV, default=f"{os.getcwd()}/virtool")
 def data_path(value: str) -> Path:
     """The path where persistent data should be stored."""
