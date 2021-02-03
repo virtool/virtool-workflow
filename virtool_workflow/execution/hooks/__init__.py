@@ -1,7 +1,6 @@
 from concurrent import futures
 
 import asyncio
-from types import SimpleNamespace
 
 from virtool_workflow.execution.workflow_execution import WorkflowError
 from virtool_workflow.fixtures.scope import FixtureScope
@@ -22,7 +21,6 @@ Parameters supplied are the `Workflow` instance and the results dict.
         ...
 """
 
-
 on_failure = FixtureHook("on_failure", parameters=[WorkflowError], return_type=None)
 """
 Triggered when a job fails to complete.
@@ -33,7 +31,6 @@ Triggered when a job fails to complete.
     async def perform_on_failure(error: WorkflowError):
         ...
 """
-
 
 on_finish = FixtureHook("on_finish", parameters=[], return_type=None)
 """
@@ -76,6 +73,7 @@ async def _trigger_on_cancelled(error: Exception, scope: FixtureScope):
     if isinstance(error, asyncio.CancelledError) or isinstance(error, futures.CancelledError):
         await on_cancelled.trigger(scope, error)
 
+
 on_load_fixtures = FixtureHook("on_load_fixtures", [FixtureScope], return_type=None)
 """
 Triggered after runtime fixtures have been added to the #WorkflowFixtureScope, but
@@ -92,7 +90,7 @@ Enables modification or injection of specific fixtures before a workflow is exec
         ...
 """
 
-on_load_config = Hook("on_load_config", [SimpleNamespace], None)
+on_load_config = FixtureHook("on_load_config", [], None)
 """
 Triggered after the config is loaded from the CLI arguments and environment variables. A SimpleNamespace object
 is provided which has an attribute (sharing the same name as the fixture) for each configuration fixture in

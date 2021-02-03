@@ -4,7 +4,8 @@ import click
 from pathlib import Path
 
 from virtool_workflow import discovery
-from virtool_workflow.config.configuration import create_config, options
+from virtool_workflow import environment
+from virtool_workflow.config.configuration import load_config, options
 from virtool_workflow.fixtures.scope import FixtureScope
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
@@ -33,9 +34,12 @@ def apply_config_options(func):
 
 
 async def _run(file: str, job_id: str, **kwargs):
-    with FixtureScope() as scope:
-        config = await create_config(scope, **kwargs)
+    with FixtureScope() as config_scope:
+        config = await load_config(config_scope, **kwargs)
+
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
+
+        result = await environment.start()
 
         if config.dev_mode:
             print(result)
@@ -52,7 +56,7 @@ def run(f: str, job_id: str, **kwargs):
 
 async def _print_config(**kwargs):
     with FixtureScope() as scope:
-        config = await create_config(scope, **kwargs)
+        config = await load_config(scope, **kwargs)
 
         for name, value in vars(config).items():
             print(f"{name}: {value}")
