@@ -19,8 +19,7 @@ def apply_config_options(func):
 
 
 async def _run(**kwargs):
-    await load_config(**kwargs)
-    await runtime.start()
+    await runtime.start(**kwargs)
 
 
 @apply_config_options
