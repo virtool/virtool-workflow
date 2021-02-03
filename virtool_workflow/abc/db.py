@@ -37,3 +37,12 @@ class AbstractDatabaseCollection(ABC):
     async def find_by_projection(self, projection: List[str]) -> Iterable[Any]:
         """Find all documents which have all fields from the given projection."""
 
+    @abstractmethod
+    async def find(self, projection=None, **kwargs) -> Iterable[Any]:
+        """
+        Find all documents matching the given projection and field constraints.
+
+        :param projection: A list of field names which should be included in the found documents.
+        :param kwargs: Key-value pairs which should be present in the found documents.
+        """
+

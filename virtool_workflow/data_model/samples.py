@@ -17,4 +17,4 @@ class Sample:
     quality: dict
     nuvs: bool = False
     pathoscope: bool = False
-    files: List[DownloadableFileUpload] = field(default_factory=lambda: [])
+    files: List[dict] = field(default_factory=lambda: [])
