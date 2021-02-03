@@ -7,6 +7,7 @@ from virtool_workflow import discovery
 from virtool_workflow import hooks
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.config.configuration import DBType
+from virtool_workflow.config.configuration import load_config
 from virtool_workflow.data_model import Job
 from virtool_workflow.db.data_providers.analysis_data_provider import AnalysisDataProvider
 from virtool_workflow.db.data_providers.index_data_provider import IndexDataProvider
@@ -124,6 +125,7 @@ def extract_workflow(workflow_file_path: Path):
         raise RuntimeError(f"{workflow_file_path.name} does not contain a Workflow.")
 
 
-async def start():
+async def start(**config):
+    await load_config(**config)
     result = await _environment.execute(_workflow)
     logger.debug(result)
