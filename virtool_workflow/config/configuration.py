@@ -8,6 +8,7 @@ import virtool_workflow
 import virtool_workflow.storage.paths
 from virtool_workflow import hooks
 from virtool_workflow.fixtures.providers import FixtureGroup
+from virtool_workflow.fixtures.scope import FixtureScope
 
 DATA_PATH_ENV = "VT_DATA_PATH"
 TEMP_PATH_ENV = "VT_TEMP_PATH"
@@ -19,6 +20,8 @@ MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
 DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
 IS_ANALYSIS_WORKFLOW = "VT_IS_ANALYSIS_WORKFLOW"
+WORKFLOW_FILE_NAME_ENV = "VT_WORKFLOW_FILE_NAME"
+JOB_ID_ENV = "VT_JOB_ID"
 
 
 @dataclass(frozen=True)
@@ -96,21 +99,20 @@ def config_fixture(
     return _config_fixture
 
 
-async def load_config(scope, **kwargs):
+async def load_config(**kwargs):
     """
     Override config fixture values with those from :obj:`kwargs`.
 
     Triggers `on_load_config` hook.
 
-    :param scope: The WorkflowFixtureScope for the current context.
     :param kwargs: Values for any config options to be used before the fixtures.
-    :return SimpleNamespace: A namespace containing any available config options.
     """
     for option in options.values():
         if option.name in kwargs and kwargs[option.name] is not None:
             option.fixture.override_value = kwargs[option.name]
 
-    await hooks.on_load_config.trigger(scope)
+    with FixtureScope(config_fixtures) as config_scope:
+        await hooks.on_load_config.trigger(config_scope)
 
 
 @config_fixture(env=TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
@@ -184,7 +186,7 @@ def db_type(_):
 @config_fixture(env=DB_ACCESS_IN_WORKFLOW_ENV,
                 type_=bool,
                 default=False)
-def direct_db_access_allowed():
+def direct_db_access_allowed(_):
     """
     A flag indicating that the database should be made available within the
     workflow code.
@@ -199,6 +201,18 @@ def direct_db_access_allowed():
 @config_fixture(env=IS_ANALYSIS_WORKFLOW,
                 type_=bool,
                 default=True)
-def is_analysis_workflow():
+def is_analysis_workflow(_):
     """A flag indicating that analysis fixtures should be loaded."""
+    ...
+
+
+@config_fixture(env=WORKFLOW_FILE_NAME_ENV, default="workflow.py")
+def workflow_file_path(name) -> Path:
+    """The python script containing the workflow code."""
+    return Path(name)
+
+
+@config_fixture(env=JOB_ID_ENV, default=None)
+def job_id(_):
+    """The database id of the job document for this workflow run."""
     ...
