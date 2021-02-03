@@ -1,7 +1,6 @@
 from typing import Dict, Any
 
 from virtool_workflow.abc import AbstractWorkflowEnvironment
-from virtool_workflow.config.configuration import config_fixtures
 from virtool_workflow.data_model import Job
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.fixtures.scope import FixtureScope
@@ -22,7 +21,6 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
 
         super(WorkflowEnvironment, self).__init__(
             workflow_fixtures,
-            config_fixtures,
             *providers,
             **instances)
 

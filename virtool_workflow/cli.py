@@ -1,14 +1,9 @@
 """Command Line Interface to virtool_workflow"""
 import asyncio
 import click
-from pathlib import Path
 
-from virtool_workflow import discovery
-from virtool_workflow import environment
+from virtool_workflow import runtime
 from virtool_workflow.config.configuration import load_config, options
-from virtool_workflow.fixtures.scope import FixtureScope
-
-JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
 
 @click.group()
@@ -16,50 +11,30 @@ def cli():
     pass
 
 
-def workflow_file_option(func):
-    """Option to provide workflow file."""
-    return click.option(
-        "-f",
-        default="workflow.py",
-        type=click.Path(),
-        help="python module containing an instance of `virtool_workflow.Workflow`"
-    )(func)
-
-
 def apply_config_options(func):
-    for _, option_name, type_, _, help_, _ in options:
-        func = click.option(option_name, type=type_, help=help_)(func)
+    for option in options:
+        func = click.option(option.name, type=option.type, help=option.help)(func)
 
     return func
 
 
-async def _run(file: str, job_id: str, **kwargs):
-    with FixtureScope() as config_scope:
-        config = await load_config(config_scope, **kwargs)
-
-        workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
-
-        result = await environment.start()
-
-        if config.dev_mode:
-            print(result)
+async def _run(**kwargs):
+    await load_config(**kwargs)
+    await runtime.start()
 
 
 @apply_config_options
-@workflow_file_option
-@click.argument("job_id", nargs=1, envvar=JOB_ID_ENV)
 @cli.command()
-def run(f: str, job_id: str, **kwargs):
-    """Run a workflow and send updates to Virtool."""
-    asyncio.run(_run(f, job_id, **kwargs))
+def run(**kwargs):
+    """Run a workflow."""
+    asyncio.run(_run(**kwargs))
 
 
 async def _print_config(**kwargs):
-    with FixtureScope() as scope:
-        config = await load_config(scope, **kwargs)
+    config = await load_config(**kwargs)
 
-        for name, value in vars(config).items():
-            print(f"{name}: {value}")
+    for name, value in vars(config).items():
+        print(f"{name}: {value}")
 
 
 @apply_config_options

@@ -33,6 +33,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
             fixtures will take precedence over those provided by the elements of :obj:`data_providers`.
         """
         self.update(**instances)
+        self["scope"] = self
         self._overrides = FixtureGroup()
         self._providers = [self, self._overrides, *providers]
         self._generators = []

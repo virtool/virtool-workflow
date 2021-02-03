@@ -49,6 +49,11 @@ def add_database_fixture(direct_db_access_allowed: bool, scope: FixtureScope):
 
 
 @hooks.on_load_config
+def instantiate_job(job_id: Optional[str]):
+    ...
+
+
+@hooks.on_load_config
 def instantiate_environment(is_analysis_workflow: bool, job: Job):
     global _environment
     if is_analysis_workflow:
