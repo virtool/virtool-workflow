@@ -5,8 +5,8 @@ from pathlib import Path
 
 from virtool_workflow.config.configuration import create_config, options
 from virtool_workflow.fixtures.scope import FixtureScope
-from . import discovery
-from . import runtime
+from virtool_workflow_runtime import discovery
+from virtool_workflow_runtime import runtime
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 

@@ -12,7 +12,6 @@ CLASSIFIERS = [
 
 PACKAGES = find_packages(exclude="tests")
 
-
 INSTALL_REQUIRES = [
     "virtool-core==0.1.1",
     "click==7.1.2",
@@ -23,10 +22,9 @@ INSTALL_REQUIRES = [
     "aiofiles==0.6.0"
 ]
 
-
 ENTRY_POINTS = {
     "console_scripts": [
-        "workflow = virtool_workflow_runtime.cli:cli_main",
+        "workflow = virtool_workflow.cli:cli_main",
     ]
 }
 
