@@ -1,7 +1,9 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
+from pathlib import Path
 from typing import Optional
 
+from virtool_workflow import discovery
 from virtool_workflow import hooks
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.config.configuration import DBType
@@ -14,10 +16,14 @@ from virtool_workflow.db.db import VirtoolDatabase
 from virtool_workflow.db.inmemory import InMemoryDatabase
 from virtool_workflow.db.mongo import VirtoolMongoDB
 from virtool_workflow.environment import WorkflowEnvironment
-from virtool_workflow.fixtures.scope import FixtureScope
+from virtool_workflow.fixtures.scoping import workflow_scope
+from virtool_workflow.workflow import Workflow
 
 _database: Optional[VirtoolDatabase] = None
-_environment = None
+_environment: Optional[WorkflowEnvironment] = None
+_workflow: Optional[Workflow] = None
+
+logger = logging.getLogger(__name__)
 
 
 @hooks.on_load_config
@@ -42,20 +48,39 @@ def instantiate_database(db_type: DBType, db_name: str, db_connection_string: st
 
 
 @hooks.on_load_config
-def add_database_fixture(direct_db_access_allowed: bool, scope: FixtureScope):
+def add_database_fixture(direct_db_access_allowed: bool):
     global _database
     if direct_db_access_allowed:
-        scope["database"] = _database
+        workflow_scope.override("database", lambda: _database)
 
 
 @hooks.on_load_config
-def instantiate_job(job_id: Optional[str]):
-    ...
+async def instantiate_job(job_id: Optional[str], mem: int, proc: int):
+    jobs = await hooks.use_job.trigger()
+    if jobs:
+        job = next(job_ for job_ in jobs if isinstance(job_, Job))
+    elif job_id:
+        job_document = await _database.jobs.get(job_id)
+        if not job_document:
+            raise RuntimeError("No job document in database. Please supply a valid job_id.")
+        job = Job(
+            _id=job_document["_id"],
+            args=job_document["args"],
+            mem=job_document["mem"] if "mem" in job_document else mem,
+            proc=job_document["proc"] if "proc" in job_document else proc,
+            task=job_document["task"] if "task" in job_document else None,
+        )
+    else:
+        raise RuntimeError("No job_id provided.")
+
+    workflow_scope.override('job', lambda: job)
+    workflow_scope.override('job_args', lambda: job.args)
 
 
 @hooks.on_load_config
-def instantiate_environment(is_analysis_workflow: bool, job: Job):
+async def instantiate_environment(is_analysis_workflow: bool):
     global _environment
+    job = await workflow_scope.get_or_instantiate('job')
     if is_analysis_workflow:
         _environment = AnalysisWorkflowEnvironment(job)
 
@@ -71,16 +96,29 @@ def instantiate_environment(is_analysis_workflow: bool, job: Job):
             _environment.data_providers.index_provider = \
                 IndexDataProvider(job.args["index_id"], _database.indexes, _database.references)
 
-        if "subtraction_id" in job.args:
-            if isinstance(job.args["subtraction_id"], str):
-                _environment.data_providers.subtraction_providers = \
-                    [SubtractionDataProvider(job.args["subtraction_id"], _database.subtractions)]
-            else:
-                _environment.data_providers.subtraction_providers = \
-                    [SubtractionDataProvider(id_, _database.subtractions) for id_ in job.args["subtraction_id"]]
+        if "subtractions" in job.args:
+            _environment.data_providers.subtraction_providers = \
+                [SubtractionDataProvider(id_, _database.subtractions) for id_ in job.args["subtractions"]]
     else:
         _environment = WorkflowEnvironment(job)
 
 
-def start():
-    ...
+@hooks.on_load_config
+def load_scripts(init_file: Path, fixtures_file: Path):
+    if init_file.exists():
+        discovery.import_module_from_file(module_name=init_file.name.rstrip(".py"), path=init_file)
+    if fixtures_file.exists():
+        discovery.import_module_from_file(module_name=fixtures_file.name.rstrip(".py"), path=fixtures_file)
+
+
+@hooks.on_load_config
+def extract_workflow(workflow_file_path: Path):
+    global _workflow
+    _workflow = discovery.discover_workflow(workflow_file_path)
+    if not _workflow:
+        raise RuntimeError(f"{workflow_file_path.name} does not contain a Workflow.")
+
+
+async def start():
+    result = await _environment.execute(_workflow)
+    logger.debug(result)

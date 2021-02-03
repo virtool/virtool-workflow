@@ -1,14 +1,16 @@
 """Create Workflows by decorating module scope functions."""
 from types import ModuleType
 
-from virtool_workflow import Workflow
+from virtool_workflow.workflow import Workflow
 
 
 def workflow_marker(marker_name: str):
     """Create a decorator to mark a function for use within a workflow."""
+
     def _marker(func):
         func.__workflow_marker__ = marker_name
         return func
+
     return _marker
 
 
@@ -46,11 +48,3 @@ def collect(module: ModuleType) -> Workflow:
             workflow.cleanup(marked)
 
     return workflow
-
-
-
-
-
-
-
-

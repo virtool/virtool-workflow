@@ -1,8 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import Dict, Any
 
-from virtool_workflow import Workflow
 from virtool_workflow.discovery import load_fixture_plugins
+from virtool_workflow.workflow import Workflow
 
 
 class AbstractWorkflowEnvironment(ABC):

@@ -22,6 +22,8 @@ DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
 IS_ANALYSIS_WORKFLOW = "VT_IS_ANALYSIS_WORKFLOW"
 WORKFLOW_FILE_NAME_ENV = "VT_WORKFLOW_FILE_NAME"
 JOB_ID_ENV = "VT_JOB_ID"
+INIT_FILE_ENV = "VT_WORKFLOW_INIT_FILE"
+FIXTURES_FILE_ENV = "VT_WORKFLOW_FIXTURES_FILE"
 
 
 @dataclass(frozen=True)
@@ -216,3 +218,21 @@ def workflow_file_path(name) -> Path:
 def job_id(_):
     """The database id of the job document for this workflow run."""
     ...
+
+
+@config_fixture(env=INIT_FILE_ENV, default="init.py")
+def init_file(name) -> Path:
+    """A python script which will be executed before the workflow is loaded."""
+    path = Path(name)
+    if path.suffix != ".py":
+        raise ValueError("init file must be a python file.")
+    return path
+
+
+@config_fixture(env=FIXTURES_FILE_ENV, default="fixtures.py")
+def fixtures_file(name) -> Path:
+    """A python script containing fixtures which will be loaded before the workflow is executed."""
+    path = Path(name)
+    if path.suffix != ".py":
+        raise ValueError("init file must be a python file.")
+    return path
