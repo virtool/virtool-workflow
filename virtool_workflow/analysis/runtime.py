@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from virtool_workflow.abc.data_providers import AbstractHmmsProvider, AbstractSubtractionProvider, \
-    AbstractSampleProvider, AbstractReferenceProvider, AbstractOTUsProvider, AbstractIndexProvider, \
+    AbstractSampleProvider, AbstractOTUsProvider, AbstractIndexProvider, \
     AbstractCacheProvider, AbstractAnalysisProvider
 from virtool_workflow.analysis.analysis import analysis
 from virtool_workflow.analysis.hmms import hmms
@@ -22,7 +22,6 @@ class DataProvider:
                  caches_provider: AbstractCacheProvider = None,
                  index_provider: AbstractIndexProvider = None,
                  otus_provider: AbstractOTUsProvider = None,
-                 reference_provider: AbstractReferenceProvider = None,
                  sample_provider: AbstractSampleProvider = None,
                  subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
                  hmms_provider: AbstractHmmsProvider = None):
@@ -31,7 +30,6 @@ class DataProvider:
         self.caches_provider = caches_provider
         self.index_provider = index_provider
         self.otus_provider = otus_provider
-        self.reference_provider = reference_provider
         self.sample_provider = sample_provider
         self.subtraction_providers = subtraction_providers
         self.hmms_provider = hmms_provider
@@ -57,7 +55,6 @@ class AnalysisWorkflowRuntime(WorkflowEnvironment):
                  caches_provider: AbstractCacheProvider = None,
                  index_provider: AbstractIndexProvider = None,
                  otus_provider: AbstractOTUsProvider = None,
-                 reference_provider: AbstractReferenceProvider = None,
                  sample_provider: AbstractSampleProvider = None,
                  subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
                  hmms_provider: AbstractHmmsProvider = None):
@@ -68,7 +65,6 @@ class AnalysisWorkflowRuntime(WorkflowEnvironment):
                                            caches_provider,
                                            index_provider,
                                            otus_provider,
-                                           reference_provider,
                                            sample_provider,
                                            subtraction_providers,
                                            hmms_provider)
