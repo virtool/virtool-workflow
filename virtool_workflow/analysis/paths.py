@@ -1,13 +1,13 @@
 from pathlib import Path
+
 from virtool_workflow import fixture
-from typing import Dict, Any
 from virtool_workflow.data_model import Job
 
 
 @fixture
 def sample_path(data_path: Path, job: Job):
     """The sample path for the current job."""
-    path = data_path/"subtractions"/job.args["sample_id"]
+    path = data_path / "subtractions" / job.args["sample_id"]
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -15,16 +15,7 @@ def sample_path(data_path: Path, job: Job):
 @fixture
 def analysis_path(sample_path: Path, job: Job) -> Path:
     """The analysis path for the current job."""
-    path = sample_path/"analysis"/job.args["analysis_id"]
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
-@fixture
-def index_path(data_path: Path, job_args: Dict[str, Any]) -> Path:
-    """The index path for the current job."""
-    path = data_path / \
-        f"references/{job_args['ref_id']}/{job_args['index_id']}/reference"
+    path = sample_path / "analysis" / job.args["analysis_id"]
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -72,7 +63,6 @@ __all__ = [
     "sample_path",
     "analysis_path",
     "raw_path",
-    "index_path",
     "temp_cache_path",
     "reads_path",
     "subtraction_data_path",
