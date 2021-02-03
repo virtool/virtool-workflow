@@ -1,16 +1,16 @@
 """Find workflows and fixtures from python modules."""
-import logging
 import sys
 from importlib import import_module
+
+import logging
 from importlib.util import spec_from_file_location, module_from_spec
 from pathlib import Path
 from types import ModuleType
+from typing import Callable
 from typing import List, Union, Iterable, Tuple, Optional
 
-from virtool_workflow import Workflow
 from virtool_workflow.decorator_api import collect
-from typing import Callable
-
+from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ FixtureImportType = Iterable[
 ]
 
 
-def _import_module_from_file(module_name: str, path: Path) -> ModuleType:
+def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
     Import a module from a file.
 
@@ -51,7 +51,7 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
     """
 
     if isinstance(module, Path):
-        module = _import_module_from_file(module.name.rstrip(module.suffix), module)
+        module = import_module_from_file(module.name.rstrip(module.suffix), module)
 
     return [attr for attr in module.__dict__.values() if isinstance(attr, Callable)]
 
@@ -83,7 +83,7 @@ def load_fixtures_from__fixtures__(path: Path) -> List[Callable]:
     :param path: The path to a python module containing __fixtures__: FixtureImportType attribute
     :return: A list of discovered fixtures, or an empty list if the `__fixtures__` attribute is absent
     """
-    module = _import_module_from_file(path.name.rstrip(path.suffix), path)
+    module = import_module_from_file(path.name.rstrip(path.suffix), path)
 
     __fixtures__ = getattr(module, "__fixtures__", None)
     if not __fixtures__:
@@ -102,7 +102,7 @@ def discover_workflow(path: Path) -> Workflow:
     :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
     """
     logger.info(f"Importing module from {path}")
-    module = _import_module_from_file(path.name.rstrip(path.suffix), path)
+    module = import_module_from_file(path.name.rstrip(path.suffix), path)
 
     workflow = next((attr for attr in module.__dict__.values() if isinstance(attr, Workflow)), None)
 
@@ -131,7 +131,7 @@ def run_discovery(
     :return: The Workflow instance from `path` and a list of discovered fixtures.
     """
     logger.info("Beginning workflow discovery.")
-    fixtures = load_fixtures_from__fixtures__(Path(__file__).parent/"autoload.py")
+    fixtures = load_fixtures_from__fixtures__(Path(__file__).parent / "autoload.py")
 
     logger.info("Loaded fixtures from `autoload.py`")
 

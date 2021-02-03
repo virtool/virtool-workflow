@@ -2,6 +2,8 @@ from concurrent import futures
 
 import asyncio
 
+from virtool_workflow.data_model import Job
+from virtool_workflow.db.db import VirtoolDatabase
 from virtool_workflow.execution.workflow_execution import WorkflowError
 from virtool_workflow.fixtures.scope import FixtureScope
 from .fixture_hooks import FixtureHook
@@ -99,9 +101,24 @@ is provided which has an attribute (sharing the same name as the fixture) for ea
 .. code-block:: python
 
     @on_load_config
-    def use_config(config: SimpleNamespace):
-        if config.dev_mode:
+    def use_config(dev_mode):
+        if dev_mode:
             ...
+"""
+
+on_load_database = Hook("on_load_database", [VirtoolDatabase], None)
+"""
+Triggered before the job document is loaded from the database.
+
+Allows the database to be initialized with additional data.
+"""
+
+use_job = Hook("use_job", [], Job)
+"""
+Triggered before the job is loaded from the database.
+
+The return value from this hook will be used as the Job for 
+the workflow run.
 """
 
 before_result_upload = FixtureHook("before_result_upload", [], None)

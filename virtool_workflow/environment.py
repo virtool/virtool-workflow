@@ -14,7 +14,7 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
         self.load_plugins(
             "virtool_workflow.execution.fixtures",
             "virtool_workflow.storage.paths",
-            "virtool_workflow_runtime.config.configuration"
+            "virtool_workflow.config.configuration"
         )
 
         self.job = self["job"] = job

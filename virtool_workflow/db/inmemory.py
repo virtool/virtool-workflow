@@ -44,6 +44,5 @@ class InMemoryDatabase(VirtoolDatabase):
 
     def __init__(self):
         super(InMemoryDatabase, self).__init__(
-            *((InMemoryDatabaseCollection(),) * 8)
+            *((InMemoryDatabaseCollection(),) * 9)
         )
-

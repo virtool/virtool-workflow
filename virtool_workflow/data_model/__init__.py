@@ -1,4 +1,3 @@
-from .analysis import Analysis
 from .hmms import HMM, HMMEntry
 from .indexes import Index
 from .jobs import Job, Status
@@ -7,7 +6,6 @@ from .samples import Sample
 from .subtractions import Subtraction, NucleotideComposition
 
 __all__ = [
-    "Analysis",
     "HMM",
     "HMMEntry",
     "Index",
