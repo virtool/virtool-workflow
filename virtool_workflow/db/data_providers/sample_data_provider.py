@@ -1,12 +1,14 @@
-from typing import List, Dict, Any
+from pathlib import Path
+from typing import List, Dict, Any, Iterable, Tuple
 
 from virtool_workflow.abc.data_providers import AbstractSampleProvider
 from virtool_workflow.abc.db import AbstractDatabaseCollection
-from virtool_workflow.uploads.files import DownloadableFileUpload
+from virtool_workflow.uploads.files import FileUpload
 from virtool_workflow.data_model import Sample
+from virtool_workflow.db.utils import convert_file_uploads_to_documents
 
 
-def calculate_workflow_tags(analyses: dict) -> dict:
+def calculate_workflow_tags(analyses: Iterable[dict]) -> dict:
     """
     Calculate the workflow tags (eg. "ip", True) that should be applied to a sample document based on a list of its
     associated analyses.
@@ -58,28 +60,23 @@ class SampleDataProvider(AbstractSampleProvider):
         )
 
     async def recalculate_workflow_tags(self):
-        await self.analyses.find()
-        analyses = await asyncio.shield(db.analyses.find({"sample.id": sample_id}, ["ready", "workflow"]).to_list(None))
-
-        return await db.samples.find_one_and_update({"_id": sample_id}, {
-            "$set": calculate_workflow_tags(analyses)
-        }, projection=LIST_PROJECTION)
-        pass
+        analyses = await self.analyses.find(projection=["ready", "workflow"], sample=dict(id=self.sample_id))
+        await self.samples.set(self.sample_id, **calculate_workflow_tags(analyses))
 
     async def set_quality(self, quality: Dict[str, Any]):
-        pass
+        await self.samples.set(self.sample_id, quality=quality, ready=True)
 
     async def delete_sample(self):
-        pass
+        await self.samples.delete(self.sample_id)
 
-    async def set_files(self, uploads: List[DownloadableFileUpload]):
-        pass
+    async def set_files(self, files: List[Tuple[FileUpload, Path]]):
+        await self.samples.set(self.sample_id, files=convert_file_uploads_to_documents(files))
 
     async def set_prune(self, prune: bool):
-        pass
+        await self.samples.set(self.sample_id, prune=True)
 
     async def delete_files(self):
-        pass
+        await self.samples.set(self.sample_id, files=None)
 
     async def release_files(self):
-        pass
+        raise NotImplemented()
