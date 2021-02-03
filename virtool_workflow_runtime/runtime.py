@@ -5,12 +5,13 @@ from virtool_workflow import hooks
 from virtool_workflow.config.configuration import DBType
 from virtool_workflow.db.inmemory import InMemoryDatabase
 from virtool_workflow.db.mongo import VirtoolMongoDB
+from virtool_workflow.fixtures.scope import FixtureScope
 
 _database = None
 
 
 @hooks.on_load_config
-def set_log_level_to_debug(dev_mode):
+def set_log_level_to_debug(dev_mode: bool):
     if dev_mode:
         logging.basicConfig(level=logging.DEBUG)
     else:
@@ -28,3 +29,10 @@ def instantiate_database(db_type: DBType, db_name: str, db_connection_string: st
         raise NotImplementedError("Proxy database is not yet supported.")
     else:
         raise ValueError(f"{db_type} is not a supported database type.")
+
+
+@hooks.on_load_config
+def add_database_fixture(direct_db_access_allowed: bool, scope: FixtureScope):
+    global _database
+    if direct_db_access_allowed:
+        scope["database"] = _database
