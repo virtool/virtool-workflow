@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 import os
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any, Type, Callable, Union, Literal
 
 import virtool_workflow
@@ -97,28 +96,21 @@ def config_fixture(
     return _config_fixture
 
 
-async def create_config(scope, **kwargs) -> SimpleNamespace:
+async def load_config(scope, **kwargs):
     """
-    Create a namespace containing all config options which have been defined.
+    Override config fixture values with those from :obj:`kwargs`.
 
-    The created namespace will be added to the scope as a fixture.
+    Triggers `on_load_config` hook.
 
     :param scope: The WorkflowFixtureScope for the current context.
     :param kwargs: Values for any config options to be used before the fixtures.
     :return SimpleNamespace: A namespace containing any available config options.
     """
-    config = SimpleNamespace()
     for option in options.values():
         if option.name in kwargs and kwargs[option.name] is not None:
-            setattr(config, option.name, kwargs[option.name])
             option.fixture.override_value = kwargs[option.name]
-        else:
-            value = await scope.instantiate(option.fixture)
-            setattr(config, option.name, value)
 
-    await hooks.on_load_config.trigger(config)
-
-    return config
+    await hooks.on_load_config.trigger(scope)
 
 
 @config_fixture(env=TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
