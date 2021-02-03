@@ -19,6 +19,7 @@ MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
 DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
+IS_ANALYSIS_WORKFLOW = "VT_IS_ANALYSIS_WORKFLOW"
 
 
 @dataclass(frozen=True)
@@ -200,4 +201,12 @@ def direct_db_access_allowed():
     If False, the database will only be available within specific fixtures
     which are part of the framework, such as `reads`.
     """
+    ...
+
+
+@config_fixture(env=IS_ANALYSIS_WORKFLOW,
+                type_=bool,
+                default=True)
+def is_analysis_workflow():
+    """A flag indicating that analysis fixtures should be loaded."""
     ...
