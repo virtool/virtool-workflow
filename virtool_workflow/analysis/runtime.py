@@ -48,7 +48,7 @@ class DataProvider:
         ))
 
 
-class AnalysisWorkflowRuntime(WorkflowEnvironment):
+class AnalysisWorkflowEnvironment(WorkflowEnvironment):
 
     def __init__(self, job: Job,
                  analysis_provider: AbstractAnalysisProvider = None,
@@ -58,7 +58,7 @@ class AnalysisWorkflowRuntime(WorkflowEnvironment):
                  sample_provider: AbstractSampleProvider = None,
                  subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
                  hmms_provider: AbstractHmmsProvider = None):
-        super(AnalysisWorkflowRuntime, self).__init__(job=job)
+        super(AnalysisWorkflowEnvironment, self).__init__(job=job)
         self.load_plugins("virtool_workflow.analysis.fixtures")
         self.data_providers = DataProvider(self,
                                            analysis_provider,
