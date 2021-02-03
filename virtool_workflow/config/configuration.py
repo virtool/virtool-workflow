@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Type, Callable, Union
+from typing import Any, Type, Callable, Union, Literal
 
 import virtool_workflow
 import virtool_workflow.storage.paths
@@ -18,6 +18,7 @@ DEVELOPMENT_MODE_ENV = "VT_DEV"
 MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
+DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
 
 
 @dataclass(frozen=True)
@@ -165,8 +166,11 @@ def db_connection_string(_):
     ...
 
 
+DBType = Literal["in-memory", "mongo", "proxy"]
+
+
 @config_fixture(env=USE_IN_MEMORY_DATABASE_ENV,
-                default='in-memory')
+                default="in-memory")
 def db_type(_):
     """
     The type of database to be used for the workflow run.
@@ -180,5 +184,20 @@ def db_type(_):
 
     If `mongo` or `proxy` is selected, then the `db_connection_string`
     fixture will be used to connect to the database.
+    """
+    ...
+
+
+@config_fixture(env=DB_ACCESS_IN_WORKFLOW_ENV,
+                type_=bool,
+                default=False)
+def direct_db_access_allowed():
+    """
+    A flag indicating that the database should be made available within the
+    workflow code.
+
+    If True, the database will be available as a fixture `database`.
+    If False, the database will only be available within specific fixtures
+    which are part of the framework, such as `reads`.
     """
     ...
