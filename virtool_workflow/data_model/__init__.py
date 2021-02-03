@@ -1,4 +1,3 @@
-from .analysis import Analysis
 from .hmms import HMM, HMMEntry
 from .indexes import Index
 from .jobs import Job, Status

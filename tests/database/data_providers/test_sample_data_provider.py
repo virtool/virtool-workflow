@@ -6,7 +6,7 @@ from virtool_workflow.db.data_providers.sample_data_provider import SampleDataPr
 from virtool_workflow.db.inmemory import InMemoryDatabaseCollection
 from virtool_workflow.uploads.files import FileUpload
 
-TEST_SAMPLE = json.loads(Path("sample.json").read_text())
+TEST_SAMPLE = json.loads((Path(__file__).parent / "sample.json").read_text())
 
 
 @pytest.fixture
