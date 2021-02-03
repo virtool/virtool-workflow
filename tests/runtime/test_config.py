@@ -1,6 +1,6 @@
 import os
 
-from virtool_workflow_runtime.config import configuration
+from virtool_workflow.config import configuration
 
 
 @configuration.config_fixture("EDITOR", type_=str, default="/usr/bin/nano")
@@ -38,4 +38,3 @@ async def test_types(runtime):
     integer_ = await runtime.instantiate(integer)
 
     assert integer_ == 49
-

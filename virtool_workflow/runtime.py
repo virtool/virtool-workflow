@@ -1,12 +1,12 @@
 from typing import Dict, Any
 
 from virtool_workflow.abc import AbstractWorkflowEnvironment
+from virtool_workflow.config.configuration import config_fixtures
 from virtool_workflow.data_model import Job
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow.workflow import Workflow
-from virtool_workflow_runtime.config.configuration import config_fixtures
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
+from virtool_workflow.workflow import Workflow
 
 
 class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
@@ -40,5 +40,3 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             result = await result
 
         return result
-
-

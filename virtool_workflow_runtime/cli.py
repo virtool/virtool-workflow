@@ -1,11 +1,10 @@
 """Command Line Interface to virtool_workflow"""
 import asyncio
+import click
 from pathlib import Path
 
-import click
-
+from virtool_workflow.config.configuration import create_config, options
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.config.configuration import create_config, options
 from . import discovery
 from . import runtime
 

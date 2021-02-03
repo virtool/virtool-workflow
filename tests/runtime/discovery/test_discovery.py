@@ -1,18 +1,18 @@
 from pathlib import Path
 
 from virtool_workflow import Workflow
-from virtool_workflow_runtime import discovery
 from virtool_workflow.analysis.runtime import AnalysisWorkflowRuntime
+from virtool_workflow.config.configuration import config_fixtures
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
-from virtool_workflow_runtime.config.configuration import config_fixtures
+from virtool_workflow_runtime import discovery
 
 cwd = Path(__file__).parent
-TEST_FILE = cwd/"discoverable_workflow.py"
-STATIC_TEST_FILE = cwd/"static_workflow.py"
+TEST_FILE = cwd / "discoverable_workflow.py"
+STATIC_TEST_FILE = cwd / "static_workflow.py"
 
-FIXTURE_TEST_FILE = cwd/"discoverable_fixtures.py"
+FIXTURE_TEST_FILE = cwd / "discoverable_fixtures.py"
 
-IMPORT_TEST_FILE = cwd/"discoverable_workflow/discoverable_workflow_with_imports.py"
+IMPORT_TEST_FILE = cwd / "discoverable_workflow/discoverable_workflow_with_imports.py"
 
 
 def test_discover_workflow():
@@ -58,5 +58,3 @@ async def test_import_workflow_with_other_imports():
     assert results["foo"] == "foo"
     assert results["bar"] == "bar"
     assert results["variable"] is None
-
-
