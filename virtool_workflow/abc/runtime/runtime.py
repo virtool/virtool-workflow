@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 from typing import Dict, Any
 
 from virtool_workflow import Workflow
-from virtool_workflow_runtime.discovery import load_fixture_plugins
+from virtool_workflow.discovery import load_fixture_plugins
 
 
 class AbstractWorkflowEnvironment(ABC):
@@ -21,7 +21,3 @@ class AbstractWorkflowEnvironment(ABC):
     async def execute_function(self, func: callable):
         """Execute a function in the runtime context."""
         ...
-
-
-
-
