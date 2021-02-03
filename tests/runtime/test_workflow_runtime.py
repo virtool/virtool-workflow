@@ -7,4 +7,4 @@ def make_mock_job():
 
 
 async def test_start():
-    await runtime.start()
+    await runtime.start(dev_mode=True, workflow_file_path="workflow.py")
