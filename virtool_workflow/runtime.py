@@ -1,42 +1,81 @@
-from typing import Dict, Any
+"""Main entrypoint(s) to run virtool workflows."""
+import logging
+from typing import Optional
 
-from virtool_workflow.abc import AbstractWorkflowEnvironment
-from virtool_workflow.config.configuration import config_fixtures
+from virtool_workflow import hooks
+from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
+from virtool_workflow.config.configuration import DBType
 from virtool_workflow.data_model import Job
-from virtool_workflow.execution.workflow_execution import WorkflowExecution
+from virtool_workflow.db.data_providers.analysis_data_provider import AnalysisDataProvider
+from virtool_workflow.db.data_providers.index_data_provider import IndexDataProvider
+from virtool_workflow.db.data_providers.sample_data_provider import SampleDataProvider
+from virtool_workflow.db.data_providers.subtraction_data_provider import SubtractionDataProvider
+from virtool_workflow.db.db import VirtoolDatabase
+from virtool_workflow.db.inmemory import InMemoryDatabase
+from virtool_workflow.db.mongo import VirtoolMongoDB
+from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
-from virtool_workflow.workflow import Workflow
+
+_database: Optional[VirtoolDatabase] = None
+_environment = None
 
 
-class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
+@hooks.on_load_config
+def set_log_level_to_debug(dev_mode: bool):
+    if dev_mode:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
-    def __init__(self, job: Job, *providers, **instances):
-        self.load_plugins(
-            "virtool_workflow.execution.fixtures",
-            "virtool_workflow.storage.paths",
-            "virtool_workflow_runtime.config.configuration"
-        )
 
-        self.job = self["job"] = job
+@hooks.on_load_config
+def instantiate_database(db_type: DBType, db_name: str, db_connection_string: str):
+    global _database
+    if db_type == "in-memory":
+        _database = InMemoryDatabase()
+    elif db_type == "mongo":
+        _database = VirtoolMongoDB(db_name, db_connection_string)
+    elif db_type == "proxy":
+        raise NotImplementedError("Proxy database is not yet supported.")
+    else:
+        raise ValueError(f"{db_type} is not a supported database type.")
 
-        super(WorkflowEnvironment, self).__init__(
-            workflow_fixtures,
-            config_fixtures,
-            *providers,
-            **instances)
 
-        self.override("job_args", lambda: job.args)
+@hooks.on_load_config
+def add_database_fixture(direct_db_access_allowed: bool, scope: FixtureScope):
+    global _database
+    if direct_db_access_allowed:
+        scope["database"] = _database
 
-    async def execute(self, workflow: Workflow) -> Dict[str, Any]:
-        """Execute a Workflow."""
-        return await WorkflowExecution(workflow, self)
 
-    async def execute_function(self, func: callable):
-        """Execute a function in the runtime context."""
-        result = (await self.bind(func))()
+@hooks.on_load_config
+def instantiate_environment(is_analysis_workflow: bool, job: Job):
+    global _environment
+    if is_analysis_workflow:
+        _environment = AnalysisWorkflowEnvironment(job)
 
-        if hasattr(result, "__await__"):
-            result = await result
+        if "analysis_id" in job.args:
+            _environment.data_providers.analysis_provider = \
+                AnalysisDataProvider(_database.analyses, job.args["analysis_id"])
 
-        return result
+        if "sample_id" in job.args:
+            _environment.data_providers.sample_provider = \
+                SampleDataProvider(job.args["sample_id"], _database.samples, _database.analyses)
+
+        if "index_id" in job.args:
+            _environment.data_providers.index_provider = \
+                IndexDataProvider(job.args["index_id"], _database.indexes, _database.references)
+
+        if "subtraction_id" in job.args:
+            if isinstance(job.args["subtraction_id"], str):
+                _environment.data_providers.subtraction_providers = \
+                    [SubtractionDataProvider(job.args["subtraction_id"], _database.subtractions)]
+            else:
+                _environment.data_providers.subtraction_providers = \
+                    [SubtractionDataProvider(id_, _database.subtractions) for id_ in job.args["subtraction_id"]]
+    else:
+        _environment = WorkflowEnvironment(job)
+
+
+def start():
+    ...

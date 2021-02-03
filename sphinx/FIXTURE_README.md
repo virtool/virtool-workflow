@@ -402,7 +402,7 @@ runtime fixtures.
 
 ```python
 from virtool_workflow.test_utils import runtime
-from virtool_workflow_runtime.runtime import execute
+from virtool_workflow.runtime import execute
 
 from ... import function_to_test
 from ... import workflow_to_test

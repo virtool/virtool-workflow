@@ -9,9 +9,9 @@ from virtool_workflow.analysis.indexes import indexes
 from virtool_workflow.analysis.samples.sample import sample
 from virtool_workflow.analysis.subtractions.subtraction import subtractions
 from virtool_workflow.data_model import Job
+from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures import providers
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow.runtime import WorkflowEnvironment
 
 
 class DataProvider:
