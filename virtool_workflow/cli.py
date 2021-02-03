@@ -3,10 +3,9 @@ import asyncio
 import click
 from pathlib import Path
 
+from virtool_workflow import discovery
 from virtool_workflow.config.configuration import create_config, options
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime import discovery
-from virtool_workflow_runtime import runtime
 
 JOB_ID_ENV = "VIRTOOL_JOB_ID"
 
@@ -38,7 +37,6 @@ async def _run(file: str, job_id: str, **kwargs):
         config = await create_config(scope, **kwargs)
         workflow, _ = discovery.run_discovery(Path(file), Path(file).parent / "fixtures.py")
 
-        result = await runtime.execute(workflow, runtime.DirectDatabaseAccessRuntime(job_id))
         if config.dev_mode:
             print(result)
 

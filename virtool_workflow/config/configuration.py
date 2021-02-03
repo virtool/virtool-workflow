@@ -15,6 +15,9 @@ TEMP_PATH_ENV = "VT_TEMP_PATH"
 PROC_ENV = "VT_PROC"
 MEM_ENV = "VT_MEM"
 DEVELOPMENT_MODE_ENV = "VT_DEV"
+MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
+MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
+USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
 
 
 @dataclass(frozen=True)
@@ -147,4 +150,35 @@ def mem(_):
 @config_fixture(env=DEVELOPMENT_MODE_ENV, default=False)
 def dev_mode(_):
     """A flag indicating that development mode is enabled."""
+    ...
+
+
+@config_fixture(env=MONGO_DATABASE_NAME_ENV, default="virtool")
+def db_name(_):
+    """The database name."""
+    ...
+
+
+@config_fixture(env=MONGO_DATABASE_CONNECTION_STRING_ENV, default="mongodb://localhost:27017")
+def db_connection_string(_):
+    """The database connection string/url."""
+    ...
+
+
+@config_fixture(env=USE_IN_MEMORY_DATABASE_ENV,
+                default='in-memory')
+def db_type(_):
+    """
+    The type of database to be used for the workflow run.
+
+    Options are:
+        - in-memory
+        - mongo
+        - proxy
+
+    A in-memory database is used by default.
+
+    If `mongo` or `proxy` is selected, then the `db_connection_string`
+    fixture will be used to connect to the database.
+    """
     ...
