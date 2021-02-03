@@ -16,12 +16,13 @@ from virtool_workflow.db.db import VirtoolDatabase
 from virtool_workflow.db.inmemory import InMemoryDatabase
 from virtool_workflow.db.mongo import VirtoolMongoDB
 from virtool_workflow.environment import WorkflowEnvironment
-from virtool_workflow.fixtures.scoping import workflow_scope
+from virtool_workflow.fixtures.scoping import workflow_scope, workflow_fixtures
 from virtool_workflow.workflow import Workflow
 
 _database: Optional[VirtoolDatabase] = None
 _environment: Optional[WorkflowEnvironment] = None
 _workflow: Optional[Workflow] = None
+_job: Optional[Job] = None
 
 logger = logging.getLogger(__name__)
 
@@ -73,14 +74,18 @@ async def instantiate_job(job_id: Optional[str], mem: int, proc: int):
     else:
         raise RuntimeError("No job_id provided.")
 
-    workflow_scope.override('job', lambda: job)
-    workflow_scope.override('job_args', lambda: job.args)
+    global _job
+    _job = job
+
+    workflow_fixtures["mem"] = lambda: job.mem
+    workflow_fixtures["proc"] = lambda: job.proc
 
 
 @hooks.on_load_config
 async def instantiate_environment(is_analysis_workflow: bool):
     global _environment
-    job = await workflow_scope.get_or_instantiate('job')
+    global _job
+    job = _job
     if is_analysis_workflow:
         _environment = AnalysisWorkflowEnvironment(job)
 
