@@ -13,13 +13,13 @@ class SubtractionDataProvider(AbstractSubtractionProvider):
         subtraction = await self.subtractions.get(self.subtraction_id)
 
         return Subtraction(
-            id=subtraction["id"],
+            id=subtraction["_id"],
             name=subtraction["name"],
             nickname=subtraction["nickname"],
             count=subtraction["count"],
-            gc=subtraction["gc"],
+            gc=NucleotideComposition(**subtraction["gc"]),
             is_host=subtraction["is_host"],
-            deleted=subtraction_path["deleted"],
+            deleted=subtraction["deleted"],
             path=subtraction_path,
             fasta_path=subtraction_path / "subtraction.fa.gz",
             bowtie2_index_path=f"{subtraction_path}/reference"
