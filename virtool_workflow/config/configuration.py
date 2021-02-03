@@ -111,7 +111,7 @@ async def load_config(**kwargs):
     """
     for option in options.values():
         if option.name in kwargs and kwargs[option.name] is not None:
-            option.fixture.override_value = option.fixture.transform(kwargs[option.name])
+            option.fixture.override_value = option.fixture.transform(kwargs[option.name]) or kwargs[option.name]
 
     with FixtureScope(config_fixtures) as config_scope:
         await hooks.on_load_config.trigger(config_scope)

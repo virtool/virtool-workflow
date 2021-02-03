@@ -1,6 +1,6 @@
-from virtool_workflow.abc.runtime.runtime import AbstractWorkflowEnvironment
-from virtool_workflow.abc.uploads import AbstractFileUploader
-from virtool_workflow.abc.db import AbstractDatabaseCollection
+from .db import AbstractDatabaseCollection
+from .runtime.runtime import AbstractWorkflowEnvironment
+from .uploads import AbstractFileUploader
 
 __all__ = [
     "AbstractFileUploader",
