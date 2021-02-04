@@ -37,8 +37,7 @@ def set_log_level_to_debug(dev_mode: bool):
 
 
 @hooks.on_load_config
-async def instantiate_database(db_type: DBType, db_name: str, db_connection_string: str,
-                               direct_db_access_allowed: bool):
+async def instantiate_database(db_type: DBType, db_name: str, db_connection_string: str):
     global _database
     if db_type == "in-memory":
         _database = InMemoryDatabase()
@@ -50,9 +49,6 @@ async def instantiate_database(db_type: DBType, db_name: str, db_connection_stri
         raise ValueError(f"{db_type} is not a supported database type.")
 
     await hooks.on_load_database.trigger(_database)
-
-    if direct_db_access_allowed:
-        workflow_fixtures["database"] = lambda: _database
 
 
 @hooks.on_load_config
