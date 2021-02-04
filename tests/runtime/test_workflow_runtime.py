@@ -1,4 +1,7 @@
+from contextlib import suppress
+
 from virtool_workflow import runtime, hooks, data_model
+from virtool_workflow.fixtures.errors import FixtureNotAvailable
 
 
 @hooks.use_job
@@ -26,3 +29,13 @@ async def test_database_accessible():
 
     assert use_db.called
     assert init_db.called
+
+
+async def test_database_not_accessible():
+    @hooks.on_load_fixtures
+    def use_database(database):
+        ...
+
+    with suppress(FixtureNotAvailable):
+        await runtime.start()
+        assert False

@@ -27,10 +27,11 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
 
         self.override("job_args", lambda: job.args)
 
-        await hooks.on_load_fixtures.trigger(self)
+        self["results"] = {}
 
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""
+        await hooks.on_load_fixtures.trigger(self)
         return await WorkflowExecution(workflow, self)
 
     async def execute_function(self, func: callable):

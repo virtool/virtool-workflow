@@ -17,7 +17,7 @@ from virtool_workflow.db.db import VirtoolDatabase
 from virtool_workflow.db.inmemory import InMemoryDatabase
 from virtool_workflow.db.mongo import VirtoolMongoDB
 from virtool_workflow.environment import WorkflowEnvironment
-from virtool_workflow.fixtures.scoping import workflow_scope, workflow_fixtures
+from virtool_workflow.fixtures.scoping import workflow_fixtures
 from virtool_workflow.workflow import Workflow
 
 _database: Optional[VirtoolDatabase] = None
@@ -37,7 +37,8 @@ def set_log_level_to_debug(dev_mode: bool):
 
 
 @hooks.on_load_config
-def instantiate_database(db_type: DBType, db_name: str, db_connection_string: str):
+async def instantiate_database(db_type: DBType, db_name: str, db_connection_string: str,
+                               direct_db_access_allowed: bool):
     global _database
     if db_type == "in-memory":
         _database = InMemoryDatabase()
@@ -48,12 +49,10 @@ def instantiate_database(db_type: DBType, db_name: str, db_connection_string: st
     else:
         raise ValueError(f"{db_type} is not a supported database type.")
 
+    await hooks.on_load_database.trigger(_database)
 
-@hooks.on_load_config
-def add_database_fixture(direct_db_access_allowed: bool):
-    global _database
     if direct_db_access_allowed:
-        workflow_scope.override("database", lambda: _database)
+        workflow_fixtures["database"] = lambda: _database
 
 
 @hooks.on_load_config
