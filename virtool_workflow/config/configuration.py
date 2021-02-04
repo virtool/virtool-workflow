@@ -135,12 +135,14 @@ def data_path(value: str) -> Path:
     return _data_path
 
 
+@fixture
 @config_fixture(env=PROC_ENV, default=2, type_=int)
 def proc(_):
     """The number of processes as an integer."""
     ...
 
 
+@fixture
 @config_fixture(env=MEM_ENV, default=8, type_=int)
 def mem(_):
     """The amount of RAM in GB available for use."""
