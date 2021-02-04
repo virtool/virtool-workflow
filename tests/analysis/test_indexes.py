@@ -44,8 +44,9 @@ async def indexes_and_runtime(runtime):
     runtime.data_providers.index_provider = TestIndexProvider()
     runtime["job_args"] = {"index_id": "foo", "ref_id": "bar", "proc": 1}
 
-    index_path = await runtime.get_or_instantiate("index_path")
-
+    data_path = await runtime.get_or_instantiate("data_path")
+    index_path = data_path / f"references/bar/foo/reference"
+    index_path.mkdir(parents=True)
     copy(FAKE_JSON_PATH, index_path / "reference.json.gz")
 
     indexes = await runtime.instantiate(virtool_workflow.analysis.indexes.indexes)

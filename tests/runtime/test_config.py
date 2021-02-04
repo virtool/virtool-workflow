@@ -8,8 +8,8 @@ def editor(_):
     ...
 
 
-async def test_environment_variable_fixture(runtime):
-    editor_ = await runtime.get_or_instantiate("editor")
+async def test_environment_variable_fixture():
+    editor_ = editor()
     assert editor_ == os.getenv("EDITOR", default="/usr/bin/nano")
 
 
