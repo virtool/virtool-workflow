@@ -167,7 +167,7 @@ def db_connection_string(_):
     ...
 
 
-DBType = Literal["direct", "http"]
+ProviderType = Literal["direct", "http"]
 
 
 @config_fixture(env=PROVIDER_TYPE_ENV,

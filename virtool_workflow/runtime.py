@@ -6,7 +6,7 @@ from typing import Optional
 from virtool_workflow import discovery
 from virtool_workflow import hooks
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
-from virtool_workflow.config.configuration import DBType
+from virtool_workflow.config.configuration import ProviderType
 from virtool_workflow.config.configuration import load_config
 from virtool_workflow.data_model import Job
 from virtool_workflow.db.data_providers.analysis_data_provider import AnalysisDataProvider
@@ -14,7 +14,6 @@ from virtool_workflow.db.data_providers.index_data_provider import IndexDataProv
 from virtool_workflow.db.data_providers.sample_data_provider import SampleDataProvider
 from virtool_workflow.db.data_providers.subtraction_data_provider import SubtractionDataProvider
 from virtool_workflow.db.db import VirtoolDatabase
-from virtool_workflow.db.inmemory import InMemoryDatabase
 from virtool_workflow.db.mongo import VirtoolMongoDB
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures.scoping import workflow_fixtures
@@ -37,17 +36,15 @@ def set_log_level_to_debug(dev_mode: bool):
 
 
 @hooks.on_load_config
-async def instantiate_database(db_type: DBType, db_name: str, db_connection_string: str,
+async def instantiate_database(provider_type: ProviderType, db_name: str, db_connection_string: str,
                                direct_db_access_allowed: bool):
     global _database
-    if db_type == "in-memory":
-        _database = InMemoryDatabase()
-    elif db_type == "mongo":
+    if provider_type == "direct":
         _database = VirtoolMongoDB(db_name, db_connection_string)
-    elif db_type == "proxy":
-        raise NotImplementedError("Proxy database is not yet supported.")
+    elif provider_type == "http":
+        raise NotImplementedError("http providers are not yet supported.")
     else:
-        raise ValueError(f"{db_type} is not a supported database type.")
+        raise ValueError(f"{provider_type} is not a supported provider type.")
 
     await hooks.on_load_database.trigger(_database)
 
