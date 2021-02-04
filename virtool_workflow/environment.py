@@ -2,6 +2,7 @@ from typing import Dict, Any
 
 from virtool_workflow.abc import AbstractWorkflowEnvironment
 from virtool_workflow.data_model import Job
+from virtool_workflow.execution import hooks
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
@@ -25,6 +26,8 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             **instances)
 
         self.override("job_args", lambda: job.args)
+
+        await hooks.on_load_fixtures.trigger(self)
 
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""
