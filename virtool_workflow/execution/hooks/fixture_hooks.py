@@ -19,10 +19,9 @@ class FixtureHook(Hook):
         """Bind fixtures from `scope` to each callback function and invoke them."""
         scope["scope"] = scope
 
-        _callbacks = [await scope.bind(callback, strict=False) for callback in self.callbacks]
+        _callbacks = [await scope.bind(callback, strict=not bool(args)) for callback in self.callbacks]
         _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
                       if len(signature(callback).parameters) == 0 else callback
                       for callback in _callbacks]
 
         return [await callback(*args, **kwargs) for callback in _callbacks]
-

@@ -76,7 +76,7 @@ async def _trigger_on_cancelled(error: Exception, scope: FixtureScope):
         await on_cancelled.trigger(scope, error)
 
 
-on_load_fixtures = FixtureHook("on_load_fixtures", [FixtureScope], return_type=None)
+on_load_fixtures = FixtureHook("on_load_fixtures", [], return_type=None)
 """
 Triggered after runtime fixtures have been added to the #WorkflowFixtureScope, but
 before the workflow is executed.
