@@ -10,9 +10,11 @@ from virtool_workflow.config.configuration import load_config
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import hooks
 
+runner_scope = FixtureScope()
+
 
 async def main(**config):
-    with FixtureScope() as fixtures:
+    with runner_scope as fixtures:
         try:
             await load_config(**config, scope=fixtures)
         except Exception as error:
