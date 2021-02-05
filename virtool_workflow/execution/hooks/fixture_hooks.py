@@ -18,10 +18,14 @@ class FixtureHook(Hook):
     async def trigger(self, scope: FixtureScope, *args, **kwargs) -> List[Any]:
         """Bind fixtures from `scope` to each callback function and invoke them."""
         scope["scope"] = scope
+        print(self.name)
 
+        print(self.callbacks)
         _callbacks = [await scope.bind(callback, strict=not bool(args)) for callback in self.callbacks]
+        print("""waaa""")
         _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
                       if len(signature(callback).parameters) == 0 else callback
                       for callback in _callbacks]
+        print("ADWD")
 
         return [await callback(*args, **kwargs) for callback in _callbacks]
