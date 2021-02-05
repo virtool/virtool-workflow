@@ -12,13 +12,13 @@ def redis_connection_string(_):
     ...
 
 
-@config_fixture(REDIS_JOB_LIST_NAME_ENV, default="job_list")
+@config_fixture(REDIS_JOB_LIST_NAME_ENV, default="channel:jobs")
 def redis_job_list_name(_):
     """The name of the job list in redis."""
     ...
 
 
-@config_fixture(REDIS_CANCEL_LIST_NAME_ENV, default="cancel")
+@config_fixture(REDIS_CANCEL_LIST_NAME_ENV, default="channel:cancel")
 def redis_cancel_list_name(_):
     """The name of the redis list where cancellations are pushed."""
     ...

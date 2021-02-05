@@ -1,11 +1,21 @@
 """Collect new Virtool Jobs from a redis list."""
-import asyncio
-from typing import Optional
 from contextlib import asynccontextmanager
 
 import aioredis
+import asyncio
+from typing import Optional
 
-VIRTOOL_JOBS_CANCEL_CHANNEL = "channel:cancel"
+from virtool_workflow.execution.hooks import on_load_config
+from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+from virtool_workflow.fixtures.scope import FixtureScope
+
+on_redis_connect = FixtureHook("on_redis_connect", [], None)
+
+
+@on_load_config
+async def connect_to_redis(redis_connection_string: str, scope: FixtureScope):
+    scope["redis"] = await aioredis.create_redis_pool(redis_connection_string)
+    await on_redis_connect.trigger(scope)
 
 
 class JobCancelledViaRedis(RuntimeError):
