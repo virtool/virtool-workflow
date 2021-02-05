@@ -1,7 +1,7 @@
 """Create hooks for triggering and responding to events."""
+import inspect
 import logging
 import pprint
-import inspect
 from typing import List, Any, Callable, Type
 
 from virtool_workflow import utils
@@ -65,7 +65,7 @@ def _validate_parameters(
 
     if len(callback_params) != len(hook_params):
         raise ParameterMismatch(callback, f"{callback} takes {len(callback_params)} parameters "
-                                f"where {hook_name} takes {len(hook_params)} parameters.")
+                                          f"where {hook_name} takes {len(hook_params)} parameters.")
 
     for hook_param, callback_param in zip(hook_params, callback_params):
         if hook_param is inspect.Parameter.empty or \
@@ -74,7 +74,7 @@ def _validate_parameters(
 
         if hook_param != callback_param:
             raise TypeHintMismatch(callback, f"({callback_param}) of {callback} does not "
-                                   f"match the type of ({hook_param}) of {hook_name}.")
+                                             f"match the type of ({hook_param}) of {hook_name}.")
 
     return utils.coerce_to_coroutine_function(callback)
 
@@ -100,6 +100,8 @@ class Hook:
         self._return = return_type
 
         self.callbacks = []
+
+        self.clear = self.callbacks.clear()
 
     def callback(self, callback_: Callable = None, until=None, once=False):
         """
