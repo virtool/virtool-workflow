@@ -3,19 +3,12 @@ import asyncio
 import click
 
 from virtool_workflow import runtime
-from virtool_workflow.config.configuration import options
+from virtool_workflow.cli_utils import apply_config_options
 
 
 @click.group()
 def cli():
     pass
-
-
-def apply_config_options(func):
-    for option in options.values():
-        func = click.option(option.option_name, type=option.type, help=option.help)(func)
-
-    return func
 
 
 async def _run(**kwargs):
