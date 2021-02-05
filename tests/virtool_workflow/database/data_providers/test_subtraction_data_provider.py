@@ -43,7 +43,7 @@ async def provider():
 
 
 async def test_fetch_subtraction(provider: SubtractionDataProvider):
-    subtraction_path = Path(".")
+    subtraction_path = Path("")
     subtraction = await provider.fetch_subtraction(subtraction_path)
 
     assert subtraction.name == TEST_SUBTRACTION["name"]
