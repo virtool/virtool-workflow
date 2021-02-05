@@ -1,8 +1,5 @@
-
 pytest_plugins = [
-    "tests.fixtures.workflow",
-    "tests.fixtures.execution",
+    "tests.virtool_workflow.fixtures.workflow",
+    "tests.virtool_workflow.fixtures.execution",
     "virtool_workflow.testing"
 ]
-
-
