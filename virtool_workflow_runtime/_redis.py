@@ -5,13 +5,18 @@ import asyncio
 
 from virtool_workflow.execution.hooks import on_load_config
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.hooks import on_redis_connect
+from virtool_workflow_runtime.hooks import on_redis_connect, on_exit
 
 
 @on_load_config
 async def connect_to_redis(redis_connection_string: str, scope: FixtureScope):
     scope["redis"] = await aioredis.create_redis_pool(redis_connection_string)
     await on_redis_connect.trigger(scope)
+
+
+@on_exit
+async def close_redis_connection(redis: aioredis.Redis):
+    await redis.close()
 
 
 async def redis_channel(redis: aioredis.Redis, channel: str):
