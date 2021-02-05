@@ -6,7 +6,9 @@ import virtool_workflow_runtime._redis
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.config
 from virtool_workflow.cli_utils import apply_config_options
+from virtool_workflow.config.configuration import load_config
 from virtool_workflow.fixtures.scope import FixtureScope
+from virtool_workflow_runtime import hooks
 
 
 async def main(**config):
@@ -14,7 +16,9 @@ async def main(**config):
         try:
             await load_config(**config, scope=fixtures)
         except Exception as error:
-            ...
+            fixtures["error"] = error
+        finally:
+            await hooks.on_exit.trigger(fixtures)
 
 
 @apply_config_options
