@@ -166,6 +166,8 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         """
         sig = signature(func)
 
+        print(f"binding {func}")
+
         fixtures = {}
         for param in sig.parameters:
             try:

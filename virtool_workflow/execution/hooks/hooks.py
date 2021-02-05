@@ -101,7 +101,7 @@ class Hook:
 
         self.callbacks = []
 
-        self.clear = self.callbacks.clear()
+        self.clear = self.callbacks.clear
 
     def callback(self, callback_: Callable = None, until=None, once=False):
         """
