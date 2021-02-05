@@ -11,12 +11,14 @@ from virtool_workflow_runtime.hooks import on_redis_connect, on_exit
 @on_load_config
 async def connect_to_redis(redis_connection_string: str, scope: FixtureScope):
     scope["redis"] = await aioredis.create_redis_pool(redis_connection_string)
+    await scope["redis"].ping()
     await on_redis_connect.trigger(scope)
 
 
 @on_exit
 async def close_redis_connection(redis: aioredis.Redis):
-    await redis.close()
+    redis.close()
+    await redis.wait_closed()
 
 
 async def redis_channel(redis: aioredis.Redis, channel: str):
