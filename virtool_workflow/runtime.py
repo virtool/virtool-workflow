@@ -14,6 +14,7 @@ from virtool_workflow.db.data_providers.index_data_provider import IndexDataProv
 from virtool_workflow.db.data_providers.sample_data_provider import SampleDataProvider
 from virtool_workflow.db.data_providers.subtraction_data_provider import SubtractionDataProvider
 from virtool_workflow.db.db import VirtoolDatabase
+from virtool_workflow.db.inmemory import InMemoryDatabase
 from virtool_workflow.db.mongo import VirtoolMongoDB
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures.scoping import workflow_fixtures
@@ -36,8 +37,7 @@ def set_log_level_to_debug(dev_mode: bool):
 
 
 @hooks.on_load_config
-async def instantiate_database(provider_type: ProviderType, db_name: str, db_connection_string: str,
-                               direct_db_access_allowed: bool):
+async def instantiate_database(provider_type: ProviderType, db_name: str, db_connection_string: str):
     global _database
     if provider_type == "direct":
         _database = VirtoolMongoDB(db_name, db_connection_string)
@@ -47,9 +47,6 @@ async def instantiate_database(provider_type: ProviderType, db_name: str, db_con
         raise ValueError(f"{provider_type} is not a supported provider type.")
 
     await hooks.on_load_database.trigger(_database)
-
-    if direct_db_access_allowed:
-        workflow_fixtures["database"] = lambda: _database
 
 
 @hooks.on_load_config

@@ -186,21 +186,6 @@ def provider_type(_):
     ...
 
 
-@config_fixture(env=DB_ACCESS_IN_WORKFLOW_ENV,
-                type_=bool,
-                default=False)
-def direct_db_access_allowed(_):
-    """
-    A flag indicating that the database should be made available within the
-    workflow code.
-
-    If True, the database will be available as a fixture `database`.
-    If False, the database will only be available within specific fixtures
-    which are part of the framework, such as `reads`.
-    """
-    ...
-
-
 @config_fixture(env=IS_ANALYSIS_WORKFLOW,
                 type_=bool,
                 default=True)
