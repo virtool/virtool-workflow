@@ -1,5 +1,6 @@
-from virtool_workflow.execution.hooks import on_load_config
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+
+on_load_config = FixtureHook("on_load_config", [], None)
 
 on_init = FixtureHook("on_init", [], None)
 """
