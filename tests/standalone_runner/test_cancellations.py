@@ -1,6 +1,11 @@
 import asyncio
 
-from virtool_workflow_runtime.hooks import on_start, on_job_cancelled
+from virtool_workflow_runtime.hooks import on_start, on_job_cancelled, on_init
+
+
+@on_init
+def set_job_provider(scope):
+    scope["job_provider"] = lambda id_: Job(id_, {})
 
 
 async def test_watch_cancel_task_is_running(loopless_main):
@@ -28,9 +33,9 @@ async def test_running_jobs_get_cancelled(loopless_main):
         await asyncio.sleep(0.5)
 
     @on_job_cancelled(once=True)
-    def check_cancelled(job_id, running_jobs):
-        assert job_id == "1"
-        assert job_id not in running_jobs
+    def check_cancelled(_id, running_jobs):
+        assert _id == "1"
+        assert _id not in running_jobs
         check_cancelled.called = True
 
     await loopless_main()
