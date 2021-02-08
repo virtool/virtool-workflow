@@ -101,7 +101,7 @@ def config_fixture(
     return _config_fixture
 
 
-async def load_config(**kwargs):
+async def load_config(scope=None, **kwargs):
     """
     Override config fixture values with those from :obj:`kwargs`.
 
@@ -113,8 +113,12 @@ async def load_config(**kwargs):
         if option.name in kwargs and kwargs[option.name] is not None:
             option.fixture.override_value = option.fixture.transform(kwargs[option.name]) or kwargs[option.name]
 
-    with FixtureScope(config_fixtures) as config_scope:
-        await hooks.on_load_config.trigger(config_scope)
+    if not scope:
+        with FixtureScope(config_fixtures) as config_scope:
+            await hooks.on_load_config.trigger(config_scope)
+    else:
+        scope.add_provider(config_fixtures)
+        await hooks.on_load_config.trigger(scope)
 
 
 @fixture
