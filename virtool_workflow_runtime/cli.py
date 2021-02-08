@@ -4,6 +4,8 @@ import click
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._redis
 # noinspection PyUnresolvedReferences
+import virtool_workflow_runtime.cancellations
+# noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.config
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.new_jobs
