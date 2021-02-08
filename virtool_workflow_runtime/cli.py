@@ -9,6 +9,8 @@ import virtool_workflow_runtime.cancellations
 import virtool_workflow_runtime.config
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.new_jobs
+# noinspection PyUnresolvedReferences
+import virtool_workflow_runtime.on_init
 from virtool_workflow.cli_utils import apply_config_options
 from virtool_workflow.config.configuration import load_config
 from virtool_workflow.fixtures.scope import FixtureScope
@@ -19,6 +21,7 @@ runner_scope = FixtureScope()
 
 async def main(**config):
     with runner_scope as fixtures:
+        fixtures["error"] = None
         try:
             await hooks.on_init.trigger(fixtures)
             await load_config(**config, scope=fixtures)
