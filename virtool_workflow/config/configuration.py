@@ -77,6 +77,9 @@ class ConfigFixture(Callable):
 
         return transformed if transformed else value
 
+    def __str__(self):
+        return self.name
+
 
 def config_fixture(
         env: str,
@@ -101,7 +104,7 @@ def config_fixture(
     return _config_fixture
 
 
-async def load_config(scope=None, **kwargs):
+async def load_config(scope=None, hook=None, **kwargs):
     """
     Override config fixture values with those from :obj:`kwargs`.
 
@@ -109,16 +112,19 @@ async def load_config(scope=None, **kwargs):
 
     :param kwargs: Values for any config options to be used before the fixtures.
     """
+    if not hook:
+        hook = hooks.on_load_config
+
     for option in options.values():
         if option.name in kwargs and kwargs[option.name] is not None:
             option.fixture.override_value = option.fixture.transform(kwargs[option.name]) or kwargs[option.name]
 
     if not scope:
         with FixtureScope(config_fixtures) as config_scope:
-            await hooks.on_load_config.trigger(config_scope)
+            await hook.trigger(config_scope)
     else:
         scope.add_provider(config_fixtures)
-        await hooks.on_load_config.trigger(scope)
+        await hook.trigger(scope)
 
 
 @fixture

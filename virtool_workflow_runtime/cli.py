@@ -31,7 +31,7 @@ async def job_loop(jobs):
 async def init(fixtures, **config):
     """Run initialization tasks before processing jobs."""
     await hooks.on_init.trigger(fixtures)
-    await load_config(**config, scope=fixtures)
+    await load_config(**config, hook=hooks.on_load_config, scope=fixtures)
     await hooks.on_start.trigger(fixtures)
 
 
