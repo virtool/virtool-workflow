@@ -21,7 +21,7 @@ class FixtureHook(Hook):
 
     async def trigger(self, scope: FixtureScope, *args, **kwargs) -> List[Any]:
         """Bind fixtures from `scope` to each callback function and invoke them."""
-        logger.debug("Triggered hook {self.name}")
+        logger.debug(f"Triggered hook {self.name}")
         scope["scope"] = scope
 
         _callbacks = [await scope.bind(callback, strict=not bool(args)) for callback in self.callbacks]
