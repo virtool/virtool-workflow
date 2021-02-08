@@ -9,10 +9,13 @@ on_redis_connect = FixtureHook("on_redis_connect", [], None)
 
 on_exit = FixtureHook("on_exit", [], None)
 
+on_job_cancelled = FixtureHook("on_job_cancelled", [str], None)
+
 __all__ = [
     "on_start",
     "on_exit",
     "on_redis_connect",
     "on_init",
-    "on_load_config"
+    "on_load_config",
+    "on_job_cancelled"
 ]
