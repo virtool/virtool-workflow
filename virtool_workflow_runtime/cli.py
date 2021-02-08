@@ -28,14 +28,19 @@ async def job_loop(jobs):
         ...
 
 
+async def init(fixtures, **config):
+    """Run initialization tasks before processing jobs."""
+    await hooks.on_init.trigger(fixtures)
+    await load_config(**config, scope=fixtures)
+    await hooks.on_start.trigger(fixtures)
+
+
 async def main(**config):
     """The main entrypoint for the standalone workflow runner."""
     with runner_scope as fixtures:
         fixtures["error"] = None
         try:
-            await hooks.on_init.trigger(fixtures)
-            await load_config(**config, scope=fixtures)
-            await hooks.on_start.trigger(fixtures)
+            await init(fixtures, **config)
 
             loop = await fixtures.bind(job_loop)
             await loop()
