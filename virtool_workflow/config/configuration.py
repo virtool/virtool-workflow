@@ -167,20 +167,20 @@ def db_connection_string(_):
     ...
 
 
-ProviderType = Literal["direct", "http"]
+ProviderType = Literal["local", "http"]
 
 
 @config_fixture(env=PROVIDER_TYPE_ENV,
-                default="direct")
+                default="local")
 def provider_type(_):
     """
     The type of data providers to be used for the workflow run.
 
     Options are:
-        - direct
+        - local
         - http
 
-    `direct` data providers access the database directly to perform operations.
+    `local` data providers use a local filesystem based database.
     `http` data providers utilize an HTTP API which accesses the database on behalf of the workflow.
     """
     ...
