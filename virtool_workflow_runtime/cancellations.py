@@ -6,16 +6,9 @@ from typing import Dict
 
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime._redis import redis_channel
-from virtool_workflow_runtime.hooks import on_redis_connect, on_init, on_exit, on_job_cancelled
+from virtool_workflow_runtime.hooks import on_redis_connect, on_exit, on_job_cancelled
 
 logger = logging.getLogger(__name__)
-
-
-@on_init
-def create_running_jobs_list(scope: FixtureScope):
-    logger.debug("Creating `tasks` and `running_jobs` dictionaries.")
-    scope["tasks"] = {}
-    scope["running_jobs"] = {}
 
 
 async def watch_cancel(cancel_channel: AsyncGenerator, running_jobs: Dict[str, asyncio.Task], scope: FixtureScope):
