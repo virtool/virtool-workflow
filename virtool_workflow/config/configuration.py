@@ -17,7 +17,7 @@ MEM_ENV = "VT_MEM"
 DEVELOPMENT_MODE_ENV = "VT_DEV"
 MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
-USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
+PROVIDER_TYPE_ENV = "VT_PROVIDER_TYPE"
 DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
 IS_ANALYSIS_WORKFLOW = "VT_IS_ANALYSIS_WORKFLOW"
 WORKFLOW_FILE_NAME_ENV = "VT_WORKFLOW_FILE_NAME"
@@ -167,39 +167,21 @@ def db_connection_string(_):
     ...
 
 
-DBType = Literal["in-memory", "mongo", "proxy"]
+ProviderType = Literal["local", "http"]
 
 
-@config_fixture(env=USE_IN_MEMORY_DATABASE_ENV,
-                default="in-memory")
-def db_type(_):
+@config_fixture(env=PROVIDER_TYPE_ENV,
+                default="local")
+def provider_type(_):
     """
-    The type of database to be used for the workflow run.
+    The type of data providers to be used for the workflow run.
 
     Options are:
-        - in-memory
-        - mongo
-        - proxy
+        - local
+        - http
 
-    A in-memory database is used by default.
-
-    If `mongo` or `proxy` is selected, then the `db_connection_string`
-    fixture will be used to connect to the database.
-    """
-    ...
-
-
-@config_fixture(env=DB_ACCESS_IN_WORKFLOW_ENV,
-                type_=bool,
-                default=False)
-def direct_db_access_allowed(_):
-    """
-    A flag indicating that the database should be made available within the
-    workflow code.
-
-    If True, the database will be available as a fixture `database`.
-    If False, the database will only be available within specific fixtures
-    which are part of the framework, such as `reads`.
+    `local` data providers use a local filesystem based database.
+    `http` data providers utilize an HTTP API which accesses the database on behalf of the workflow.
     """
     ...
 
