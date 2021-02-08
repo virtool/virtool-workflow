@@ -1,5 +1,3 @@
-import sys
-
 import filecmp
 import pytest
 from pathlib import Path
@@ -12,8 +10,8 @@ from virtool_workflow.config.configuration import \
 from virtool_workflow.data_model import Reference
 from virtool_workflow.fixtures.scope import FixtureScope
 
-EXPECTED_PATH = Path(sys.path[0]) / "tests/analysis/expected"
-FAKE_JSON_PATH = Path(sys.path[0]) / "tests/analysis/reference.json.gz"
+EXPECTED_PATH = Path(__file__).parent / "expected"
+FAKE_JSON_PATH = Path(__file__).parent / "reference.json.gz"
 
 OTU_IDS = ["625nhyu8", "n97b7lup", "uasjtbmg", "d399556a"]
 
