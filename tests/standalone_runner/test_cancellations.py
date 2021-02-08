@@ -1,23 +1,20 @@
 import asyncio
 
-from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.cli import init
 from virtool_workflow_runtime.hooks import on_start, on_job_cancelled
 
 
-async def test_watch_cancel_task_is_running():
+async def test_watch_cancel_task_is_running(loopless_main):
     @on_start(once=True)
     def check_watch_cancel_is_running(tasks):
         assert not tasks["watch_cancel"].done()
         check_watch_cancel_is_running.called = True
 
-    with FixtureScope() as fixtures:
-        await init(fixtures)
+    await loopless_main()
 
     assert check_watch_cancel_is_running.called
 
 
-async def test_running_jobs_get_cancelled():
+async def test_running_jobs_get_cancelled(loopless_main):
     @on_start(once=True)
     async def start_a_mock_job_and_send_cancel_signal_to_redis(redis, running_jobs, redis_cancel_list_name):
         running_jobs["1"] = asyncio.create_task(asyncio.sleep(10000))
@@ -36,6 +33,6 @@ async def test_running_jobs_get_cancelled():
         assert job_id not in running_jobs
         check_cancelled.called = True
 
-    with FixtureScope() as fixtures:
-        await init(fixtures)
-        assert check_cancelled.called
+    await loopless_main()
+
+    assert check_cancelled.called

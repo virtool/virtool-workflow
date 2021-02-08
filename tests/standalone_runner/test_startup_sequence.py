@@ -2,8 +2,6 @@ from aioredis import Redis
 from typing import AsyncGenerator
 
 from virtool_workflow.data_model import Job
-from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.cli import main, init
 from virtool_workflow_runtime.hooks import on_redis_connect, on_exit, on_init, on_start
 
 
@@ -12,7 +10,7 @@ def set_job_provider(scope):
     scope["job_provider"] = lambda id_: Job(id_, {})
 
 
-async def test_startup_sequence(monkeypatch):
+async def test_startup_sequence(loopless_main):
     @on_redis_connect(once=True)
     async def check_redis_connection(redis):
         assert isinstance(redis, Redis)
@@ -24,18 +22,13 @@ async def test_startup_sequence(monkeypatch):
         assert redis.closed
         check_redis_closed.called = True
 
-    async def mock_job_loop():
-        ...
-
-    monkeypatch.setattr("virtool_workflow_runtime.cli.job_loop", mock_job_loop)
-
-    await main()
+    await loopless_main()
 
     assert check_redis_connection.called
     assert check_redis_closed.called
 
 
-async def test_jobs_generator_is_instantiated():
+async def test_jobs_generator_is_instantiated(loopless_main):
     @on_start
     async def push_to_jobs_list(redis: Redis, redis_job_list_name: str, jobs: AsyncGenerator[Job, None]):
         await redis.lpush(redis_job_list_name, "1")
@@ -47,7 +40,6 @@ async def test_jobs_generator_is_instantiated():
 
         push_to_jobs_list.called = True
 
-    with FixtureScope() as fixtures:
-        await init(fixtures)
+    await loopless_main()
 
     assert push_to_jobs_list.called
