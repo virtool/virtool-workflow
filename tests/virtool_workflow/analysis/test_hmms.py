@@ -1,15 +1,13 @@
-import sys
-from typing import List
-
 import filecmp
 from pathlib import Path
 from shutil import copy
-from virtool_workflow.abc.data_providers.hmms import AbstractHmmsProvider
+from typing import List
 
+from virtool_workflow.abc.data_providers.hmms import AbstractHmmsProvider
 from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.data_model import HMM
 
-FAKE_PROFILES_PATH = Path(sys.path[0]) / "tests/analysis/profiles.hmm"
+FAKE_PROFILES_PATH = Path(__file__).parent / "profiles.hmm"
 
 
 def make_mock_hmm(id_, cluster):
@@ -50,4 +48,4 @@ async def test_hmms(runtime, run_in_executor, run_subprocess, tmpdir):
         for suffix in ["", ".h3p", ".h3m", ".h3i", ".h3f"]
     }
 
-    assert set((work_path/"hmms").iterdir()) == expected_paths
+    assert set((work_path / "hmms").iterdir()) == expected_paths
