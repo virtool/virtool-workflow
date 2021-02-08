@@ -1,5 +1,6 @@
 import asyncio
 import click
+import logging
 
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._redis
@@ -16,16 +17,29 @@ from virtool_workflow.config.configuration import load_config
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import hooks
 
+logger = logging.getLogger()
 runner_scope = FixtureScope()
 
 
+async def job_loop(jobs):
+    """Process incoming jobs."""
+    async for job in jobs:
+        logger.debug(f"Processing job {job}")
+        ...
+
+
 async def main(**config):
+    """The main entrypoint for the standalone workflow runner."""
     with runner_scope as fixtures:
         fixtures["error"] = None
         try:
             await hooks.on_init.trigger(fixtures)
             await load_config(**config, scope=fixtures)
             await hooks.on_start.trigger(fixtures)
+
+            loop = await fixtures.bind(job_loop)
+            await loop()
+
         except Exception as error:
             fixtures["error"] = error
             raise error
