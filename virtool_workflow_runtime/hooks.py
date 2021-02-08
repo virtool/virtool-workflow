@@ -22,7 +22,8 @@ on_exit = FixtureHook("on_exit", [], None)
 """
 Triggered before the process exists.
 
-If the process is exiting due to an exception, the `error` fixture will hold the exception.
+If the process is exiting due to an exception, the `error` fixture will hold the exception. If the process is 
+finishing successfully then the `error` fixture will be None.
 """
 
 on_job_cancelled = FixtureHook("on_job_cancelled", [str], None)
