@@ -17,6 +17,7 @@ async def watch_cancel(cancel_channel: AsyncGenerator, running_jobs: Dict[str, a
         if job_id in running_jobs:
             running_jobs[job_id].cancel(f"This job ({job_id}) has been cancelled via Redis.")
             del running_jobs[job_id]
+            logger.info(f"Cancelling job {job_id}.")
             await on_job_cancelled.trigger(scope, job_id)
 
 
@@ -25,6 +26,7 @@ def start_cancellation_watcher(redis: Redis, redis_cancel_list_name: str,
                                tasks: dict, running_jobs: Dict[str, asyncio.Task],
                                scope: FixtureScope):
     cancel_channel = redis_channel(redis, redis_cancel_list_name)
+    logger.debug("Creating watch_cancel task.")
     tasks["watch_cancel"] = asyncio.create_task(watch_cancel(cancel_channel, running_jobs, scope))
 
 
