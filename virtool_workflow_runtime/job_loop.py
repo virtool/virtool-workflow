@@ -20,6 +20,6 @@ async def job_loop(jobs, workflow_to_docker_image, scope):
 
 
 @on_exit
-def stop_all_containers(job_containers):
-    for container in job_containers.values():
+def stop_all_containers(containers):
+    for container in containers.values():
         container.stop()
