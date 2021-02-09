@@ -18,16 +18,10 @@ from virtool_workflow.cli_utils import apply_config_options
 from virtool_workflow.config.configuration import load_config
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import hooks
+from virtool_workflow_runtime.job_loop import job_loop
 
 logger = logging.getLogger()
 runner_scope = FixtureScope()
-
-
-async def job_loop(jobs):
-    """Process incoming jobs."""
-    async for job in jobs:
-        logger.debug(f"Processing job {job}")
-        ...
 
 
 async def init(fixtures, **config):
