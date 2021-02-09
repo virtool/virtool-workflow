@@ -35,6 +35,9 @@ tox-docker = "^2.0.0"
 [tool.poetry.scripts]
 workflow = "virtool_workflow.cli:cli_main"
 
+[tool.poetry.extras]
+docs = ["sphinx", "sphinx_rtd_theme", "sphinx-autoapi", "myst"]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
