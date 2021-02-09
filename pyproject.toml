@@ -31,16 +31,9 @@ pytest-xdist = "^2.2.0"
 pytest-cov = "^2.11.1"
 pytest-aiohttp = "0.3.0"
 tox-docker = "^2.0.0"
-Sphinx = { version = "^3.4.3", optional = true, extras = ["docs"] }
-sphinx-rtd-theme = { version = "^0.5.1", optional = true, extras = ["docs"] }
-sphinx-autoapi = { version = "^1.7.0", optional = true, extras = ["docs"] }
-myst = { version = "^1.0.4", optional = true, extras = ["docs"] }
 
 [tool.poetry.scripts]
 workflow = "virtool_workflow.cli:cli_main"
-
-[tool.poetry.extras]
-docs = ["Sphinx", "sphinx_rtd_theme", "sphinx-autoapi", "myst", "sphinx-autobuild"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

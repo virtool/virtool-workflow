@@ -329,23 +329,16 @@ tox
 
 For docstrings, use the [**Sphinx** docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
 
-#### pydoc-markdown
-
-[pydoc-markdown](https://pydoc-markdown.readthedocs.io/en/latest/) is used to generate python API documentation
-in markdown format. 
+To build the docs; 
 
 ```shell script
-pip install pydoc-markdown
+(cd sphinx && ./build-docs.sh)
 ```
 
-##### Building And Viewing the API Documentation
+To run a live-preview server;
 
-From the repository root directory run;
-
-```shell script
-pydoc-markdown --server --open
+```
+pip install sphinx-autobuild
+sphinx-autobuild sphinx sphinx/_docs/html
 ```
 
-This will open a browser window showing the rendered documentation.
-The source markdown files are available under `build/content/docs`. The 
-page will reload the page automatically when any of the source files change.

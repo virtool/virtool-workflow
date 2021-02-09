@@ -1,5 +1,4 @@
 #!/bin/sh
 
-pip install poetry
-poetry install --extras docs
+pip install sphinx sphinx-autoapi sphinx-rtd-theme myst myst_parser
 make html
