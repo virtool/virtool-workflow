@@ -280,6 +280,34 @@ functions. Any standard function provided will be wrapped into an async function
 
 ## Contributing
 
+### Poetry
+
+(poetry)[https://python-poetry.org/] is used to manage dependencies for the project.
+
+To build the distribution;
+
+```shell script
+poetry build
+```
+
+To install dependencies;
+
+```
+poetry install
+```
+
+To run a command in the context of the venv;
+
+```
+poetry run command
+```
+
+To add a new dependency; 
+
+```shell script
+poetry add `dependency`
+```
+
 ### Tests
 
 The testing framework used is [pytest](https://docs.pytest.org/en/stable/).
