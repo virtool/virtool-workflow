@@ -35,3 +35,29 @@ def no_sentry(_):
 def docker_daemon_url(_):
     """The url for the docker daemon. If not set, the docker daemon running on the host will be used."""
     ...
+
+
+@config_fixture(env="VT_SWARM_MANAGER_NODES", default=None)
+def swarm_manager_nodes(addresses):
+    if addresses:
+        return addresses.split(",")
+
+
+@config_fixture(env="VT_SWARM_JOIN_TOKEN", default=None)
+def swarm_join_token(_):
+    ...
+
+
+@config_fixture(env="VT_SWARM_LISTEN_ADDRESS", default=None)
+def swarm_listen_address(_):
+    ...
+
+
+@config_fixture(env="VT_SWARM_ADVERTISE_ADDRESS", default=None)
+def swarm_advertise_address(_):
+    ...
+
+
+@config_fixture(env="VT_SWARM_DATA_PATH_ADDRESS", default=None)
+def swarm_data_path_address(_):
+    ...
