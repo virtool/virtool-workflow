@@ -19,6 +19,13 @@ Triggered when a connection to redis is established.
 The :class:`aioredis.Redis` object is available as a fixture `redis`.
 """
 
+on_docker_connect = FixtureHook("on_docker_connect", [], None)
+"""
+Triggered when a connection to the docker daemon is established.
+
+The :class:`docker.DockerClient` object is available as a fixture `docker`.
+"""
+
 on_exit = FixtureHook("on_exit", [], None)
 """
 Triggered before the process exists.

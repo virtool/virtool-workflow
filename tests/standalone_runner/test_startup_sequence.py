@@ -2,7 +2,7 @@ from aioredis import Redis
 from typing import AsyncGenerator
 
 from virtool_workflow.data_model import Job
-from virtool_workflow_runtime.hooks import on_redis_connect, on_exit, on_init, on_start
+from virtool_workflow_runtime.hooks import on_redis_connect, on_exit, on_init, on_start, on_docker_connect
 
 
 @on_init
@@ -43,3 +43,16 @@ async def test_jobs_generator_is_instantiated(loopless_main):
     await loopless_main()
 
     assert push_to_jobs_list.called
+
+
+async def test_docker_client_available(loopless_main):
+    @on_docker_connect(once=True)
+    async def check_docker_client(docker):
+        assert docker
+        assert docker.ping()
+
+        check_docker_client.called = True
+
+    await loopless_main()
+
+    assert check_docker_client.called
