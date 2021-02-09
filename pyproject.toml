@@ -30,8 +30,7 @@ pytest-asyncio = "^0.14.0"
 pytest-xdist = "^2.2.0"
 pytest-cov = "^2.11.1"
 pytest-aiohttp = "0.3.0"
-
-[tool.poetry.extras]
+tox-docker = "^2.0.0"
 
 [tool.poetry.scripts]
 workflow = "virtool_workflow.cli:cli_main"
