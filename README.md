@@ -310,20 +310,19 @@ poetry add `dependency`
 
 ### Tests
 
-The testing framework used is [pytest](https://docs.pytest.org/en/stable/).
+The tests are written using [pytest](https://docs.pytest.org/en/stable/) and run using `tox`.
 
-Run the tests using tox:
+To install tox;
+
+```shell script
+pip install tox tox-docker
+```
+
+To run the tests 
 ```shell script
 tox
 ```
 
-The test suite requires MongoDB and Redis to be available. The [test.sh](tests/test.sh)
-script will run MongoDB and Redis using Docker for the duration of the tests. Any
-arguments will be passed directly to pytest. 
-
-```shell script
-./tests/test.sh 
-```
 
 
 ### Documentation
