@@ -4,6 +4,7 @@ REDIS_CONNECTION_STRING_ENV = "VT_REDIS_CONNECTION_STRING"
 REDIS_JOB_LIST_NAME_ENV = "VT_REDIS_JOB_LIST_NAME"
 REDIS_CANCEL_LIST_NAME_ENV = "VT_CANCEL_LIST_NAME"
 NO_SENTRY_ENV = "VT_NO_SENTRY"
+DOCER_DAEMON_ENV = "VT_DOCKER_DAEMON"
 
 
 @config_fixture(env=REDIS_CONNECTION_STRING_ENV, default="redis://localhost:6379")
@@ -27,4 +28,10 @@ def redis_cancel_list_name(_):
 @config_fixture(env=NO_SENTRY_ENV, default=True)
 def no_sentry(_):
     """A flag indicating whether or not to run sentry checks."""
+    ...
+
+
+@config_fixture(env=DOCER_DAEMON_ENV, default=None)
+def docker_daemon_url(_):
+    """The url for the docker daemon. If not set, the docker daemon running on the host will be used."""
     ...

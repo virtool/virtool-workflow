@@ -318,9 +318,15 @@ To install tox;
 pip install tox tox-docker
 ```
 
-To run the tests 
+To run the tests;
 ```shell script
 tox
+
+```
+
+Forward arguments to pytest;
+```shell script
+tox -- {pytest args}
 ```
 
 

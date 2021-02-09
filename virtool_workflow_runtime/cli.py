@@ -3,6 +3,8 @@ import click
 import logging
 
 # noinspection PyUnresolvedReferences
+import virtool_workflow_runtime._docker
+# noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._redis
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.cancellations
