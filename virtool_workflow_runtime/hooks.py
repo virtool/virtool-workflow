@@ -26,6 +26,11 @@ Triggered when a connection to the docker daemon is established.
 The :class:`docker.DockerClient` object is available as a fixture `docker`.
 """
 
+on_docker_event = FixtureHook("on_docker_event", [dict], None)
+"""
+Triggered when there is an event emitted by the docker daemon.
+"""
+
 on_join_swarm = FixtureHook("on_join_swarm", [], None)
 """
 Triggered when the docker engine is connected to an existing docker swarm.

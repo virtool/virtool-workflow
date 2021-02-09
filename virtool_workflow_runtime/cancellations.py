@@ -33,3 +33,4 @@ def start_cancellation_watcher(redis: Redis, redis_cancel_list_name: str,
 @on_exit
 def cancel_cancellation_watcher(tasks: Dict[str, asyncio.Task]):
     tasks["watch_cancel"].cancel()
+    del tasks["watch_cancel"]

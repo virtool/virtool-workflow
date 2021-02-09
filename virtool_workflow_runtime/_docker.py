@@ -1,9 +1,11 @@
+import asyncio
 import docker
 import logging
 from typing import List
 
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.hooks import on_load_config, on_docker_connect, on_join_swarm, on_init
+from virtool_workflow_runtime.hooks import on_load_config, on_docker_connect, on_join_swarm, on_init, on_docker_event, \
+    on_exit
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,7 @@ async def join_swarm(docker: docker.DockerClient,
 
 async def start_workflow_container(client: docker.DockerClient,
                                    image: str,
-                                   options: List[str]):
+                                   *options: str):
     """
     Start a workflow container.
 
@@ -58,4 +60,26 @@ async def start_workflow_container(client: docker.DockerClient,
     :param image: The name of the container image for the workflow.
     :param options: Any options which should be provided to the workflow container.
     """
-    return client.containers.run(image, ["workflow", "run", *options], detach=True)
+    return client.containers.run(image, [*options], detach=True)
+
+
+async def async_docker_events(client: docker.DockerClient):
+    for event in client.events(decode=True):
+        yield event
+
+
+async def docker_event_watcher(client: docker.DockerClient, scope: FixtureScope):
+    logger.debug("Starting docker event watcher.")
+    async for event in async_docker_events(client):
+        await on_docker_event.trigger(scope, event)
+
+
+@on_docker_connect
+async def start_docker_event_watcher(docker, scope, tasks):
+    tasks["docker_event_watcher"] = asyncio.create_task(docker_event_watcher(docker, scope))
+
+
+@on_exit
+async def cancel_docker_event_watcher(tasks):
+    tasks["docker_event_watcher"].cancel()
+    del tasks["docker_event_watcher"]
