@@ -26,6 +26,11 @@ Triggered when a connection to the docker daemon is established.
 The :class:`docker.DockerClient` object is available as a fixture `docker`.
 """
 
+on_join_swarm = FixtureHook("on_join_swarm", [], None)
+"""
+Triggered when the docker engine is connected to an existing docker swarm.
+"""
+
 on_exit = FixtureHook("on_exit", [], None)
 """
 Triggered before the process exists.
@@ -42,5 +47,7 @@ __all__ = [
     "on_redis_connect",
     "on_init",
     "on_load_config",
-    "on_job_cancelled"
+    "on_job_cancelled",
+    "on_docker_connect",
+    "on_join_swarm",
 ]
