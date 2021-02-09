@@ -3,9 +3,14 @@ import logging
 from typing import List
 
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.hooks import on_load_config, on_docker_connect, on_join_swarm
+from virtool_workflow_runtime.hooks import on_load_config, on_docker_connect, on_join_swarm, on_init
 
 logger = logging.getLogger(__name__)
+
+
+@on_init
+def instantiate_job_container_dict(scope):
+    scope["containers"] = {}
 
 
 @on_load_config
@@ -41,3 +46,16 @@ async def join_swarm(docker: docker.DockerClient,
         await on_join_swarm.trigger(scope)
 
     logger.info("No docker swarm configured, using a single docker engine only.")
+
+
+async def start_workflow_container(client: docker.DockerClient,
+                                   image: str,
+                                   options: List[str]):
+    """
+    Start a workflow container.
+
+    :param client: The docker client.
+    :param image: The name of the container image for the workflow.
+    :param options: Any options which should be provided to the workflow container.
+    """
+    return client.containers.run(image, ["workflow", "run", *options], detach=True)
