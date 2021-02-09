@@ -25,7 +25,9 @@ jobs:
         run: pip install poetry
 
       - name: Install tox
-        run: pip install tox
+        run: |
+          pip install tox
+          pip install tox-docker
 
       - name: Install Bowtie2
         run: |
