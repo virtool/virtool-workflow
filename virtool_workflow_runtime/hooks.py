@@ -61,7 +61,7 @@ def on_container_exit(target):
     """Respond to a particular docker container exiting."""
 
     def _on_specific_container_exit(callback):
-        @on_docker_container_exit
+        @on_docker_container_exit(once=True)
         async def _watch_for_container(container):
             if container == target:
                 await coerce_to_coroutine_function(callback)()

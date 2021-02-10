@@ -8,6 +8,5 @@ logger = logging.getLogger(__name__)
 
 @on_init
 def create_running_jobs_list(scope: FixtureScope):
-    logger.debug("Creating `tasks` and `running_jobs` dictionaries.")
+    logger.debug("Creating `tasks` dictionaries.")
     scope["tasks"] = {}
-    scope["running_jobs"] = {}

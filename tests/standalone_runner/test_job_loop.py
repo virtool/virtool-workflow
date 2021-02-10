@@ -34,7 +34,7 @@ async def test_containers_are_started_when_jobs_are_given_to_redis():
 async def test_containers_are_stopped_when_jobs_are_cancelled():
     @on_init(once=True)
     def set_job_provider(scope):
-        scope["job_provider"] = lambda id_: Job(id_, {}, task="ubuntu")
+        scope["job_provider"] = lambda id_: Job(id_, {}, task="loop")
 
     @on_redis_connect(once=True)
     async def submit_a_job_and_cancel(redis, redis_job_list_name, redis_cancel_list_name):

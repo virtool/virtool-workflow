@@ -3,6 +3,7 @@ import docker
 import logging
 from pathlib import Path
 
+from virtool_workflow.data_model import Job
 from virtool_workflow_runtime._docker import start_workflow_container
 from virtool_workflow_runtime.hooks import on_start, on_init, on_docker_event, on_docker_container_exit
 
