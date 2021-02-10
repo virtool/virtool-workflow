@@ -1,3 +1,5 @@
+from docker.models.containers import Container
+
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 
 on_load_config = FixtureHook("on_load_config", [], None)
@@ -31,6 +33,13 @@ on_docker_event = FixtureHook("on_docker_event", [dict], None)
 Triggered when there is an event emitted by the docker daemon.
 """
 
+on_docker_container_exit = FixtureHook("on_docker_container_exit", [Container], None)
+"""
+Triggered when the `die` event is emitted by the docker daemon.
+
+Callbacks to this hook are passed the container that died as their first argument.
+"""
+
 on_join_swarm = FixtureHook("on_join_swarm", [], None)
 """
 Triggered when the docker engine is connected to an existing docker swarm.
@@ -54,5 +63,7 @@ __all__ = [
     "on_load_config",
     "on_job_cancelled",
     "on_docker_connect",
+    "on_docker_event",
+    "on_docker_container_exit",
     "on_join_swarm",
 ]
