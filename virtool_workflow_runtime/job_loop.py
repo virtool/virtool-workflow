@@ -17,8 +17,8 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers)
     container = await start_workflow_container(docker, containers, image, *args)
 
     @on_container_exit(container)
-    def _handle_container_failure():
-        if not job_is_finished(job):
+    async def _handle_container_failure():
+        if not await job_is_finished(job):
             await process_job(job, image, args, docker, containers)
 
 
@@ -28,7 +28,7 @@ async def job_loop(jobs, workflow_to_docker_image, scope):
     async for job in jobs:
         logger.debug(f"Processing job {job}")
         image = workflow_to_docker_image[job.task]
-        await _process_job(job, image)
+        await _process_job(job, image, [])
 
 
 @on_exit
