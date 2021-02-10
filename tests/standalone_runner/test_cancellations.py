@@ -21,7 +21,7 @@ async def test_watch_cancel_task_is_running(loopless_main):
 
 async def test_running_jobs_get_cancelled(loopless_main):
     @on_start(once=True)
-    async def start_a_mock_job_and_send_cancel_signal_to_redis(redis, running_jobs, redis_cancel_list_name):
+    async def start_a_mock_job_and_send_cancel_signal_to_redis(redis, redis_cancel_list_name):
         # Allow some time for the `watch_cancel` task to prepare before publishing.
         await asyncio.sleep(0.5)
 

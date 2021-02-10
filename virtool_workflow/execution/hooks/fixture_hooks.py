@@ -24,9 +24,20 @@ class FixtureHook(Hook):
         logger.debug(f"Triggered hook {self.name}")
         scope["scope"] = scope
 
-        _callbacks = [await scope.bind(callback, strict=not bool(args)) for callback in self.callbacks]
+        async def _bind(callback_: Callable):
+            logger.debug(f"Binding fixtures to callback {callback_}")
+            return await scope.bind(callback_, strict=not args)
+
+        _callbacks = [await _bind(callback) for callback in self.callbacks]
         _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
                       if len(signature(callback).parameters) == 0 else callback
                       for callback in _callbacks]
 
-        return [await callback(*args, **kwargs) for callback in _callbacks]
+        async def _call(callback_):
+            logger.debug(f"Calling {callback_}")
+            result = await callback_(*args, **kwargs)
+            if result:
+                logger.debug(f"Callback {callback_} had result {result}.")
+            return result
+
+        return [await _call(callback) for callback in _callbacks]
