@@ -1,11 +1,14 @@
+from asyncio import AbstractEventLoop
+
 import asyncio
+import concurrent.futures
 import docker
 import logging
 from typing import List
 
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow_runtime.hooks import on_load_config, on_docker_connect, on_join_swarm, on_init, on_docker_event, \
-    on_exit
+from virtool_workflow_runtime._threading import run_async_function_in_thread
+from virtool_workflow_runtime.hooks import on_load_config, on_docker_connect, on_join_swarm, on_init, on_docker_event
 
 logger = logging.getLogger(__name__)
 
@@ -63,23 +66,33 @@ async def start_workflow_container(client: docker.DockerClient,
     return client.containers.run(image, [*options], detach=True)
 
 
-async def async_docker_events(client: docker.DockerClient):
-    for event in client.events(decode=True):
-        yield event
+async def docker_event_watcher(client: docker.DockerClient,
+                               scope: FixtureScope,
+                               main_thread_event_loop: AbstractEventLoop):
+    """
+    Trigger the `on_docker_event` hook for each incoming docker event.
 
+    :func:`DockerClient.events()` returns a generator yielding docker events. This generator
+    is blocking so it can't be used with the main asyncio event loop. As such this function is
+    intended to be run in a separate thread.
 
-async def docker_event_watcher(client: docker.DockerClient, scope: FixtureScope):
+    The `on_docker_event` hook is triggered using :func:`asyncio.run_coroutine_threadsafe` to avoid thread safety
+    issues within the `on_docker_event` callback functions. Though a separate thread is monitoring the docker events,
+    the hook callbacks are being executed in the main thread and are scheduled by the asyncio event loop.
+
+    :param client: The docker client
+    :param scope: The :class:`FixtureScope` which should be used when triggering the `on_docker_event` hook.
+    :param main_thread_event_loop: The asyncio event loop.
+    """
     logger.debug("Starting docker event watcher.")
-    async for event in async_docker_events(client):
-        await on_docker_event.trigger(scope, event)
+    for event in client.events(decode=True):
+        if main_thread_event_loop.is_closed():
+            return
+        future = asyncio.run_coroutine_threadsafe(on_docker_event.trigger(scope, event), main_thread_event_loop)
+        concurrent.futures.wait((future,))
 
 
 @on_docker_connect
-async def start_docker_event_watcher(docker, scope, tasks):
-    tasks["docker_event_watcher"] = asyncio.create_task(docker_event_watcher(docker, scope))
-
-
-@on_exit
-async def cancel_docker_event_watcher(tasks):
-    tasks["docker_event_watcher"].cancel()
-    del tasks["docker_event_watcher"]
+async def start_docker_event_watcher(docker, scope):
+    """Start a new thread which watches for docker events."""
+    run_async_function_in_thread(docker_event_watcher(docker, scope, asyncio.get_running_loop()))
