@@ -1,8 +1,10 @@
+import asyncio
 import docker
+import logging
 from pathlib import Path
 
 from virtool_workflow_runtime._docker import start_workflow_container
-from virtool_workflow_runtime.hooks import on_start, on_init
+from virtool_workflow_runtime.hooks import on_start, on_init, on_docker_event
 
 TEST_IMAGE_MAP_JSON = Path(__file__).parent / "default_images.json"
 
@@ -36,4 +38,18 @@ async def test_start_container():
 
 
 async def test_docker_events_trigger_on_docker_event_hook(loopless_main):
-    await loopless_main
+    @on_docker_event(once=True)
+    def check_docker_event_triggered(event):
+        logging.debug(f"Docker Event: {event}")
+        check_docker_event_triggered.called = True
+
+    @on_start(once=True)
+    async def start_a_container(docker):
+        container = docker.containers.run("ubuntu:latest", detach=True)
+        container.stop()
+
+        await asyncio.sleep(1)
+
+    await loopless_main()
+
+    assert check_docker_event_triggered.called
