@@ -3,7 +3,7 @@ from typing import List
 
 from virtool_workflow.data_model import Job
 from virtool_workflow_runtime._docker import start_workflow_container
-from virtool_workflow_runtime.hooks import on_exit, on_container_exit
+from virtool_workflow_runtime.hooks import on_exit, on_container_exit, on_job_cancelled
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,11 @@ async def job_is_finished(job) -> bool:
 
 async def process_job(job: Job, image: str, args: List[str], docker, containers):
     container = await start_workflow_container(docker, containers, image, *args)
+
+    @on_job_cancelled
+    async def stop_container_when_job_is_cancelled(job_id):
+        if job_id == job._id:
+            container.stop()
 
     @on_container_exit(container)
     async def _handle_container_failure():
