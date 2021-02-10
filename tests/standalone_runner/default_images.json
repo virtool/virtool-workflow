@@ -1,4 +1,4 @@
 {
   "test": "hello-world",
-  "ubuntu": "ubuntu:latest"
+  "loop": "enhariharan/infinite-loop"
 }
