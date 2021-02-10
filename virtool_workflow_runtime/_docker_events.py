@@ -44,8 +44,11 @@ async def start_docker_event_watcher(docker, scope):
 
 
 @on_docker_event
-async def _remove_dead_container_and_trigger_on_container_exit_hook(event, containers):
-    if event["action"] == "die":
-        dead_container = containers[event["id"]]
-        del containers[event["id"]]
-        await on_docker_container_exit(dead_container)
+async def _remove_dead_container_and_trigger_on_container_exit_hook(event, containers, scope):
+    """Filter through incoming docker events and trigger `on_docker_container_exit` hook."""
+    if event["Action"] == "die":
+        if event["id"] in containers:
+            dead_container = containers[event["id"]]
+            logger.info(f"{dead_container} running {dead_container.image} has exited.")
+            del containers[event["id"]]
+            await on_docker_container_exit.trigger(scope, dead_container)
