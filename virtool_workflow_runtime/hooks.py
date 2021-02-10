@@ -1,5 +1,6 @@
 from docker.models.containers import Container
 
+from virtool_workflow.data_model import Job
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 from virtool_workflow.utils import coerce_to_coroutine_function
 
@@ -56,6 +57,9 @@ finishing successfully then the `error` fixture will be None.
 
 on_job_cancelled = FixtureHook("on_job_cancelled", [str], None)
 
+on_job_processed = FixtureHook("on_job_processed", [Job], None)
+"""Triggered when a job is processed and it's docker container is started."""
+
 
 def on_container_exit(target):
     """Respond to a particular docker container exiting."""
@@ -70,15 +74,16 @@ def on_container_exit(target):
 
 
 __all__ = [
-    "on_start",
-    "on_exit",
-    "on_redis_connect",
-    "on_init",
-    "on_load_config",
-    "on_job_cancelled",
-    "on_docker_connect",
-    "on_docker_event",
-    "on_docker_container_exit",
     "on_container_exit",
+    "on_docker_connect",
+    "on_docker_container_exit",
+    "on_docker_event",
+    "on_exit",
+    "on_init",
+    "on_job_cancelled",
+    "on_job_processed",
     "on_join_swarm",
+    "on_load_config",
+    "on_redis_connect",
+    "on_start",
 ]

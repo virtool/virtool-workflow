@@ -62,5 +62,6 @@ async def start_workflow_container(client: docker.DockerClient,
     :param options: Any options which should be provided to the workflow container.
     """
     container = client.containers.run(image, [*options], detach=True)
+    logger.info(f"Started {container} running {container.image}.")
     containers[container.id] = container
     return container

@@ -1,5 +1,4 @@
 import asyncio
-import concurrent.futures
 import docker
 import logging
 from asyncio.events import AbstractEventLoop
@@ -30,11 +29,11 @@ async def docker_event_watcher(client: docker.DockerClient,
     :param main_thread_event_loop: The asyncio event loop.
     """
     logger.debug("Starting docker event watcher.")
+
     for event in client.events(decode=True):
         if main_thread_event_loop.is_closed():
             return
-        future = asyncio.run_coroutine_threadsafe(on_docker_event.trigger(scope, event), main_thread_event_loop)
-        concurrent.futures.wait((future,))
+        asyncio.run_coroutine_threadsafe(on_docker_event.trigger(scope, event), main_thread_event_loop)
 
 
 @on_docker_connect

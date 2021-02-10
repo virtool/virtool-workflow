@@ -3,7 +3,7 @@ from typing import List
 
 from virtool_workflow.data_model import Job
 from virtool_workflow_runtime._docker import start_workflow_container
-from virtool_workflow_runtime.hooks import on_exit, on_container_exit, on_job_cancelled
+from virtool_workflow_runtime.hooks import on_exit, on_container_exit, on_job_cancelled, on_job_processed
 
 logger = logging.getLogger(__name__)
 
@@ -13,18 +13,28 @@ async def job_is_finished(job) -> bool:
     return True
 
 
-async def process_job(job: Job, image: str, args: List[str], docker, containers):
+async def process_job(job: Job, image: str, args: List[str], docker, containers, scope):
+    """
+    Process a job.
+
+    1. Start the job's associated workflow container
+    2. Set handlers for events relating to that container
+    3. Trigger `on_job_processed` hook
+    """
     container = await start_workflow_container(docker, containers, image, *args)
 
     @on_job_cancelled
-    async def stop_container_when_job_is_cancelled(job_id):
-        if job_id == job._id:
-            container.stop()
+    async def stop_container_when_job_is_cancelled(id_):
+        if id_ == job._id:
+            logger.debug(f"Stopping {container} running {container.image} due to cancellation of {id_}.")
+            container.stop(timeout=3)
 
     @on_container_exit(container)
     async def _handle_container_failure():
-        if not await job_is_finished(job):
-            await process_job(job, image, args, docker, containers)
+        if await job_is_finished(job):
+            logger.info(f"Job {job} is finished.")
+
+    await on_job_processed.trigger(scope, job)
 
 
 async def job_loop(jobs, workflow_to_docker_image, scope):
