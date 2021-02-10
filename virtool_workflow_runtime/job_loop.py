@@ -1,13 +1,25 @@
 import logging
+from typing import List
 
 from virtool_workflow.data_model import Job
-from virtool_workflow_runtime.hooks import on_exit
+from virtool_workflow_runtime._docker import start_workflow_container
+from virtool_workflow_runtime.hooks import on_exit, on_container_exit
 
 logger = logging.getLogger(__name__)
 
 
-async def process_job(job: Job, image: str, command: str, docker, job_containers):
-    job_containers[job] = docker.containers.run(image, command, detach=True)
+async def job_is_finished(job) -> bool:
+    logger.warning(f"function {job_is_finished} is not implemented.")
+    return True
+
+
+async def process_job(job: Job, image: str, args: List[str], docker, containers):
+    container = await start_workflow_container(docker, containers, image, *args)
+
+    @on_container_exit(container)
+    def _handle_container_failure():
+        if not job_is_finished(job):
+            await process_job(job, image, args, docker, containers)
 
 
 async def job_loop(jobs, workflow_to_docker_image, scope):
