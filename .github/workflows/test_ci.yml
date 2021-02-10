@@ -14,21 +14,20 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-   
+
     container:
       image: python:3.9-buster
-    
-    services:
-      redis: 
-        image: redis:6.0
-      mongo:
-        image: mongo:4.4
-        
+
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install poetry
+        run: pip install poetry
+
       - name: Install tox
-        run: pip install tox
+        run: |
+          pip install tox
+          pip install tox-docker
 
       - name: Install Bowtie2
         run: |
@@ -46,12 +45,9 @@ jobs:
           make install
           cd ..
           ln -s $GITHUB_WORKSPACE/hmmer/bin/hmm* /usr/local/bin
-        
+
       - name: Run tox
         run: tox
-        env:
-          VT_DB_CONNECTION_STRING: mongodb://mongo:27017
-          VT_REDIS_CONNECTION_STRING: redis://redis:6379/1
 
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2

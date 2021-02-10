@@ -1,4 +1,4 @@
 #!/bin/sh
 
-pip install sphinx myst-parser sphinx-autoapi sphinx-rtd-theme
+pip install sphinx sphinx-autoapi sphinx-rtd-theme myst myst_parser
 make html

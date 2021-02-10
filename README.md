@@ -280,45 +280,65 @@ functions. Any standard function provided will be wrapped into an async function
 
 ## Contributing
 
+### Poetry
+
+(poetry)[https://python-poetry.org/] is used to manage dependencies for the project.
+
+To build the distribution;
+
+```shell script
+poetry build
+```
+
+To install dependencies;
+
+```
+poetry install
+```
+
+To run a command in the context of the venv;
+
+```
+poetry run command
+```
+
+To add a new dependency; 
+
+```shell script
+poetry add `dependency`
+```
+
 ### Tests
 
-The testing framework used is [pytest](https://docs.pytest.org/en/stable/).
+The tests are written using [pytest](https://docs.pytest.org/en/stable/) and run using `tox`.
 
-Run the tests using tox:
+To install tox;
+
+```shell script
+pip install tox tox-docker
+```
+
+To run the tests 
 ```shell script
 tox
 ```
 
-The test suite requires MongoDB and Redis to be available. The [test.sh](tests/test.sh)
-script will run MongoDB and Redis using Docker for the duration of the tests. Any
-arguments will be passed directly to pytest. 
-
-```shell script
-./tests/test.sh 
-```
 
 
 ### Documentation
 
 For docstrings, use the [**Sphinx** docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
 
-#### pydoc-markdown
-
-[pydoc-markdown](https://pydoc-markdown.readthedocs.io/en/latest/) is used to generate python API documentation
-in markdown format. 
+To build the docs; 
 
 ```shell script
-pip install pydoc-markdown
+(cd sphinx && ./build-docs.sh)
 ```
 
-##### Building And Viewing the API Documentation
+To run a live-preview server;
 
-From the repository root directory run;
-
-```shell script
-pydoc-markdown --server --open
+```
+pip install sphinx-autobuild
+sphinx-autobuild sphinx sphinx/_docs/html
 ```
 
-This will open a browser window showing the rendered documentation.
-The source markdown files are available under `build/content/docs`. The 
-page will reload the page automatically when any of the source files change.
