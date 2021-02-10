@@ -41,7 +41,9 @@ async def main(**config):
             await init(fixtures, **config)
 
             loop = await fixtures.bind(job_loop)
-            await loop()
+            fixtures["tasks"]["job_loop"] = asyncio.create_task(loop())
+
+            await asyncio.gather(fixtures["tasks"]["job_loop"])
 
         except Exception as error:
             fixtures["error"] = error

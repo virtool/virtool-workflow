@@ -62,7 +62,7 @@ def on_container_exit(target):
 
     def _on_specific_container_exit(callback):
         @on_docker_container_exit
-        def _watch_for_container(container):
+        async def _watch_for_container(container):
             if container == target:
                 await coerce_to_coroutine_function(callback)()
 
