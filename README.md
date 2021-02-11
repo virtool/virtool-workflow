@@ -320,17 +320,17 @@ pip install tox tox-docker
 
 To run the tests;
 ```shell script
-tox -e docker
+tox
 ```
 
 Forward arguments to pytest;
 ```shell script
-tox -e docker -- {pytest args}
+tox -- {pytest args}
 ```
 
 To view log output in pytest;
 ```
-tox -e docker -- --log-cli-level=DEBUG
+tox -- --log-cli-level=DEBUG
 ```
 
 
