@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import List
 
@@ -23,6 +24,8 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers,
     """
     container = await start_workflow_container(docker, containers, image, *args)
 
+    container_finished_future = asyncio.get_running_loop().create_future()
+
     @on_job_cancelled
     async def stop_container_when_job_is_cancelled(id_):
         if id_ == job._id:
@@ -33,15 +36,18 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers,
     async def _handle_container_failure():
         if await job_is_finished(job):
             logger.info(f"Job {job} is finished.")
+        container_finished_future.set_result(None)
 
     await on_job_processed.trigger(scope, job)
+
+    await container_finished_future
 
 
 async def job_loop(jobs, workflow_to_docker_image, scope):
     """Process incoming jobs."""
     _process_job = await scope.bind(process_job, strict=False)
     async for job in jobs:
-        logger.debug(f"Processing job {job}")
+        logger.info(f"Processing job {job}")
         image = workflow_to_docker_image[job.task]
         await _process_job(job, image, [])
 
