@@ -60,6 +60,9 @@ on_job_cancelled = FixtureHook("on_job_cancelled", [str], None)
 on_job_processed = FixtureHook("on_job_processed", [Job], None)
 """Triggered when a job is processed and it's docker container is started."""
 
+on_job_finished = FixtureHook("on_job_finished", [Job], None)
+"""Triggered when a job is finished and it's docker container has exited."""
+
 
 def on_container_exit(target):
     """Respond to a particular docker container exiting."""
@@ -82,6 +85,7 @@ __all__ = [
     "on_init",
     "on_job_cancelled",
     "on_job_processed",
+    "on_job_finished",
     "on_join_swarm",
     "on_load_config",
     "on_redis_connect",

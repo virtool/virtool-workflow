@@ -7,7 +7,7 @@ from pathlib import Path
 from virtool_workflow.data_model import Job
 from virtool_workflow_runtime.cli import main
 from virtool_workflow_runtime.hooks import on_init, on_docker_container_exit, on_redis_connect, on_job_processed, \
-    on_start
+    on_start, on_job_finished, on_exit
 
 TEST_IMAGE_MAP_JSON = Path(__file__).parent / "default_images.json"
 
@@ -74,7 +74,7 @@ async def test_runner_does_not_execute_multiple_jobs_at_once():
         await redis.lpush(redis_job_list_name, "test_job")
         await redis.lpush(redis_job_list_name, "second_test_job")
 
-    @on_job_processed
+    @on_job_finished(until=on_exit)
     async def check_jobs(job, tasks):
         nonlocal test_job_processed
         nonlocal second_test_job_processed
@@ -86,7 +86,6 @@ async def test_runner_does_not_execute_multiple_jobs_at_once():
         logger.info(f"{job} {test_job_processed}, {second_test_job_processed}")
 
         if test_job_processed and second_test_job_processed:
-            on_job_processed.callbacks.remove(check_jobs)
             tasks["job_loop"].cancel()
 
     with suppress(asyncio.CancelledError):

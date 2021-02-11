@@ -47,7 +47,7 @@ jobs:
           ln -s $GITHUB_WORKSPACE/hmmer/bin/hmm* /usr/local/bin
 
       - name: Run tox
-        run: tox -- --log-cli-level=DEBUG
+        run: tox -- --log-cli-level=INFO
 
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2
