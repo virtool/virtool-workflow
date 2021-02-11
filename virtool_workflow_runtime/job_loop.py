@@ -34,9 +34,9 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers,
 
     @on_container_exit(container)
     async def _handle_container_failure():
-        if await job_is_finished(job):
-            logger.info(f"Job {job} is finished.")
-        container_finished_future.set_result(None)
+        container_exit = container.wait()
+        logger.info(f"{container} exited with status code: {container_exit['StatusCode']}")
+        container_finished_future.set_result(container_exit)
 
     await on_job_processed.trigger(scope, job)
 
