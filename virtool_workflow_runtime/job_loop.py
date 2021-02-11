@@ -4,7 +4,8 @@ from typing import List
 
 from virtool_workflow.data_model import Job
 from virtool_workflow_runtime._docker import start_workflow_container
-from virtool_workflow_runtime.hooks import on_exit, on_container_exit, on_job_cancelled, on_job_processed
+from virtool_workflow_runtime.hooks import on_exit, on_container_exit, on_job_cancelled, on_job_processed, \
+    on_job_finished
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,8 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers,
     await on_job_processed.trigger(scope, job)
 
     await container_finished_future
+
+    await on_job_finished.trigger(scope, job)
 
 
 async def job_loop(jobs, workflow_to_docker_image, scope):
