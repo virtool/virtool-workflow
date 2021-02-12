@@ -1,4 +1,6 @@
 """Create hooks for triggering and responding to events."""
+from contextlib import suppress
+
 import asyncio
 import logging
 import pprint
@@ -78,14 +80,18 @@ class Hook:
         return _temporary_callback
 
     @staticmethod
-    async def _trigger(callbacks, *args, **kwargs):
+    async def _trigger(callbacks, *args, suppress_errors=False, **kwargs):
+
         async def call_callback(callback):
             logger.info(f"Calling {callback}.")
+            if suppress_errors:
+                with suppress(Exception):
+                    return await callback(*args, **kwargs)
             return await callback(*args, **kwargs)
 
         return await asyncio.gather(*[call_callback(callback) for callback in callbacks])
 
-    async def trigger(self, *args, **kwargs) -> List[Any]:
+    async def trigger(self, *args, suppress=False, **kwargs) -> List[Any]:
         """
         Trigger this Hook.
 
@@ -93,8 +99,10 @@ class Hook:
         will be called using the arguments supplied to this function.
 
         :param args: Positional Arguments for this Hook.
+        :param suppress: If True, any exceptions raised from callback functions will be suppressed.
         :param kwargs: Keyword arguments for this Hook.
         :return List[Any]: The results of each callback function.
         """
-        logger.debug(f"Triggering {self.name} hook with callback functions: {pprint.pformat(self.callbacks)}")
-        return await self._trigger(self.callbacks, *args, **kwargs)
+        logger.debug(
+            f"Triggering {self.name} hook with callback functions:\n {pprint.pformat(self.callbacks, indent=4)}")
+        return await self._trigger(self.callbacks, *args, suppress_errors=suppress, **kwargs)

@@ -1,4 +1,5 @@
 import logging
+import pprint
 from inspect import signature
 from typing import List, Any, Callable
 
@@ -19,8 +20,16 @@ class FixtureHook(Hook):
         self.callbacks.append(callback_)
         return callback_
 
-    async def trigger(self, scope: FixtureScope, *args, **kwargs) -> List[Any]:
-        """Bind fixtures from `scope` to each callback function and invoke them."""
+    async def trigger(self, scope: FixtureScope, *args, suppress=False, **kwargs) -> List[Any]:
+        """
+        Bind fixtures from `scope` to each callback function and invoke them.
+
+        :param scope: The :class:`FixtureScope` to use to bind fixtures.
+        :param args: Any positional arguments to pass to the callback functions, after fixtures have been bound.
+        :param suppress: If true, errors raised within the callback functions will be suppressed.
+        """
+        logger.debug(
+            f"Triggering {self.name} hook with callback functions: \n{pprint.pformat(self.callbacks, indent=4)}")
         if "scope" not in scope:
             scope["scope"] = scope
 
@@ -33,4 +42,4 @@ class FixtureHook(Hook):
                       if len(signature(callback).parameters) == 0 else callback
                       for callback in _callbacks]
 
-        return await self._trigger(_callbacks, *args, **kwargs)
+        return await self._trigger(_callbacks, *args, suppress_errors=suppress, **kwargs)
