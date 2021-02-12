@@ -1,12 +1,13 @@
 """Execute workflows and manage the execution context."""
-import logging
-import pprint
 import sys
 import traceback
 from enum import Enum
+
+import logging
+import pprint
 from typing import Optional, Callable, Coroutine, Any, Dict
 
-from virtool_workflow.execution import hooks
+from virtool_workflow import hooks
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.workflow import Workflow
 
@@ -123,7 +124,7 @@ class WorkflowExecution:
             if count_steps:
                 self.current_step += 1
                 self.progress = float(self.current_step) / \
-                    float(len(self.workflow.steps))
+                                float(len(self.workflow.steps))
             update = await self._run_step(step)
             if count_steps:
                 await hooks.on_workflow_step.trigger(self.scope, update)

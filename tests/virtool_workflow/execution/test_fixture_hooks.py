@@ -1,11 +1,10 @@
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 from virtool_workflow.fixtures.scope import FixtureScope
 
-test_hook = FixtureHook("test_hook", [str, str], None)
+test_hook = FixtureHook("test_hook")
 
 
 async def test_trigger():
-
     hook_triggered = False
 
     @test_hook
@@ -22,5 +21,3 @@ async def test_trigger():
         await test_hook.trigger(scope, "item1", "item2")
 
     assert hook_triggered
-
-

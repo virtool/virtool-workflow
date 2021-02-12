@@ -1,8 +1,8 @@
 from typing import Dict, Any
 
+from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractWorkflowEnvironment
 from virtool_workflow.data_model import Job
-from virtool_workflow.execution import hooks
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
