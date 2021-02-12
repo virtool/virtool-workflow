@@ -47,9 +47,11 @@ async def main(**config):
 
         except Exception as error:
             fixtures["error"] = error
-            raise error
         finally:
-            await hooks.on_exit.trigger(fixtures)
+            await hooks.on_exit.trigger(fixtures, supress=True)
+
+            if fixtures["error"]:
+                raise fixtures["error"]
 
 
 @apply_config_options
