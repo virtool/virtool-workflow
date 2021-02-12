@@ -1,66 +1,28 @@
-from virtool_workflow import hooks, hook
-from virtool_workflow.execution.hooks.hooks import IncompatibleCallback
+from virtool_workflow import hooks
+from virtool_workflow.execution.hooks.hooks import Hook
 
-
-@hook
-async def example_hook_without_params():
-    pass
+example_hook = Hook("example_hook")
 
 
 async def test_hook():
-
-    @example_hook_without_params.callback
+    @example_hook.callback
     async def callback():
         callback.called = True
 
-    await example_hook_without_params.trigger()
+    await example_hook.trigger()
 
     assert callback.called
 
 
 async def test_temporary_callback(runtime):
-
-    @example_hook_without_params.callback(until=hooks.on_result)
+    @example_hook(until=hooks.on_result)
     def temporary_callback():
         pass
 
-    assert temporary_callback in example_hook_without_params.callbacks
+    assert temporary_callback in example_hook.callbacks
 
     await hooks.on_result.trigger(runtime)
 
     assert "remove_callback" not in [
-        f.__name__ for f in example_hook_without_params.callbacks]
-    assert temporary_callback not in example_hook_without_params.callbacks
-
-
-async def test_return_type_hint_checking_error_raised():
-
-    @hook
-    def hook_with_return_hint() -> str:
-        pass
-
-    thrown = False
-
-    try:
-        @hook_with_return_hint.callback
-        def callback_with_return_type_hint() -> int:
-            return 1
-    except IncompatibleCallback:
-        thrown = True
-
-    assert thrown
-
-
-async def test_return_type_hint_checking():
-
-    @hook
-    def hook_with_return_hint() -> str:
-        pass
-
-    @hook_with_return_hint.callback
-    def no_hints():
-        return ""
-
-    @hook_with_return_hint.callback
-    def correct_hint() -> str:
-        return ""
+        f.__name__ for f in example_hook.callbacks]
+    assert temporary_callback not in example_hook.callbacks

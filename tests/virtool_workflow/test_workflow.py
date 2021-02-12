@@ -1,8 +1,8 @@
-from virtool_workflow import hooks, WorkflowError
+from virtool_workflow import hooks
+from virtool_workflow.execution.workflow_execution import WorkflowError
 
 
 async def test_respond_errors(test_workflow, runtime):
-
     @test_workflow.step
     async def throw_error():
         raise Exception()
@@ -24,7 +24,7 @@ async def test_respond_errors(test_workflow, runtime):
 
 async def test_correct_traceback_data(test_workflow, runtime):
     arg1, arg2 = "arg1", "arg2"
-    
+
     @test_workflow.step
     async def raise_exception():
         raise ValueError(arg1, arg2)
@@ -41,7 +41,6 @@ async def test_correct_traceback_data(test_workflow, runtime):
 
 
 async def test_correct_progress(test_workflow, runtime):
-
     correct_progress = {
         0: 0.0,
         1: 0.1,
@@ -70,7 +69,6 @@ async def test_correct_progress(test_workflow, runtime):
 
 
 async def test_on_update_called(test_workflow, runtime):
-
     calls = 0
     state_calls = 0
 
@@ -91,4 +89,3 @@ async def test_on_update_called(test_workflow, runtime):
 
     assert calls == 4
     assert state_calls == 4
-

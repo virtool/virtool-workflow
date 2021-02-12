@@ -1,7 +1,6 @@
-from virtool_workflow.execution.hooks import FixtureHook
-from virtool_workflow.execution.workflow_execution import State
+from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 
-on_result = FixtureHook("on_result", [], None)
+on_result = FixtureHook("on_result")
 """
 Triggered when a workflow has completed and a result is available.
 
@@ -16,7 +15,7 @@ such the result can be mutated within the callback and that change will be
 reflected in the final result. 
 """
 
-on_update = FixtureHook("on_update", [str], None)
+on_update = FixtureHook("on_update")
 """
 Triggered when an update is sent from a Workflow. 
 
@@ -30,7 +29,7 @@ This occurs both when a (*str*) value is returned from a workflow step and when
         ...
 """
 
-on_workflow_step = FixtureHook("on_workflow_step", [], None)
+on_workflow_step = FixtureHook("on_workflow_step")
 """
 Triggered on each workflow step.
 
@@ -41,7 +40,7 @@ Triggered on each workflow step.
         ...
 """
 
-on_state_change = FixtureHook("on_state_change", [State, State], None)
+on_state_change = FixtureHook("on_state_change")
 """
 Triggered on a change of state during workflow execution.
 
@@ -52,7 +51,7 @@ Triggered on a change of state during workflow execution.
         ...
 """
 
-on_workflow_failure = FixtureHook("on_workflow_finish", [Exception], None)
+on_workflow_failure = FixtureHook("on_workflow_finish")
 """
 Triggered when a workflow fails to complete.
 
@@ -63,7 +62,7 @@ Triggered when a workflow fails to complete.
         ...
 """
 
-on_workflow_finish = FixtureHook("on_workflow_finish", [], None)
+on_workflow_finish = FixtureHook("on_workflow_finish")
 """
 Triggered when a workflow finishes, regardless of it's success.
 
@@ -74,7 +73,7 @@ Triggered when a workflow finishes, regardless of it's success.
         ...
 """
 
-on_error = FixtureHook("on_error", [Exception], None)
+on_error = FixtureHook("on_error")
 """
 Triggered when an error occurs in a workflow step. If a string value is returned from this 
 hook it will be used as the update for the step in which the error occurred,  and the workflow 
