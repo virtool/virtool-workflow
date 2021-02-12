@@ -5,6 +5,7 @@ from typing import List, Any, Callable
 
 from virtool_workflow import utils
 from virtool_workflow.execution.hooks.hooks import Hook
+from virtool_workflow.fixtures.errors import FixtureNotAvailable
 from virtool_workflow.fixtures.scope import FixtureScope
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,14 @@ class FixtureHook(Hook):
 
         async def _bind(callback_: Callable):
             logger.debug(f"Binding fixtures to callback {callback_}")
-            return await scope.bind(callback_, strict=not args)
+            try:
+                return await scope.bind(callback_, strict=not args)
+            except FixtureNotAvailable as error:
+                if suppress:
+                    logger.exception(error)
+                    return lambda: None
+                else:
+                    raise error
 
         _callbacks = [await _bind(callback) for callback in self.callbacks]
         _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
