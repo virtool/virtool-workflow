@@ -26,7 +26,7 @@ class FixtureHook(Hook):
 
         :param scope: The :class:`FixtureScope` to use to bind fixtures.
         :param args: Any positional arguments to pass to the callback functions, after fixtures have been bound.
-        :param suppress: If true, errors raised within the callback functions will be suppressed.
+        :param suppress: If true, errors raised within the callback functions will be suppressed and logged.
         """
         logger.debug(
             f"Triggering {self.name} hook with callback functions: \n{pprint.pformat(self.callbacks, indent=4)}")

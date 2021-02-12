@@ -1,5 +1,4 @@
 """Create hooks for triggering and responding to events."""
-from contextlib import suppress
 
 import asyncio
 import logging
@@ -83,11 +82,14 @@ class Hook:
     async def _trigger(callbacks, *args, suppress_errors=False, **kwargs):
 
         async def call_callback(callback):
-            logger.info(f"Calling {callback}.")
+            logger.debug(f"Calling {callback}.")
             if suppress_errors:
-                with suppress(Exception):
+                try:
                     return await callback(*args, **kwargs)
-            return await callback(*args, **kwargs)
+                except Exception as error:
+                    logger.exception(error)
+            else:
+                return await callback(*args, **kwargs)
 
         return await asyncio.gather(*[call_callback(callback) for callback in callbacks])
 
@@ -99,7 +101,7 @@ class Hook:
         will be called using the arguments supplied to this function.
 
         :param args: Positional Arguments for this Hook.
-        :param suppress: If True, any exceptions raised from callback functions will be suppressed.
+        :param suppress: If True, any exceptions raised from callback functions will be suppressed and logged.
         :param kwargs: Keyword arguments for this Hook.
         :return List[Any]: The results of each callback function.
         """
