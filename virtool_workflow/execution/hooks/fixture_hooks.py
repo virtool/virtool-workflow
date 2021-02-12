@@ -21,22 +21,16 @@ class FixtureHook(Hook):
 
     async def trigger(self, scope: FixtureScope, *args, **kwargs) -> List[Any]:
         """Bind fixtures from `scope` to each callback function and invoke them."""
-        logger.debug(f"Triggered hook {self.name}")
-        scope["scope"] = scope
+        if "scope" not in scope:
+            scope["scope"] = scope
 
         async def _bind(callback_: Callable):
             logger.debug(f"Binding fixtures to callback {callback_}")
             return await scope.bind(callback_, strict=not args)
 
-        backup_callbacks = self.callbacks
+        _callbacks = [await _bind(callback) for callback in self.callbacks]
+        _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
+                      if len(signature(callback).parameters) == 0 else callback
+                      for callback in _callbacks]
 
-        self.callbacks = [await _bind(callback) for callback in self.callbacks]
-        self.callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
-                          if len(signature(callback).parameters) == 0 else callback
-                          for callback in self.callbacks]
-
-        results = await super(FixtureHook, self).trigger(*args, **kwargs)
-
-        self.callbacks = backup_callbacks
-
-        return results
+        return await self._trigger(_callbacks, *args, **kwargs)

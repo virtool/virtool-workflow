@@ -1,4 +1,5 @@
 """Create hooks for triggering and responding to events."""
+import asyncio
 import logging
 import pprint
 from typing import List, Any, Callable
@@ -76,6 +77,13 @@ class Hook:
 
         return _temporary_callback
 
+    @staticmethod
+    async def _trigger(callbacks, *args, **kwargs):
+        async def call_callback(callback):
+            return await callback(*args, **kwargs)
+
+        return await asyncio.gather(*[call_callback(callback) for callback in callbacks])
+
     async def trigger(self, *args, **kwargs) -> List[Any]:
         """
         Trigger this Hook.
@@ -88,4 +96,4 @@ class Hook:
         :return List[Any]: The results of each callback function.
         """
         logger.debug(f"Triggering {self.name} hook with callback functions: {pprint.pformat(self.callbacks)}")
-        return [await callback(*args, **kwargs) for callback in self.callbacks]
+        return await self._trigger(self.callbacks, *args, **kwargs)
