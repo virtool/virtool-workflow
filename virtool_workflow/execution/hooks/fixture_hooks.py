@@ -28,16 +28,15 @@ class FixtureHook(Hook):
             logger.debug(f"Binding fixtures to callback {callback_}")
             return await scope.bind(callback_, strict=not args)
 
-        _callbacks = [await _bind(callback) for callback in self.callbacks]
-        _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
-                      if len(signature(callback).parameters) == 0 else callback
-                      for callback in _callbacks]
+        backup_callbacks = self.callbacks
 
-        async def _call(callback_):
-            logger.debug(f"Calling {callback_}")
-            result = await callback_(*args, **kwargs)
-            if result:
-                logger.debug(f"Callback {callback_} had result {result}.")
-            return result
+        self.callbacks = [await _bind(callback) for callback in self.callbacks]
+        self.callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
+                          if len(signature(callback).parameters) == 0 else callback
+                          for callback in self.callbacks]
 
-        return [await _call(callback) for callback in _callbacks]
+        results = await super(FixtureHook, self).trigger(*args, **kwargs)
+
+        self.callbacks = backup_callbacks
+
+        return results
