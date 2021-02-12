@@ -80,6 +80,7 @@ class Hook:
     @staticmethod
     async def _trigger(callbacks, *args, **kwargs):
         async def call_callback(callback):
+            logger.info(f"Calling {callback}.")
             return await callback(*args, **kwargs)
 
         return await asyncio.gather(*[call_callback(callback) for callback in callbacks])
