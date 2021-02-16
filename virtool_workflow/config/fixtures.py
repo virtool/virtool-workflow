@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Literal
 
 import virtool_workflow
 import virtool_workflow.storage.paths
@@ -13,9 +12,6 @@ PROC_ENV = "VT_PROC"
 MEM_ENV = "VT_MEM"
 DEVELOPMENT_MODE_ENV = "VT_DEV"
 API_URL_ENV = "VT_API_URL"
-MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
-USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
-DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
 IS_ANALYSIS_WORKFLOW = "VT_IS_ANALYSIS_WORKFLOW"
 WORKFLOW_FILE_NAME_ENV = "VT_WORKFLOW_FILE_NAME"
 JOB_ID_ENV = "VT_JOB_ID"
@@ -64,28 +60,6 @@ def dev_mode(_):
 @config_fixture(env=API_URL_ENV, default="mongodb://localhost:27017")
 def virtool_api_url(_):
     """The database connection string/url."""
-    ...
-
-
-DBType = Literal["in-memory", "mongo", "proxy"]
-
-
-@config_fixture(env=USE_IN_MEMORY_DATABASE_ENV,
-                default="in-memory")
-def db_type(_):
-    """
-    The type of database to be used for the workflow run.
-
-    Options are:
-        - in-memory
-        - mongo
-        - proxy
-
-    A in-memory database is used by default.
-
-    If `mongo` or `proxy` is selected, then the `db_connection_string`
-    fixture will be used to connect to the database.
-    """
     ...
 
 
