@@ -1,10 +1,9 @@
 """Scoping and injection of workflow fixtures."""
-from contextlib import AbstractContextManager
-
 import logging
 import pprint
+from contextlib import AbstractContextManager
 from functools import wraps
-from inspect import iscoroutinefunction, signature
+from inspect import iscoroutinefunction, signature, Parameter
 from types import GeneratorType
 from typing import Any, Callable, Iterator
 
@@ -172,8 +171,10 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
                 fixtures[param] = await self.get_or_instantiate(param, requested_by=func)
             except KeyError as key_error:
                 if strict:
-                    missing_param = key_error.args[0]
-                    raise FixtureNotAvailable(param_name=missing_param, signature=sig, func=func, scope=self)
+                    if param.default == Parameter.empty:
+                        # Parameter does not have a default value.
+                        missing_param = key_error.args[0]
+                        raise FixtureNotAvailable(param_name=missing_param, signature=sig, func=func, scope=self)
 
         if iscoroutinefunction(func):
             @wraps(func)
