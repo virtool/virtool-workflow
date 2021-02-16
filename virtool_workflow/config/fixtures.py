@@ -12,7 +12,7 @@ TEMP_PATH_ENV = "VT_TEMP_PATH"
 PROC_ENV = "VT_PROC"
 MEM_ENV = "VT_MEM"
 DEVELOPMENT_MODE_ENV = "VT_DEV"
-MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
+API_URL_ENV = "VT_API_URL"
 MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
 USE_IN_MEMORY_DATABASE_ENV = "VT_USE_IN_MEMORY_DATABASE"
 DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
@@ -61,14 +61,8 @@ def dev_mode(_):
     ...
 
 
-@config_fixture(env=MONGO_DATABASE_NAME_ENV, default="virtool")
-def db_name(_):
-    """The database name."""
-    ...
-
-
-@config_fixture(env=MONGO_DATABASE_CONNECTION_STRING_ENV, default="mongodb://localhost:27017")
-def db_connection_string(_):
+@config_fixture(env=API_URL_ENV, default="mongodb://localhost:27017")
+def virtool_api_url(_):
     """The database connection string/url."""
     ...
 
