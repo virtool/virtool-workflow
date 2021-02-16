@@ -1,21 +1,30 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Any, Optional, List
+from pathlib import Path
+from typing import Dict, Any, List
 
 
 @dataclass(frozen=True)
 class CacheEntry:
-    database_id: Optional[str]
+    id: str
     trimming_parameters: Dict[str, Any]
     trimming_program: Dict[str, Any]
     files: List[dict]
+    paired: bool
 
 
 class AbstractCacheProvider(ABC):
 
     @abstractmethod
-    async def create(self, cache: CacheEntry):
-        """Store a new cache entry."""
+    async def create(self, trimming_parameters: Dict[str, Any], paired: bool, quality: Dict[str, Any]):
+        """
+        Create and store a new cache entry.
+
+        :param trimming_parameters: The trimming parameters
+        :param paired: A boolean indicating that the sample is paired
+        :param quality: The output of `FastQC` quality check for the sample
+            as parsed by :func:`virtool_workflow.analysis.fastqc.parse_fastqc`.
+        """
         ...
 
     @abstractmethod
@@ -51,4 +60,9 @@ class AbstractCacheProvider(ABC):
     @abstractmethod
     async def unset_caches_for_analyses(self):
         """Invalidate all caches associated with this sample."""
+        ...
+
+    @abstractmethod
+    async def delete_cache_if_not_ready(cache_path: Path):
+        """Delete the cache entry and remove the cache from the filesystem if it is not ready."""
         ...
