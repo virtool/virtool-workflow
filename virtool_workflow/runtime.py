@@ -5,20 +5,14 @@ from typing import Optional
 
 from virtool_workflow import discovery
 from virtool_workflow import hooks
+from virtool_workflow.abc.data_providers.jobs import JobProviderProtocol
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.config.configuration import load_config
 from virtool_workflow.data_model import Job
-from virtool_workflow.db.data_providers.analysis_data_provider import AnalysisDataProvider
-from virtool_workflow.db.data_providers.index_data_provider import IndexDataProvider
-from virtool_workflow.db.data_providers.sample_data_provider import SampleDataProvider
-from virtool_workflow.db.data_providers.subtraction_data_provider import SubtractionDataProvider
-from virtool_workflow.db.db import VirtoolDatabase
-from virtool_workflow.db.mongo import VirtoolMongoDB
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures.scoping import workflow_fixtures
 from virtool_workflow.workflow import Workflow
 
-_database: Optional[VirtoolDatabase] = None
 _environment: Optional[WorkflowEnvironment] = None
 _workflow: Optional[Workflow] = None
 _job: Optional[Job] = None
@@ -35,29 +29,10 @@ def set_log_level_to_debug(dev_mode: bool):
 
 
 @hooks.on_load_config
-async def instantiate_database(db_name: str, db_connection_string: str):
-    global _database
-    _database = VirtoolMongoDB(db_name, db_connection_string)
-
-    await hooks.on_load_database.trigger(_database)
-
-
-@hooks.on_load_config
-async def instantiate_job(job_id: Optional[str], mem: int, proc: int):
-    jobs = await hooks.use_job.trigger()
-    if jobs:
-        job = next(job_ for job_ in jobs if isinstance(job_, Job))
-    elif job_id:
-        job_document = await _database.jobs.get(job_id)
-        if not job_document:
-            raise RuntimeError("No job document in database. Please supply a valid job_id.")
-        job = Job(
-            _id=job_document["_id"],
-            args=job_document["args"],
-            mem=job_document["mem"] if "mem" in job_document else mem,
-            proc=job_document["proc"] if "proc" in job_document else proc,
-            task=job_document["task"] if "task" in job_document else None,
-        )
+async def instantiate_job(job_id: Optional[str], job_provider: JobProviderProtocol, mem: int, proc: int):
+    job = next(job_ for job_ in await hooks.use_job.trigger() if job_)
+    if not job and job_id:
+        job = await job_provider(job_id, mem=mem, proc=proc)
     else:
         raise RuntimeError("No job_id provided.")
 
@@ -75,22 +50,6 @@ async def instantiate_environment(is_analysis_workflow: bool):
     job = _job
     if is_analysis_workflow:
         _environment = AnalysisWorkflowEnvironment(job)
-
-        if "analysis_id" in job.args:
-            _environment.data_providers.analysis_provider = \
-                AnalysisDataProvider(_database.analyses, job.args["analysis_id"])
-
-        if "sample_id" in job.args:
-            _environment.data_providers.sample_provider = \
-                SampleDataProvider(job.args["sample_id"], _database.samples, _database.analyses)
-
-        if "index_id" in job.args:
-            _environment.data_providers.index_provider = \
-                IndexDataProvider(job.args["index_id"], _database.indexes, _database.references)
-
-        if "subtractions" in job.args:
-            _environment.data_providers.subtraction_providers = \
-                [SubtractionDataProvider(id_, _database.subtractions) for id_ in job.args["subtractions"]]
     else:
         _environment = WorkflowEnvironment(job)
 
