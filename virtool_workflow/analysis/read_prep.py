@@ -8,14 +8,12 @@ from typing import List, Dict, Any, Tuple
 import virtool_workflow
 from virtool_workflow.analysis import utils, fastqc
 from virtool_workflow.analysis.cache import fetch_cache, create_cache
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.execution.run_subprocess import RunSubprocess
-from virtool_workflow.storage.utils import copy_paths
-from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow import hooks
-from virtool_workflow.analysis.cache import delete_cache_if_not_ready, delete_analysis
 from virtool_workflow.analysis.reads import Reads
 from virtool_workflow.data_model import Sample
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.execution.run_subprocess import RunSubprocess
+from virtool_workflow.fixtures.scope import FixtureScope
+from virtool_workflow.storage.utils import copy_paths
 
 logger = logging.getLogger(__name__)
 
@@ -28,23 +26,23 @@ def rename_trimming_results(path: Path):
     """
     try:
         shutil.move(
-            path/"reads-trimmed.fastq.gz",
-            path/"reads_1.fq.gz",
+            path / "reads-trimmed.fastq.gz",
+            path / "reads_1.fq.gz",
         )
     except FileNotFoundError:
         shutil.move(
-            path/"reads-trimmed-pair1.fastq.gz",
-            path/"reads_1.fq.gz",
+            path / "reads-trimmed-pair1.fastq.gz",
+            path / "reads_1.fq.gz",
         )
 
         shutil.move(
-            path/"reads-trimmed-pair2.fastq.gz",
-            path/"reads_2.fq.gz",
+            path / "reads-trimmed-pair2.fastq.gz",
+            path / "reads_2.fq.gz",
         )
 
     shutil.move(
-        path/"reads-trimmed.log",
-        path/"trim.log",
+        path / "reads-trimmed.log",
+        path / "trim.log",
     )
 
 
@@ -68,7 +66,7 @@ async def parsed_fastqc(
 
     read_paths = utils.make_read_paths(trimming_output_path, paired)
 
-    fastqc_path = temp_cache_path/"fastqc"
+    fastqc_path = temp_cache_path / "fastqc"
     fastqc_path.mkdir()
 
     command = [
@@ -91,7 +89,7 @@ async def fetch_legacy_paths(
         run_in_executor: FunctionExecutor
 ):
     """Copy legacy style reads to the reads_path."""
-    return await copy_paths({path: reads_path/path.name for path in paths}.items(), run_in_executor)
+    return await copy_paths({path: reads_path / path.name for path in paths}.items(), run_in_executor)
 
 
 @virtool_workflow.fixture
@@ -137,10 +135,11 @@ async def reads(
         analysis_path: Path,
         cache_path: Path,
         cache_document: Dict[str, Any],
+        cache_provider,
         trimming_parameters: Dict[str, Any],
         trimming_output_path: Path,
         run_in_executor: FunctionExecutor,
-        unprepared_reads: Reads
+        unprepared_reads: Reads,
 ) -> Reads:
     """
     The prepared reads for the current job.
@@ -156,16 +155,12 @@ async def reads(
     elif not all(f["raw"] for f in sample["files"]):
         legacy_paths = utils.make_legacy_read_paths(sample_path, paired)
 
-        paths_to_copy = {path: reads_path/path.name
+        paths_to_copy = {path: reads_path / path.name
                          for path in legacy_paths}
 
         await copy_paths(paths_to_copy.items(), run_in_executor)
     else:
-        hooks.on_workflow_failure(delete_cache_if_not_ready, once=True)
-        hooks.on_workflow_failure(delete_analysis, once=True)
-
         _, fq = await scope.instantiate(prepared_reads_and_fastqc)
-        await create_cache(job_args, paired, fq, database, trimming_parameters, trimming_output_path, cache_path)
+        await scope.instantiate(create_cache)
 
     return unprepared_reads
-

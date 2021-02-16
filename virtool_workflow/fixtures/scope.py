@@ -166,12 +166,12 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
         sig = signature(func)
 
         fixtures = {}
-        for param in sig.parameters:
+        for name, parameter in sig.parameters.items():
             try:
-                fixtures[param] = await self.get_or_instantiate(param, requested_by=func)
+                fixtures[name] = await self.get_or_instantiate(name, requested_by=func)
             except KeyError as key_error:
                 if strict:
-                    if param.default == Parameter.empty:
+                    if parameter.default == Parameter.empty:
                         # Parameter does not have a default value.
                         missing_param = key_error.args[0]
                         raise FixtureNotAvailable(param_name=missing_param, signature=sig, func=func, scope=self)

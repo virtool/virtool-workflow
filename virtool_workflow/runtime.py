@@ -29,12 +29,13 @@ def set_log_level_to_debug(dev_mode: bool):
 
 
 @hooks.on_load_config
-async def instantiate_job(job_id: Optional[str], job_provider: JobProviderProtocol, mem: int, proc: int):
+async def instantiate_job(job_id: Optional[str], mem: int, proc: int, job_provider: JobProviderProtocol = None):
     job = next(job_ for job_ in await hooks.use_job.trigger() if job_)
-    if not job and job_id:
-        job = await job_provider(job_id, mem=mem, proc=proc)
-    else:
-        raise RuntimeError("No job_id provided.")
+    if not job:
+        if job_id and job_provider:
+            job = await job_provider(job_id, mem=mem, proc=proc)
+        else:
+            raise RuntimeError("No job_id provided.")
 
     global _job
     _job = job
