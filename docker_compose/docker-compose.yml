@@ -52,6 +52,8 @@ services:
       --redis-connection-string=redis://redis:6379
       --postgres-connection-string=postgresql+asyncpg://virtool:virtool@postgres
       jobsAPI
+    ports:
+      - "9050:9050"
 
     depends_on: [ mongo, redis, postgres ]
 
