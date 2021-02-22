@@ -1,7 +1,10 @@
+
 FROM library/python:3.8-buster as server
+ARG branch
+ENV BRANCH=${branch}
 WORKDIR /build
 RUN python -m pip install --upgrade pip
-RUN git clone --single-branch --branch release/5.0.0 https://github.com/virtool/virtool/
+RUN git clone --single-branch --branch "${BRANCH}" https://github.com/virtool/virtool/
 RUN sed "s/idna==3.1/idna==2.10/g" ./virtool/requirements.txt > ./virtool/modified-requirements.txt
 RUN pip install --user -r ./virtool/modified-requirements.txt
 
