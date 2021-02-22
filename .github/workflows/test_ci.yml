@@ -18,38 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install poetry
-        run: pip install poetry
-
-      - name: Install tox
-        run: |
-          pip install tox
-          pip install tox-docker
-
-      - name: Install Bowtie2
-        run: |
-          wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2-2.3.2-legacy-linux-x86_64.zip
-          unzip bowtie2-2.3.2-legacy-linux-x86_64.zip
-          cp bowtie2-2.3.2-legacy/bowtie2* /usr/local/bin
-
-      - name: Install HMMER
-        run: |
-          wget http://eddylab.org/software/hmmer/hmmer-3.3.2.tar.gz
-          tar -xvf hmmer-3.3.2.tar.gz
-          cd hmmer-3.3.2
-          ./configure --prefix $GITHUB_WORKSPACE/hmmer
-          make
-          make install
-          cd ..
-          ln -s $GITHUB_WORKSPACE/hmmer/bin/hmm* /usr/local/bin
-
       - name: Start Jobs API
         run: cd tests && docker-compose up -d
-
-      - name: Run tox
-        run: tox -e py39
-        env:
-          VT_DB_CONNECTION_STRING: http://localhost:9050
 
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2
