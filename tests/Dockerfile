@@ -17,6 +17,7 @@ RUN wget http://eddylab.org/software/hmmer/hmmer-3.3.2.tar.gz \
     && cd .. \
     && ln -s /install/hmmer/bin/hmm* /usr/local/bin
 
+WORKDIR test
 ENV VT_DB_CONNECTION_STRING=http://localhost:9050
 
 COPY . .

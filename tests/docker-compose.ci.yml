@@ -1,0 +1,10 @@
+# Mount the working directory of the `test` service to a directory
+# Used to retrieve the `coverage.xml` file when running in the github CI workflow.
+
+services:
+  tests:
+    volumes:
+      - ${PWD}coverage.xml:/test/coverage.xml
+
+
+

@@ -62,9 +62,17 @@ services:
       dockerfile: tests/Dockerfile
       context: ..
     command: -e py39
-
+    environment:
+      - VT_DB_CONNECTION_STRING=mongodb://mongo:27017
+      - VT_REDIS_CONNECTION_STRING=redis://redis:6379
+    volumes:
+      - test_coverage:/test/coverage.xml
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      [ jobsapi ]
 volumes:
   vt_mongo_data:
   vt_redis_data:
   vt_postgres_data:
   vt_pgadmin4_data:
+  test_coverage:
