@@ -15,15 +15,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    container:
-      image: python:3.9-buster
-
-    services:
-      redis:
-        image: redis:6.0
-      mongo:
-        image: mongo:4.4
-
     steps:
       - uses: actions/checkout@v2
 
@@ -52,11 +43,13 @@ jobs:
           cd ..
           ln -s $GITHUB_WORKSPACE/hmmer/bin/hmm* /usr/local/bin
 
+      - name: Start Jobs API
+        run: cd tests && docker-compose up -d
+
       - name: Run tox
         run: tox -e py39
         env:
-          VT_DB_CONNECTION_STRING: mongodb://mongo:27017
-          VT_REDIS_CONNECTION_STRING: redis://redis:6379
+          VT_DB_CONNECTION_STRING: http://localhost:9050
 
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2

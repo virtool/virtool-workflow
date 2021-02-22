@@ -43,8 +43,8 @@ services:
 
   jobsapi:
     build:
-      dockerfile: ./run_jobs_api_server/Dockerfile
-      context: .
+      dockerfile: ../docker/run_jobs_api_server/Dockerfile
+      context: ""
       args:
         branch: release/5.0.0
     command: >-
@@ -56,6 +56,12 @@ services:
       - "9050:9050"
 
     depends_on: [ mongo, redis, postgres ]
+
+  tests:
+    build:
+      dockerfile: tests/Dockerfile
+      context: ..
+    command: -e py39
 
 volumes:
   vt_mongo_data:
