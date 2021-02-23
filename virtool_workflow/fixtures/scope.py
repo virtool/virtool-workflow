@@ -1,11 +1,11 @@
 """Scoping and injection of workflow fixtures."""
 import logging
 import pprint
-from contextlib import AbstractAsyncContextManager
+from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from inspect import iscoroutinefunction, signature, Parameter
 from types import GeneratorType
-from typing import Any, Callable, Iterator
+from typing import Any, Callable
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
 from virtool_workflow.fixtures.providers import FixtureProvider, InstanceFixtureGroup, FixtureGroup
@@ -36,6 +36,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         self._overrides = FixtureGroup()
         self._providers = [self, self._overrides, *providers]
         self._generators = []
+        self._async_generators = []
         self.add_provider = self._providers.append
         self.add_providers = self._providers.extend
 
@@ -46,7 +47,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         logger.debug(f"Opening a new {FixtureScope.__name__}")
         return self
 
-    def close(self):
+    async def close(self):
         """
         Remove references to any instances managed by this WorkflowFixtureScope.
 
@@ -57,21 +58,27 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         logger.debug("Clearing instances")
         # return control to the generator fixtures which are still left open
         self.clear()
-        for gen in self._generators:
+        while self._generators:
+            gen = self._generators.pop()
             logger.debug(f"Returning control to generator fixture {gen}")
             none = next(gen, None)
             if none is not None:
                 raise FixtureMultipleYield("Fixture must only yield once")
-        logger.debug("Clearing generators")
-        self._generators = []
+
+        while self._async_generators:
+            gen = self._async_generators.pop()
+            logger.debug(f"Returning control to async generator fixture {gen}")
+            with suppress(StopAsyncIteration):
+                await gen.__anext__()
+                raise FixtureMultipleYield("Fixture must only yield once")
 
         for provider in self._providers:
             if isinstance(provider, FixtureScope) and id(provider) != id(self):
-                provider.close()
+                await provider.close()
 
     async def __aexit__(self, *args, **kwargs):
         """Close the :class:`FixtureScope` on exit."""
-        self.close()
+        await self.close()
 
     @property
     def available(self):
@@ -165,26 +172,25 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         """
         sig = signature(func)
 
-        fixtures = {}
-        for name, parameter in sig.parameters.items():
-            try:
-                fixtures[name] = await self.get_or_instantiate(name, requested_by=func)
-            except KeyError as key_error:
-                if strict:
-                    if parameter.default == Parameter.empty:
-                        # Parameter does not have a default value.
-                        missing_param = key_error.args[0]
-                        raise FixtureNotAvailable(param_name=missing_param, signature=sig, func=func, scope=self)
+        async def _bind(func, fixtures):
+            for name, parameter in sig.parameters.items():
+                try:
+                    fixtures[name] = await self.get_or_instantiate(name, requested_by=func)
+                except KeyError as key_error:
+                    if strict:
+                        if parameter.default == Parameter.empty:
+                            # Parameter does not have a default value.
+                            missing_param = key_error.args[0]
+                            raise FixtureNotAvailable(param_name=missing_param, signature=sig, func=func, scope=self)
+            return fixtures
 
-        if iscoroutinefunction(func):
-            @wraps(func)
-            async def bound(*args, **_kwargs) -> Iterator[Any]:
-                _kwargs.update(fixtures)
-                return await func(*args, **_kwargs)
-        else:
-            @wraps(func)
-            def bound(*args, **_kwargs) -> Any:
-                _kwargs.update(fixtures)
+        @wraps(func)
+        async def bound(*args, **_kwargs):
+            fixtures = await _bind(func, {})
+            fixtures.update(_kwargs)
+            try:
+                return await func(*args, **fixtures)
+            except TypeError:
                 return func(*args, **_kwargs)
 
         return bound
