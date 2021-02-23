@@ -30,11 +30,11 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Coverage
-          path: $GITHUB_WORKSPACE/tests/coverage/coverage.xml
+          path: $GITHUB_WORKSPACE/test/coverage/coverage.xml
 
       - name: Run codacy-coverage-reporter
         if: github.event_name == 'push'
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: $GITHUB_WORKSPACE/tests/coverage/coverage.xml
+          coverage-reports: $GITHUB_WORKSPACE/test/coverage/coverage.xml
