@@ -20,9 +20,10 @@ jobs:
 
       - name: Run Tests Using Docker Compose
         run: >-
-          docker-compose up
+          docker-compose
           -f tests/docker-compose.yml
           -f tests/docker-compose.ci.yml
+          up
           --exit-code-from tests
 
       - name: Upload Coverage Report As Artifact
