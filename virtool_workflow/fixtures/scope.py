@@ -1,7 +1,7 @@
 """Scoping and injection of workflow fixtures."""
 import logging
 import pprint
-from contextlib import AbstractContextManager
+from contextlib import AbstractAsyncContextManager
 from functools import wraps
 from inspect import iscoroutinefunction, signature, Parameter
 from types import GeneratorType
@@ -14,7 +14,7 @@ from virtool_workflow.workflow import Workflow
 logger = logging.getLogger(__name__)
 
 
-class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
+class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
     """
     A scope maintaining instances of workflow fixtures.
 
@@ -41,7 +41,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
 
         super(FixtureScope, self).__init__()
 
-    def __enter__(self):
+    async def __aenter__(self):
         """Return this instance when `with` statement is used."""
         logger.debug(f"Opening a new {FixtureScope.__name__}")
         return self
@@ -69,7 +69,7 @@ class FixtureScope(AbstractContextManager, InstanceFixtureGroup):
             if isinstance(provider, FixtureScope) and id(provider) != id(self):
                 provider.close()
 
-    def __exit__(self, *args, **kwargs):
+    async def __aexit__(self, *args, **kwargs):
         """Close the :class:`FixtureScope` on exit."""
         self.close()
 
