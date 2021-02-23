@@ -59,7 +59,7 @@ def dev_mode(_):
 
 @config_fixture(env=API_URL_ENV, default="mongodb://localhost:27017")
 def virtool_api_url(_):
-    """The database connection string/url."""
+    """The url for the Virtool Jobs API."""
     ...
 
 
