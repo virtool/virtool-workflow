@@ -101,7 +101,7 @@ async def load_config(scope=None, hook=None, **kwargs):
             option.fixture.override_value = option.fixture.transform(kwargs[option.name]) or kwargs[option.name]
 
     if not scope:
-        with FixtureScope(config_fixtures) as config_scope:
+        async with FixtureScope(config_fixtures) as config_scope:
             await hook.trigger(config_scope)
     else:
         scope.add_provider(config_fixtures)

@@ -15,7 +15,7 @@ async def test_trigger():
         assert item2 == "item2"
         assert some_fixture == "some_fixture"
 
-    with FixtureScope() as scope:
+    async with FixtureScope() as scope:
         scope["some_fixture"] = "some_fixture"
 
         await test_hook.trigger(scope, "item1", "item2")

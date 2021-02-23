@@ -73,6 +73,6 @@ def extract_workflow(workflow_file_path: Path):
 
 async def start(**config):
     await load_config(**config)
-    with _environment:
+    async with _environment:
         result = await _environment.execute(_workflow)
         logger.debug(result)
