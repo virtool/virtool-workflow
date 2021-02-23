@@ -18,18 +18,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Start Jobs API
-        run: cd tests && docker-compose up -d
+      - name: Run Tests Using Docker Compose
+        run: >-
+          docker-compose up
+          -f tests/docker-compose.yml
+          -f tests/docker-compose.ci.yml
+          --exit-code-from tests
 
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: coverage-report
-          path: coverage.xml
+          name: Coverage
+          path: $GITHUB_WORKSPACE/tests/coverage/coverage.xml
 
       - name: Run codacy-coverage-reporter
         if: github.event_name == 'push'
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: $GITHUB_WORKSPACE/coverage.xml
+          coverage-reports: $GITHUB_WORKSPACE/tests/coverage/coverage.xml

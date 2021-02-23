@@ -4,7 +4,9 @@
 services:
   tests:
     volumes:
-      - ${PWD}coverage.xml:/test/coverage.xml
+      - ./coverage:/test/coverage
+    command:
+      -e py39 -- --log-cli-level=DEBUG --cov --cov-report xml:/test/coverage/coverage.xml
 
 
 
