@@ -1,6 +1,7 @@
 import asyncio
-import click
 import logging
+
+import click
 
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._docker
@@ -35,7 +36,7 @@ async def init(fixtures, **config):
 
 async def main(**config):
     """The main entrypoint for the standalone workflow runner."""
-    with runner_scope as fixtures:
+    async with runner_scope as fixtures:
         fixtures["error"] = None
         try:
             await init(fixtures, **config)

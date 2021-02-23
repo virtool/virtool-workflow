@@ -1,11 +1,12 @@
 import filecmp
-import pytest
 from pathlib import Path
 from shutil import copy
 
+import pytest
+
 import virtool_workflow.analysis.indexes
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
-from virtool_workflow.config.configuration import \
+from virtool_workflow.config.fixtures import \
     work_path as work_path_fixture
 from virtool_workflow.data_model import Reference
 from virtool_workflow.fixtures.scope import FixtureScope
@@ -33,7 +34,7 @@ class TestIndexProvider(AbstractIndexProvider):
 
 @pytest.fixture
 async def work_path():
-    with FixtureScope() as scope:
+    async with FixtureScope() as scope:
         yield await scope.instantiate(work_path_fixture)
 
 
