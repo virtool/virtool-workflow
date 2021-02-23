@@ -53,7 +53,7 @@ services:
       --postgres-connection-string=postgresql+asyncpg://virtool:virtool@postgres
       jobsAPI
     ports:
-      - "9050:9050"
+      - "9050"
 
     depends_on: [ mongo, redis, postgres ]
 
@@ -63,10 +63,10 @@ services:
       context: ..
     command: -e py39
     environment:
+      - VT_JOB_API_URL=http://jobsapi:9050
       - VT_DB_CONNECTION_STRING=mongodb://mongo:27017
       - VT_REDIS_CONNECTION_STRING=redis://redis:6379
     volumes:
-      - test_coverage:/test/coverage.xml
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       [ jobsapi ]
@@ -75,4 +75,3 @@ volumes:
   vt_redis_data:
   vt_postgres_data:
   vt_pgadmin4_data:
-  test_coverage:
