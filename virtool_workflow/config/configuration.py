@@ -1,29 +1,10 @@
-from dataclasses import dataclass
-
 import os
-from pathlib import Path
-from typing import Any, Type, Callable, Union, Literal
+from dataclasses import dataclass
+from typing import Any, Type, Callable, Union
 
-import virtool_workflow
-import virtool_workflow.storage.paths
-from virtool_workflow import hooks, fixture
+from virtool_workflow import hooks
 from virtool_workflow.fixtures.providers import FixtureGroup
 from virtool_workflow.fixtures.scope import FixtureScope
-
-DATA_PATH_ENV = "VT_DATA_PATH"
-TEMP_PATH_ENV = "VT_TEMP_PATH"
-PROC_ENV = "VT_PROC"
-MEM_ENV = "VT_MEM"
-DEVELOPMENT_MODE_ENV = "VT_DEV"
-MONGO_DATABASE_CONNECTION_STRING_ENV = "VT_DB_CONNECTION_STRING"
-MONGO_DATABASE_NAME_ENV = "VT_DB_NAME"
-PROVIDER_TYPE_ENV = "VT_PROVIDER_TYPE"
-DB_ACCESS_IN_WORKFLOW_ENV = "VT_ALLOW_DIRECT_DB_ACCESS"
-IS_ANALYSIS_WORKFLOW = "VT_IS_ANALYSIS_WORKFLOW"
-WORKFLOW_FILE_NAME_ENV = "VT_WORKFLOW_FILE_NAME"
-JOB_ID_ENV = "VT_JOB_ID"
-INIT_FILE_ENV = "VT_WORKFLOW_INIT_FILE"
-FIXTURES_FILE_ENV = "VT_WORKFLOW_FIXTURES_FILE"
 
 
 @dataclass(frozen=True)
@@ -125,110 +106,3 @@ async def load_config(scope=None, hook=None, **kwargs):
     else:
         scope.add_provider(config_fixtures)
         await hook.trigger(scope)
-
-
-@fixture
-@config_fixture(env=TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
-def work_path(value: str) -> Path:
-    """The path where temporary data should be stored."""
-    with virtool_workflow.storage.paths.context_directory(value) as temp:
-        yield temp
-
-
-@fixture
-@config_fixture(DATA_PATH_ENV, default=f"{os.getcwd()}/virtool")
-def data_path(value: str) -> Path:
-    """The path where persistent data should be stored."""
-    _data_path = Path(value)
-    if not _data_path.exists():
-        _data_path.mkdir()
-    return _data_path
-
-
-@fixture
-@config_fixture(env=PROC_ENV, default=2, type_=int)
-def proc(_):
-    """The number of processes as an integer."""
-    ...
-
-
-@fixture
-@config_fixture(env=MEM_ENV, default=8, type_=int)
-def mem(_):
-    """The amount of RAM in GB available for use."""
-    ...
-
-
-@config_fixture(env=DEVELOPMENT_MODE_ENV, default=False)
-def dev_mode(_):
-    """A flag indicating that development mode is enabled."""
-    ...
-
-
-@config_fixture(env=MONGO_DATABASE_NAME_ENV, default="virtool")
-def db_name(_):
-    """The database name."""
-    ...
-
-
-@config_fixture(env=MONGO_DATABASE_CONNECTION_STRING_ENV, default="mongodb://localhost:27017")
-def db_connection_string(_):
-    """The database connection string/url."""
-    ...
-
-
-ProviderType = Literal["local", "http"]
-
-
-@config_fixture(env=PROVIDER_TYPE_ENV,
-                default="local")
-def provider_type(_):
-    """
-    The type of data providers to be used for the workflow run.
-
-    Options are:
-        - local
-        - http
-
-    `local` data providers use a local filesystem based database.
-    `http` data providers utilize an HTTP API which accesses the database on behalf of the workflow.
-    """
-    ...
-
-
-@config_fixture(env=IS_ANALYSIS_WORKFLOW,
-                type_=bool,
-                default=True)
-def is_analysis_workflow(_):
-    """A flag indicating that analysis fixtures should be loaded."""
-    ...
-
-
-@config_fixture(env=WORKFLOW_FILE_NAME_ENV, default="workflow.py")
-def workflow_file_path(name) -> Path:
-    """The python script containing the workflow code."""
-    return Path(name)
-
-
-@config_fixture(env=JOB_ID_ENV, default=None)
-def job_id(_):
-    """The database id of the job document for this workflow run."""
-    ...
-
-
-@config_fixture(env=INIT_FILE_ENV, default="init.py")
-def init_file(name) -> Path:
-    """A python script which will be executed before the workflow is loaded."""
-    path = Path(name)
-    if path.suffix != ".py":
-        raise ValueError("init file must be a python file.")
-    return path
-
-
-@config_fixture(env=FIXTURES_FILE_ENV, default="fixtures.py")
-def fixtures_file(name) -> Path:
-    """A python script containing fixtures which will be loaded before the workflow is executed."""
-    path = Path(name)
-    if path.suffix != ".py":
-        raise ValueError("init file must be a python file.")
-    return path
