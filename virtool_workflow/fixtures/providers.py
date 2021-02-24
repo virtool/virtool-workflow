@@ -24,6 +24,7 @@ def for_fixtures(*receivers: Callable, **fixtures):
     Create a new fixture provider which only returns fixtures from :obj:`fixtures`
     if they are requested by particular fixtures.
     """
+
     def _grouping(param_name: str, request_from: Callable):
         if param_name in fixtures and (request_from in receivers):
             return fixtures[param_name]
@@ -34,6 +35,11 @@ def for_fixtures(*receivers: Callable, **fixtures):
 class FixtureGroup(FixtureProvider, dict):
     """A dict defining a group of fixture functions."""
 
+    def __init__(self, *args, **kwargs):
+        super(FixtureGroup, self).__init__()
+        self.update(**{f.__name__: f for f in args})
+        self.update(**kwargs)
+
     def __call__(self, name: str, _: Callable = None):
         if name in self:
             return self[name]
@@ -43,7 +49,7 @@ class FixtureGroup(FixtureProvider, dict):
         return func
 
     def fixtures(self):
-        return {name: self[name] for name in self}
+        return self
 
 
 class InstanceFixtureGroup(FixtureGroup):
@@ -52,6 +58,3 @@ class InstanceFixtureGroup(FixtureGroup):
     def __call__(self, name: str, _: Callable = None):
         if name in self:
             return lambda: self[name]
-
-
-

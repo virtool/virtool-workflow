@@ -62,7 +62,7 @@ async def test_generator_fixtures_cleanup(runtime):
     assert runtime["generator_fixture"]
 
     assert not cleanup_executed
-    runtime.close()
+    await runtime.close()
     assert cleanup_executed
 
 

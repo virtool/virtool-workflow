@@ -3,8 +3,8 @@ import logging
 import pprint
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
-from inspect import iscoroutinefunction, signature, Parameter
-from types import GeneratorType
+from inspect import signature, Parameter
+from types import GeneratorType, AsyncGeneratorType
 from typing import Any, Callable
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
@@ -55,9 +55,9 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         references to them.
         """
         logger.debug(f"Closing {FixtureScope.__name__} {self}")
-        logger.debug("Clearing instances")
         # return control to the generator fixtures which are still left open
         self.clear()
+
         while self._generators:
             gen = self._generators.pop()
             logger.debug(f"Returning control to generator fixture {gen}")
@@ -103,15 +103,12 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
 
         bound = await self.bind(fixture_)
 
-        if iscoroutinefunction(fixture_):
-            instance = await bound()
-        else:
-            instance = bound()
-
-        if isinstance(instance, GeneratorType):
-            generator = bound()
-            self._generators.append(generator)
+        if isinstance(instance := await bound(), GeneratorType):
+            self._generators.append(generator := instance)
             instance = next(generator)
+        elif isinstance(instance, AsyncGeneratorType):
+            self._async_generators.append(async_gen := instance)
+            instance = await async_gen.__anext__()
 
         self[fixture_.__name__] = instance
 
@@ -156,7 +153,10 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
                 f"Available instances are: \n {pprint.pformat(dict(self))}"
             )
 
-    async def bind(self, func: Callable[..., Any], strict: bool = True) -> Callable[[], Any]:
+    async def bind(self, func, strict=False):
+        return self.bound(func, strict)
+
+    def bound(self, func: Callable[..., Any], strict: bool = True) -> Callable[[], Any]:
         """
         Bind fixtures to the parameters of a function.
 
@@ -185,15 +185,15 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             return fixtures
 
         @wraps(func)
-        async def bound(*args, **_kwargs):
+        async def _bound(*args, **_kwargs):
             fixtures = await _bind(func, {})
             fixtures.update(_kwargs)
             try:
                 return await func(*args, **fixtures)
             except TypeError:
-                return func(*args, **_kwargs)
+                return func(*args, **fixtures)
 
-        return bound
+        return _bound
 
     async def bind_to_workflow(self, workflow: Workflow):
         """
