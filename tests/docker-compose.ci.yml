@@ -1,12 +1,18 @@
 # Mount the working directory of the `test` service to a directory
 # Used to retrieve the `coverage.xml` file when running in the github CI workflow.
 
-services:
-  tests:
-    volumes:
-      - ./coverage:/test/coverage
-    command:
-      -e py39 -- --log-cli-level=DEBUG --cov --cov-report xml:/test/coverage/coverage.xml
-
-
+tests:
+  build:
+    dockerfile: tests/Dockerfile
+    context: ..
+  command: -e py39 -- --log-cli-level=DEBUG --cov --cov-report xml:/test/coverage/coverage.xml
+  environment:
+    - VT_JOB_API_URL=http://jobsapi:9050
+    - VT_DB_CONNECTION_STRING=mongodb://mongo:27017
+    - VT_REDIS_CONNECTION_STRING=redis://redis:6379
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./coverage:/test/coverage
+  depends_on:
+    [ jobsapi ]
 
