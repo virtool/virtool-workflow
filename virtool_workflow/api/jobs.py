@@ -1,7 +1,6 @@
 import aiohttp
 
 from .errors import JobAlreadyAcquired, JobsAPIServerError
-from .scope import api_fixtures
 from ..data_model import Job
 
 
@@ -35,7 +34,6 @@ async def acquire_job_by_id(job_id: str, http_client: aiohttp.ClientSession, job
         )
 
 
-@api_fixtures.fixture
 def acquire_job(http_client: aiohttp.ClientSession, jobs_api_url: str):
     async def _job_provider(job_id: str):
         return await acquire_job_by_id(job_id, http_client, jobs_api_url)

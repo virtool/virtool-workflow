@@ -1,10 +1,7 @@
 import pytest
 
-from virtool_workflow.api.jobs import job_provider
-from virtool_workflow.api.scope import api_scope
 
-
-@pytest.fixture()
+@pytest.fixture
 async def test_job(connect_to_db):
     dbi = connect_to_db()
     job = {
@@ -19,7 +16,7 @@ async def test_job(connect_to_db):
     await dbi.jobs.delete_one(job)
 
 
-async def test_job_can_be_aquired(connect_to_db, test_job):
+async def test_job_can_be_acquired(connect_to_db, test_job, acquire_job):
     _job_provider = await api_scope.instantiate(job_provider)
 
     job = await _job_provider(job_id=test_job["_id"])
