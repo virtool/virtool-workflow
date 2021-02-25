@@ -1,5 +1,6 @@
 import aiohttp
 
+from .errors import JobAlreadyAcquired, JobsAPIServerError
 from .scope import api_fixtures
 from ..data_model import Job
 
@@ -16,8 +17,13 @@ async def acquire_job_by_id(job_id: str, http_client: aiohttp.ClientSession, job
     """
     async with http_client.patch(f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True},
                                  headers={"Content-Type": "application/json"}) as response:
-        document = await response.json()
+        if response.status != 200:
+            if response.status == 400:
+                raise JobAlreadyAcquired(job_id)
+            else:
+                raise JobsAPIServerError(await response.json())
 
+        document = await response.json()
         return Job(
             id=document["id"],
             args=document["args"],
