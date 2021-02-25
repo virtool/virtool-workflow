@@ -5,7 +5,6 @@ import pytest
 
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.data_model import Job
-from virtool_workflow.fixtures import FixtureGroup
 from virtool_workflow.fixtures.scoping import workflow_fixtures
 from virtool_workflow.storage.paths import context_directory
 
@@ -35,13 +34,15 @@ def mock_fixture(fixture: Union[str, Callable]):
     return _add_mock_fixture
 
 
-def install_as_pytest_fixtures(fixtures: FixtureGroup):
+def install_as_pytest_fixtures(_globals, *fixtures):
     """Create pytest fixtures for each fixture in a given :class:`FixtureGroup`."""
-    for name, fixture in fixtures.items():
-        globals()[name] = pytest.fixture(fixture)
+    for fixture in fixtures:
+        print(fixture)
+        _globals[fixture.__name__] = pytest.fixture(fixture)
 
 
 __all__ = [
     "runtime",
-    "mock_fixture"
+    "mock_fixture",
+    "install_as_pytest_fixtures"
 ]
