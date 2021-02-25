@@ -15,7 +15,7 @@ class Status:
 @dataclass
 class Job:
     """A Virtool Job."""
-    _id: str
+    id: str
     """Unique ID for the job."""
     args: dict
     """Workflow specific arguments."""
@@ -27,3 +27,5 @@ class Job:
     """The status log for the job."""
     task: str = None
     """The name of the workflow which should be used."""
+    key: str = None
+    """The auth key for the jobs API."""

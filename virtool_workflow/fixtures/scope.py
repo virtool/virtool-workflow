@@ -156,7 +156,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
     async def bind(self, func, strict=False):
         return self.bound(func, strict)
 
-    def bound(self, func: Callable[..., Any], strict: bool = True) -> Callable[[], Any]:
+    def bound(self, func: Callable[..., Any], strict: bool = False) -> Callable[[], Any]:
         """
         Bind fixtures to the parameters of a function.
 
