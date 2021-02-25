@@ -19,7 +19,7 @@ async def test_job(connect_to_db):
     await dbi.jobs.delete_one(job)
 
 
-async def test_job_provider(connect_to_db, test_job):
+async def test_job_can_be_aquired(connect_to_db, test_job):
     _job_provider = await api_scope.instantiate(job_provider)
 
     job = await _job_provider(job_id=test_job["_id"])
