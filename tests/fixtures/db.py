@@ -7,6 +7,6 @@ from virtool_core.db.core import DB
 def connect_to_db(db_connection_string: str):
     def _dbi():
         client = AsyncIOMotorClient(db_connection_string)
-        return DB(client["test"], None)
+        return DB(client["virtool"], None)
 
     return _dbi
