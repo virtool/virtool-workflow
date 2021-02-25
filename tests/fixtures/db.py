@@ -4,6 +4,9 @@ from virtool_core.db.core import DB
 
 
 @pytest.fixture
-def dbi(db_connection_string: str):
-    client = AsyncIOMotorClient(db_connection_string)
-    return DB(client["test"], None)
+def connect_to_db(db_connection_string: str):
+    def _dbi():
+        client = AsyncIOMotorClient(db_connection_string)
+        return DB(client["test"], None)
+
+    return _dbi
