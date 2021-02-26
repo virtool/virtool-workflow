@@ -4,7 +4,6 @@ import pprint
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from inspect import signature, Parameter
-from types import GeneratorType, AsyncGeneratorType
 from typing import Any, Callable
 
 from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
@@ -103,17 +102,21 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
 
         bound = await self.bind(fixture_)
 
-        if isinstance(instance := await bound(), GeneratorType):
-            self._generators.append(generator := instance)
+        instance = await bound()
+
+        with suppress(TypeError):
+            generator = instance
             instance = next(generator)
-        elif isinstance(instance, AsyncGeneratorType):
-            self._async_generators.append(async_gen := instance)
-            instance = await async_gen.__anext__()
+            self._generators.append(generator)
+
+        with suppress(TypeError, AttributeError):
+            async_generator = instance
+            instance = await instance.__anext__()
+            self._async_generators.append(async_generator)
 
         self[fixture_.__name__] = instance
 
         logger.debug(f"Instantiated {fixture_} as {instance}")
-
         return instance
 
     def _get_fixture_from_providers(self, name, request_from: Callable = None):
@@ -137,10 +140,12 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         with suppress(KeyError):
             return self[name]
 
-        if fixture := self._get_fixture_from_providers(name, requested_by):
-            return await self.instantiate(fixture)
-
-        raise KeyError(f"{name} is not a fixture within this FixtureScope.")
+        try:
+            return await self.instantiate(
+                self._get_fixture_from_providers(name, requested_by)
+            )
+        except TypeError:
+            raise KeyError(f"{name} is not a fixture within this FixtureScope.")
 
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
