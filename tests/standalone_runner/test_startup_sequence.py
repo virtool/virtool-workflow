@@ -1,5 +1,6 @@
-from aioredis import Redis
 from typing import AsyncGenerator
+
+from aioredis import Redis
 
 from virtool_workflow.data_model import Job
 from virtool_workflow_runtime.hooks import on_redis_connect, on_exit, on_init, on_start, on_docker_connect
@@ -36,7 +37,7 @@ async def test_jobs_generator_is_instantiated(loopless_main):
         job = await jobs.__anext__()
 
         assert isinstance(job, Job)
-        assert job._id == "1"
+        assert job.id == "1"
 
         push_to_jobs_list.called = True
 
