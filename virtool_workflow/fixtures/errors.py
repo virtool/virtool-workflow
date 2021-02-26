@@ -1,5 +1,4 @@
 """Exceptions relating to workflow fixtures."""
-import pprint
 from inspect import Signature, getsourcefile, getsourcelines
 from typing import Callable
 
@@ -13,41 +12,43 @@ class FixtureNotAvailable(RuntimeError):
 
     def _get_source_location(self, func: Callable):
         try:
-            source, lineno = getsourcelines(func)
-            source_file = getsourcefile(func)
-        except TypeError: # func is a Callable class
-            if hasattr(func, "__call__"):
-                source, lineno = getsourcelines(func.__call__)
-                source_file = getsourcefile(func.__call__)
-            else:
-                raise
+            try:
+                source, lineno = getsourcelines(func)
+                source_file = getsourcefile(func)
+            except (TypeError, OSError):  # func may be a Callable class
+                if hasattr(func, "__call__"):
+                    source, lineno = getsourcelines(func.__call__)
+                    source_file = getsourcefile(func.__call__)
+                else:
+                    raise
 
-        return source, f"{source_file}:{lineno}"
+            return source, f"{source_file}:{lineno}"
+        except TypeError:
+            return None, None
 
-    def __init__(self, param_name: str, signature: Signature, func: Callable, scope, *args):
+    def __init__(self, exception_message: str, signature: Signature, func: Callable, scope, *args):
         """
-        :param param_name: The name of the parameter/fixture which
-            was not available
+        :param message: The message of the cause exception.
         :param signature: The signature of the function requiring the unavailable fixture.
         :param func: The function requiring the unavailable fixture.
         :param args: Arguments passed to ValueError's __init__
-        :param kwargs: Keyword arguments passed to ValueError's __init__
         """
-        self.param_name = param_name
+        self.message = exception_message
         self.signature = signature
         self.func = func
-        self.available_fixtures = {name: self._get_source_location(callable_)[1]
-                                   if callable(callable_) else str(callable_)
-                                   for name, callable_ in scope.available.items()}
+        self.available_fixtures = {
+            name: self._get_source_location(callable_)[1]
+            if callable(callable_) else str(callable_)
+            for name, callable_ in scope.available.items()
+        }
+
+        self.available_fixtures = {k: v or "Source location not available" for k, v in self.available_fixtures.items()}
         super().__init__(*args)
 
     def __str__(self):
         _, location = self._get_source_location(self.func)
         available_fixture_lines = "\n".join(f'{name}: \n   {loc}'
                                             for name, loc in self.available_fixtures.items())
-        return f"'{self.param_name}' is not available as a workflow fixture.\n" \
-               f"{location}\n"\
+        return f"'\n{self.message}\n" \
+               f"{location if location else ''}\n" \
                f"Available fixtures:\n {available_fixture_lines}\n"
-
-
-

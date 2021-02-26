@@ -134,21 +134,20 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         :return: The workflow fixture instance for this :class:`FixtureScope`
         :raise KeyError: When the given name does not correspond to a defined workflow fixture.
         """
-        if name in self:
+        with suppress(KeyError):
             return self[name]
 
-        fixture = self._get_fixture_from_providers(name, requested_by)
-        if fixture:
+        if fixture := self._get_fixture_from_providers(name, requested_by):
             return await self.instantiate(fixture)
 
-        raise KeyError(name, f"{name} is not a fixture within this WorkflowFixtureScope.")
+        raise KeyError(f"{name} is not a fixture within this FixtureScope.")
 
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
         try:
             return super().__getitem__(item)
         except KeyError as error:
-            raise ValueError(
+            raise KeyError(
                 f"{error} is not available within this scope.\n"
                 f"Available instances are: \n {pprint.pformat(dict(self))}"
             )
@@ -180,8 +179,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
                     if strict:
                         if parameter.default == Parameter.empty:
                             # Parameter does not have a default value.
-                            missing_param = key_error.args[0]
-                            raise FixtureNotAvailable(param_name=missing_param, signature=sig, func=func, scope=self)
+                            raise FixtureNotAvailable(key_error.args[0], signature=sig, func=func, scope=self)
             return fixtures
 
         @wraps(func)
@@ -189,9 +187,13 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             fixtures = await _bind(func, {})
             fixtures.update(_kwargs)
             try:
-                return await func(*args, **fixtures)
-            except TypeError:
-                return func(*args, **fixtures)
+                try:
+                    return await func(*args, **fixtures)
+                except TypeError:
+                    return func(*args, **fixtures)
+            except TypeError as missing_params:
+                # Missing parameters
+                raise FixtureNotAvailable(missing_params.args[0], sig, func, self) from missing_params
 
         return _bound
 
