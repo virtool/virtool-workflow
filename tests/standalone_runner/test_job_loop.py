@@ -1,7 +1,6 @@
-from contextlib import suppress
-
 import asyncio
 import logging
+from contextlib import suppress
 from pathlib import Path
 
 from virtool_workflow.data_model import Job
@@ -51,7 +50,7 @@ async def test_containers_are_stopped_when_jobs_are_cancelled():
     @on_job_processed(once=True)
     async def submit_a_job_and_cancel(job, redis, redis_cancel_list_name):
         await asyncio.sleep(1)
-        await redis.publish(redis_cancel_list_name, job._id)
+        await redis.publish(redis_cancel_list_name, job.id)
         submit_a_job_and_cancel.called = True
 
     with suppress(asyncio.CancelledError):
@@ -78,9 +77,9 @@ async def test_runner_does_not_execute_multiple_jobs_at_once():
     async def check_jobs(job, tasks):
         nonlocal test_job_processed
         nonlocal second_test_job_processed
-        if job._id == "test_job":
+        if job.id == "test_job":
             test_job_processed = True
-        elif job._id == "second_test_job":
+        elif job.id == "second_test_job":
             second_test_job_processed = True
 
         logger.info(f"{job} {test_job_processed}, {second_test_job_processed}")

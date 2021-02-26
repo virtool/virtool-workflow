@@ -41,7 +41,7 @@ def extract_workflow(workflow_file_path: Path, scope):
 
 
 @on_load_api
-def init_environment(acquire_job, job_id, is_analysis_workflow, scope):
+async def init_environment(acquire_job, job_id, is_analysis_workflow, scope):
     job = await acquire_job(job_id)
 
     if is_analysis_workflow:

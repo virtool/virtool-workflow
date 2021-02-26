@@ -29,7 +29,7 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers,
 
     @on_job_cancelled
     async def stop_container_when_job_is_cancelled(id_):
-        if id_ == job._id:
+        if id_ == job.id:
             logger.debug(f"Stopping {container} running {container.image} due to cancellation of {id_}.")
             container.stop(timeout=3)
 
