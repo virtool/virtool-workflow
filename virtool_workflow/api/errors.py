@@ -5,3 +5,11 @@ class JobAlreadyAcquired(Exception):
 
 class JobsAPIServerError(Exception):
     ...
+
+
+class InsufficientJobRights(Exception):
+    ...
+
+
+class NotFound(KeyError):
+    ...

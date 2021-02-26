@@ -1,18 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
-
-VirtoolFileFormat = Literal[
-    "sam",
-    "bam",
-    "fasta",
-    "fastq",
-    "csv",
-    "tsv",
-    "json",
-    "unknown",
-]
+from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
 @dataclass(frozen=True)
@@ -26,5 +15,3 @@ class FileUpload:
 @dataclass(frozen=True)
 class DownloadableFileUpload(FileUpload):
     download_url: str
-
-
