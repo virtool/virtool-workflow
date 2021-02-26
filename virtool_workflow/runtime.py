@@ -1,26 +1,21 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
 from pathlib import Path
-from typing import Optional
 
-from virtool_workflow import discovery
-from virtool_workflow import hooks
-from virtool_workflow.abc.data_providers.jobs import JobProviderProtocol
+from virtool_workflow import discovery, FixtureScope
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
-from virtool_workflow.config.configuration import load_config
-from virtool_workflow.data_model import Job
+from virtool_workflow.api.scope import api_fixtures
+from virtool_workflow.config.configuration import load_config, config_fixtures
 from virtool_workflow.environment import WorkflowEnvironment
-from virtool_workflow.fixtures.scoping import workflow_fixtures
-from virtool_workflow.workflow import Workflow
-
-_environment: Optional[WorkflowEnvironment] = None
-_workflow: Optional[Workflow] = None
-_job: Optional[Job] = None
+from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+from virtool_workflow.hooks import on_load_config
 
 logger = logging.getLogger(__name__)
 
+on_load_api = FixtureHook("on_load_api")
 
-@hooks.on_load_config
+
+@on_load_config
 def set_log_level_to_debug(dev_mode: bool):
     if dev_mode:
         logging.basicConfig(level=logging.DEBUG)
@@ -28,34 +23,7 @@ def set_log_level_to_debug(dev_mode: bool):
         logging.basicConfig(level=logging.INFO)
 
 
-@hooks.on_load_config
-async def instantiate_job(job_id: Optional[str], mem: int, proc: int, job_provider: JobProviderProtocol = None):
-    job = next(job_ for job_ in await hooks.use_job.trigger() if job_)
-    if not job:
-        if job_id and job_provider:
-            job = await job_provider(job_id, mem=mem, proc=proc)
-        else:
-            raise RuntimeError("No job_id provided.")
-
-    global _job
-    _job = job
-
-    workflow_fixtures["mem"] = lambda: job.mem
-    workflow_fixtures["proc"] = lambda: job.proc
-
-
-@hooks.on_load_config
-async def instantiate_environment(is_analysis_workflow: bool):
-    global _environment
-    global _job
-    job = _job
-    if is_analysis_workflow:
-        _environment = AnalysisWorkflowEnvironment(job)
-    else:
-        _environment = WorkflowEnvironment(job)
-
-
-@hooks.on_load_config
+@on_load_config
 def load_scripts(init_file: Path, fixtures_file: Path):
     if init_file.exists():
         discovery.import_module_from_file(module_name=init_file.name.rstrip(".py"), path=init_file)
@@ -63,16 +31,33 @@ def load_scripts(init_file: Path, fixtures_file: Path):
         discovery.import_module_from_file(module_name=fixtures_file.name.rstrip(".py"), path=fixtures_file)
 
 
-@hooks.on_load_config
-def extract_workflow(workflow_file_path: Path):
-    global _workflow
+@on_load_config
+def extract_workflow(workflow_file_path: Path, scope):
     _workflow = discovery.discover_workflow(workflow_file_path)
     if not _workflow:
         raise RuntimeError(f"{workflow_file_path.name} does not contain a Workflow.")
 
+    scope["workflow"] = _workflow
+
+
+@on_load_api
+def init_environment(acquire_job, job_id, is_analysis_workflow, scope):
+    job = await acquire_job(job_id)
+
+    if is_analysis_workflow:
+        scope["environment"] = AnalysisWorkflowEnvironment(job)
+    else:
+        scope["environment"] = WorkflowEnvironment(job)
+
 
 async def start(**config):
-    await load_config(**config)
-    async with _environment:
-        result = await _environment.execute(_workflow)
+    scope = FixtureScope(config_fixtures)
+    await load_config(scope=scope, **config)
+    scope.add_provider(api_fixtures)
+    await on_load_api.trigger(scope)
+
+    environment, workflow = scope["environment"], scope["workflow"]
+
+    async with environment:
+        result = await environment.execute(workflow)
         logger.debug(result)
