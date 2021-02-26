@@ -16,5 +16,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./coverage:/test/coverage
     depends_on:
-      [ jobsapi ]
+      [ redis ]
 
