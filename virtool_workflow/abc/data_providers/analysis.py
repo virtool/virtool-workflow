@@ -32,3 +32,6 @@ class AbstractAnalysisProvider(ABC):
     async def delete(self):
         """Delete the analysis for the current job."""
         ...
+
+    def __await__(self):
+        return self.get().__await__()
