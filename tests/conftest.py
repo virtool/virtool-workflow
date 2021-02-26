@@ -4,7 +4,7 @@ pytest_plugins = [
     "tests.virtool_workflow.fixtures.workflow",
     "tests.virtool_workflow.fixtures.execution",
     "tests.standalone_runner.fixtures",
-    "tests.fixtures.db",
+    "tests.virtool_workflow.api.fixtures",
     "virtool_workflow.testing",
 ]
 
