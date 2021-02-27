@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Dict, Any
 
 from virtool_workflow.data_model.analysis import Analysis
-from virtool_workflow.data_model.files import AnalysisFile
+from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
 class AbstractAnalysisProvider(ABC):
@@ -12,7 +13,7 @@ class AbstractAnalysisProvider(ABC):
         ...
 
     @abstractmethod
-    async def upload(self, file: AnalysisFile):
+    async def upload(self, path: Path, format: VirtoolFileFormat):
         ...
 
     @abstractmethod

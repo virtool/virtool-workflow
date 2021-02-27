@@ -1,4 +1,5 @@
 from base64 import b64encode
+from datetime import datetime
 
 from aiohttp import web
 
@@ -105,3 +106,29 @@ async def get_analysis(request):
         ],
         "ready": False
     }, status=200)
+
+
+@mock_routes.post("/api/analyses/{analysis_id}/files")
+async def upload_file(request):
+    reader = await request.multipart()
+    file = await reader.next()
+
+    name = request.query.get("name")
+    format = request.query.get("format")
+
+    size = 0
+    while True:
+        chunk = await file.read_chunk(1000)
+        if not chunk:
+            break
+        size += len(chunk)
+
+    return web.json_response({
+        "id": 1,
+        "description": None,
+        "name": name,
+        "format": format,
+        "name_on_disk": f"1-{name}",
+        "size": size,
+        "uploaded_at": str(datetime.now()),
+    }, status=201)

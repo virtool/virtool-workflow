@@ -66,7 +66,7 @@ async def upload_analysis_file(analysis_id: str,
                                jobs_api_url: str):
     """Upload an analysis file using the jobs API."""
     with path.open('rb') as binary:
-        async with http.post(f"{jobs_api_url}/analyses/{analysis_id}", data={"file": binary}, query={
+        async with http.post(f"{jobs_api_url}/analyses/{analysis_id}/files", data={"file": binary}, params={
             "name": path.name,
             "format": format
         }) as response:
@@ -104,8 +104,8 @@ class AnalysisProvider(AbstractAnalysisProvider):
     async def get(self) -> Analysis:
         return await get_analysis_by_id(self.id, self.http, self.api_url)
 
-    async def upload(self, file: AnalysisFile):
-        pass
+    async def upload(self, path: Path, format: VirtoolFileFormat):
+        return await upload_analysis_file(self.id, path, format, self.http, self.api_url)
 
     async def download(self, file_id):
         pass
