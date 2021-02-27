@@ -37,3 +37,4 @@ async def test_analysis_provider_upload(http: aiohttp.ClientSession, jobs_api_ur
     assert isinstance(upload, AnalysisFile)
     assert upload.name == test_upload.name
     assert upload.format == "json"
+    assert upload.size == 14
