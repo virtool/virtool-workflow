@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Iterable, Tuple, Dict, Any
 
@@ -7,8 +8,10 @@ import dateutil.parser
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound
 from virtool_workflow.data_model.analysis import Analysis
-from virtool_workflow.data_model.files import AnalysisFile
+from virtool_workflow.data_model.files import AnalysisFile, VirtoolFileFormat
 from virtool_workflow.uploads.files import FileUpload
+
+logger = logging.getLogger(__name__)
 
 
 def _analysis_file_from_api_response_json(json):
@@ -48,12 +51,48 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
                 files=_analysis_file_from_api_response_json(response_json),
             )
         except aiohttp.ContentTypeError:
-            raise JobsAPIServerError(await response.text(), response.status)
+            raise JobsAPIServerError(response.status)
         except KeyError:
             if response.status == 203:
                 raise InsufficientJobRights(response_json, response.status)
             elif response.status == 404:
                 raise NotFound(response_json, response.status)
+
+
+async def upload_analysis_file(analysis_id: str,
+                               path: Path,
+                               format: VirtoolFileFormat,
+                               http: aiohttp.ClientSession,
+                               jobs_api_url: str):
+    """Upload an analysis file using the jobs API."""
+    with path.open('rb') as binary:
+        async with http.post(f"{jobs_api_url}/analyses/{analysis_id}", data={"file": binary}, query={
+            "name": path.name,
+            "format": format
+        }) as response:
+            try:
+                response_json = await response.json()
+            except aiohttp.ContentTypeError as content_type_error:
+                raise JobsAPIServerError(response.status) from content_type_error
+
+            try:
+                return AnalysisFile(
+                    id=response_json["id"],
+                    name=response_json["name"],
+                    name_on_disk=response_json["name_on_disk"],
+                    size=response_json["size"],
+                    uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
+                    format=response_json["format"],
+                )
+            except KeyError as key_error:
+                if response.status in (400, 409):
+                    raise ValueError(response_json) from key_error
+                elif response.status == 403:
+                    raise InsufficientJobRights(response_json) from key_error
+                elif response.status == 404:
+                    raise NotFound(response_json) from key_error
+                else:
+                    raise JobsAPIServerError(response_json) from key_error
 
 
 class AnalysisProvider(AbstractAnalysisProvider):
