@@ -26,15 +26,21 @@ jobs:
           up
           --exit-code-from tests
 
+      - name: Print Files
+        run: >-
+          ls -la -R &&
+          ls -la tests &&
+          echo "$GITHUB_WORKSPACE"
+
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2
         with:
           name: Coverage
-          path: $GITHUB_WORKSPACE/test/coverage/coverage.xml
+          path: ./tests/coverage/coverage.xml
 
       - name: Run codacy-coverage-reporter
         if: github.event_name == 'push'
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: $GITHUB_WORKSPACE/test/coverage/coverage.xml
+          coverage-reports: test/tests/coverage/coverage.xml
