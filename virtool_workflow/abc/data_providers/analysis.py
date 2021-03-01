@@ -1,11 +1,24 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Any, Tuple, Iterable
+from typing import Dict, Any
 
-from virtool_workflow.uploads.files import FileUpload
+from virtool_workflow.data_model.analysis import Analysis
+from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
 class AbstractAnalysisProvider(ABC):
+
+    @abstractmethod
+    async def get(self) -> Analysis:
+        ...
+
+    @abstractmethod
+    async def upload(self, path: Path, format: VirtoolFileFormat):
+        ...
+
+    @abstractmethod
+    async def download(self, file_id):
+        ...
 
     @abstractmethod
     async def store_result(self, result: Dict[str, Any]):
@@ -17,15 +30,9 @@ class AbstractAnalysisProvider(ABC):
         ...
 
     @abstractmethod
-    async def store_files(self, uploads: Iterable[Tuple[FileUpload, Path]]):
-        """
-        Register that a file is available under the `data_path`.
-
-        :param uploads: An Iterable of :class:`FileUpload` and destination path tuples.
-        """
-        ...
-
-    @abstractmethod
     async def delete(self):
         """Delete the analysis for the current job."""
         ...
+
+    def __await__(self):
+        return self.get().__await__()

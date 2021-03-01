@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
-from virtool_workflow.uploads.files import DownloadableFileUpload
+
 from virtool_workflow.analysis.library_types import LibraryType
 
 
