@@ -4,8 +4,8 @@ from pathlib import Path
 import aiohttp
 import pytest
 import virtool_workflow.api.errors
+from virtool_workflow import api
 from virtool_workflow.api.analysis import get_analysis_by_id, AnalysisProvider
-from virtool_workflow.api.errors import ResourceDeleted
 from virtool_workflow.config.fixtures import work_path
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile
@@ -58,5 +58,7 @@ async def test_analysis_file_download(analysis_api):
 async def test_analysis_delete(analysis_api):
     await analysis_api.delete()
 
-    with pytest.raises(ResourceDeleted):
-        await analysis_api
+    analysis_api.id = "foobar"
+
+    with pytest.raises(api.errors.NotFound):
+        await analysis_api.delete()

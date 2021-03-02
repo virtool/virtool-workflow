@@ -5,8 +5,9 @@ from typing import Dict, Any
 import aiofiles
 import aiohttp
 import dateutil.parser
+from aiohttp import ContentTypeError
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
-from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound
+from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound, AlreadyFinalized
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile, VirtoolFileFormat
 
@@ -118,6 +119,8 @@ class AnalysisProvider(AbstractAnalysisProvider):
         :param file_id: The ID of the file.
         :param target_path: The path which the file data should be stored under.
         :return: A path to the downloaded file. It will be the `target_path` if one was given.
+        :raise NotFound: When either the file or the analysis does not exist (404 status code).
+        :raise JobsAPIServerError: When the status code of the response is not 200 or 404.
         """
         target_path = target_path or self.work_path
 
@@ -138,4 +141,33 @@ class AnalysisProvider(AbstractAnalysisProvider):
         pass
 
     async def delete(self):
-        pass
+        """
+        Delete the analysis. This method should be called if the workflow code fails before a result is uploaded.
+
+        :raise InsufficientJobRights: When the current job does not have the appropriate permissions required
+            to delete the analysis.
+        :raise NotFound: When the analysis has already been deleted.
+        :raise AlreadyFinalized: When the analysis has a result uploaded and is viewable in Virtool.
+            Jobs are not permitted to delete the analysis after this point.
+        :raise JobsAPIServerError: When the analysis is not deleted for any other reason.
+        """
+        async with self.http.delete(f"{self.api_url}/analyses/{self.id}") as response:
+            if response.status == 204:
+                return
+
+            try:
+                response_json = await response.json()
+                response_message = response_json["message"]
+            except ContentTypeError:
+                response_message = await response.text()
+            except KeyError:
+                response_message = response_json
+
+            if response.status == 403:
+                raise InsufficientJobRights(response_message)
+            elif response.status == 404:
+                raise NotFound(response_message)
+            elif response.status == 409:
+                raise AlreadyFinalized(response_message)
+            else:
+                raise JobsAPIServerError(response_message)

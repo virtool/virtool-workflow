@@ -15,5 +15,5 @@ class NotFound(KeyError):
     ...
 
 
-class ResourceDeleted(Exception):
+class AlreadyFinalized(Exception):
     ...
