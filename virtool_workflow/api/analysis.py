@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Iterable, Tuple, Dict, Any
+from typing import Dict, Any
 
 import aiofiles
 import aiohttp
@@ -9,7 +9,6 @@ from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile, VirtoolFileFormat
-from virtool_workflow.uploads.files import FileUpload
 
 logger = logging.getLogger(__name__)
 
@@ -136,9 +135,6 @@ class AnalysisProvider(AbstractAnalysisProvider):
         return target_path
 
     async def store_result(self, result: Dict[str, Any]):
-        pass
-
-    async def store_files(self, uploads: Iterable[Tuple[FileUpload, Path]]):
         pass
 
     async def delete(self):
