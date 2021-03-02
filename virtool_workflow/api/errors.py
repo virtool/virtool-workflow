@@ -30,6 +30,19 @@ async def raising_errors_by_status_code(response,
                                         on_404=NotFound,
                                         on_403=InsufficientJobRights,
                                         on_other=JobsAPIServerError):
+    """
+    Raise exceptions based on the result status code.
+
+    If the status code is between 200 and 299 then this context manager will have no effect, other than
+    getting the JSON body of the response.
+
+    :param response: The aiohttp response object.
+    :param on_409: An exception to raise if there is a 409 status code.
+    :param on_404: An exception to raise if there is a 404 status code.
+    :param on_403: An exception to raise if there is a 403 status code.
+    :param on_other: An exception to raise if there is some other status code.
+    :return: The response json as a dict, if it is available.
+    """
     try:
         response_json = await response.json()
     except ContentTypeError:
