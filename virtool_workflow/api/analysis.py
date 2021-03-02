@@ -107,8 +107,17 @@ class AnalysisProvider(AbstractAnalysisProvider):
     async def upload(self, path: Path, format: VirtoolFileFormat):
         return await upload_analysis_file(self.id, path, format, self.http, self.api_url)
 
-    async def download(self, file_id):
-        pass
+    async def download(self, file_id: str, target_path: Path = None) -> Path:
+        """
+        Download a file associated to the current analysis.
+
+        :param file_id: The ID of the file.
+        :param target_path: The path which the file data should be stored under.
+        :return: A path to the downloaded file. It will be the `target_path` if one was given.
+        """
+        async with self.http.get(f"self.api_url/analyses/{self.id}/files/{file_id}") as response:
+            print(await response.read())
+
 
     async def store_result(self, result: Dict[str, Any]):
         pass
