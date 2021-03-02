@@ -27,7 +27,7 @@ class Analysis(data_model.Analysis):
 
 
 @fixture
-def analysis(analysis_provider: AbstractAnalysisProvider) -> Analysis:
+async def analysis(analysis_provider: AbstractAnalysisProvider) -> Analysis:
     async def upload_files(files):
         for path, format in files:
             await analysis_provider.upload(path, format)

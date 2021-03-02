@@ -59,6 +59,7 @@ async def acquire_job(request):
         "task": "create_subtraction",
         "args": {
             "subtraction_id": "Thale",
+            "analysis_id": "test_analysis",
             "file_id": "vlekszor-ATgenomeTAIR9.171"
         },
         "proc": 2,

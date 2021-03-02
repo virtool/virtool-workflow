@@ -2,7 +2,6 @@
 from typing import Callable, Union
 
 import pytest
-
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures.scoping import workflow_fixtures
@@ -17,7 +16,7 @@ def testing_data_path():
 @pytest.fixture
 async def runtime():
     async with AnalysisWorkflowEnvironment(
-            Job("test_job", {}),
+            Job("test_job", {"analysis_id": "test_analysis"}),
     ) as _runtime:
         _runtime.override("data_path", testing_data_path)
         yield _runtime
