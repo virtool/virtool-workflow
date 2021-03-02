@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import Dict, Type
 
 from aiohttp import ContentTypeError
 
@@ -26,10 +27,7 @@ class AlreadyFinalized(Exception):
 
 @asynccontextmanager
 async def raising_errors_by_status_code(response,
-                                        on_409=AlreadyFinalized,
-                                        on_404=NotFound,
-                                        on_403=InsufficientJobRights,
-                                        on_other=JobsAPIServerError):
+                                        status_codes_to_exceptions: Dict[int, Type[Exception]] = None):
     """
     Raise exceptions based on the result status code.
 
@@ -37,33 +35,28 @@ async def raising_errors_by_status_code(response,
     getting the JSON body of the response.
 
     :param response: The aiohttp response object.
-    :param on_409: An exception to raise if there is a 409 status code.
-    :param on_404: An exception to raise if there is a 404 status code.
-    :param on_403: An exception to raise if there is a 403 status code.
-    :param on_other: An exception to raise if there is some other status code.
+    :param status_codes_to_exceptions: A dict associating status codes to exceptions that should be raised.
     :return: The response json as a dict, if it is available.
     """
+    if status_codes_to_exceptions is None:
+        status_codes_to_exceptions = {
+            404: NotFound,
+            409: AlreadyFinalized,
+            403: InsufficientJobRights,
+            500: JobsAPIServerError,
+        }
+
+    response_json = None
+
     try:
         response_json = await response.json()
+        response_message = response_json["message"]
     except ContentTypeError:
-        response_json = {}
+        response_message = await response.text()
+    except (KeyError, TypeError):
+        response_message = str(response_json)
 
-    if 200 <= response.status < 300:
-        yield response_json
+    if response.status in status_codes_to_exceptions:
+        raise status_codes_to_exceptions[response.status](response_message)
     else:
-        try:
-            response_json = await response.json()
-            response_message = response_json["message"]
-        except ContentTypeError:
-            response_message = await response.text()
-        except KeyError:
-            response_message = response_json
-
-        if response.status == 404:
-            raise on_404(response_message)
-        elif response.status == 409:
-            raise on_409(response_message)
-        elif response.status == 403:
-            raise on_403(response_message)
-        else:
-            raise on_other(response_message)
+        yield response_json

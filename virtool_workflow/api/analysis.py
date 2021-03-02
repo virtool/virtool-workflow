@@ -37,7 +37,6 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
 
     :return: A :class:`virtool_workflow.data_model.analysis.Analysis` instance.
 
-    :raise JobsAPIServerError: When the jobs API server fails to respond with a JSON body
     :raise InsufficientJobRights: When the current job does not have sufficient rights to access the analysis.
     :raise NotFound: When the given :obj:`analysis_id` does not correspond to an existing analysis (HTTP 404).
     :raise KeyError: When the analysis data received from the API is missing a required key.
@@ -97,7 +96,6 @@ class AnalysisProvider(AbstractAnalysisProvider):
         :param target_path: The path which the file data should be stored under.
         :return: A path to the downloaded file. It will be the `target_path` if one was given.
         :raise NotFound: When either the file or the analysis does not exist (404 status code).
-        :raise JobsAPIServerError: When the status code of the response is not 200 or 404.
         """
         target_path = target_path or self.work_path
 
@@ -135,7 +133,6 @@ class AnalysisProvider(AbstractAnalysisProvider):
         :raise NotFound: When the analysis has already been deleted.
         :raise AlreadyFinalized: When the analysis has a result uploaded and is viewable in Virtool.
             Jobs are not permitted to delete the analysis after this point.
-        :raise JobsAPIServerError: When the analysis is not deleted for any other reason.
         """
         async with self.http.delete(f"{self.api_url}/analyses/{self.id}") as response:
             async with raising_errors_by_status_code(response):
