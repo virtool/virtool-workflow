@@ -2,7 +2,6 @@ from base64 import b64encode
 from datetime import datetime
 from pathlib import Path
 
-import aiohttp
 from aiohttp import web
 
 mock_routes = web.RouteTableDef()
@@ -141,12 +140,10 @@ async def download(request):
     file_id = request.match_info["file_id"]
     analysis_id = request.match_info["analysis_id"]
 
-    if file_id == 0 and analysis_id == "test_analysis":
+    if file_id == "0" and analysis_id == "test_analysis":
         test_file = Path("test.txt")
         test_file.write_text("TEST")
         response = web.FileResponse(test_file)
-
-        test_file.unlink()
 
         return response
 

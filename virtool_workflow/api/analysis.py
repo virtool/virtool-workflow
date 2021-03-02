@@ -2,9 +2,9 @@ import logging
 from pathlib import Path
 from typing import Iterable, Tuple, Dict, Any
 
+import aiofiles
 import aiohttp
 import dateutil.parser
-
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound
 from virtool_workflow.data_model.analysis import Analysis
@@ -96,10 +96,15 @@ async def upload_analysis_file(analysis_id: str,
 
 
 class AnalysisProvider(AbstractAnalysisProvider):
-    def __init__(self, analysis_id, http: aiohttp.ClientSession, jobs_api_url: str):
+    def __init__(self,
+                 analysis_id: str,
+                 http: aiohttp.ClientSession,
+                 jobs_api_url: str,
+                 work_path: Path):
         self.id = analysis_id
         self.http = http
         self.api_url = jobs_api_url
+        self.work_path = work_path
 
     async def get(self) -> Analysis:
         return await get_analysis_by_id(self.id, self.http, self.api_url)
@@ -115,9 +120,20 @@ class AnalysisProvider(AbstractAnalysisProvider):
         :param target_path: The path which the file data should be stored under.
         :return: A path to the downloaded file. It will be the `target_path` if one was given.
         """
-        async with self.http.get(f"self.api_url/analyses/{self.id}/files/{file_id}") as response:
-            print(await response.read())
+        target_path = target_path or self.work_path
 
+        async with self.http.get(f"{self.api_url}/analyses/{self.id}/files/{file_id}") as response:
+            if response.status == 200:
+                async with aiofiles.open(target_path, "wb") as f:
+                    await f.write(await response.read())
+
+                return target_path
+            elif response.status == 404:
+                raise NotFound(await response.json())
+
+            raise JobsAPIServerError(await response.json())
+
+        return target_path
 
     async def store_result(self, result: Dict[str, Any]):
         pass
