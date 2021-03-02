@@ -134,7 +134,7 @@ class AnalysisProvider(AbstractAnalysisProvider):
 
         return target_path
 
-    async def store_result(self, result: Dict[str, Any]):
+    async def upload_result(self, result: Dict[str, Any]):
         pass
 
     async def delete(self):

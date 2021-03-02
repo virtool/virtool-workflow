@@ -21,7 +21,7 @@ class AbstractAnalysisProvider(ABC):
         ...
 
     @abstractmethod
-    async def store_result(self, result: Dict[str, Any]):
+    async def upload_result(self, result: Dict[str, Any]):
         """
         Set the result for the current job and mark it as ready.
 
