@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, Any
 
-from virtool_workflow.data_model.analysis import Analysis
+from virtool_workflow.data_model import Analysis
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
