@@ -74,3 +74,7 @@ class AnalysisWorkflowEnvironment(WorkflowEnvironment):
             @hooks.on_success
             async def upload_results(results):
                 await analysis_provider.upload_result(results)
+
+            @hooks.on_failure
+            async def delete():
+                await analysis_provider.delete()

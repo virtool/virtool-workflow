@@ -1,5 +1,6 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope
@@ -63,7 +64,8 @@ async def init_environment(
         scope["environment"] = WorkflowEnvironment(job)
 
 
-async def start(**config):
+@asynccontextmanager
+async def prepare_environment(**config):
     scope = FixtureScope(config_fixtures)
     await load_config(scope=scope, **config)
     scope.add_provider(api_fixtures)
@@ -72,5 +74,9 @@ async def start(**config):
     environment, workflow = scope["environment"], scope["workflow"]
 
     async with environment:
-        result = await environment.execute(workflow)
-        logger.debug(result)
+        yield environment, workflow
+
+
+async def start(**config):
+    async with prepare_environment(**config) as (environment, workflow):
+        await environment.execute(workflow)
