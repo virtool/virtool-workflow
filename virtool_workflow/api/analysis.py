@@ -5,9 +5,8 @@ from typing import Dict, Any, Tuple
 import aiofiles
 import aiohttp
 import dateutil.parser
-from aiohttp import ContentTypeError
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
-from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound, AlreadyFinalized
+from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile, VirtoolFileFormat
 
@@ -41,22 +40,14 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
     :raise JobsAPIServerError: When the jobs API server fails to respond with a JSON body
     :raise InsufficientJobRights: When the current job does not have sufficient rights to access the analysis.
     :raise NotFound: When the given :obj:`analysis_id` does not correspond to an existing analysis (HTTP 404).
+    :raise KeyError: When the analysis data received from the API is missing a required key.
     """
     async with http.get(f"{jobs_api_url}/analyses/{analysis_id}") as response:
-        try:
-            response_json = await response.json()
-
+        async with raising_errors_by_status_code(response) as response_json:
             return Analysis(
                 id=response_json["id"],
                 files=_analysis_file_from_api_response_json(response_json),
             )
-        except aiohttp.ContentTypeError:
-            raise JobsAPIServerError(response.status)
-        except KeyError:
-            if response.status == 203:
-                raise InsufficientJobRights(response_json, response.status)
-            elif response.status == 404:
-                raise NotFound(response_json, response.status)
 
 
 async def upload_analysis_file(analysis_id: str,
@@ -70,12 +61,7 @@ async def upload_analysis_file(analysis_id: str,
             "name": path.name,
             "format": format
         }) as response:
-            try:
-                response_json = await response.json()
-            except aiohttp.ContentTypeError as content_type_error:
-                raise JobsAPIServerError(response.status) from content_type_error
-
-            try:
+            async with raising_errors_by_status_code(response) as response_json:
                 return AnalysisFile(
                     id=response_json["id"],
                     name=response_json["name"],
@@ -84,15 +70,6 @@ async def upload_analysis_file(analysis_id: str,
                     uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
                     format=response_json["format"],
                 )
-            except KeyError as key_error:
-                if response.status in (400, 409):
-                    raise ValueError(response_json) from key_error
-                elif response.status == 403:
-                    raise InsufficientJobRights(response_json) from key_error
-                elif response.status == 404:
-                    raise NotFound(response_json) from key_error
-                else:
-                    raise JobsAPIServerError(response_json) from key_error
 
 
 class AnalysisProvider(AbstractAnalysisProvider):
@@ -125,15 +102,9 @@ class AnalysisProvider(AbstractAnalysisProvider):
         target_path = target_path or self.work_path
 
         async with self.http.get(f"{self.api_url}/analyses/{self.id}/files/{file_id}") as response:
-            if response.status == 200:
+            async with raising_errors_by_status_code(response):
                 async with aiofiles.open(target_path, "wb") as f:
                     await f.write(await response.read())
-
-                return target_path
-            elif response.status == 404:
-                raise NotFound(await response.json())
-
-            raise JobsAPIServerError(await response.json())
 
         return target_path
 
@@ -149,23 +120,11 @@ class AnalysisProvider(AbstractAnalysisProvider):
         async with self.http.patch(f"{self.api_url}/analyses/{self.id}", json={
             "results": result
         }) as response:
-            try:
-                analysis_json = await response.json()
+            async with raising_errors_by_status_code(response) as analysis_json:
                 return Analysis(
                     analysis_json["id"],
                     _analysis_file_from_api_response_json(analysis_json)
                 ), analysis_json["results"]
-            except ContentTypeError:
-                raise JobsAPIServerError(await response.text())
-            except KeyError:
-                if response.status == 403:
-                    raise InsufficientJobRights(await response.json())
-                elif response.status == 404:
-                    raise NotFound(await response.json())
-                elif response.status == 409:
-                    raise AlreadyFinalized(await response.json())
-                else:
-                    raise JobsAPIServerError(await response.json())
 
     async def delete(self):
         """
@@ -179,22 +138,5 @@ class AnalysisProvider(AbstractAnalysisProvider):
         :raise JobsAPIServerError: When the analysis is not deleted for any other reason.
         """
         async with self.http.delete(f"{self.api_url}/analyses/{self.id}") as response:
-            if response.status == 204:
+            async with raising_errors_by_status_code(response):
                 return
-
-            try:
-                response_json = await response.json()
-                response_message = response_json["message"]
-            except ContentTypeError:
-                response_message = await response.text()
-            except KeyError:
-                response_message = response_json
-
-            if response.status == 403:
-                raise InsufficientJobRights(response_message)
-            elif response.status == 404:
-                raise NotFound(response_message)
-            elif response.status == 409:
-                raise AlreadyFinalized(response_message)
-            else:
-                raise JobsAPIServerError(response_message)

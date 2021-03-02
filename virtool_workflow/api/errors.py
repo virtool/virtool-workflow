@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 
 from aiohttp import ContentTypeError
 
@@ -24,16 +24,20 @@ class AlreadyFinalized(Exception):
     ...
 
 
-@contextmanager
-def raise_server_errors(response,
-                        on_409=AlreadyFinalized,
-                        on_404=NotFound,
-                        on_403=InsufficientJobRights,
-                        on_other=JobsAPIServerError):
-    if 200 <= response.status < 300:
-        yield
-    else:
+@asynccontextmanager
+async def raising_errors_by_status_code(response,
+                                        on_409=AlreadyFinalized,
+                                        on_404=NotFound,
+                                        on_403=InsufficientJobRights,
+                                        on_other=JobsAPIServerError):
+    try:
+        response_json = await response.json()
+    except ContentTypeError:
+        response_json = {}
 
+    if 200 <= response.status < 300:
+        yield response_json
+    else:
         try:
             response_json = await response.json()
             response_message = response_json["message"]
