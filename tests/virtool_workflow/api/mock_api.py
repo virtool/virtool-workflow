@@ -4,6 +4,8 @@ from pathlib import Path
 
 from aiohttp import web
 
+TEST_ANALYSIS_ID = "test_analysis"
+
 mock_routes = web.RouteTableDef()
 
 
@@ -64,13 +66,13 @@ async def acquire_job(request):
 async def get_analysis(request):
     id_ = request.match_info["analysis_id"]
 
-    if id_ != "test_analysis":
+    if id_ != TEST_ANALYSIS_ID:
         return web.json_response({
             "message": "Not Found"
         }, status=404)
 
     return web.json_response({
-        "id": "test_analysis",
+        "id": TEST_ANALYSIS_ID,
         "created_at": "2017-10-03T21:35:54.813000Z",
         "job": {
             "id": "test_job"
@@ -140,7 +142,7 @@ async def download(request):
     file_id = request.match_info["file_id"]
     analysis_id = request.match_info["analysis_id"]
 
-    if file_id == "0" and analysis_id == "test_analysis":
+    if file_id == "0" and analysis_id == TEST_ANALYSIS_ID:
         test_file = Path("test.txt")
         test_file.write_text("TEST")
         response = web.FileResponse(test_file)
@@ -150,3 +152,15 @@ async def download(request):
     return web.json_response({
         "message": "Not Found"
     }, status=404)
+
+
+@mock_routes.delete("/api/analyses/{analysis_id}")
+async def delete(request):
+    analysis_id = request.match_info["analysis_id"]
+
+    if analysis_id != TEST_ANALYSIS_ID:
+        return web.json_response({
+            "message": "Not Found"
+        }, status=404)
+
+    return web.Response(status=204)
