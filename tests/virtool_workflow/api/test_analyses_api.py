@@ -62,3 +62,11 @@ async def test_analysis_delete(analysis_api):
 
     with pytest.raises(api.errors.NotFound):
         await analysis_api.delete()
+
+
+async def test_result_upload(analysis_api):
+    mock_result = {"foo": "bar"}
+    analysis, result = await analysis_api.upload_result(mock_result)
+
+    assert isinstance(analysis, Analysis)
+    assert result == mock_result

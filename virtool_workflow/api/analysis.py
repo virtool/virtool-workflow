@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
 import aiofiles
 import aiohttp
@@ -137,8 +137,35 @@ class AnalysisProvider(AbstractAnalysisProvider):
 
         return target_path
 
-    async def upload_result(self, result: Dict[str, Any]):
-        pass
+    async def upload_result(self, result: Dict[str, Any]) -> Tuple[Analysis, dict]:
+        """
+        Upload the results dict for the analysis.
+
+        :param result: The results dict.
+        :raise InsufficientJobRights: When the current job does not have sufficient rights to modify the analysis.
+        :raise NotFound: When there is no analysis with the ID :obj:`.id`.
+        :raise AlreadyFinalized: When there is already a result for the analysis.
+        """
+        async with self.http.patch(f"{self.api_url}/analyses/{self.id}", json={
+            "results": result
+        }) as response:
+            try:
+                analysis_json = await response.json()
+                return Analysis(
+                    analysis_json["id"],
+                    _analysis_file_from_api_response_json(analysis_json)
+                ), analysis_json["results"]
+            except ContentTypeError:
+                raise JobsAPIServerError(await response.text())
+            except KeyError:
+                if response.status == 403:
+                    raise InsufficientJobRights(await response.json())
+                elif response.status == 404:
+                    raise NotFound(await response.json())
+                elif response.status == 409:
+                    raise AlreadyFinalized(await response.json())
+                else:
+                    raise JobsAPIServerError(await response.json())
 
     async def delete(self):
         """
