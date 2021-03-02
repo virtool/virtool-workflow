@@ -13,3 +13,7 @@ class InsufficientJobRights(Exception):
 
 class NotFound(KeyError):
     ...
+
+
+class ResourceDeleted(Exception):
+    ...
