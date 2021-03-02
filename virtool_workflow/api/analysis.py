@@ -72,15 +72,21 @@ async def upload_analysis_file(analysis_id: str,
 
 
 class AnalysisProvider(AbstractAnalysisProvider):
+    """
+    Use the Virtool Jobs API to perform operations on the current analysis.
+
+    :param analysis_id: The ID of the current analysis as found in the job args.
+    :param http: A :class:`aiohttp.ClientSession` instance to be used when making requests.
+    :param jobs_api_url: The url to the Jobs API. It should include the `/api` path.
+    """
+
     def __init__(self,
                  analysis_id: str,
                  http: aiohttp.ClientSession,
-                 jobs_api_url: str,
-                 work_path: Path):
+                 jobs_api_url: str):
         self.id = analysis_id
         self.http = http
         self.api_url = jobs_api_url
-        self.work_path = work_path
 
     async def get(self) -> Analysis:
         return await get_analysis_by_id(self.id, self.http, self.api_url)
@@ -88,7 +94,7 @@ class AnalysisProvider(AbstractAnalysisProvider):
     async def upload(self, path: Path, format: VirtoolFileFormat):
         return await upload_analysis_file(self.id, path, format, self.http, self.api_url)
 
-    async def download(self, file_id: str, target_path: Path = None) -> Path:
+    async def download(self, file_id: str, target_path: Path) -> Path:
         """
         Download a file associated to the current analysis.
 
@@ -97,8 +103,6 @@ class AnalysisProvider(AbstractAnalysisProvider):
         :return: A path to the downloaded file. It will be the `target_path` if one was given.
         :raise NotFound: When either the file or the analysis does not exist (404 status code).
         """
-        target_path = target_path or self.work_path
-
         async with self.http.get(f"{self.api_url}/analyses/{self.id}/files/{file_id}") as response:
             async with raising_errors_by_status_code(response):
                 async with aiofiles.open(target_path, "wb") as f:

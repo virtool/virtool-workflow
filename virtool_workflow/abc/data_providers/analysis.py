@@ -17,7 +17,7 @@ class AbstractAnalysisProvider(ABC):
         ...
 
     @abstractmethod
-    async def download(self, file_id: str, target_path: Path = None):
+    async def download(self, file_id: str, target_path: Path):
         ...
 
     @abstractmethod
