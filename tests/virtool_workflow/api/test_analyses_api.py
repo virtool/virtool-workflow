@@ -10,6 +10,11 @@ from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile
 
 
+@pytest.fixture
+def analysis_api(http: aiohttp.ClientSession, jobs_api_url: str):
+    return AnalysisProvider("test_analysis", http, jobs_api_url)
+
+
 async def test_get_analysis(http: aiohttp.ClientSession, jobs_api_url: str):
     analysis = await get_analysis_by_id("test_analysis", http, jobs_api_url)
     assert isinstance(analysis, Analysis)
@@ -18,15 +23,13 @@ async def test_get_analysis(http: aiohttp.ClientSession, jobs_api_url: str):
         await get_analysis_by_id("not_an_id", http, jobs_api_url)
 
 
-async def test_analysis_provider_get(http: aiohttp.ClientSession, jobs_api_url: str):
-    analysis = await AnalysisProvider("test_analysis", http, jobs_api_url)
+async def test_analysis_provider_get(analysis_api):
+    analysis = await analysis_api
 
     assert isinstance(analysis, Analysis)
 
 
-async def test_analysis_provider_upload(http: aiohttp.ClientSession, jobs_api_url: str):
-    analysis_api = AnalysisProvider("test_analysis", http, jobs_api_url)
-
+async def test_analysis_provider_upload(analysis_api):
     test_upload = Path("test.json")
 
     with test_upload.open("w") as fp:
@@ -38,3 +41,6 @@ async def test_analysis_provider_upload(http: aiohttp.ClientSession, jobs_api_ur
     assert upload.name == test_upload.name
     assert upload.format == "json"
     assert upload.size == 14
+
+async def test_analysis_file_download(analysis_api):
+    raise False
