@@ -6,17 +6,13 @@ import pytest
 import virtool_workflow.api.errors
 from virtool_workflow import api
 from virtool_workflow.api.analysis import get_analysis_by_id, AnalysisProvider
-from virtool_workflow.config.fixtures import work_path
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile
-from virtool_workflow.testing import install_as_pytest_fixtures
-
-install_as_pytest_fixtures(globals(), work_path)
 
 
 @pytest.fixture
-def analysis_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path):
-    return AnalysisProvider("test_analysis", http, jobs_api_url, work_path)
+def analysis_api(http: aiohttp.ClientSession, jobs_api_url: str):
+    return AnalysisProvider("test_analysis", http, jobs_api_url)
 
 
 async def test_get_analysis(http: aiohttp.ClientSession, jobs_api_url: str):
@@ -34,7 +30,7 @@ async def test_analysis_provider_get(analysis_api):
 
 
 async def test_analysis_provider_upload(analysis_api):
-    test_upload = Path("test.json")
+    test_upload = Path("test.txt")
 
     with test_upload.open("w") as fp:
         json.dump({"foo": "bar"}, fp)
@@ -45,6 +41,8 @@ async def test_analysis_provider_upload(analysis_api):
     assert upload.name == test_upload.name
     assert upload.format == "json"
     assert upload.size == 14
+
+    test_upload.unlink()
 
 
 async def test_analysis_file_download(analysis_api):
