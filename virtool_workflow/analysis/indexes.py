@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
@@ -160,10 +160,13 @@ async def indexes(
     index_work_path = work_path / "indexes" / index_.id
     index_work_path.mkdir(parents=True, exist_ok=True)
 
-    await index_provider.download()
+    await index_provider.download(index_work_path)
 
     index = Index(
-        **asdict(index_),
+        id=index_.id,
+        manifest=index_.manifest,
+        reference=index_.reference,
+        path=index_work_path,
         _run_in_executor=run_in_executor,
         _run_subprocess=run_subprocess
     )

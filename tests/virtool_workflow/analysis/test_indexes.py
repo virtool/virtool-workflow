@@ -1,69 +1,56 @@
 import filecmp
+import shutil
 from pathlib import Path
-from shutil import copy
 
+import aiohttp
 import pytest
 
-import virtool_workflow.analysis.indexes
-from virtool_workflow.config.fixtures import \
-    work_path as work_path_fixture
-from virtool_workflow.fixtures.scope import FixtureScope
+from tests.virtool_workflow.api.mock_api import TEST_INDEX_ID, TEST_REF_ID
+from virtool_workflow.analysis.indexes import indexes as indexes_fixture
+from virtool_workflow.api.indexes import IndexProvider
+from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor
+from virtool_workflow.execution.run_subprocess import run_subprocess
+from virtool_workflow.testing import install_as_pytest_fixtures
 
 EXPECTED_PATH = Path(__file__).parent / "expected"
 FAKE_JSON_PATH = Path(__file__).parent / "reference.json.gz"
 
 OTU_IDS = ["625nhyu8", "n97b7lup", "uasjtbmg", "d399556a"]
 
-
-@pytest.fixture
-async def work_path():
-    async with FixtureScope() as scope:
-        yield await scope.instantiate(work_path_fixture)
+install_as_pytest_fixtures(globals(), run_in_executor, run_subprocess, thread_pool_executor)
 
 
 @pytest.fixture
-async def indexes_and_runtime(runtime):
-    runtime["job_args"] = {"index_id": "foo", "ref_id": "bar", "proc": 1}
-
-    data_path = await runtime.get_or_instantiate("data_path")
-    index_path = data_path / f"references/bar/foo/reference"
-    index_path.mkdir(parents=True)
-    copy(FAKE_JSON_PATH, index_path / "reference.json.gz")
-
-    indexes = await runtime.instantiate(virtool_workflow.analysis.indexes.indexes)
-
-    return indexes, runtime
+async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, tmpdir: Path):
+    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, Path(tmpdir), http, jobs_api_url)
 
 
 @pytest.fixture
-def indexes(indexes_and_runtime):
-    indexes, _ = indexes_and_runtime
-    return indexes
+async def indexes(indexes_api: IndexProvider, tmpdir, run_in_executor, run_subprocess):
+    async def _download(*args, **kwargs):
+        shutil.copyfile(FAKE_JSON_PATH, Path(tmpdir) / f"indexes/{indexes_api._index_id}/reference.json.gz")
+
+    indexes_api.download = _download
+    return await indexes_fixture(indexes_api, Path(tmpdir), 3, run_in_executor, run_subprocess)
 
 
-async def test_indexes(indexes_and_runtime):
-    indexes, runtime = indexes_and_runtime
-    work_path = runtime["work_path"]
+async def test_indexes(indexes, tmpdir):
+    work_path = Path(tmpdir)
+    index_dir_path = work_path / f"indexes/{TEST_INDEX_ID}"
 
     # Check that single index directory was created
     assert set((work_path / "indexes").iterdir()
-               ) == {work_path / "indexes/foo"}
+               ) == {work_path / f"indexes/{TEST_INDEX_ID}"}
 
-    # Check that single reference directory was created
-    assert set((work_path / "indexes/foo").iterdir()) == {
-        work_path / "indexes/foo/reference.json",
-        work_path / "indexes/foo/reference.json",
-        work_path / "indexes/foo/reference.json",
-        work_path / "indexes/foo/reference.json.gz",
+    assert set(index_dir_path.iterdir()) >= {
+        index_dir_path / "reference.json",
+        index_dir_path / "reference.json.gz",
     }
 
     assert len(indexes) == 1
 
-    index_dir_path = work_path / "indexes/foo"
-
     assert indexes[0].path == index_dir_path
-    assert indexes[0].compressed_json_path == index_dir_path / \
-           "reference.json.gz"
+    assert indexes[0].compressed_json_path == index_dir_path / "reference.json.gz"
     assert indexes[0].json_path == index_dir_path / "reference.json"
 
 
