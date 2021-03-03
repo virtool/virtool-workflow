@@ -89,5 +89,8 @@ class IndexProvider(AbstractIndexProvider):
                         uploaded_at=dateutil.parser.isoparse(file_json["uploaded_at"])
                     )
 
+    async def download(self, target_path: Path, *names) -> Path:
+        pass
+
     async def finalize(self):
         raise NotImplementedError()

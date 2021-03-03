@@ -11,8 +11,6 @@ from virtool_workflow.api.scope import api_fixtures
 from virtool_workflow.config.configuration import load_config, config_fixtures
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.fixtures import workflow_fixtures
 from virtool_workflow.hooks import on_load_config
 
@@ -55,8 +53,6 @@ async def init_environment(
         http,
         jobs_api_url,
         work_path: Path,
-        run_in_executor: FunctionExecutor,
-        run_subprocess: RunSubprocess
 ):
     job = await acquire_job(job_id)
 
