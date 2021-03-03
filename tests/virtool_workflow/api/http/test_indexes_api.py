@@ -31,12 +31,12 @@ async def test_get(indexes_api):
 
 
 async def test_upload(indexes_api: IndexProvider, tmpdir):
-    test_file = tmpdir / "reference.fa.gz"
-    test_file.write_text("ACTGACG")
+    test_file = Path(tmpdir) / "reference.fa.gz"
+    test_file.write_text("ACTGACG", encoding="utf-8")
 
     file = await indexes_api.upload(test_file)
 
     assert isinstance(file, VirtoolFile)
     assert file.name == "reference.fa.gz"
     assert file.format == "fasta"
-    assert file.size == 8
+    assert file.size == 7

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import Dict, Type
+from typing import Dict, Type, List
 
 from aiohttp import ContentTypeError
 
@@ -27,6 +27,7 @@ class AlreadyFinalized(Exception):
 
 @asynccontextmanager
 async def raising_errors_by_status_code(response,
+                                        accept: List[int] = None,
                                         status_codes_to_exceptions: Dict[int, Type[Exception]] = None):
     """
     Raise exceptions based on the result status code.
@@ -35,6 +36,7 @@ async def raising_errors_by_status_code(response,
     getting the JSON body of the response.
 
     :param response: The aiohttp response object.
+    :param accept: A list of status codes to consider successful. Defaults to 200-299.
     :param status_codes_to_exceptions: A dict associating status codes to exceptions that should be raised.
     :return: The response json as a dict, if it is available.
     """
@@ -45,6 +47,9 @@ async def raising_errors_by_status_code(response,
             403: InsufficientJobRights,
             500: JobsAPIServerError,
         }
+
+    if accept is None:
+        accept = list(range(200, 299))
 
     response_json = None
 
@@ -58,5 +63,8 @@ async def raising_errors_by_status_code(response,
 
     if response.status in status_codes_to_exceptions:
         raise status_codes_to_exceptions[response.status](response_message)
-    else:
+
+    if response.status in accept:
         yield response_json
+    else:
+        raise ValueError(f"Status code {response.status} not handled")
