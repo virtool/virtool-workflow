@@ -4,10 +4,10 @@ import aiohttp
 import dateutil.parser
 
 from virtool_workflow.abc.data_providers import AbstractIndexProvider
-from virtool_workflow.analysis.indexes import Index
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
+from virtool_workflow.data_model.indexes import Index
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
@@ -50,8 +50,6 @@ class IndexProvider(AbstractIndexProvider):
         self.index_path = index_path
         self.http = http
         self.jobs_api_url = jobs_api_url
-        self.run_in_executor = run_in_executor
-        self.run_subprocess = run_subprocess
 
     async def get(self) -> Index:
         """Get the index for the current job."""
@@ -62,8 +60,6 @@ class IndexProvider(AbstractIndexProvider):
                     index_document["manifest"],
                     self.index_path,
                     await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
-                    self.run_in_executor,
-                    self.run_subprocess,
                 )
 
     async def upload(self, path: Path, format: VirtoolFileFormat = "fasta") -> VirtoolFile:
