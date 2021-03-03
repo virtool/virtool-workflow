@@ -5,17 +5,18 @@ from typing import Dict, Any, Tuple
 import aiofiles
 import aiohttp
 import dateutil.parser
+
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.analysis import Analysis
-from virtool_workflow.data_model.files import AnalysisFile, VirtoolFileFormat
+from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 
 logger = logging.getLogger(__name__)
 
 
 def _analysis_file_from_api_response_json(json):
     return [
-        AnalysisFile(
+        VirtoolFile(
             id=f["id"],
             name=f["name"],
             name_on_disk=f["name_on_disk"],
@@ -61,7 +62,7 @@ async def upload_analysis_file(analysis_id: str,
             "format": format
         }) as response:
             async with raising_errors_by_status_code(response) as response_json:
-                return AnalysisFile(
+                return VirtoolFile(
                     id=response_json["id"],
                     name=response_json["name"],
                     name_on_disk=response_json["name_on_disk"],
