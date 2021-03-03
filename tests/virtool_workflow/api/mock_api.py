@@ -244,6 +244,31 @@ async def get_ref(request):
     }, status=200)
 
 
+@mock_routes.post("/api/analyses/{index_id}/files")
+async def upload_index_file(request):
+    reader = await request.multipart()
+    file = await reader.next()
+
+    name = request.query.get("name")
+
+    size = 0
+    while True:
+        chunk = await file.read_chunk(1000)
+        if not chunk:
+            break
+        size += len(chunk)
+
+    return web.json_response({
+        "id": 1,
+        "description": None,
+        "name": name,
+        "format": "fasta",
+        "name_on_disk": f"1-{name}",
+        "size": size,
+        "uploaded_at": str(datetime.now()),
+    }, status=201)
+
+
 @mock_routes.get("/api/analyses/{analysis_id}/files/{file_id}")
 async def download(request):
     file_id = request.match_info["file_id"]
