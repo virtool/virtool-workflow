@@ -244,8 +244,9 @@ async def get_ref(request):
     }, status=200)
 
 
-@mock_routes.post("/api/analyses/{index_id}/files")
+@mock_routes.post("/api/indexes/{index_id}/files")
 async def upload_index_file(request):
+    print(request.content_type)
     reader = await request.multipart()
     file = await reader.next()
 

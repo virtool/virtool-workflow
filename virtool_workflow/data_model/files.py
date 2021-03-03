@@ -18,7 +18,7 @@ VirtoolFileFormat = Literal[
 class VirtoolFile:
     id: int
     name: str
-    name_on_disk: str
     size: int
-    uploaded_at: date
     format: VirtoolFileFormat
+    name_on_disk: str = None
+    uploaded_at: date = None
