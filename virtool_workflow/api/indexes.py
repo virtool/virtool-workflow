@@ -5,12 +5,21 @@ import aiohttp
 from virtool_workflow.abc.data_providers import AbstractIndexProvider
 from virtool_workflow.analysis.indexes import Index
 from virtool_workflow.api.errors import raising_errors_by_status_code
+from virtool_workflow.data_model import Reference
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
 async def _fetch_reference(ref_id, http, jobs_api_url):
-    raise NotImplementedError()
+    async with http.get(f"{jobs_api_url}/references/{ref_id}") as response:
+        async with raising_errors_by_status_code(response) as reference_json:
+            return Reference(
+                reference_json["id"],
+                reference_json["data_type"],
+                reference_json["description"],
+                reference_json["name"],
+                reference_json["organism"],
+            )
 
 
 class IndexProvider(AbstractIndexProvider):
