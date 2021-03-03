@@ -36,12 +36,10 @@ class IndexProvider(AbstractIndexProvider):
     def __init__(self,
                  index_id: str,
                  ref_id: str,
-                 index_path: Path,
                  http: aiohttp.ClientSession,
                  jobs_api_url: str):
         self._index_id = index_id
         self._ref_id = ref_id
-        self.index_path = index_path
         self.http = http
         self.jobs_api_url = jobs_api_url
 
@@ -52,7 +50,6 @@ class IndexProvider(AbstractIndexProvider):
                 return Index(
                     index_document["id"],
                     index_document["manifest"],
-                    self.index_path,
                     await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
                 )
 
