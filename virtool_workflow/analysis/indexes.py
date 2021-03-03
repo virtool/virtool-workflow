@@ -1,8 +1,7 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
-from shutil import copytree
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional
 
 import aiofiles
 from virtool_core.utils import decompress_file
@@ -150,28 +149,15 @@ class Index(data_model.Index):
 @fixture
 async def indexes(
         index_provider: AbstractIndexProvider,
-        job_args: Dict[str, Any],
-        data_path: Path,
-        work_path: Path,
         proc: int,
         run_in_executor: FunctionExecutor,
         run_subprocess: RunSubprocess,
 ) -> List[Index]:
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
-    index_id = job_args["index_id"]
-    reference = await index_provider.fetch_reference()
-    manifest = await index_provider.fetch_manifest()
-
-    index_path = data_path / f"references/{reference.id}/{index_id}/reference"
-
-    index_work_path = work_path / "indexes" / index_id
-    await run_in_executor(copytree, index_path, index_work_path)
+    index_ = await index_provider
 
     index = Index(
-        id=index_id,
-        manifest=manifest,
-        path=index_work_path,
-        reference=reference,
+        **asdict(index_),
         _run_in_executor=run_in_executor,
         _run_subprocess=run_subprocess
     )
