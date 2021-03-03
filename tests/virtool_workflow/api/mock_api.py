@@ -47,6 +47,8 @@ TEST_ANALYSIS = {
 
 mock_routes = web.RouteTableDef()
 
+TEST_INDEX_ID = "jiwncaqr"
+
 
 @mock_routes.patch("/api/jobs/{job_id}")
 async def acquire_job(request):
@@ -179,6 +181,9 @@ async def upload_file(request):
 
 @mock_routes.get("/api/indexes/{index_id}")
 async def get_index(request):
+    if request.matchInfo["index_id"] != TEST_INDEX_ID:
+        return web.json_response({"message": "Not Found"}, status=404)
+
     return web.json_response({
         "version": 0,
         "created_at": "2018-02-01T00:28:49.798000Z",
