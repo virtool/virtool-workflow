@@ -1,10 +1,10 @@
-from dataclasses import dataclass
-
-import aiofiles
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import copytree
 from typing import Dict, List, Tuple, Optional, Any
+
+import aiofiles
 from virtool_core.utils import decompress_file
 
 from virtool_workflow import data_model
@@ -12,14 +12,6 @@ from virtool_workflow import fixture
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
-
-
-@dataclass
-class Reference:
-    """Represents a Virtool reference"""
-    id: str
-    data_type: str
-    name: str
 
 
 @dataclass
