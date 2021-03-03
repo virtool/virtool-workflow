@@ -217,7 +217,7 @@ async def get_ref(request):
         return web.json_response({"message": "Not Found"}, status=404)
 
     return web.json_response({
-        "_id": "21n3j5v6",
+        "id": "21n3j5v6",
         "created_at": {
             "$date": "2019-10-04T17:17:48.935Z"
         },
