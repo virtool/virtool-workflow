@@ -106,12 +106,49 @@ async def acquire_job(request):
 async def get_analysis(request):
     id_ = request.match_info["analysis_id"]
 
-    if id_ != TEST_ANALYSIS_ID:
+    if id_ != "test_analysis":
         return web.json_response({
             "message": "Not Found"
         }, status=404)
 
-    return web.json_response(TEST_ANALYSIS, status=200)
+    return web.json_response({
+        "id": "test_analysis",
+        "created_at": "2017-10-03T21:35:54.813000Z",
+        "job": {
+            "id": "test_job"
+        },
+        "files": [
+            {
+                "analysis": "test_analysis",
+                "description": None,
+                "format": "fasta",
+                "id": 1,
+                "name": "results.fa",
+                "name_on_disk": "1-results.fa",
+                "size": 20466,
+                "uploaded_at": "2017-10-03T21:35:54.813000Z"
+            }
+        ],
+        "workflow": "pathoscope_bowtie",
+        "sample": {
+            "id": "kigvhuql",
+            "name": "Test 1"
+        },
+        "index": {
+            "id": "qldihken",
+            "version": 0
+        },
+        "user": {
+            "id": "igboyes"
+        },
+        "subtractions": [
+            {
+                "id": "yhxoynb0",
+                "name": "Arabidopsis Thaliana"
+            }
+        ],
+        "ready": False
+    }, status=200)
 
 
 @mock_routes.post("/api/analyses/{analysis_id}/files")
@@ -138,6 +175,32 @@ async def upload_file(request):
         "size": size,
         "uploaded_at": str(datetime.now()),
     }, status=201)
+
+
+@mock_routes.get("/api/indexes/{index_id}")
+async def get_index(request):
+    return web.json_response({
+        "version": 0,
+        "created_at": "2018-02-01T00:28:49.798000Z",
+        "manifest": {
+            "c93ec9a9": 0,
+        },
+        "ready": False,
+        "user": {
+            "id": "igboyes"
+        },
+        "job": {
+            "id": "wwssuhhy"
+        },
+        "id": "jiwncaqr",
+        "contributors": [
+            {
+                "id": "igboyes",
+                "count": 1419
+            }
+        ],
+        "change_count": 1419
+    }, status=200)
 
 
 @mock_routes.get("/api/analyses/{analysis_id}/files/{file_id}")
