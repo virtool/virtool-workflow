@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, Any
 
-from virtool_workflow.data_model.analysis import Analysis
+from virtool_workflow.data_model import Analysis
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
@@ -17,11 +17,11 @@ class AbstractAnalysisProvider(ABC):
         ...
 
     @abstractmethod
-    async def download(self, file_id):
+    async def download(self, file_id: str, target_path: Path):
         ...
 
     @abstractmethod
-    async def store_result(self, result: Dict[str, Any]):
+    async def upload_result(self, result: Dict[str, Any]):
         """
         Set the result for the current job and mark it as ready.
 

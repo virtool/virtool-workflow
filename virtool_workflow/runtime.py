@@ -1,9 +1,11 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
+from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.api.scope import api_fixtures
 from virtool_workflow.config.configuration import load_config, config_fixtures
 from virtool_workflow.environment import WorkflowEnvironment
@@ -41,16 +43,29 @@ def extract_workflow(workflow_file_path: Path, scope):
 
 
 @on_load_api
-async def init_environment(acquire_job, job_id, is_analysis_workflow, scope):
+async def init_environment(
+        acquire_job,
+        job_id,
+        is_analysis_workflow,
+        scope,
+        http,
+        jobs_api_url,
+):
     job = await acquire_job(job_id)
 
     if is_analysis_workflow:
-        scope["environment"] = AnalysisWorkflowEnvironment(job)
+        analysis_api = AnalysisProvider(
+            job.args["analysis_id"], http, jobs_api_url
+        ) if "analysis_id" in job.args else None
+
+        scope["environment"] = AnalysisWorkflowEnvironment(job,
+                                                           analysis_provider=analysis_api)
     else:
         scope["environment"] = WorkflowEnvironment(job)
 
 
-async def start(**config):
+@asynccontextmanager
+async def prepare_environment(**config):
     scope = FixtureScope(config_fixtures)
     await load_config(scope=scope, **config)
     scope.add_provider(api_fixtures)
@@ -59,5 +74,9 @@ async def start(**config):
     environment, workflow = scope["environment"], scope["workflow"]
 
     async with environment:
-        result = await environment.execute(workflow)
-        logger.debug(result)
+        yield environment, workflow
+
+
+async def start(**config):
+    async with prepare_environment(**config) as (environment, workflow):
+        await environment.execute(workflow)

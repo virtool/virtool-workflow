@@ -1,66 +1,37 @@
+from dataclasses import asdict
 from pathlib import Path
 
-import virtool_workflow.abc
-import virtool_workflow.storage.utils
+from virtool_workflow import data_model
 from virtool_workflow import fixture
 from virtool_workflow import hooks
 from virtool_workflow.abc.data_providers.analysis import AbstractAnalysisProvider
 from virtool_workflow.data_model.files import VirtoolFileFormat
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.uploads.files import FileUpload
 
 
-class AnalysisUploader(virtool_workflow.abc.AbstractFileUploader):
-    """
-    Perform upload by copying files into a specified directory (under the `data_path`).
-
-    File entries are added to the "files" field of the analysis database document.
-    """
-
-    def __init__(self, analysis_path: Path, run_in_executor: FunctionExecutor,
-                 analysis_provider: AbstractAnalysisProvider, analysis_id: str):
-        self.analysis_path = analysis_path
-        self.run_in_executor = run_in_executor
-        self.provider = analysis_provider
-        self.analysis_id = analysis_id
-        self._marks = []
-
-    def mark(self, upload: FileUpload):
-        """Mark a file for upload."""
-        self._marks.append(upload)
-
-    async def upload(self):
-        """Move marked files to the :obj:`AnalysisUploader.analysis_path` and create database entries."""
-        source_paths = [file_upload.path for file_upload in self._marks]
-        target_paths = [
-            self.analysis_path / f"{n}_{source_path.name}" for n, source_path in enumerate(source_paths)]
-
-        await virtool_workflow.storage.utils.move_paths(
-            zip(source_paths, target_paths),
-            self.run_in_executor
-        )
-
-        await self.provider.store_files(zip(self._marks, target_paths))
-
-
-class Analysis:
+class Analysis(data_model.Analysis):
     """Operations relating to the current analysis, including file uploads."""
 
-    def __init__(self, _id: str, uploader: virtool_workflow.abc.AbstractFileUploader):
-        self._id = _id
-        self.uploader = uploader
+    def __init__(self, upload_files: callable, *args, **kwargs):
+        self.to_upload = []
 
-    def upload_file(self, name: str, description: str, path: Path, format: VirtoolFileFormat):
+        @hooks.on_success
+        async def _upload_files():
+            await upload_files(self.to_upload)
+            self.to_upload = []
+
+        super(Analysis, self).__init__(*args, **kwargs)
+
+    def upload(self, path: Path, format: VirtoolFileFormat):
         """Mark a file to be uploaded at the end of a workflow run."""
-        self.uploader.mark(FileUpload(name, description, path, format))
+        self.to_upload.append((path, format))
 
 
 @fixture
-def analysis(job, run_in_executor, analysis_path: Path, analysis_provider: AbstractAnalysisProvider) -> Analysis:
-    analysis_id = job.args["analysis_id"]
-    uploader = AnalysisUploader(
-        analysis_path, run_in_executor, analysis_provider, analysis_id)
+async def analysis(analysis_provider: AbstractAnalysisProvider) -> Analysis:
+    async def upload_files(files):
+        for path, format in files:
+            await analysis_provider.upload(path, format)
 
-    hooks.before_result_upload(uploader.upload, once=True)
+    _analysis = asdict(await analysis_provider)
 
-    return Analysis(job.args["analysis_id"], uploader)
+    return Analysis(upload_files, **_analysis)

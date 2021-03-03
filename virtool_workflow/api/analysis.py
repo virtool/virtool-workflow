@@ -1,15 +1,14 @@
 import logging
 from pathlib import Path
-from typing import Iterable, Tuple, Dict, Any
+from typing import Dict, Any, Tuple
 
+import aiofiles
 import aiohttp
 import dateutil.parser
-
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
-from virtool_workflow.api.errors import InsufficientJobRights, JobsAPIServerError, NotFound
+from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import AnalysisFile, VirtoolFileFormat
-from virtool_workflow.uploads.files import FileUpload
 
 logger = logging.getLogger(__name__)
 
@@ -38,25 +37,16 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
 
     :return: A :class:`virtool_workflow.data_model.analysis.Analysis` instance.
 
-    :raise JobsAPIServerError: When the jobs API server fails to respond with a JSON body
     :raise InsufficientJobRights: When the current job does not have sufficient rights to access the analysis.
     :raise NotFound: When the given :obj:`analysis_id` does not correspond to an existing analysis (HTTP 404).
+    :raise KeyError: When the analysis data received from the API is missing a required key.
     """
     async with http.get(f"{jobs_api_url}/analyses/{analysis_id}") as response:
-        try:
-            response_json = await response.json()
-
+        async with raising_errors_by_status_code(response) as response_json:
             return Analysis(
                 id=response_json["id"],
                 files=_analysis_file_from_api_response_json(response_json),
             )
-        except aiohttp.ContentTypeError:
-            raise JobsAPIServerError(response.status)
-        except KeyError:
-            if response.status == 203:
-                raise InsufficientJobRights(response_json, response.status)
-            elif response.status == 404:
-                raise NotFound(response_json, response.status)
 
 
 async def upload_analysis_file(analysis_id: str,
@@ -70,12 +60,7 @@ async def upload_analysis_file(analysis_id: str,
             "name": path.name,
             "format": format
         }) as response:
-            try:
-                response_json = await response.json()
-            except aiohttp.ContentTypeError as content_type_error:
-                raise JobsAPIServerError(response.status) from content_type_error
-
-            try:
+            async with raising_errors_by_status_code(response) as response_json:
                 return AnalysisFile(
                     id=response_json["id"],
                     name=response_json["name"],
@@ -84,19 +69,21 @@ async def upload_analysis_file(analysis_id: str,
                     uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
                     format=response_json["format"],
                 )
-            except KeyError as key_error:
-                if response.status in (400, 409):
-                    raise ValueError(response_json) from key_error
-                elif response.status == 403:
-                    raise InsufficientJobRights(response_json) from key_error
-                elif response.status == 404:
-                    raise NotFound(response_json) from key_error
-                else:
-                    raise JobsAPIServerError(response_json) from key_error
 
 
 class AnalysisProvider(AbstractAnalysisProvider):
-    def __init__(self, analysis_id, http: aiohttp.ClientSession, jobs_api_url: str):
+    """
+    Use the Virtool Jobs API to perform operations on the current analysis.
+
+    :param analysis_id: The ID of the current analysis as found in the job args.
+    :param http: A :class:`aiohttp.ClientSession` instance to be used when making requests.
+    :param jobs_api_url: The url to the Jobs API. It should include the `/api` path.
+    """
+
+    def __init__(self,
+                 analysis_id: str,
+                 http: aiohttp.ClientSession,
+                 jobs_api_url: str):
         self.id = analysis_id
         self.http = http
         self.api_url = jobs_api_url
@@ -107,14 +94,50 @@ class AnalysisProvider(AbstractAnalysisProvider):
     async def upload(self, path: Path, format: VirtoolFileFormat):
         return await upload_analysis_file(self.id, path, format, self.http, self.api_url)
 
-    async def download(self, file_id):
-        pass
+    async def download(self, file_id: str, target_path: Path) -> Path:
+        """
+        Download a file associated to the current analysis.
 
-    async def store_result(self, result: Dict[str, Any]):
-        pass
+        :param file_id: The ID of the file.
+        :param target_path: The path which the file data should be stored under.
+        :return: A path to the downloaded file. It will be the `target_path` if one was given.
+        :raise NotFound: When either the file or the analysis does not exist (404 status code).
+        """
+        async with self.http.get(f"{self.api_url}/analyses/{self.id}/files/{file_id}") as response:
+            async with raising_errors_by_status_code(response):
+                async with aiofiles.open(target_path, "wb") as f:
+                    await f.write(await response.read())
 
-    async def store_files(self, uploads: Iterable[Tuple[FileUpload, Path]]):
-        pass
+        return target_path
+
+    async def upload_result(self, result: Dict[str, Any]) -> Tuple[Analysis, dict]:
+        """
+        Upload the results dict for the analysis.
+
+        :param result: The results dict.
+        :raise InsufficientJobRights: When the current job does not have sufficient rights to modify the analysis.
+        :raise NotFound: When there is no analysis with the ID :obj:`.id`.
+        :raise AlreadyFinalized: When there is already a result for the analysis.
+        """
+        async with self.http.patch(f"{self.api_url}/analyses/{self.id}", json={
+            "results": result
+        }) as response:
+            async with raising_errors_by_status_code(response) as analysis_json:
+                return Analysis(
+                    analysis_json["id"],
+                    _analysis_file_from_api_response_json(analysis_json)
+                ), analysis_json["results"]
 
     async def delete(self):
-        pass
+        """
+        Delete the analysis. This method should be called if the workflow code fails before a result is uploaded.
+
+        :raise InsufficientJobRights: When the current job does not have the appropriate permissions required
+            to delete the analysis.
+        :raise NotFound: When the analysis has already been deleted.
+        :raise AlreadyFinalized: When the analysis has a result uploaded and is viewable in Virtool.
+            Jobs are not permitted to delete the analysis after this point.
+        """
+        async with self.http.delete(f"{self.api_url}/analyses/{self.id}") as response:
+            async with raising_errors_by_status_code(response):
+                return

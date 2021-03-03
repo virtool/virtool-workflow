@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from virtool_workflow.data_model import Sample, Index, Subtraction
 from virtool_workflow.data_model.files import AnalysisFile
+from virtool_workflow.data_model.indexes import Index
+from virtool_workflow.data_model.samples import Sample
+from virtool_workflow.data_model.subtractions import Subtraction
 
 
 @dataclass

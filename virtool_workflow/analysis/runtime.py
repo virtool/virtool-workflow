@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from virtool_workflow import hooks
 from virtool_workflow.abc.data_providers import AbstractHmmsProvider, AbstractSubtractionProvider, \
     AbstractSampleProvider, AbstractOTUsProvider, AbstractIndexProvider, \
     AbstractCacheProvider, AbstractAnalysisProvider
@@ -68,3 +69,12 @@ class AnalysisWorkflowEnvironment(WorkflowEnvironment):
                                            sample_provider,
                                            subtraction_providers,
                                            hmms_provider)
+
+        if analysis_provider:
+            @hooks.on_success
+            async def upload_results(results):
+                await analysis_provider.upload_result(results)
+
+            @hooks.on_failure
+            async def delete():
+                await analysis_provider.delete()
