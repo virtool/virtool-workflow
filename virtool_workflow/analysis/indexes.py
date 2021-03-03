@@ -149,12 +149,18 @@ class Index(data_model.Index):
 @fixture
 async def indexes(
         index_provider: AbstractIndexProvider,
+        work_path: Path,
         proc: int,
         run_in_executor: FunctionExecutor,
         run_subprocess: RunSubprocess,
 ) -> List[Index]:
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
     index_ = await index_provider
+
+    index_work_path = work_path / "indexes" / index_.id
+    index_work_path.mkdir(parents=True, exist_ok=True)
+
+    await index_provider.download()
 
     index = Index(
         **asdict(index_),

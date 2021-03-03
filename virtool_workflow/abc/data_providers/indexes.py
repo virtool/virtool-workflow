@@ -18,6 +18,11 @@ class AbstractIndexProvider(ABC):
         ...
 
     @abstractmethod
+    async def download(self, target_path: Path, *names) -> Path:
+        """Download files associated with the index."""
+        ...
+
+    @abstractmethod
     async def finalize(self):
         """Mark that the index associated with the current job has a json representation of the reference available."""
         ...

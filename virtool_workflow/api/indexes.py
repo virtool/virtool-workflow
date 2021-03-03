@@ -8,8 +8,6 @@ from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
 from virtool_workflow.data_model.indexes import Index
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
 async def _fetch_reference(ref_id, http, jobs_api_url):
@@ -33,8 +31,6 @@ class IndexProvider(AbstractIndexProvider):
     :param index_path: The file system path to store index files.
     :param http: An :obj:`aiohttp.ClientSession` to use when making HTTP requests.
     :param jobs_api_url: The base URL for the jobs API (should include `/api`).
-    :param run_in_executor: A :class:`FunctionExecutor` to use for background operations.
-    :param run_subprocess: A :class:`RunSubprocess` function to use for subprocesses.
     """
 
     def __init__(self,
@@ -42,9 +38,7 @@ class IndexProvider(AbstractIndexProvider):
                  ref_id: str,
                  index_path: Path,
                  http: aiohttp.ClientSession,
-                 jobs_api_url: str,
-                 run_in_executor: FunctionExecutor,
-                 run_subprocess: RunSubprocess):
+                 jobs_api_url: str):
         self._index_id = index_id
         self._ref_id = ref_id
         self.index_path = index_path
