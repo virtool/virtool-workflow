@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from virtool_workflow.data_model import Index
+from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
 class AbstractIndexProvider(ABC):
@@ -8,6 +10,11 @@ class AbstractIndexProvider(ABC):
     @abstractmethod
     async def get(self) -> Index:
         """Get the current index."""
+        ...
+
+    @abstractmethod
+    async def upload(self, path: Path, format: VirtoolFileFormat) -> Path:
+        """Upload a file associated with the index."""
         ...
 
     @abstractmethod

@@ -15,7 +15,7 @@ VirtoolFileFormat = Literal[
 
 
 @dataclass
-class AnalysisFile:
+class VirtoolFile:
     id: int
     name: str
     name_on_disk: str

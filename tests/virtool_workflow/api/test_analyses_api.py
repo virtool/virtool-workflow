@@ -3,11 +3,12 @@ from pathlib import Path
 
 import aiohttp
 import pytest
+
 import virtool_workflow.api.errors
 from virtool_workflow import api
 from virtool_workflow.api.analysis import get_analysis_by_id, AnalysisProvider
 from virtool_workflow.data_model.analysis import Analysis
-from virtool_workflow.data_model.files import AnalysisFile
+from virtool_workflow.data_model.files import VirtoolFile
 
 
 @pytest.fixture
@@ -37,7 +38,7 @@ async def test_analysis_provider_upload(analysis_api):
 
     upload = await analysis_api.upload(test_upload, format="json")
 
-    assert isinstance(upload, AnalysisFile)
+    assert isinstance(upload, VirtoolFile)
     assert upload.name == test_upload.name
     assert upload.format == "json"
     assert upload.size == 14
