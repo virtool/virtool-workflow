@@ -15,6 +15,7 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 @dataclass
 class Index(data_model.Index):
+    path: Path
     _run_in_executor: FunctionExecutor
     _run_subprocess: RunSubprocess
     _sequence_lengths: Optional[Dict[str, int]] = None

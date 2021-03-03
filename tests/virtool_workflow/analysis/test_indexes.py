@@ -21,17 +21,22 @@ install_as_pytest_fixtures(globals(), run_in_executor, run_subprocess, thread_po
 
 
 @pytest.fixture
-async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, tmpdir: Path):
-    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, Path(tmpdir), http, jobs_api_url)
+def work_path(tmpdir):
+    return Path(tmpdir)
 
 
 @pytest.fixture
-async def indexes(indexes_api: IndexProvider, tmpdir, run_in_executor, run_subprocess):
+async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path: Path):
+    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_url)
+
+
+@pytest.fixture
+async def indexes(indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess):
     async def _download(*args, **kwargs):
-        shutil.copyfile(FAKE_JSON_PATH, Path(tmpdir) / f"indexes/{indexes_api._index_id}/reference.json.gz")
+        shutil.copyfile(FAKE_JSON_PATH, work_path / f"indexes/{indexes_api._index_id}/reference.json.gz")
 
     indexes_api.download = _download
-    return await indexes_fixture(indexes_api, Path(tmpdir), 3, run_in_executor, run_subprocess)
+    return await indexes_fixture(indexes_api, work_path, 3, run_in_executor, run_subprocess)
 
 
 async def test_indexes(indexes, tmpdir):
