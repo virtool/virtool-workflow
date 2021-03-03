@@ -65,7 +65,7 @@ class IndexProvider(AbstractIndexProvider):
                     self.run_subprocess,
                 )
 
-    async def upload(self, path: Path, format: VirtoolFileFormat) -> VirtoolFile:
+    async def upload(self, path: Path, format: VirtoolFileFormat = "fasta") -> VirtoolFile:
         """
         Upload a file associated with the current Index.
 
