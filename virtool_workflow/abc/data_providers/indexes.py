@@ -1,21 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import Dict
 
-from virtool_workflow.data_model import Reference
+from virtool_workflow.data_model import Index
 
 
 class AbstractIndexProvider(ABC):
 
     @abstractmethod
-    async def fetch_reference(self) -> Reference:
-        """Get the reference associated with the index for the current job."""
+    async def get(self) -> Index:
+        """Get the current index."""
         ...
-
-    @abstractmethod
-    async def fetch_manifest(self) -> Dict[str, int]:
-        """Get the manifest for the index associated with the current job."""
 
     @abstractmethod
     async def set_has_json(self):
         """Mark that the index associated with the current job has a json representation of the reference available."""
         ...
+
+    def __await__(self):
+        return self.get().__await__()
