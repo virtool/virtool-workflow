@@ -78,8 +78,6 @@ async def init_environment(
                 index_path=index_path,
                 http=http,
                 jobs_api_url=jobs_api_url,
-                run_in_executor=run_in_executor,
-                run_subprocess=run_subprocess,
             )
         except KeyError:
             indexes_api = None

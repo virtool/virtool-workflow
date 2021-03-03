@@ -5,31 +5,14 @@ from shutil import copy
 import pytest
 
 import virtool_workflow.analysis.indexes
-from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.config.fixtures import \
     work_path as work_path_fixture
-from virtool_workflow.data_model import Reference
 from virtool_workflow.fixtures.scope import FixtureScope
 
 EXPECTED_PATH = Path(__file__).parent / "expected"
 FAKE_JSON_PATH = Path(__file__).parent / "reference.json.gz"
 
 OTU_IDS = ["625nhyu8", "n97b7lup", "uasjtbmg", "d399556a"]
-
-
-class TestIndexProvider(AbstractIndexProvider):
-
-    def __init__(self):
-        self.has_json = False
-
-    async def fetch_reference(self):
-        return Reference("bar", "barcode", "", "Bar", "")
-
-    async def fetch_manifest(self):
-        return {}
-
-    async def finalize(self):
-        self.has_json = True
 
 
 @pytest.fixture
@@ -40,7 +23,6 @@ async def work_path():
 
 @pytest.fixture
 async def indexes_and_runtime(runtime):
-    runtime.data_providers.index_provider = TestIndexProvider()
     runtime["job_args"] = {"index_id": "foo", "ref_id": "bar", "proc": 1}
 
     data_path = await runtime.get_or_instantiate("data_path")
