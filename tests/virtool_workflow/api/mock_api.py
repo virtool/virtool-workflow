@@ -48,7 +48,7 @@ TEST_ANALYSIS = {
 mock_routes = web.RouteTableDef()
 
 TEST_INDEX_ID = "jiwncaqr"
-TEST_REF_ID = "test_ref"
+TEST_REF_ID = "21n3j5v6"
 
 
 @mock_routes.patch("/api/jobs/{job_id}")
@@ -206,6 +206,41 @@ async def get_index(request):
             }
         ],
         "change_count": 1419
+    }, status=200)
+
+
+@mock_routes.get("/api/references/{ref_id}")
+async def get_ref(request):
+    ref_id = request.match_info["ref_id"]
+
+    if ref_id != TEST_REF_ID:
+        return web.json_response({"message": "Not Found"}, status=404)
+
+    return web.json_response({
+        "_id": "21n3j5v6",
+        "created_at": {
+            "$date": "2019-10-04T17:17:48.935Z"
+        },
+        "data_type": "genome",
+        "description": "",
+        "name": "Clone of Banana Viruses",
+        "organism": "virus",
+        "internal_control": None,
+        "restrict_source_types": False,
+        "source_types": [
+            "isolate",
+            "strain"
+        ],
+        "groups": [
+
+        ],
+        "cloned_from": {
+            "id": "9mciizg6",
+            "name": "Banana Viruses"
+        },
+        "process": {
+            "id": "zhio57ug"
+        }
     }, status=200)
 
 
