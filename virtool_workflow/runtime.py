@@ -6,10 +6,14 @@ from pathlib import Path
 from virtool_workflow import discovery, FixtureScope
 from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.api.analysis import AnalysisProvider
+from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.api.scope import api_fixtures
 from virtool_workflow.config.configuration import load_config, config_fixtures
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.execution.run_subprocess import RunSubprocess
+from virtool_workflow.fixtures import workflow_fixtures
 from virtool_workflow.hooks import on_load_config
 
 logger = logging.getLogger(__name__)
@@ -50,16 +54,39 @@ async def init_environment(
         scope,
         http,
         jobs_api_url,
+        work_path: Path,
+        run_in_executor: FunctionExecutor,
+        run_subprocess: RunSubprocess
 ):
     job = await acquire_job(job_id)
 
     if is_analysis_workflow:
-        analysis_api = AnalysisProvider(
-            job.args["analysis_id"], http, jobs_api_url
-        ) if "analysis_id" in job.args else None
+        try:
+            analysis_api = AnalysisProvider(
+                job.args["analysis_id"], http, jobs_api_url
+            )
+        except KeyError:
+            analysis_api = None
+
+        try:
+            index_path = work_path / f"indexes/{job.args['index_id']}"
+            index_path.mkdir(parents=True, exist_ok=True)
+
+            indexes_api = IndexProvider(
+                index_id=job.args["index_id"],
+                ref_id=job.args["ref_id"],
+                index_path=index_path,
+                http=http,
+                jobs_api_url=jobs_api_url,
+                run_in_executor=run_in_executor,
+                run_subprocess=run_subprocess,
+            )
+        except KeyError:
+            indexes_api = None
 
         scope["environment"] = AnalysisWorkflowEnvironment(job,
-                                                           analysis_provider=analysis_api)
+                                                           analysis_provider=analysis_api,
+                                                           index_provider=indexes_api)
     else:
         scope["environment"] = WorkflowEnvironment(job)
 
@@ -68,7 +95,7 @@ async def init_environment(
 async def prepare_environment(**config):
     scope = FixtureScope(config_fixtures)
     await load_config(scope=scope, **config)
-    scope.add_provider(api_fixtures)
+    scope.add_providers(api_fixtures, workflow_fixtures)
     await on_load_api.trigger(scope)
 
     environment, workflow = scope["environment"], scope["workflow"]
