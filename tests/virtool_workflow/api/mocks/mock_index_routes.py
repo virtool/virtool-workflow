@@ -109,4 +109,4 @@ def download_index_files(request):
             "message": "Not Found"
         }, status=404)
 
-    return web.FileResponse(Path(__file__).parent / "files/reference.json.gz")
+    return web.FileResponse(Path(__file__).parent.parent / "files/reference.json.gz")
