@@ -8,6 +8,7 @@ import dateutil.parser
 
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
+from virtool_workflow.api.utils import upload_file_via_post
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 
@@ -50,28 +51,6 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
             )
 
 
-async def upload_analysis_file(analysis_id: str,
-                               path: Path,
-                               format: VirtoolFileFormat,
-                               http: aiohttp.ClientSession,
-                               jobs_api_url: str):
-    """Upload an analysis file using the jobs API."""
-    with path.open('rb') as binary:
-        async with http.post(f"{jobs_api_url}/analyses/{analysis_id}/files", data={"file": binary}, params={
-            "name": path.name,
-            "format": format
-        }) as response:
-            async with raising_errors_by_status_code(response) as response_json:
-                return VirtoolFile(
-                    id=response_json["id"],
-                    name=response_json["name"],
-                    name_on_disk=response_json["name_on_disk"],
-                    size=response_json["size"],
-                    uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
-                    format=response_json["format"],
-                )
-
-
 class AnalysisProvider(AbstractAnalysisProvider):
     """
     Use the Virtool Jobs API to perform operations on the current analysis.
@@ -93,7 +72,10 @@ class AnalysisProvider(AbstractAnalysisProvider):
         return await get_analysis_by_id(self.id, self.http, self.api_url)
 
     async def upload(self, path: Path, format: VirtoolFileFormat):
-        return await upload_analysis_file(self.id, path, format, self.http, self.api_url)
+        return await upload_file_via_post(self.http,
+                                          f"{self.api_url}/analyses/{self.id}/files",
+                                          path,
+                                          format)
 
     async def download(self, file_id: str, target_path: Path) -> Path:
         """

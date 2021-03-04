@@ -6,6 +6,7 @@ import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
+from virtool_workflow.api.utils import upload_file_via_post
 from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
 
@@ -51,7 +52,7 @@ class SubtractionProvider(AbstractSubtractionProvider):
             - subtraction.rev.1.bt2
             - subtraction.rev.2.bt2
         """
-        ...
+        return await upload_file_via_post(self.http, f"{self.api_url}/files", path)
 
     async def finalize(self, count: int, gc: Dict[str, Number]):
         pass
