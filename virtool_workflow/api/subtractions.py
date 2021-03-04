@@ -37,6 +37,22 @@ class SubtractionProvider(AbstractSubtractionProvider):
                     self.path,
                 )
 
+    async def upload(self, path: Path):
+        """
+        Upload a file relating to this subtraction.
+
+        :param path: The path to the file. The filename must be one of:
+
+            - subtraction.fa.gz
+            - subtraction.1.bt2
+            - subtraction.2.bt2
+            - subtraction.3.bt2
+            - subtraction.4.bt2
+            - subtraction.rev.1.bt2
+            - subtraction.rev.2.bt2
+        """
+        ...
+
     async def finalize(self, count: int, gc: Dict[str, Number]):
         pass
 
