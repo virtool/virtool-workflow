@@ -64,3 +64,18 @@ async def upload_subtraction_file(request):
         }, status=400)
 
     return web.json_response(await read_file_from_request(request, name, "bt2"), status=201)
+
+
+@mock_routes.patch("/api/subtractions/{subtraction_id}")
+async def finalize_subtraction(request):
+    subtraction_id = request.match_info["subtraction_id"]
+
+    if subtraction_id != TEST_SUBTRACTION_ID:
+        return web.json_response({"message": "Not Found"}, status=404)
+
+    request_json = await request.json()
+
+    TEST_SUBTRACTION["ready"] = True
+    TEST_SUBTRACTION["gc"] = request_json["gc"]
+
+    return web.json_response(TEST_SUBTRACTION)
