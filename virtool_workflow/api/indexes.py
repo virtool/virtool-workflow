@@ -11,7 +11,7 @@ from virtool_workflow.data_model.indexes import Index
 
 
 async def _fetch_reference(ref_id, http, jobs_api_url):
-    async with http.get(f"{jobs_api_url}/references/{ref_id}") as response:
+    async with http.get(f"{jobs_api_url}/refs/{ref_id}") as response:
         async with raising_errors_by_status_code(response) as reference_json:
             return Reference(
                 reference_json["id"],
