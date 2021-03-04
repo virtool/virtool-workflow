@@ -27,5 +27,9 @@ class AbstractSubtractionProvider(ABC):
     async def upload(self, path: Path):
         """Upload files relating to the subtraction."""
 
+    @abstractmethod
+    async def download(self, target_path: Path, *names):
+        """Download files relating to the subtraction."""
+
     def __await__(self):
         return self.get().__await__()
