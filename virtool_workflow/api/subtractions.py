@@ -6,7 +6,7 @@ import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import upload_file_via_post
+from virtool_workflow.api.utils import upload_file_via_post, read_file_from_response
 from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
 
@@ -80,6 +80,24 @@ class SubtractionProvider(AbstractSubtractionProvider):
                     subtraction_json["is_host"],
                     self.path,
                 )
+
+    async def download(self, target_path: Path = None, *names):
+        if not names:
+            names = [
+                "subtraction.fa.gz",
+                "subtraction.1.bt2",
+                "subtraction.2.bt2",
+                "subtraction.3.bt2",
+                "subtraction.4.bt2",
+                "subtraction.rev.1.bt2",
+                "subtraction.rev.2.bt2",
+            ]
+
+        for name in names:
+            async with self.http.get(f"{self.api_url}/files/{name}") as response:
+                await read_file_from_response(response, target_path)
+
+        return target_path
 
     async def delete(self):
         """Delete the subtraction."""

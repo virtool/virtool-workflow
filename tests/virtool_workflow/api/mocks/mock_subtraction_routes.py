@@ -92,3 +92,8 @@ async def delete_subtraction(request):
         return web.json_response({"message": "Conflict"}, status=409)
 
     return web.Response(status=204)
+
+
+@mock_routes.get("/api/subtractions/{subtraction_id}/files/{filename}")
+async def download_subtraction_data(request):
+    return web.Response(status=200)

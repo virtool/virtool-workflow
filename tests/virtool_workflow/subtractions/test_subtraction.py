@@ -1,69 +1,17 @@
-from numbers import Number
-from typing import Dict
+from pathlib import Path
 
-from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
+import aiohttp
+
+from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
 from virtool_workflow.analysis.subtractions.subtraction import subtractions
-from virtool_workflow.data_model import Subtraction, NucleotideComposition
-
-mock_subtractions = {str(i): {"id": str(i)} for i in range(5)}
-
-subtraction_data_filenames = [
-    "subtraction.fa.gz",
-    "reference.1.bt2",
-    "reference.3.bt2",
-    "reference.2.bt2",
-    "reference.4.bt2",
-    "reference.rev.1.bt2",
-    "reference.rev.2.bt2",
-]
+from virtool_workflow.api.subtractions import SubtractionProvider
+from virtool_workflow.data_model import Subtraction
 
 
-class TestSubtractionProvider(AbstractSubtractionProvider):
+async def test_subtractions(http: aiohttp.ClientSession, jobs_api_url: str, tmpdir):
+    subtraction_provider = SubtractionProvider(TEST_SUBTRACTION_ID, http, jobs_api_url, Path(tmpdir))
 
-    def __init__(self, _id: str):
-        self.id = _id
-
-    async def fetch_subtraction(self, subtraction_path) -> Subtraction:
-        return Subtraction(
-            id=self.id,
-            name="foobar",
-            nickname="bar",
-            count=7,
-            is_host=False,
-            deleted=False,
-            path=subtraction_path / self.id,
-            fasta_path=subtraction_path / self.id / "subtraction.fa.gz",
-            bowtie2_index_path=f"{subtraction_path / self.id}/reference",
-            gc=NucleotideComposition(a=0.2, t=0.2, c=0.2, g=0.4, n=0.0),
-        )
-
-    async def finalize(self, count: int, gc: Dict[str, Number]):
-        pass
-
-    async def delete(self):
-        pass
-
-
-async def setup_sample_data_path(runtime):
-    subtraction_path = await runtime.get_or_instantiate("subtraction_data_path")
-
-    for subtraction in mock_subtractions.values():
-        current_subtraction_data_path = subtraction_path / subtraction["id"]
-        current_subtraction_data_path.mkdir()
-
-        for name in subtraction_data_filenames:
-            (current_subtraction_data_path / name).touch()
-
-
-async def test_subtractions(monkeypatch, runtime):
-    runtime.data_providers.subtraction_providers = [TestSubtractionProvider(id_) for id_ in mock_subtractions]
-
-    await setup_sample_data_path(runtime)
-    _subtractions = await runtime.instantiate(subtractions)
-
-    assert len(_subtractions) == len(mock_subtractions)
+    _subtractions = await subtractions([subtraction_provider])
 
     for subtraction in _subtractions:
-        assert subtraction.path == runtime["subtraction_path"] / subtraction.id
-        assert subtraction.fasta_path == subtraction.path / "subtraction.fa.gz"
-        assert subtraction.bowtie2_index_path == f"{subtraction.path}/reference"
+        assert isinstance(subtraction, Subtraction)
