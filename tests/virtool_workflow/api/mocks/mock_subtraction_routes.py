@@ -47,7 +47,7 @@ def get_subtraction(request):
 
 
 @mock_routes.post("/api/subtractions/{subtraction_id}/files")
-def upload_subtraction_file(request):
+async def upload_subtraction_file(request):
     name = request.query.get("name")
 
     if name not in [

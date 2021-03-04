@@ -6,6 +6,7 @@ from pytest import fixture
 from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.data_model import Subtraction
+from virtool_workflow.data_model.files import VirtoolFile
 
 
 @fixture
@@ -32,3 +33,15 @@ async def test_get(subtraction_api):
     assert isinstance(subtraction, Subtraction)
 
     assert subtraction.id == TEST_SUBTRACTION_ID
+
+
+async def test_upload_file(subtraction_api, work_path):
+    test_file = work_path / "subtraction.fa.gz"
+
+    test_file.write_text("ATCG")
+
+    file = await subtraction_api.upload(test_file)
+
+    assert isinstance(file, VirtoolFile)
+    assert file.name == test_file.name
+    assert file.size == 4
