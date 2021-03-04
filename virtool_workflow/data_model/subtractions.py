@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from abc import ABC
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -12,7 +12,7 @@ class NucleotideComposition:
     t: float
 
 
-@dataclass(frozen=True)
+@dataclass
 class Subtraction(ABC):
     """A dataclass representing a subtraction in Virtool."""
     id: str
@@ -23,5 +23,7 @@ class Subtraction(ABC):
     gc: NucleotideComposition
     is_host: bool
     path: Path
-    fasta_path: Path
-    bowtie2_index_path: str
+
+    def __post_init__(self):
+        self.fasta_path = self.path / "subtraction.fa.gz"
+        self.bowtie2_index_path = str(self.path) + "/reference"
