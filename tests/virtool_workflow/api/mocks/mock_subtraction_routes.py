@@ -1,5 +1,7 @@
 from aiohttp import web
 
+from tests.virtool_workflow.api.mocks.utils import read_file_from_request
+
 mock_routes = web.RouteTableDef()
 
 TEST_SUBTRACTION_ID = "Apis mellifera"
@@ -42,3 +44,23 @@ def get_subtraction(request):
         }, status=404)
 
     return web.json_response(TEST_SUBTRACTION, status=200)
+
+
+@mock_routes.post("/api/subtractions/{subtraction_id}/files")
+def upload_subtraction_file(request):
+    name = request.query.get("name")
+
+    if name not in [
+        "subtraction.fa.gz",
+        "subtraction.1.bt2",
+        "subtraction.2.bt2",
+        "subtraction.3.bt2",
+        "subtraction.4.bt2",
+        "subtraction.rev.1.bt2",
+        "subtraction.rev.2.bt2"
+    ]:
+        return web.json_response({
+            "message": "Unsupported file name."
+        }, status=400)
+
+    return web.json_response(await read_file_from_request(request, name, "bt2"), status=201)
