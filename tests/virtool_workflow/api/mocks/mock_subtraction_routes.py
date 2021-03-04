@@ -5,7 +5,7 @@ mock_routes = web.RouteTableDef()
 TEST_SUBTRACTION_ID = "Apis mellifera"
 
 TEST_SUBTRACTION = {
-    "_id": TEST_SUBTRACTION_ID,
+    "id": TEST_SUBTRACTION_ID,
     "nickname": "honey bee",
     "ready": True,
     "is_host": True,
