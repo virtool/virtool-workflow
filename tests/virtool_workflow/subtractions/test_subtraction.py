@@ -1,9 +1,8 @@
 from numbers import Number
+from typing import Dict
 
-from typing import Optional, Dict, Any
-
-from virtool_workflow.analysis.subtractions.subtraction import subtractions
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
+from virtool_workflow.analysis.subtractions.subtraction import subtractions
 from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
 mock_subtractions = {str(i): {"id": str(i)} for i in range(5)}
@@ -34,11 +33,11 @@ class TestSubtractionProvider(AbstractSubtractionProvider):
             deleted=False,
             path=subtraction_path / self.id,
             fasta_path=subtraction_path / self.id / "subtraction.fa.gz",
-            bowtie2_index_path=f"{subtraction_path/self.id}/reference",
+            bowtie2_index_path=f"{subtraction_path / self.id}/reference",
             gc=NucleotideComposition(a=0.2, t=0.2, c=0.2, g=0.4, n=0.0),
         )
 
-    async def store_count_and_gc(self, count: int, gc: Dict[str, Number]):
+    async def finalize(self, count: int, gc: Dict[str, Number]):
         pass
 
     async def delete(self):
@@ -66,5 +65,5 @@ async def test_subtractions(monkeypatch, runtime):
 
     for subtraction in _subtractions:
         assert subtraction.path == runtime["subtraction_path"] / subtraction.id
-        assert subtraction.fasta_path == subtraction.path/"subtraction.fa.gz"
+        assert subtraction.fasta_path == subtraction.path / "subtraction.fa.gz"
         assert subtraction.bowtie2_index_path == f"{subtraction.path}/reference"

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict
 from numbers import Number
+from typing import Dict
 
 from virtool_workflow.data_model import Subtraction
 
@@ -8,12 +8,11 @@ from virtool_workflow.data_model import Subtraction
 class AbstractSubtractionProvider(ABC):
 
     @abstractmethod
-    async def fetch_subtraction(self, subtraction_path) -> Subtraction:
-        """Fetch the subtraction associated with this provider."""
-        ...
+    async def get(self) -> Subtraction:
+        """Get the subtraction."""
 
     @abstractmethod
-    async def store_count_and_gc(self, count: int, gc: Dict[str, Number]):
+    async def finalize(self, count: int, gc: Dict[str, Number]):
         """Store the count and gc for the current subtraction and mark it as ready."""
         ...
 
@@ -21,3 +20,5 @@ class AbstractSubtractionProvider(ABC):
     async def delete(self):
         """Permanently delete the subtraction."""
 
+    def __await__(self):
+        return self.get().__await__()
