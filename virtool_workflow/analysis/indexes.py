@@ -161,7 +161,7 @@ async def indexes(
     index_work_path = work_path / "indexes" / index_.id
     index_work_path.mkdir(parents=True, exist_ok=True)
 
-    await index_provider.download(index_work_path)
+    await index_provider.download(index_work_path, "reference.json.gz")
 
     index = Index(
         id=index_.id,
