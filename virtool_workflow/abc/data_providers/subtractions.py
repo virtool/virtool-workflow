@@ -26,7 +26,6 @@ class AbstractSubtractionProvider(ABC):
     @abstractmethod
     async def upload(self, path: Path):
         """Upload files relating to the subtraction."""
-        ...
 
     def __await__(self):
         return self.get().__await__()

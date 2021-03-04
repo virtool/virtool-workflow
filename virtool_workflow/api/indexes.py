@@ -1,11 +1,10 @@
 from pathlib import Path
 
-import aiofiles
 import aiohttp
-import dateutil.parser
 
 from virtool_workflow.abc.data_providers import AbstractIndexProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
+from virtool_workflow.api.utils import upload_file_via_post, read_file_from_response
 from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
 from virtool_workflow.data_model.indexes import Index
@@ -73,19 +72,9 @@ class IndexProvider(AbstractIndexProvider):
         :param format: The format of the file.
         :return: A :class:`VirtoolFile` object.
         """
-        with path.open('rb') as f:
-            async with self.http.post(f"{self.jobs_api_url}/indexes/{self._index_id}/files",
-                                      data={"file": f},
-                                      params={"name": path.name}) as response:
-                async with raising_errors_by_status_code(response, accept=[201]) as file_json:
-                    return VirtoolFile(
-                        id=file_json["id"],
-                        name=file_json["name"],
-                        size=file_json["size"],
-                        format=file_json["format"],
-                        name_on_disk=file_json["name_on_disk"],
-                        uploaded_at=dateutil.parser.isoparse(file_json["uploaded_at"])
-                    )
+        return await upload_file_via_post(self.http,
+                                          f"{self.jobs_api_url}/indexes/{self._index_id}/files",
+                                          path, format)
 
     async def download(self, target_path: Path, *names) -> Path:
         """Download files associated with the current index."""
@@ -103,9 +92,7 @@ class IndexProvider(AbstractIndexProvider):
 
         for name in names:
             async with self.http.get(f"{self.jobs_api_url}/indexes/{self._index_id}/files/{name}") as response:
-                async with raising_errors_by_status_code(response):
-                    async with aiofiles.open(target_path / name, 'wb') as f:
-                        await f.write(await response.read())
+                await read_file_from_response(response, target_path)
 
         return target_path
 
