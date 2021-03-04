@@ -45,3 +45,13 @@ async def test_upload_file(subtraction_api, work_path):
     assert isinstance(file, VirtoolFile)
     assert file.name == test_file.name
     assert file.size == 4
+
+
+async def test_finalize(subtraction_api):
+    updated_subtraction = await subtraction_api.finalize({"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4})
+
+    assert isinstance(updated_subtraction, Subtraction)
+    assert updated_subtraction.gc.a == 0.2
+    assert updated_subtraction.gc.t == 0.2
+    assert updated_subtraction.gc.c == 0.2
+    assert updated_subtraction.gc.g == 0.4

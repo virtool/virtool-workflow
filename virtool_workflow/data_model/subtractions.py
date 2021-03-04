@@ -5,11 +5,11 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class NucleotideComposition:
-    a: float
-    c: float
-    g: float
-    n: float
-    t: float
+    a: float = 0.0
+    c: float = 0.0
+    g: float = 0.0
+    n: float = 0.0
+    t: float = 0.0
 
 
 @dataclass

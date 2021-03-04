@@ -33,7 +33,7 @@ class SubtractionProvider(AbstractSubtractionProvider):
                     subtraction_json["nickname"],
                     subtraction_json["count"],
                     subtraction_json["deleted"],
-                    NucleotideComposition(**subtraction_json["gc"]),
+                    NucleotideComposition(**subtraction_json["gc"]) if "gc" in subtraction_json else {},
                     subtraction_json["is_host"],
                     self.path,
                 )
@@ -54,8 +54,24 @@ class SubtractionProvider(AbstractSubtractionProvider):
         """
         return await upload_file_via_post(self.http, f"{self.api_url}/files", path)
 
-    async def finalize(self, count: int, gc: Dict[str, Number]):
-        pass
+    async def finalize(self, gc: Dict[str, Number]):
+        """
+        Finalize the subtraction by setting the gc.
+        :param gc: The nucleotide composition of the subtraction
+        :return: The updated subtraction.
+        """
+        async with self.http.patch(self.api_url, json={"gc": gc}) as response:
+            async with raising_errors_by_status_code(response) as subtraction_json:
+                return Subtraction(
+                    subtraction_json["id"],
+                    subtraction_json["name"],
+                    subtraction_json["nickname"],
+                    subtraction_json["count"],
+                    subtraction_json["deleted"],
+                    NucleotideComposition(**subtraction_json["gc"]),
+                    subtraction_json["is_host"],
+                    self.path,
+                )
 
     async def delete(self):
         pass

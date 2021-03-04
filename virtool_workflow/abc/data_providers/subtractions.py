@@ -14,8 +14,8 @@ class AbstractSubtractionProvider(ABC):
         ...
 
     @abstractmethod
-    async def finalize(self, count: int, gc: Dict[str, Number]):
-        """Store the count and gc for the current subtraction and mark it as ready."""
+    async def finalize(self, gc: Dict[str, Number]):
+        """Store the gc and finalize the subtraction."""
         ...
 
     @abstractmethod
