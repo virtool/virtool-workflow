@@ -93,9 +93,12 @@ class SubtractionProvider(AbstractSubtractionProvider):
                 "subtraction.rev.2.bt2",
             ]
 
+        if not target_path:
+            target_path = self.path
+
         for name in names:
             async with self.http.get(f"{self.api_url}/files/{name}") as response:
-                await read_file_from_response(response, target_path)
+                await read_file_from_response(response, target_path / name)
 
         return target_path
 
