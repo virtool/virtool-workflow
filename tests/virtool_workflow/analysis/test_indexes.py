@@ -1,11 +1,12 @@
 import filecmp
 from pathlib import Path
+from typing import Sequence
 
 import aiohttp
 import pytest
 
 from tests.virtool_workflow.api.mock_api import TEST_INDEX_ID, TEST_REF_ID
-from virtool_workflow.analysis.indexes import indexes as indexes_fixture
+from virtool_workflow.analysis.indexes import indexes as indexes_fixture, Index
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor
 from virtool_workflow.execution.run_subprocess import run_subprocess
@@ -34,7 +35,7 @@ async def indexes(indexes_api: IndexProvider, work_path, run_in_executor, run_su
     return await indexes_fixture(indexes_api, work_path, 3, run_in_executor, run_subprocess)
 
 
-async def test_indexes(indexes, tmpdir):
+async def test_indexes(indexes: Sequence[Index], tmpdir):
     work_path = Path(tmpdir)
     index_dir_path = work_path / f"indexes/{TEST_INDEX_ID}"
 

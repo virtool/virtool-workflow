@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import aiofiles
 import aiohttp
 import dateutil.parser
 
@@ -87,7 +88,14 @@ class IndexProvider(AbstractIndexProvider):
                     )
 
     async def download(self, target_path: Path, *names) -> Path:
-        pass
+        """Download files associated with the current index."""
+        for name in names:
+            async with self.http.get(f"{self.jobs_api_url}/indexes/{self._index_id}/files/{name}") as response:
+                async with raising_errors_by_status_code(response):
+                    async with aiofiles.open(target_path / name, 'wb') as f:
+                        await f.write(await response.read())
+
+        return target_path
 
     async def finalize(self):
         raise NotImplementedError()

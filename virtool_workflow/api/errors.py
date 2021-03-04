@@ -58,6 +58,8 @@ async def raising_errors_by_status_code(response,
         response_message = response_json["message"]
     except ContentTypeError:
         response_message = await response.text()
+    except UnicodeDecodeError:
+        response_message = "Could not get message from response"
     except (KeyError, TypeError):
         response_message = str(response_json)
 
