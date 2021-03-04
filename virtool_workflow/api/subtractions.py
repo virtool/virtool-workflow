@@ -25,7 +25,7 @@ class SubtractionProvider(AbstractSubtractionProvider):
 
     async def get(self) -> Subtraction:
         async with self.http.get(self.api_url) as response:
-            with raising_errors_by_status_code(response) as subtraction_json:
+            async with raising_errors_by_status_code(response) as subtraction_json:
                 return Subtraction(
                     subtraction_json["id"],
                     subtraction_json["name"],
