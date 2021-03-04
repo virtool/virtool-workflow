@@ -2,7 +2,7 @@ import aiohttp
 import pytest
 from aiohttp import web
 
-from tests.virtool_workflow.api.mock_api import mock_routes
+from tests.virtool_workflow.api.mocks.mock_api import mock_routes
 
 
 @pytest.fixture
@@ -19,6 +19,7 @@ async def jobs_api_url():
 async def http(loop, aiohttp_client) -> aiohttp.ClientSession:
     app = web.Application(loop=loop)
 
-    app.add_routes(mock_routes)
+    for route_table in mock_routes:
+        app.add_routes(route_table)
 
     return await aiohttp_client(app)
