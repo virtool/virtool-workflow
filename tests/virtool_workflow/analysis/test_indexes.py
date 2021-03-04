@@ -5,7 +5,7 @@ from typing import Sequence
 import aiohttp
 import pytest
 
-from tests.virtool_workflow.api.mock_api import TEST_INDEX_ID, TEST_REF_ID
+from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
 from virtool_workflow.analysis.indexes import indexes as indexes_fixture, Index
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor

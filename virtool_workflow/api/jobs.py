@@ -1,6 +1,6 @@
 import aiohttp
 
-from .errors import JobAlreadyAcquired, JobsAPIServerError
+from .errors import raising_errors_by_status_code
 from ..data_model import Job
 
 
@@ -15,23 +15,16 @@ async def acquire_job_by_id(job_id: str, http: aiohttp.ClientSession, jobs_api_u
     :return: a :class:`virtool_workflow.data_model.Job` instance with an api key (.key attribute)
     """
     async with http.patch(f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True}) as response:
-        if response.status != 200:
-            if response.status == 400:
-                raise JobAlreadyAcquired(job_id)
-            else:
-                print(response.status)
-                raise JobsAPIServerError(await response.json())
-
-        document = await response.json()
-        return Job(
-            id=document["id"],
-            args=document["args"],
-            mem=document["mem"],
-            proc=document["proc"],
-            status=document["status"],
-            task=document["task"],
-            key=document["key"],
-        )
+        async with raising_errors_by_status_code(response) as document:
+            return Job(
+                id=document["id"],
+                args=document["args"],
+                mem=document["mem"],
+                proc=document["proc"],
+                status=document["status"],
+                task=document["task"],
+                key=document["key"],
+            )
 
 
 def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str):

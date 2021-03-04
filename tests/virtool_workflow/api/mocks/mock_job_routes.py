@@ -1,3 +1,5 @@
+from base64 import b64encode
+
 from aiohttp import web
 
 mock_routes = web.RouteTableDef()
