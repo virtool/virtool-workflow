@@ -79,3 +79,16 @@ async def finalize_subtraction(request):
     TEST_SUBTRACTION["gc"] = request_json["gc"]
 
     return web.json_response(TEST_SUBTRACTION)
+
+
+@mock_routes.delete("/api/subtractions/{subtraction_id}")
+async def delete_subtraction(request):
+    subtraction_id = request.match_info["subtraction_id"]
+
+    if subtraction_id != TEST_SUBTRACTION_ID:
+        return web.json_response({"message": "Not Found"}, status=404)
+
+    if "ready" in TEST_SUBTRACTION and TEST_SUBTRACTION["ready"] is True:
+        return web.json_response({"message": "Conflict"}, status=409)
+
+    return web.Response(status=204)
