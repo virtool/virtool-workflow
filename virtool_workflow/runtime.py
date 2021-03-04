@@ -8,6 +8,7 @@ from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
 from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.api.scope import api_fixtures
+from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.config.configuration import load_config, config_fixtures
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
@@ -71,16 +72,31 @@ async def init_environment(
             indexes_api = IndexProvider(
                 index_id=job.args["index_id"],
                 ref_id=job.args["ref_id"],
-                index_path=index_path,
                 http=http,
                 jobs_api_url=jobs_api_url,
             )
         except KeyError:
             indexes_api = None
 
+        try:
+            subtraction_ids = job.args["subtraction_id"]
+            if isinstance(subtraction_ids, str):
+                subtraction_ids = [subtraction_ids]
+
+            subtractions_api = [
+                SubtractionProvider(subtraction_id, http, jobs_api_url, work_path / f"subtractions/{subtraction_id}")
+                for subtraction_id in subtraction_ids
+            ]
+
+            for provider in subtractions_api:
+                provider.path.mkdir(parents=True, exist_ok=True)
+        except KeyError:
+            subtractions_api = None
+
         scope["environment"] = AnalysisWorkflowEnvironment(job,
                                                            analysis_provider=analysis_api,
-                                                           index_provider=indexes_api)
+                                                           index_provider=indexes_api,
+                                                           subtraction_providers=subtractions_api)
     else:
         scope["environment"] = WorkflowEnvironment(job)
 
