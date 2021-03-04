@@ -270,6 +270,19 @@ async def upload_index_file(request):
     }, status=201)
 
 
+@mock_routes.get("/api/indexes/{index_id}/files/{filename}")
+def download_index_files(request):
+    index_id = request.match_info["index_id"]
+    filename = request.match_info["filename"]
+
+    if index_id != TEST_INDEX_ID or filename != "reference.json.gz":
+        return web.json_response({
+            "message": "Not Found"
+        }, status=404)
+
+    return web.FileResponse(Path(__file__).parent / "files/reference.json.gz")
+
+
 @mock_routes.get("/api/analyses/{analysis_id}/files/{file_id}")
 async def download(request):
     file_id = request.match_info["file_id"]
