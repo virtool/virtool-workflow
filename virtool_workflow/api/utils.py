@@ -9,7 +9,7 @@ from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
 
 
 async def read_file_from_response(response, target_path: Path):
-    async with raising_errors_by_status_code(response, accept=[201]):
+    async with raising_errors_by_status_code(response):
         async with aiofiles.open(target_path, "wb") as f:
             await f.write(await response.read())
 

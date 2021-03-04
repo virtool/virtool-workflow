@@ -92,7 +92,7 @@ class IndexProvider(AbstractIndexProvider):
 
         for name in names:
             async with self.http.get(f"{self.jobs_api_url}/indexes/{self._index_id}/files/{name}") as response:
-                await read_file_from_response(response, target_path)
+                await read_file_from_response(response, target_path / name)
 
         return target_path
 
