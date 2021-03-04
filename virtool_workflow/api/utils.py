@@ -22,14 +22,11 @@ async def upload_file_via_post(http: aiohttp.ClientSession,
                                format: VirtoolFileFormat = None):
     params = {"name": path.name}
 
-    if format:
+    if format is not None:
         params.update(format=format)
 
     with path.open('rb') as binary:
-        async with http.post(url, data={"file": binary}, params={
-            "name": path.name,
-            "format": format
-        }) as response:
+        async with http.post(url, data={"file": binary}, params=params) as response:
             async with raising_errors_by_status_code(response) as response_json:
                 return VirtoolFile(
                     id=response_json["id"],
