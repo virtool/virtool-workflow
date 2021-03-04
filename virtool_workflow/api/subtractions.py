@@ -11,6 +11,14 @@ from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
 
 class SubtractionProvider(AbstractSubtractionProvider):
+    """
+    Operations on a Subtraction via the Jobs API.
+
+    :param subtraction_id: The ID of the subtraction.
+    :param http: An class:`aiohttp.ClientSession` to use when making requests.
+    :param jobs_api_url: The url for the jobs API (including /api).
+    :param subtraction_work_path: The working path for subtraction files.
+    """
 
     def __init__(
             self,
