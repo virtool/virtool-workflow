@@ -74,4 +74,7 @@ class SubtractionProvider(AbstractSubtractionProvider):
                 )
 
     async def delete(self):
-        pass
+        """Delete the subtraction."""
+        async with self.http.delete(self.api_url) as response:
+            async with raising_errors_by_status_code(response, accept=[204]):
+                pass

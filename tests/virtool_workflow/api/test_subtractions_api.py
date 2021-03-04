@@ -1,9 +1,11 @@
 from pathlib import Path
 
 import aiohttp
+import pytest
 from pytest import fixture
 
-from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
+from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID, TEST_SUBTRACTION
+from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.data_model import Subtraction
 from virtool_workflow.data_model.files import VirtoolFile
@@ -18,6 +20,8 @@ def work_path(tmpdir):
 def subtraction_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path):
     subtraction_work_path = work_path / "subtractions"
     subtraction_work_path.mkdir(parents=True)
+
+    TEST_SUBTRACTION["ready"] = False
 
     return SubtractionProvider(
         TEST_SUBTRACTION_ID,
@@ -55,3 +59,10 @@ async def test_finalize(subtraction_api):
     assert updated_subtraction.gc.t == 0.2
     assert updated_subtraction.gc.c == 0.2
     assert updated_subtraction.gc.g == 0.4
+
+    with pytest.raises(AlreadyFinalized):
+        await subtraction_api.delete()
+
+
+async def test_delete(subtraction_api):
+    await subtraction_api.delete()
