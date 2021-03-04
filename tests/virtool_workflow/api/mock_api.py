@@ -209,7 +209,7 @@ async def get_index(request):
     }, status=200)
 
 
-@mock_routes.get("/api/references/{ref_id}")
+@mock_routes.get("/api/refs/{ref_id}")
 async def get_ref(request):
     ref_id = request.match_info["ref_id"]
 
