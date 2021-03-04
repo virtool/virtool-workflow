@@ -1,5 +1,4 @@
 import filecmp
-import shutil
 from pathlib import Path
 
 import aiohttp
@@ -32,10 +31,6 @@ async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path:
 
 @pytest.fixture
 async def indexes(indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess):
-    async def _download(*args, **kwargs):
-        shutil.copyfile(FAKE_JSON_PATH, work_path / f"indexes/{indexes_api._index_id}/reference.json.gz")
-
-    indexes_api.download = _download
     return await indexes_fixture(indexes_api, work_path, 3, run_in_executor, run_subprocess)
 
 
