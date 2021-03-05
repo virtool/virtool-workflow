@@ -35,3 +35,20 @@ async def test_upload(indexes_api: IndexProvider, tmpdir):
     assert file.name == "reference.fa.gz"
     assert file.format == "fasta"
     assert file.size == 7
+
+
+async def test_download(indexes_api: IndexProvider, tmpdir):
+    await indexes_api.download(Path(tmpdir))
+
+    print(set(p.name for p in Path(tmpdir).iterdir()))
+
+    assert set(p.name for p in Path(tmpdir).iterdir()) == {
+        "reference.fa.gz",
+        "reference.json.gz",
+        "reference.1.bt2",
+        "reference.2.bt2",
+        "reference.3.bt2",
+        "reference.4.bt2",
+        "reference.rev.1.bt2",
+        "reference.rev.2.bt2"
+    }
