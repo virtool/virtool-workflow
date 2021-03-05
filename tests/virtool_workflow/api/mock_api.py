@@ -275,12 +275,14 @@ def download_index_files(request):
     index_id = request.match_info["index_id"]
     filename = request.match_info["filename"]
 
-    if index_id != TEST_INDEX_ID or filename != "reference.json.gz":
+    test_files_path = Path(__file__).parent / "files"
+
+    if index_id != TEST_INDEX_ID or filename not in {p.name for p in test_files_path.iterdir()}:
         return web.json_response({
             "message": "Not Found"
         }, status=404)
 
-    return web.FileResponse(Path(__file__).parent / "files/reference.json.gz")
+    return web.FileResponse(test_files_path / filename)
 
 
 @mock_routes.get("/api/analyses/{analysis_id}/files/{file_id}")

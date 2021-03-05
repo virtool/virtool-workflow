@@ -55,13 +55,12 @@ async def raising_errors_by_status_code(response,
 
     try:
         response_json = await response.json()
-        response_message = response_json["message"]
-    except ContentTypeError:
-        response_message = await response.text()
-    except UnicodeDecodeError:
-        response_message = "Could not get message from response"
-    except (KeyError, TypeError):
-        response_message = str(response_json)
+        response_message = response_json["message"] if "message" in response_json else str(response_json)
+    except (ContentTypeError, UnicodeDecodeError):
+        try:
+            response_message = await response.text()
+        except UnicodeDecodeError:
+            response_message = "Could not get message from response"
 
     if response.status in status_codes_to_exceptions:
         raise status_codes_to_exceptions[response.status](response_message)

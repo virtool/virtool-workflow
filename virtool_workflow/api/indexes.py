@@ -89,6 +89,18 @@ class IndexProvider(AbstractIndexProvider):
 
     async def download(self, target_path: Path, *names) -> Path:
         """Download files associated with the current index."""
+        if not names:
+            names = {
+                "reference.json.gz",
+                "reference.fa.gz",
+                "reference.1.bt2",
+                "reference.2.bt2",
+                "reference.3.bt2",
+                "reference.4.bt2",
+                "reference.rev.1.bt2",
+                "reference.rev.2.bt2",
+            }
+
         for name in names:
             async with self.http.get(f"{self.jobs_api_url}/indexes/{self._index_id}/files/{name}") as response:
                 async with raising_errors_by_status_code(response):
