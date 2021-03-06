@@ -36,7 +36,7 @@ class SampleProvider(AbstractSampleProvider):
                     files=sample_json["files"],
                 )
 
-    async def finalize(self, quality: Dict[str, Any]):
+    async def finalize(self, quality: Dict[str, Any]) -> Sample:
         pass
 
     async def delete(self):

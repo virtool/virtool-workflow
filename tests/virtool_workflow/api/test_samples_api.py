@@ -23,3 +23,11 @@ async def test_get(sample_api):
 
     for actual, expected in zip(sample.files, TEST_SAMPLE["files"]):
         assert actual == expected
+
+
+async def test_finalize(sample_api):
+    mock_quality = {"quality": True}
+    sample = await sample_api.finalize(mock_quality)
+
+    assert isinstance(sample, Sample)
+    assert sample.quality == mock_quality

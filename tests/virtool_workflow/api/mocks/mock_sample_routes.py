@@ -22,3 +22,18 @@ async def get_sample(request):
         return not_found()
 
     return json_response(TEST_SAMPLE, status=200)
+
+
+@mock_routes.patch("/api/samples/{sample_id}")
+async def finalize(request):
+    sample_id = request.match_info["sample_id"]
+
+    if sample_id != TEST_SAMPLE_ID:
+        return not_found()
+
+    response_json = await request.json()
+
+    TEST_SAMPLE["quality"] = response_json["quality"]
+    TEST_SAMPLE["ready"] = True
+
+    return json_response(TEST_SAMPLE)
