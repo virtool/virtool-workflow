@@ -104,9 +104,11 @@ def download_index_files(request):
     index_id = request.match_info["index_id"]
     filename = request.match_info["filename"]
 
-    if index_id != TEST_INDEX_ID or filename != "reference.json.gz":
+    path = Path(__file__).parent.parent / f"files/{filename}"
+
+    if index_id != TEST_INDEX_ID or not path.exists():
         return web.json_response({
             "message": "Not Found"
         }, status=404)
 
-    return web.FileResponse(Path(__file__).parent.parent / "files/reference.json.gz")
+    return web.FileResponse(path)
