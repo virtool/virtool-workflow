@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from aiohttp.web import RouteTableDef
-from aiohttp.web_response import json_response
+from aiohttp.web_response import json_response, Response
 
 from tests.virtool_workflow.api.mocks.utils import not_found
 
@@ -37,3 +37,13 @@ async def finalize(request):
     TEST_SAMPLE["ready"] = True
 
     return json_response(TEST_SAMPLE)
+
+
+@mock_routes.delete("/api/samples/{sample_id}")
+async def delete(request):
+    sample_id = request.match_info["sample_id"]
+
+    if sample_id != TEST_SAMPLE_ID:
+        return not_found()
+
+    return Response(status=201)
