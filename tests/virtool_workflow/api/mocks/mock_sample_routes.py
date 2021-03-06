@@ -1,14 +1,16 @@
 import json
 from pathlib import Path
 
-from aiohttp.web_routedef import RouteTableDef
+from aiohttp.web import RouteTableDef
+from aiohttp.web_response import json_response
 
-from virtool.api.response import not_found, json_response
+from tests.virtool_workflow.api.mocks.utils import not_found
 
 mock_routes = RouteTableDef()
 
 TEST_SAMPLE_PATH = Path(__file__).parent / "mock_sample.json"
-TEST_SAMPLE = json.load(TEST_SAMPLE_PATH)
+with TEST_SAMPLE_PATH.open('r') as f:
+    TEST_SAMPLE = json.load(f)
 TEST_SAMPLE_ID = TEST_SAMPLE["id"]
 
 

@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import List
 
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow.data_model.files import VirtoolFile
 
 
 @dataclass(frozen=True)
@@ -18,4 +17,4 @@ class Sample:
     quality: dict
     nuvs: bool = False
     pathoscope: bool = False
-    files: List[VirtoolFile] = field(default_factory=lambda: [])
+    files: List[dict] = field(default_factory=lambda: [])

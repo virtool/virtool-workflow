@@ -21,8 +21,5 @@ async def test_get(sample_api):
                 "paired", "quality", "nuvs", "pathoscope"]:
         assert getattr(sample, key) == TEST_SAMPLE[key]
 
-    for file, file_dict in zip(sample.files, TEST_SAMPLE["files"]):
-        assert file.name == file_dict["name"]
-        assert file.size == file_dict["size"]
-        assert file.format == file_dict["format"]
-        assert file.name_on_disk == file_dict["name_on_disk"]
+    for actual, expected in zip(sample.files, TEST_SAMPLE["files"]):
+        assert actual == expected
