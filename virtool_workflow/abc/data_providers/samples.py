@@ -31,3 +31,6 @@ class AbstractSampleProvider(ABC):
     async def download(self):
         """Delete files associated with the current sample."""
         ...
+
+    def __await__(self):
+        return self.get().__await__()
