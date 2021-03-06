@@ -4,7 +4,7 @@ from typing import Dict, Any
 import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSampleProvider
-from virtool_workflow.api.errors import raising_errors_by_status_code
+from virtool_workflow.api.errors import raising_errors_by_status_code, AlreadyFinalized, JobsAPIServerError
 from virtool_workflow.data_model import Sample
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
@@ -45,7 +45,12 @@ class SampleProvider(AbstractSampleProvider):
             return await _make_sample_from_response(response)
 
     async def delete(self):
-        pass
+        async with self.http.delete(self.url) as response:
+            async with raising_errors_by_status_code(response, accept=[204], status_codes_to_exceptions={
+                400: AlreadyFinalized,
+                500: JobsAPIServerError
+            }):
+                pass
 
     async def upload(self, path: Path, format: VirtoolFileFormat):
         pass

@@ -46,4 +46,10 @@ async def delete(request):
     if sample_id != TEST_SAMPLE_ID:
         return not_found()
 
-    return Response(status=201)
+    if "ready" in TEST_SAMPLE and TEST_SAMPLE["ready"] is True:
+        return json_response(
+            {"message": "Already Finalized"},
+            status=400,
+        )
+
+    return Response(status=204)
