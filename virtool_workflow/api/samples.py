@@ -9,6 +9,23 @@ from virtool_workflow.data_model import Sample
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
+async def _make_sample_from_response(response) -> Sample:
+    async with raising_errors_by_status_code(response) as sample_json:
+        return Sample(
+            id=sample_json["id"],
+            name=sample_json["name"],
+            host=sample_json["host"],
+            isolate=sample_json["isolate"],
+            locale=sample_json["locale"],
+            library_type=sample_json["library_type"],
+            paired=sample_json["paired"],
+            quality=sample_json["quality"],
+            nuvs=sample_json["nuvs"],
+            pathoscope=sample_json["pathoscope"],
+            files=sample_json["files"],
+        )
+
+
 class SampleProvider(AbstractSampleProvider):
 
     def __init__(self,
@@ -21,23 +38,11 @@ class SampleProvider(AbstractSampleProvider):
 
     async def get(self) -> Sample:
         async with self.http.get(self.url) as response:
-            async with raising_errors_by_status_code(response) as sample_json:
-                return Sample(
-                    id=sample_json["id"],
-                    name=sample_json["name"],
-                    host=sample_json["host"],
-                    isolate=sample_json["isolate"],
-                    locale=sample_json["locale"],
-                    library_type=sample_json["library_type"],
-                    paired=sample_json["paired"],
-                    quality=sample_json["quality"],
-                    nuvs=sample_json["nuvs"],
-                    pathoscope=sample_json["pathoscope"],
-                    files=sample_json["files"],
-                )
+            return await _make_sample_from_response(response)
 
     async def finalize(self, quality: Dict[str, Any]) -> Sample:
-        pass
+        async with self.http.patch(self.url, json={"quality": quality}) as response:
+            return await _make_sample_from_response(response)
 
     async def delete(self):
         pass
