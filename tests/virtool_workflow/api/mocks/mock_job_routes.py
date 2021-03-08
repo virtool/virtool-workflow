@@ -9,7 +9,7 @@ mock_routes = web.RouteTableDef()
 async def acquire_job(request):
     json = await request.json()
 
-    if json.get("acquired", None) is not True:
+    if json.get("acquired") is not True:
         return web.Response(status=422)
 
     return web.json_response({

@@ -47,9 +47,7 @@ async def get_ref(request):
 
     return web.json_response({
         "id": "21n3j5v6",
-        "created_at": {
-            "$date": "2019-10-04T17:17:48.935Z"
-        },
+        "created_at": "2019-10-04T17:17:48.935Z",
         "data_type": "genome",
         "description": "",
         "name": "Clone of Banana Viruses",
@@ -75,7 +73,6 @@ async def get_ref(request):
 
 @mock_routes.post("/api/indexes/{index_id}/files")
 async def upload_index_file(request):
-    print(request.content_type)
     reader = await request.multipart()
     file = await reader.next()
 
