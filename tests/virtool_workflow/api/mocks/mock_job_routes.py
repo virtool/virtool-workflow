@@ -1,4 +1,5 @@
 from base64 import b64encode
+from datetime import datetime
 
 from aiohttp import web
 from aiohttp.web_response import json_response
@@ -73,4 +74,11 @@ async def push_status(request):
 
     status = await request.json()
 
-    job_id["status"].append(status)
+    job_id["status"].append({k: v for k, v in status.items() if k in [
+        "error", "progress", "stage", "state",
+    ]})
+
+    return web.json_response({
+        **status,
+        "timestamp": datetime.now().isoformat()},
+    )
