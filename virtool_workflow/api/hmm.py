@@ -13,10 +13,11 @@ from virtool_workflow.data_model import HMM
 
 def _hmm_from_dict(hmm_json) -> HMM:
     return HMM(
+
         *itemgetter("id", "cluster", "count", "entries",
                     "families", "genera", "hidden",
-                    "mean_entropy", "total_entropy",
-                    "names")(hmm_json)
+                    "length", "mean_entropy",
+                    "total_entropy", "names")(hmm_json)
     )
 
 
@@ -46,13 +47,12 @@ class HmmsProvider(AbstractHmmsProvider):
                     await f.write(await response.read())
 
         async with aiofiles.open(self.path / "annotations.json") as f:
-            lines = await f.read()
-            hmms_json = json.loads(lines)
+            hmms_json = json.loads(await f.read())
             return [_hmm_from_dict(hmm) for hmm in hmms_json]
 
     async def get_profiles(self) -> Path:
         async with self.http.get(f"{self.download_url}/profiles.hmm") as response:
-            async with raising_errors_by_status_code(response, accept=[200])
+            async with raising_errors_by_status_code(response, accept=[200]):
                 async with aiofiles.open(self.path / "profiles.hmm", "wb") as f:
                     await f.write(await response.read())
 
