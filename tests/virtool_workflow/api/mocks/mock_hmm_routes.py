@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from aiohttp.web_fileresponse import FileResponse
+from aiohttp.web_response import json_response
 from aiohttp.web_routedef import RouteTableDef
 
 mock_routes = RouteTableDef()
@@ -42,6 +43,18 @@ MOCK_HMM = {
 }
 
 HMM_PROFILES = Path(__file__).parent.parent / "files/profiles.hmm"
+
+
+@mock_routes.get("/api/hmm/{hmm_id}")
+async def get(request):
+    hmm_id = request.match_info["hmm_id"]
+
+    if hmm_id != MOCK_HMM["id"]:
+        return json_response({
+            "message": "Not Found"
+        }, status=404)
+
+    return json_response(MOCK_HMM)
 
 
 @mock_routes.get('/download/hmms/profiles.hmm')
