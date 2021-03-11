@@ -22,4 +22,4 @@ async def http(loop, aiohttp_client) -> aiohttp.ClientSession:
     for route_table in mock_routes:
         app.add_routes(route_table)
 
-    return await aiohttp_client(app, auto_decompress=False)
+    return await aiohttp_client(app, auto_decompress=True)

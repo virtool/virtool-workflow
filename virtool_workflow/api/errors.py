@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Dict, Type, List
 
-from aiohttp import ContentTypeError
+from aiohttp import ContentTypeError, ClientPayloadError
 
 
 class JobAlreadyAcquired(Exception):
@@ -54,13 +54,16 @@ async def raising_errors_by_status_code(response,
     response_json = None
 
     try:
-        response_json = await response.json()
-        response_message = response_json["message"] if "message" in response_json else str(response_json)
-    except (ContentTypeError, UnicodeDecodeError):
         try:
-            response_message = await response.text()
-        except UnicodeDecodeError:
-            response_message = "Could not get message from response"
+            response_json = await response.json()
+            response_message = response_json["message"] if "message" in response_json else str(response_json)
+        except (ContentTypeError, UnicodeDecodeError):
+            try:
+                response_message = await response.text()
+            except UnicodeDecodeError:
+                response_message = "Could not get message from response"
+    except ClientPayloadError:
+        response_message = "Could not get message from response"
 
     if response.status in status_codes_to_exceptions:
         raise status_codes_to_exceptions[response.status](response_message)

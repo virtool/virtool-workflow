@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import virtool_core.utils
 from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_response import json_response
 from aiohttp.web_routedef import RouteTableDef
@@ -64,9 +65,13 @@ async def download_hmm_profiles(request):
 
 @mock_routes.get('/api/hmm/files/annotations.json.gz')
 async def download_annotations(request):
-    annotations_path = Path("annotations.json.gz")
+    annotations_path = Path("annotations.json")
+    compressed_annotations_path = annotations_path.with_suffix(".json.gz")
 
-    with annotations_path.open("w") as f:
-        json.dump([MOCK_HMM] * 10, f)
+    if not compressed_annotations_path.exists():
+        with annotations_path.open("w") as f:
+            json.dump([MOCK_HMM] * 10, f)
+
+        virtool_core.utils.compress_file(annotations_path, compressed_annotations_path)
 
     return FileResponse(annotations_path)
