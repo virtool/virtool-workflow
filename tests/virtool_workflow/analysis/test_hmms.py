@@ -15,6 +15,12 @@ def make_mock_hmm(id_, cluster):
 
 
 class TestHmmsProvider(AbstractHmmsProvider):
+    async def get(self, hmm_id: str):
+        pass
+
+    async def get_profiles(self) -> Path:
+        pass
+
     @property
     def hmm_list(self) -> List[HMM]:
         return [
@@ -23,16 +29,16 @@ class TestHmmsProvider(AbstractHmmsProvider):
         ]
 
 
-async def test_hmms(runtime, run_in_executor, run_subprocess, tmpdir):
-    runtime.data_providers.hmms_provider = TestHmmsProvider()
-
-    data_path = await runtime.get_or_instantiate("data_path")
+async def test_hmms(run_in_executor, run_subprocess, tmpdir):
+    data_path = Path(tmpdir) / "data"
+    work_path = Path(tmpdir) / "work"
+    work_path.mkdir()
     hmms_path = data_path / "hmm"
-    hmms_path.mkdir()
+    hmms_path.mkdir(parents=True)
 
     copy(FAKE_PROFILES_PATH, hmms_path)
 
-    hmms_obj = await runtime.instantiate(hmms)
+    hmms_obj = await hmms(TestHmmsProvider(), tmpdir / "work", data_path, run_in_executor, run_subprocess)
 
     assert hmms_obj.cluster_annotation_map == {
         1: "foo",
@@ -40,8 +46,6 @@ async def test_hmms(runtime, run_in_executor, run_subprocess, tmpdir):
     }
 
     assert filecmp.cmp(hmms_path / "profiles.hmm", hmms_obj.path)
-
-    work_path: Path = runtime["work_path"]
 
     expected_paths = {
         work_path / "hmms" / f"profiles.hmm{suffix}"
