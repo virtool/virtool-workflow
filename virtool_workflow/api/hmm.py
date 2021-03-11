@@ -51,4 +51,9 @@ class HmmsProvider(AbstractHmmsProvider):
             return [_hmm_from_dict(hmm) for hmm in hmms_json]
 
     async def get_profiles(self) -> Path:
-        pass
+        async with self.http.get(f"{self.download_url}/profiles.hmm") as response:
+            async with raising_errors_by_status_code(response, accept=[200])
+                async with aiofiles.open(self.path / "profiles.hmm", "wb") as f:
+                    await f.write(await response.read())
+
+        return self.path / "profiles.hmm"
