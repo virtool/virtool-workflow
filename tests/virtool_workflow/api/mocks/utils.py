@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from aiohttp.web_response import json_response, Response
+
 
 async def read_file_from_request(request, name, format) -> dict:
     reader = await request.multipart()
@@ -21,3 +23,9 @@ async def read_file_from_request(request, name, format) -> dict:
         "size": size,
         "uploaded_at": str(datetime.now()),
     }
+
+
+def not_found(message=None) -> Response:
+    return json_response({
+        "message": message or "Not found"
+    }, status=404)
