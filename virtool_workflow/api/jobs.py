@@ -40,6 +40,8 @@ PushStatus = Callable[[str, str, int, Optional[str]], Awaitable[Status]]
 
 
 def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
+    """Update the status of the current job."""
+
     async def _push_status(state: str, stage: str, progress: int, error: str = None):
         async with http.post(f"{jobs_api_url}/jobs/{job.id}/status", json={
             "state": state,
