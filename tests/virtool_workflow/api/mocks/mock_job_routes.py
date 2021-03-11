@@ -1,6 +1,7 @@
 from base64 import b64encode
 
 from aiohttp import web
+from aiohttp.web_response import json_response
 
 mock_routes = web.RouteTableDef()
 
@@ -65,4 +66,11 @@ async def acquire_job(request):
 async def push_status(request):
     job_id = request.match_info["job_id"]
 
-    if job_id != TEST_JOB
+    if job_id != TEST_JOB["id"]:
+        return json_response({
+            "message": "Not Found",
+        }, status=404)
+
+    status = await request.json()
+
+    job_id["status"].append(status)
