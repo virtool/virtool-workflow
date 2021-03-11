@@ -6,7 +6,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Iterable
 
-from virtool_workflow.abc.data_providers.hmms import AbstractHmmsProvider
+from virtool_workflow.abc.data_providers.hmms import AbstractHMMsProvider
 from virtool_workflow.data_model import HMM
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
@@ -27,7 +27,7 @@ class HMMs(UserList):
 
 
 @fixture
-async def hmms(hmms_provider: AbstractHmmsProvider, work_path: Path, data_path: Path,
+async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, data_path: Path,
                run_in_executor: FunctionExecutor, run_subprocess: RunSubprocess):
     """
     A fixture for accessing HMM data.

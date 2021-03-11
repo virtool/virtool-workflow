@@ -5,7 +5,7 @@ from typing import List
 from virtool_workflow.data_model import HMM
 
 
-class AbstractHmmsProvider(ABC):
+class AbstractHMMsProvider(ABC):
 
     @abstractmethod
     async def get(self, hmm_id: str):

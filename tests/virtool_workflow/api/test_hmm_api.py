@@ -4,13 +4,13 @@ import aiohttp
 from pytest import fixture
 
 from tests.virtool_workflow.api.mocks.mock_hmm_routes import MOCK_HMM
-from virtool_workflow.api.hmm import HmmsProvider
+from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.data_model import HMM
 
 
 @fixture
 def hmms_api(http: aiohttp.ClientSession, jobs_api_url: str, tmpdir):
-    return HmmsProvider(
+    return HMMsProvider(
         http=http,
         jobs_api_url=jobs_api_url,
         download_url="/download",

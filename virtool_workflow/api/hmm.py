@@ -6,7 +6,7 @@ from typing import List
 import aiofiles
 import aiohttp
 
-from virtool_workflow.abc.data_providers import AbstractHmmsProvider
+from virtool_workflow.abc.data_providers import AbstractHMMsProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model import HMM
 
@@ -21,7 +21,7 @@ def _hmm_from_dict(hmm_json) -> HMM:
     )
 
 
-class HmmsProvider(AbstractHmmsProvider):
+class HMMsProvider(AbstractHMMsProvider):
 
     def __init__(self,
                  http: aiohttp.ClientSession,
