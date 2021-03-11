@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from virtool_workflow import hooks
-from virtool_workflow.abc.data_providers import AbstractHmmsProvider, AbstractSubtractionProvider, \
+from virtool_workflow.abc.data_providers import AbstractHMMsProvider, AbstractSubtractionProvider, \
     AbstractSampleProvider, AbstractOTUsProvider, AbstractIndexProvider, \
     AbstractCacheProvider, AbstractAnalysisProvider
 from virtool_workflow.analysis.analysis import analysis
@@ -25,7 +25,7 @@ class DataProvider:
                  otus_provider: AbstractOTUsProvider = None,
                  sample_provider: AbstractSampleProvider = None,
                  subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
-                 hmms_provider: AbstractHmmsProvider = None):
+                 hmms_provider: AbstractHMMsProvider = None):
         self.scope = scope
         self.analysis_provider = analysis_provider
         self.caches_provider = caches_provider
@@ -58,7 +58,7 @@ class AnalysisWorkflowEnvironment(WorkflowEnvironment):
                  otus_provider: AbstractOTUsProvider = None,
                  sample_provider: AbstractSampleProvider = None,
                  subtraction_providers: Iterable[AbstractSubtractionProvider] = None,
-                 hmms_provider: AbstractHmmsProvider = None):
+                 hmms_provider: AbstractHMMsProvider = None):
         super(AnalysisWorkflowEnvironment, self).__init__(job=job)
         self.load_plugins("virtool_workflow.analysis.fixtures")
         self.data_providers = DataProvider(self,
