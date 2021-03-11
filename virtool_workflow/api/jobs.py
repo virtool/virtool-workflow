@@ -36,12 +36,12 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str):
     return _job_provider
 
 
-PushStatus = Callable[[str, str, str, int, Optional[str]], Awaitable[Status]]
+PushStatus = Callable[[str, str, int, Optional[str]], Awaitable[Status]]
 
 
-def push_status(job_id: str, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
-    async def _push_status(self, state: str, stage: str, progress: int, error: str = None):
-        async with http.post(f"{jobs_api_url}/jobs/{job_id}/status", json={
+def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
+    async def _push_status(state: str, stage: str, progress: int, error: str = None):
+        async with http.post(f"{jobs_api_url}/jobs/{job.id}/status", json={
             "state": state,
             "stage": stage,
             "error": error,

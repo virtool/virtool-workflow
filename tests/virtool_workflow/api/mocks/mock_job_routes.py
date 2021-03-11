@@ -74,7 +74,7 @@ async def push_status(request):
 
     status = await request.json()
 
-    job_id["status"].append({k: v for k, v in status.items() if k in [
+    TEST_JOB["status"].append({k: v for k, v in status.items() if k in [
         "error", "progress", "stage", "state",
     ]})
 
