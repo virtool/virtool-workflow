@@ -1,7 +1,9 @@
+from typing import Callable, Optional, Awaitable
+
 import aiohttp
 
 from .errors import raising_errors_by_status_code
-from ..data_model import Job
+from ..data_model import Job, Status
 
 
 async def acquire_job_by_id(job_id: str, http: aiohttp.ClientSession, jobs_api_url):
@@ -32,3 +34,22 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str):
         return await acquire_job_by_id(job_id, http, jobs_api_url)
 
     return _job_provider
+
+
+PushStatus = Callable[[str, str, int, Optional[str]], Awaitable[Status]]
+
+
+def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
+    """Update the status of the current job."""
+
+    async def _push_status(state: str, stage: str, progress: int, error: str = None):
+        async with http.post(f"{jobs_api_url}/jobs/{job.id}/status", json={
+            "state": state,
+            "stage": stage,
+            "error": error,
+            "progress": progress,
+        }) as response:
+            async with raising_errors_by_status_code(response, accept=[200]) as status_json:
+                return Status(**status_json)
+
+    return _push_status

@@ -4,6 +4,6 @@ from virtool_workflow.data_model import Job
 
 
 class JobProviderProtocol(Protocol):
-    def __call__(self, id_: str) -> Job:
+    async def __call__(self, id_: str) -> Job:
         """Fetch a job with the given id."""
         ...
