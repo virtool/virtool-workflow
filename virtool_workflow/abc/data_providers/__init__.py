@@ -1,5 +1,4 @@
 from .analysis import AbstractAnalysisProvider
-from .cache import AbstractCacheProvider
 from .hmms import AbstractHMMsProvider
 from .indexes import AbstractIndexProvider
 from .otus import AbstractOTUsProvider

@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from virtool_workflow.abc.data_providers.cache import AbstractCache, AbstractCaches
+from virtool_workflow.abc.caches.cache import AbstractCache, AbstractCaches
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
