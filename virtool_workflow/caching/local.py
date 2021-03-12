@@ -8,11 +8,13 @@ from virtool_workflow.execution.run_in_executor import FunctionExecutor
 class LocalCache(AbstractCacheWriter):
     """A cache stored in the local filesystem."""
 
+    @property
+    def cache(self):
+
     def __init__(self, key: str, path: Path, run_in_executor: FunctionExecutor):
         self.key = key
         self.path = path
         self.run_in_executor = run_in_executor
-        self.closed = False
 
         path.mkdir(parents=True, exist_ok=True)
 
@@ -43,7 +45,7 @@ class LocalCaches(AbstractCaches):
         return self._caches[key]
 
     async def create(self, key: str) -> AbstractCacheWriter:
-        self._caches = LocalCache(key, self.path / key, self.run_in_executor)
+        self._caches[key] = LocalCache(key, self.path / key, self.run_in_executor)
         return self._caches[key]
 
     def __contains__(self, key: str):
