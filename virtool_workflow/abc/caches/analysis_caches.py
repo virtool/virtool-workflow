@@ -20,7 +20,7 @@ class AbstractReadsCache(AbstractCache):
         if not self.quality:
             raise ValueError("FastQC quality check output must be provided.")
 
-        cache_files = list(self.path.iterdir())
+        cache_files = list(p.name for p in self.path.iterdir())
 
         if "reads.fq.gz" not in cache_files:
             if "reads_1.fq.gz" not in cache_files or "reads_2.fq.gz" not in cache_files:

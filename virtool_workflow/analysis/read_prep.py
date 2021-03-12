@@ -20,7 +20,7 @@ async def reads(
 ):
     """A fixture for accessing trimmed reads for the current sample."""
     if reads_cache.finalized:
-        await run_in_executor(shutil.copytree(reads_cache.path, reads_path))
+        await run_in_executor(shutil.copytree, reads_cache.path, reads_path)
         return Reads.from_quality(reads_cache.quality, paired, reads_path)
     else:
         raise NotImplementedError()

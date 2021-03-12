@@ -24,4 +24,4 @@ class Reads:
     def from_quality(cls, quality: dict, paired: bool, path: Path):
         min_length, max_length = quality["length"]
         count = quality["count"]
-        return cls(paired, min_length, max_length, count, make_read_paths(path))
+        return cls(paired, min_length, max_length, count, make_read_paths(path, paired))
