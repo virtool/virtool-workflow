@@ -1,9 +1,9 @@
 from abc import abstractmethod
 
-from virtool_workflow.abc.caches.cache import AbstractCache, CacheFileMissing
+from virtool_workflow.abc.caches.cache import AbstractCacheWriter, CacheFileMissing
 
 
-class AbstractReadsCache(AbstractCache):
+class AbstractReadsCache(AbstractCacheWriter):
 
     @property
     @abstractmethod

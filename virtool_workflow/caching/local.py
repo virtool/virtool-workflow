@@ -1,11 +1,11 @@
 import shutil
 from pathlib import Path
 
-from virtool_workflow.abc.caches.cache import AbstractCache, AbstractCaches
+from virtool_workflow.abc.caches.cache import AbstractCacheWriter, AbstractCaches
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
-class LocalCache(AbstractCache):
+class LocalCache(AbstractCacheWriter):
     """A cache stored in the local filesystem."""
 
     def __init__(self, key: str, path: Path, run_in_executor: FunctionExecutor):
@@ -16,7 +16,7 @@ class LocalCache(AbstractCache):
 
         path.mkdir(parents=True, exist_ok=True)
 
-    async def open(self) -> "AbstractCache":
+    async def open(self) -> "AbstractCacheWriter":
         self.closed = False
         return self
 
@@ -39,10 +39,10 @@ class LocalCaches(AbstractCaches):
         self.run_in_executor = run_in_executor
         self._caches = {}
 
-    async def get(self, key: str) -> AbstractCache:
+    async def get(self, key: str) -> AbstractCacheWriter:
         return self._caches[key]
 
-    async def create(self, key: str) -> AbstractCache:
+    async def create(self, key: str) -> AbstractCacheWriter:
         self._caches = LocalCache(key, self.path / key, self.run_in_executor)
         return self._caches[key]
 
