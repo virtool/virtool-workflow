@@ -3,7 +3,7 @@ from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 
 
-class AbstractCache(ABC, AbstractAsyncContextManager):
+class AbstractCache(AbstractAsyncContextManager):
     key: str
     path: Path
 
