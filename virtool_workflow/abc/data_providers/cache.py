@@ -1,68 +1,43 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from contextlib import AbstractAsyncContextManager
 from pathlib import Path
-from typing import Dict, Any, List
 
 
-@dataclass(frozen=True)
-class CacheEntry:
-    id: str
-    trimming_parameters: Dict[str, Any]
-    trimming_program: Dict[str, Any]
-    files: List[dict]
-    paired: bool
-
-
-class AbstractCacheProvider(ABC):
+class AbstractCache(ABC, AbstractAsyncContextManager):
+    key: str
+    path: Path
 
     @abstractmethod
-    async def create(self, trimming_parameters: Dict[str, Any], paired: bool, quality: Dict[str, Any]):
-        """
-        Create and store a new cache entry.
-
-        :param trimming_parameters: The trimming parameters
-        :param paired: A boolean indicating that the sample is paired
-        :param quality: The output of `FastQC` quality check for the sample
-            as parsed by :func:`virtool_workflow.analysis.fastqc.parse_fastqc`.
-        """
+    async def open(self) -> "AbstractCache":
+        """Signal intent to create a new cache."""
         ...
 
     @abstractmethod
-    async def set_files(self, files: List[dict]):
-        """Set the files included in the current cache."""
+    async def upload(self, path: Path):
+        """Upload a file to this cache"""
         ...
 
     @abstractmethod
-    async def set_quality(self, quality: Dict[str, Any]):
-        """Set the quality for the current cache and mark it as ready."""
+    async def close(self):
+        """Finalize the cache."""
         ...
 
     @abstractmethod
-    async def find(self, trimming_parameters: Dict[str, Any], trimming_program: str) -> CacheEntry:
-        """
-        Find a cache entry for the current analysis which matches the trimming parameters and program being used.
-
-        :param trimming_parameters: The parameters supplied to the `trimming_program` when.
-        :param trimming_program: The program being used for trimming.
-        :return: A cache entry for the current analysis, or None if there is no entry.
-        """
-
-    @abstractmethod
-    async def delete_cache(self):
-        """Delete the cache entry associated with the current analysis (in case it is incomplete, or invalid)."""
+    async def delete(self):
+        """Delete the cache."""
         ...
 
-    @abstractmethod
-    async def clear_caches(self):
-        """Delete all caches associated with the sample being analyzed by the current job."""
-        ...
+    def __aexit__(self, exc_type, exc_val, exc_tb):
+        return await self.close()
+
+
+class AbstractCaches(ABC, AbstractAsyncContextManager):
 
     @abstractmethod
-    async def unset_caches_for_analyses(self):
-        """Invalidate all caches associated with this sample."""
-        ...
+    async def get(self, key: str) -> AbstractCache:
+        """Get the cache with a given key."""
 
     @abstractmethod
-    async def delete_cache_if_not_ready(cache_path: Path):
-        """Delete the cache entry and remove the cache from the filesystem if it is not ready."""
+    async def create(self, key: str) -> AbstractCache:
+        """Create a new cache."""
         ...
