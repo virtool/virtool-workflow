@@ -14,6 +14,7 @@ class CacheFileMissing(ValueError):
 class AbstractCache(AbstractAsyncContextManager):
     key: str
     path: Path
+    finalized: bool
 
     @abstractmethod
     async def open(self) -> "AbstractCache":

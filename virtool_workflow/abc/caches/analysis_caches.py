@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from virtool_workflow.abc.caches.cache import AbstractCache, CacheFileMissing
 
 
-class AbstractAnalysisCache(ABC, AbstractCache):
+class AbstractReadsCache(AbstractCache):
+
     @property
     @abstractmethod
     def quality(self):
@@ -24,3 +25,5 @@ class AbstractAnalysisCache(ABC, AbstractCache):
         if "reads.fq.gz" not in cache_files:
             if "reads_1.fq.gz" not in cache_files or "reads_2.fq.gz" not in cache_files:
                 raise CacheFileMissing("Trimmed read files have not been uploaded to the read cache.")
+
+        await super(AbstractReadsCache, self).close()
