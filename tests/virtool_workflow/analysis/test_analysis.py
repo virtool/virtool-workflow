@@ -1,8 +1,10 @@
 from pathlib import Path
 
 from virtool_workflow.abc.caches.analysis_caches import AbstractReadsCache
+from virtool_workflow.analysis.read_prep import reads
+from virtool_workflow.analysis.reads import Reads
 from virtool_workflow.caching.local import LocalCache
-from virtool_workflow.execution.run_in_executor import FunctionExecutor, run_in_executor, thread_pool_executor
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
 class MockReadsCache(AbstractReadsCache, LocalCache):
@@ -10,6 +12,7 @@ class MockReadsCache(AbstractReadsCache, LocalCache):
     def __init__(self, path: Path, run_in_executor: FunctionExecutor):
         super(MockReadsCache, self).__init__("test_analysis_cache", path, run_in_executor)
         self._quality = None
+        self.finalized = False
 
     @property
     def quality(self):
@@ -24,9 +27,26 @@ class MockReadsCache(AbstractReadsCache, LocalCache):
 
     async def close(self):
         await AbstractReadsCache.close(self)
+        self.finalized = True
 
 
-async def test_reads_caching(tmpdir):
-    read_cache = MockReadsCache(Path(tmpdir), run_in_executor(thread_pool_executor()))
+async def test_get_reads_from_existing_cache(tmpdir, run_in_executor):
+    tmpdir = Path(tmpdir)
+    read_cache = MockReadsCache(tmpdir, run_in_executor)
 
-    reads(read_cache)
+    mock_reads_file = tmpdir / "work/reads.fq.gz"
+    mock_reads_file.parent.mkdir()
+    mock_reads_file.touch()
+
+    async with read_cache:
+        await read_cache.upload(mock_reads_file)
+        read_cache.quality = {
+            "length": [0, 100],
+            "count": 10
+        }
+
+    assert read_cache.finalized
+
+    _reads = await reads(read_cache, tmpdir / "reads", run_in_executor, False)
+
+    assert isinstance(_reads, Reads)
