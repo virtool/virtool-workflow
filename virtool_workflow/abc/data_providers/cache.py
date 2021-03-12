@@ -3,23 +3,50 @@ from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 
 
+class CacheExists(Exception):
+    ...
+
+
+class CacheFileMissing(ValueError):
+    ...
+
+
 class AbstractCache(AbstractAsyncContextManager):
     key: str
     path: Path
 
     @abstractmethod
     async def open(self) -> "AbstractCache":
-        """Signal intent to create a new cache."""
+        """
+        Signal intent to create a new cache.
+
+        :return: self.
+        :raises CacheExists: When there is already a cache open with a key matching :obj:`self.key`.
+        """
         ...
 
     @abstractmethod
     async def upload(self, path: Path):
-        """Upload a file to this cache"""
+        """
+        Upload a file to this cache.
+
+        :param path: The path to a file to upload.
+        :raises FileExistsError: When there is already a file in the cache with the same name.
+        :raises IsADirectoryError: When the path given is a directory.
+        """
+
         ...
 
     @abstractmethod
     async def close(self):
-        """Finalize the cache."""
+        """
+        Finalize the cache.
+
+        This method should call :func:`.delete` in the case of an invalid cache.
+
+        :raises ValueError: When a required value of the cache has not been set.
+        :raises CacheFileMissing: When a required file for the cache has not been uploaded.
+        """
         ...
 
     @abstractmethod
@@ -35,9 +62,21 @@ class AbstractCaches(ABC):
 
     @abstractmethod
     async def get(self, key: str) -> AbstractCache:
-        """Get the cache with a given key."""
+        """
+        Get the cache with a given key.
+
+        :raises KeyError: When the given key does not map to an existing cache.
+        """
 
     @abstractmethod
     async def create(self, key: str) -> AbstractCache:
-        """Create a new cache."""
+        """Create a new cache.
+
+        :raises CacheExists: When a cache already exists for the given key.
+        """
+        ...
+
+    @abstractmethod
+    def __contains__(self, item: str):
+        """Check if there is an existing cache with the given key."""
         ...
