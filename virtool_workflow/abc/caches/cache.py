@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
 from contextlib import AbstractAsyncContextManager
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -11,13 +12,18 @@ class CacheFileMissing(ValueError):
     ...
 
 
-class AbstractCache(AbstractAsyncContextManager):
+@dataclass
+class Cache:
     key: str
     path: Path
-    finalized: bool
+
+
+class AbstractCacheWriter(AbstractAsyncContextManager):
+    key: str
+    path: Path
 
     @abstractmethod
-    async def open(self) -> "AbstractCache":
+    async def open(self) -> "AbstractCacheWriter":
         """
         Signal intent to create a new cache.
 
@@ -65,7 +71,7 @@ class AbstractCache(AbstractAsyncContextManager):
 class AbstractCaches(ABC):
 
     @abstractmethod
-    async def get(self, key: str) -> AbstractCache:
+    async def get(self, key: str) -> AbstractCacheWriter:
         """
         Get the cache with a given key.
 
@@ -73,7 +79,7 @@ class AbstractCaches(ABC):
         """
 
     @abstractmethod
-    async def create(self, key: str) -> AbstractCache:
+    async def create(self, key: str) -> AbstractCacheWriter:
         """Create a new cache.
 
         :raises CacheExists: When a cache already exists for the given key.
