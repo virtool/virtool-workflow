@@ -3,6 +3,7 @@ from pathlib import Path
 from virtool_workflow.abc.caches.analysis_caches import AbstractReadsCache
 from virtool_workflow.analysis.read_prep import reads
 from virtool_workflow.analysis.reads import Reads
+from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.caching.local import LocalCache
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
@@ -50,3 +51,8 @@ async def test_get_reads_from_existing_cache(tmpdir, run_in_executor):
     _reads = await reads(read_cache, tmpdir / "reads", run_in_executor, False)
 
     assert isinstance(_reads, Reads)
+
+    assert _reads.paired is False
+    assert _reads.count == 10
+    assert (_reads.min_length, _reads.max_length) == (0, 100)
+    assert _reads.paths == make_read_paths(tmpdir / "reads", False)
