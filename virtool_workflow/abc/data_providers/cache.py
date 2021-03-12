@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 
@@ -31,7 +31,7 @@ class AbstractCache(AbstractAsyncContextManager):
         return await self.close()
 
 
-class AbstractCaches(ABC, AbstractAsyncContextManager):
+class AbstractCaches(AbstractAsyncContextManager):
 
     @abstractmethod
     async def get(self, key: str) -> AbstractCache:
