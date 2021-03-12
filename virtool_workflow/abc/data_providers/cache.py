@@ -55,6 +55,9 @@ class AbstractCache(AbstractAsyncContextManager):
         ...
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if exc_val:
+            return await self.delete()
+
         return await self.close()
 
 
