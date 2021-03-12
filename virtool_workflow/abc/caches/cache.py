@@ -12,6 +12,10 @@ class CacheFileMissing(ValueError):
     ...
 
 
+class CacheNotFinalized(ValueError):
+    ...
+
+
 @dataclass
 class Cache:
     key: str
@@ -19,15 +23,21 @@ class Cache:
 
 
 class AbstractCacheWriter(AbstractAsyncContextManager):
-    key: str
-    path: Path
+
+    @property
+    @abstractmethod
+    def cache(self) -> Cache:
+        """
+        The cache which was created by this :class:`AbstractCacheWriter`.
+
+        :raises CacheNotFinalized: When this property is accessed before the cache has been finalized.
+        """
 
     @abstractmethod
-    async def open(self) -> "AbstractCacheWriter":
+    async def open(self):
         """
         Signal intent to create a new cache.
 
-        :return: self.
         :raises CacheExists: When there is already a cache open with a key matching :obj:`self.key`.
         """
         ...
@@ -61,6 +71,10 @@ class AbstractCacheWriter(AbstractAsyncContextManager):
         """Delete the cache."""
         ...
 
+    async def __aenter__(self):
+        await self.open()
+        return self
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_val:
             return await self.delete()
@@ -71,7 +85,7 @@ class AbstractCacheWriter(AbstractAsyncContextManager):
 class AbstractCaches(ABC):
 
     @abstractmethod
-    async def get(self, key: str) -> AbstractCacheWriter:
+    async def get(self, key: str) -> Cache:
         """
         Get the cache with a given key.
 
