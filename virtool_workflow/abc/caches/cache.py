@@ -71,7 +71,7 @@ class AbstractCacheWriter(AbstractAsyncContextManager):
         """Delete the cache."""
         ...
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "AbstractCacheWriter":
         await self.open()
         return self
 
@@ -93,7 +93,7 @@ class AbstractCaches(ABC):
         """
 
     @abstractmethod
-    async def create(self, key: str) -> AbstractCacheWriter:
+    def create(self, key: str) -> AbstractCacheWriter:
         """Create a new cache.
 
         :raises CacheExists: When a cache already exists for the given key.
