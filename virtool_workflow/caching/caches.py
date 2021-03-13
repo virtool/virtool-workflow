@@ -18,9 +18,13 @@ class GenericCacheWriter(AbstractCacheWriter):
     @property
     def cache(self) -> GenericCache:
         if not self._cache:
-            raise CacheNotFinalized(
-                f"Cache has missing attributes: {[key for key, value in self._attributes.items() if key is None]}"
-            )
+            missing_keys = [key for key, value in self._attributes.items() if key is None]
+            if missing_keys:
+                raise CacheNotFinalized(
+                    f"Cache has missing attributes: {missing_keys}"
+                )
+            else:
+                raise AttributeError("cache")
         return self._cache
 
     async def write_cache(self):
