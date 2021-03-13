@@ -1,9 +1,10 @@
-import pytest
 import asyncio
-from virtool_workflow.execution.workflow_execution import WorkflowError
 
-from virtool_workflow.execution.run_subprocess import run_subprocess as _run_subprocess
+import pytest
+
 from virtool_workflow import hooks
+from virtool_workflow.execution.run_subprocess import run_subprocess as _run_subprocess
+from virtool_workflow.execution.workflow_execution import WorkflowError
 
 run_subprocess = _run_subprocess()
 
@@ -15,23 +16,23 @@ def bash(tmpdir):
     echo "foo bar"
     """
 
-    path = tmpdir/"test.sh"
-    path.write(sh)
+    path = tmpdir / "test.sh"
+    path._write(sh)
 
     return path
 
 
 @pytest.fixture
 def bash_sleep(tmpdir):
-    txt_path = tmpdir/'test.txt'
+    txt_path = tmpdir / 'test.txt'
 
     sh = f"""
     sleep 100
     touch {txt_path}
     """
 
-    sh_path = tmpdir/"test.sh"
-    sh_path.write(sh)
+    sh_path = tmpdir / "test.sh"
+    sh_path._write(sh)
 
     return sh_path, txt_path
 
