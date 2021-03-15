@@ -17,7 +17,7 @@ def bash(tmpdir):
     """
 
     path = tmpdir / "test.sh"
-    path._write(sh)
+    path.write(sh)
 
     return path
 
@@ -32,7 +32,7 @@ def bash_sleep(tmpdir):
     """
 
     sh_path = tmpdir / "test.sh"
-    sh_path._write(sh)
+    sh_path.write(sh)
 
     return sh_path, txt_path
 
