@@ -7,18 +7,27 @@ GenericCache = TypeVar("GenericCache", bound=Cache)
 
 
 class GenericCacheWriter(AbstractCacheWriter):
+    """
+    A :class:`AbstractCacheWriter` which supports attribute assignment based on a
+    type argument extending :class:`Cache`.
+
+    This class will have attributes for each parameter in the signature of the :func:`__init__`
+    method of the class given as a type argument.
+    """
     cache_class = Cache
 
     def __init__(self):
-        self._attributes = {name: None for name
-                            in signature(self.cache_class.__init__).parameters
-                            if name != "self"}
+        self._expected_attrs = list(signature(self.cache_class.__init__).parameters)[1:]
+
+        for key in self._expected_attrs:
+            setattr(self, key, None)
+
         self._cache = None
 
     @property
     def cache(self) -> GenericCache:
         if not self._cache:
-            missing_keys = [key for key, value in self._attributes.items() if key is None]
+            missing_keys = [key for key in self._expected_attrs if getattr(self, key) is None]
             if missing_keys:
                 raise CacheNotFinalized(
                     f"Cache has missing attributes: {missing_keys}"
@@ -27,29 +36,21 @@ class GenericCacheWriter(AbstractCacheWriter):
                 raise AttributeError("cache")
         return self._cache
 
-    async def write_cache(self):
-        ...
-
-    def __setattr__(self, key, value):
-        try:
-            if key in self._attributes:
-                self._attributes[key] = value
-            else:
-                raise KeyError(key)
-        except (KeyError, AttributeError):
-            super(GenericCacheWriter, self).__setattr__(key, value)
-
-    async def _write(self):
-        self._cache = self.cache_class(**self._attributes)
-        await self.write_cache()
+    async def write(self) -> GenericCache:
+        """Create an instance of the cache class using the applicable attributes of this :class:`GenericCacheWriter`."""
+        self._cache = self.cache_class(**{key: getattr(self, key) for key in self._expected_attrs})
+        return self._cache
 
     async def open(self):
+        """Default implementation of :func:`.open()`"""
         return self
 
     async def close(self):
-        await self._write()
+        """Create the cache object before closing this :class:`AbstractCacheWriter`"""
+        await self.write()
         return await super(GenericCacheWriter, self).close()
 
     def __class_getitem__(cls, item):
+        """Set the cache_class."""
         cls.cache_class = item
         return cls

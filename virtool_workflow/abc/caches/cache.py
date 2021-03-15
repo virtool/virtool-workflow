@@ -91,6 +91,7 @@ class AbstractCacheWriter(AbstractAsyncContextManager):
 
 
 class AbstractCaches(ABC):
+    """Fetch caches and create new caches."""
 
     @abstractmethod
     async def get(self, key: str) -> Cache:
@@ -102,7 +103,8 @@ class AbstractCaches(ABC):
 
     @abstractmethod
     def create(self, key: str) -> AbstractCacheWriter:
-        """Create a new cache.
+        """
+        Create a new cache.
 
         :raises CacheExists: When a cache already exists for the given key.
         """
