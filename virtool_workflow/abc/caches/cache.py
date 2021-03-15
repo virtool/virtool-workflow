@@ -18,11 +18,15 @@ class CacheNotFinalized(ValueError):
 
 @dataclass
 class Cache:
+    """Base class for all caches."""
     key: str
+    """A key which will be used to retrieve the cache."""
     path: Path
+    """Path to the directory containing cached files."""
 
 
 class AbstractCacheWriter(AbstractAsyncContextManager):
+    """Async context manager for creating new caches."""
 
     @property
     @abstractmethod
@@ -59,8 +63,6 @@ class AbstractCacheWriter(AbstractAsyncContextManager):
         """
         Finalize the cache.
 
-        This method should call :func:`.delete` in the case of an invalid cache.
-
         :raises ValueError: When a required value of the cache has not been set.
         :raises CacheFileMissing: When a required file for the cache has not been uploaded.
         """
@@ -72,14 +74,20 @@ class AbstractCacheWriter(AbstractAsyncContextManager):
         ...
 
     async def __aenter__(self) -> "AbstractCacheWriter":
+        """Open a new cache and return this :class:`AbstractCacheWriter`."""
         await self.open()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Finalize the cache and delete it upon any errors."""
         if exc_val:
             return await self.delete()
 
-        return await self.close()
+        try:
+            return await self.close()
+        except Exception as e:
+            await self.delete()
+            raise e
 
 
 class AbstractCaches(ABC):
