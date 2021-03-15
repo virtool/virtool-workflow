@@ -10,11 +10,9 @@ class LocalCacheWriter(GenericCacheWriter):
     """A cache stored in the local filesystem."""
 
     def __init__(self, key: str, path: Path, run_in_executor: FunctionExecutor):
-        self.key = key
-        self.path = path
         self.run_in_executor = run_in_executor
 
-        super(LocalCacheWriter, self).__init__()
+        super(LocalCacheWriter, self).__init__(key, path)
 
     async def upload(self, path: Path):
         await self.run_in_executor(shutil.copyfile, path, self.path / path.name)
