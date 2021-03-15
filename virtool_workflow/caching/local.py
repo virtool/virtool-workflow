@@ -1,8 +1,8 @@
 import shutil
 from pathlib import Path
 
-from virtool_workflow.abc.caches.cache import AbstractCacheWriter, AbstractCaches, Cache, CacheExists
-from virtool_workflow.caching.caches import GenericCacheWriter
+from virtool_workflow.abc.caches.cache import CacheExists
+from virtool_workflow.caching.caches import GenericCacheWriter, GenericCaches, GenericCache
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
@@ -16,9 +16,6 @@ class LocalCacheWriter(GenericCacheWriter):
 
         super(LocalCacheWriter, self).__init__()
 
-        self._attributes["key"] = key
-        self._attributes["path"] = path
-
     async def upload(self, path: Path):
         await self.run_in_executor(shutil.copyfile, path, self.path / path.name)
 
@@ -26,8 +23,8 @@ class LocalCacheWriter(GenericCacheWriter):
         await self.run_in_executor(shutil.rmtree, self.path)
 
 
-class LocalCaches(AbstractCaches):
-    cache_class = Cache
+class LocalCaches(GenericCaches):
+    """Access and create local caches."""
 
     def __init__(self, path: Path, run_in_executor: FunctionExecutor):
         self.path = path
@@ -36,14 +33,16 @@ class LocalCaches(AbstractCaches):
         self.run_in_executor = run_in_executor
         self._caches = {}
 
-    async def get(self, key: str) -> AbstractCacheWriter:
+    async def get(self, key: str) -> GenericCache:
+        """Get a cache if one exists."""
         try:
             return self._caches[key].cache
         except AttributeError:
             del self._caches[key]
             raise KeyError(key)
 
-    def create(self, key: str) -> AbstractCacheWriter:
+    def create(self, key: str) -> LocalCacheWriter[GenericCache]:
+        """Create a new cache."""
         if key in self._caches:
             raise CacheExists(key)
         self._caches[key] = LocalCacheWriter[self.cache_class](key, self.path, self.run_in_executor)
@@ -51,7 +50,3 @@ class LocalCaches(AbstractCaches):
 
     def __contains__(self, key: str):
         return key in self._caches
-
-    def __class_getitem__(cls, item):
-        cls.cache_class = item
-        return cls

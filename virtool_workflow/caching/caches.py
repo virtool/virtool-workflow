@@ -1,7 +1,8 @@
+from abc import abstractmethod
 from inspect import signature
 from typing import TypeVar
 
-from virtool_workflow.abc.caches.cache import Cache, AbstractCacheWriter, CacheNotFinalized
+from virtool_workflow.abc.caches.cache import Cache, AbstractCacheWriter, CacheNotFinalized, AbstractCaches
 
 GenericCache = TypeVar("GenericCache", bound=Cache)
 
@@ -49,6 +50,27 @@ class GenericCacheWriter(AbstractCacheWriter):
         """Create the cache object before closing this :class:`AbstractCacheWriter`"""
         await self.write()
         return await super(GenericCacheWriter, self).close()
+
+    def __class_getitem__(cls, item):
+        """Set the cache_class."""
+        cls.cache_class = item
+        return cls
+
+
+class GenericCaches(AbstractCaches):
+    cache_class = Cache
+
+    @abstractmethod
+    async def get(self, key: str) -> GenericCache:
+        pass
+
+    @abstractmethod
+    def create(self, key: str) -> GenericCacheWriter[GenericCache]:
+        pass
+
+    @abstractmethod
+    def __contains__(self, item: str):
+        pass
 
     def __class_getitem__(cls, item):
         """Set the cache_class."""
