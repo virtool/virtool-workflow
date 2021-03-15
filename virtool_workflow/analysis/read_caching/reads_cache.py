@@ -14,8 +14,11 @@ async def reads_cache(sample: Sample, caches: GenericCaches[ReadsCache], trimmin
         return await caches.get(cache_key)
 
     async with caches.create(cache_key) as cache:
-        for path in await trimming.run_trimming(output_path=cache.path):
+        await trimming.run_trimming(output_path=cache.path)
+       
+        for path in cache.path.iterdir():
             await cache.upload(path)
-            cache.quality = await fastqc.run(cache.path)
+
+        cache.quality = await fastqc.run(cache.path)
 
     return await caches.get(cache_key)

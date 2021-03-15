@@ -1,6 +1,5 @@
 """Perform read prep before accessing Virtool reads."""
 import logging
-import shutil
 from pathlib import Path
 
 from virtool_workflow import fixture
@@ -19,8 +18,4 @@ async def reads(
         reads_cache: ReadsCache = None,
 ):
     """A fixture for accessing trimmed reads for the current sample."""
-    if reads_cache:
-        await run_in_executor(shutil.copytree, reads_cache.path, reads_path)
-        return Reads.from_quality(reads_cache.quality, paired, reads_path)
-    else:
-        raise NotImplementedError()
+    return Reads.from_quality(reads_cache.quality, paired, reads_cache.path)
