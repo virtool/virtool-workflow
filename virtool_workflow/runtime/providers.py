@@ -13,5 +13,5 @@ async def _job(job_id, acquire_job):
 
 
 @providers.fixture
-async def analysis_provider(job, http):
-    return AnalysisProvider(job.args["analysis_id"], http)
+async def analysis_provider(job, http, jobs_api_url):
+    return AnalysisProvider(job.args["analysis_id"], http, jobs_api_url)
