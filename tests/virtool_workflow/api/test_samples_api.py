@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import aiohttp
 import pytest
 
@@ -45,3 +47,28 @@ async def test_delete_after_finalize(sample_api):
 
     with pytest.raises(AlreadyFinalized):
         await sample_api.delete()
+
+
+async def test_upload(sample_api, tmpdir):
+    tmpdir = Path(tmpdir)
+
+    reads_1 = tmpdir / "reads_1.fq.gz"
+    artifact = tmpdir / "artifact.json"
+
+    reads_1.touch()
+    artifact.touch()
+
+    await sample_api.upload(reads_1)
+    await sample_api.upload(artifact)
+
+
+async def test_download(sample_api, tmpdir):
+    tmpdir = Path(tmpdir)
+
+    read_files = await sample_api.download_reads(tmpdir)
+
+    assert read_files == (tmpdir / "reads_1.fq.gz",)
+
+    await sample_api.download_artifact("artifact.json")
+
+    assert (tmpdir / "artifact.json").exists()
