@@ -1,4 +1,5 @@
 """Scoping and injection of workflow fixtures."""
+import inspect
 import logging
 import pprint
 from contextlib import AbstractAsyncContextManager, suppress
@@ -141,11 +142,11 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             return self[name]
 
         try:
-            return await self.instantiate(
-                self._get_fixture_from_providers(name, requested_by)
-            )
+            fixture = self._get_fixture_from_providers(name, requested_by)
         except TypeError:
             raise KeyError(f"{name} is not a fixture within this FixtureScope.")
+
+        return await self.instantiate(fixture)
 
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
@@ -192,13 +193,14 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             fixtures = await _bind(func, {})
             fixtures.update(_kwargs)
             try:
-                try:
-                    return await func(*args, **fixtures)
-                except TypeError:
-                    return func(*args, **fixtures)
-            except TypeError as missing_params:
-                # Missing parameters
-                raise FixtureNotAvailable(missing_params.args[0], sig, func, self) from missing_params
+                return await func(*args, **fixtures)
+            except TypeError as e:
+                if not inspect.iscoroutinefunction(func):
+                    try:
+                        return func(*args, **fixtures)
+                    except TypeError as missing_params:
+                        raise FixtureNotAvailable(missing_params.args[0], sig, func, self) from missing_params
+                raise e
 
         return _bound
 
