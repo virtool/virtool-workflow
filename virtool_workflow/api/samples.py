@@ -4,9 +4,11 @@ from typing import Dict, Any
 import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSampleProvider
+from virtool_workflow.analysis.utils import ReadPaths, make_read_paths
 from virtool_workflow.api.errors import raising_errors_by_status_code, AlreadyFinalized, JobsAPIServerError
+from virtool_workflow.api.utils import upload_file_via_post, read_file_from_response
 from virtool_workflow.data_model import Sample
-from virtool_workflow.data_model.files import VirtoolFileFormat
+from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
 
 
 async def _make_sample_from_response(response) -> Sample:
@@ -52,11 +54,35 @@ class SampleProvider(AbstractSampleProvider):
             }):
                 pass
 
-    async def upload(self, path: Path, format: VirtoolFileFormat):
-        pass
+    async def upload(self, path: Path, format: VirtoolFileFormat = "fastq") -> VirtoolFile:
+        if path.name in ("reads_1.fq.gz", "reads_2.fq.gz"):
+            return await upload_file_via_post(self.http, f"{self.url}/reads", path, params={
+                "name": path.name,
+                "type": format
+            })
 
-    async def download(self):
-        pass
+        return await upload_file_via_post(self.http, f"{self.url}/artifacts", path, params={
+            "name": path.name,
+            "type": format
+        })
+
+    async def download_reads(self, target_path: Path, paired: bool = None) -> ReadPaths:
+        if paired is None:
+            sample = await self.get()
+            paired = sample.paired
+
+        async with self.http.get(f"{self.url}/reads/1") as response:
+            await read_file_from_response(response, target_path / "reads_1.fq.gz")
+
+        if paired:
+            async with self.http.get(f"{self.url}/reads/2") as response:
+                await read_file_from_response(response, target_path / "reads_1.fq.gz")
+
+        return make_read_paths(target_path, paired)
+
+    async def download_artifact(self, filename: str, target_path: Path):
+        async with self.http.get(f"{self.url}/artifacts/{filename}") as response:
+            await read_file_from_response(response, target_path)
 
 
 async def release_files(self):
