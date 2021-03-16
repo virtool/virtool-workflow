@@ -13,7 +13,6 @@ def hmms_api(http: aiohttp.ClientSession, jobs_api_url: str, tmpdir):
     return HMMsProvider(
         http=http,
         jobs_api_url=jobs_api_url,
-        download_url="/download",
         work_path=Path(tmpdir),
     )
 
