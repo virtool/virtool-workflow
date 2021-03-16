@@ -69,6 +69,6 @@ async def test_download(sample_api, tmpdir):
 
     assert read_files == (tmpdir / "reads_1.fq.gz",)
 
-    await sample_api.download_artifact("artifact.json")
+    await sample_api.download_artifact("artifact.json", tmpdir)
 
     assert (tmpdir / "artifact.json").exists()

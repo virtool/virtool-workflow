@@ -57,7 +57,7 @@ async def raising_errors_by_status_code(response,
         try:
             response_json = await response.json()
             response_message = response_json["message"] if "message" in response_json else str(response_json)
-        except (ContentTypeError, UnicodeDecodeError):
+        except (ContentTypeError, UnicodeDecodeError, TypeError):
             try:
                 response_message = await response.text()
             except UnicodeDecodeError:

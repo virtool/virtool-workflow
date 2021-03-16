@@ -82,7 +82,7 @@ class SampleProvider(AbstractSampleProvider):
 
     async def download_artifact(self, filename: str, target_path: Path):
         async with self.http.get(f"{self.url}/artifacts/{filename}") as response:
-            await read_file_from_response(response, target_path)
+            await read_file_from_response(response, target_path / filename)
 
 
 async def release_files(self):
