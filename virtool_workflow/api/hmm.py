@@ -26,11 +26,9 @@ class HMMsProvider(AbstractHMMsProvider):
     def __init__(self,
                  http: aiohttp.ClientSession,
                  jobs_api_url: str,
-                 download_url: str,
                  work_path: Path):
         self.http = http
         self.url = f"{jobs_api_url}/hmm"
-        self.download_url = f"{download_url}/hmms"
         self.path = work_path / "hmms"
 
         self.path.mkdir(parents=True, exist_ok=True)
@@ -51,7 +49,7 @@ class HMMsProvider(AbstractHMMsProvider):
             return [_hmm_from_dict(hmm) for hmm in hmms_json]
 
     async def get_profiles(self) -> Path:
-        async with self.http.get(f"{self.download_url}/profiles.hmm") as response:
+        async with self.http.get(f"{self.url}/files/profiles.hmm") as response:
             async with raising_errors_by_status_code(response, accept=[200]):
                 async with aiofiles.open(self.path / "profiles.hmm", "wb") as f:
                     await f.write(await response.read())

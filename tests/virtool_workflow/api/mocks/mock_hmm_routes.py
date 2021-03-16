@@ -58,7 +58,7 @@ async def get(request):
     return json_response(MOCK_HMM)
 
 
-@mock_routes.get('/download/hmms/profiles.hmm')
+@mock_routes.get('/api/hmm/files/profiles.hmm')
 async def download_hmm_profiles(request):
     return FileResponse(HMM_PROFILES)
 
