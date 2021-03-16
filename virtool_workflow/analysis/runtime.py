@@ -59,7 +59,6 @@ class AnalysisWorkflowEnvironment(WorkflowEnvironment):
         self.load_plugins("virtool_workflow.analysis.fixtures")
         self.data_providers = DataProvider(self,
                                            analysis_provider,
-                                           caches_provider,
                                            index_provider,
                                            otus_provider,
                                            sample_provider,

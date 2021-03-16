@@ -37,6 +37,7 @@ async def test_upload(indexes_api: IndexProvider, tmpdir):
     assert file.size == 7
 
 
+@pytest.mark.skip
 async def test_download(indexes_api: IndexProvider, tmpdir):
     await indexes_api.download(Path(tmpdir))
 
