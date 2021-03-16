@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from virtool_workflow import fixture
+from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.utils import ReadPaths, make_read_paths
 from virtool_workflow.data_model import Sample
 
@@ -25,3 +27,12 @@ class Reads:
         min_length, max_length = quality["length"]
         count = quality["count"]
         return cls(paired, min_length, max_length, count, make_read_paths(path, paired))
+
+
+@fixture
+async def reads(
+        paired: bool,
+        reads_cache: ReadsCache = None,
+):
+    """A fixture for accessing trimmed reads for the current sample."""
+    return Reads.from_quality(reads_cache.quality, paired, reads_cache.path)
