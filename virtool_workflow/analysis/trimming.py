@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
-from typing import Dict, Any, Iterable, List
+from typing import Dict, Any, List
 
 from virtool_workflow.analysis import utils
+from virtool_workflow.analysis.read_caching.trimming import compose_trimming_command
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.fixtures.workflow_fixture import fixture
 from virtool_workflow.storage.utils import copy_paths
@@ -15,7 +16,7 @@ def trimming_output_path(cache_path: Path):
 
     A directory will be created at the Path if one does not already exist.
     """
-    path = cache_path/"reads"
+    path = cache_path / "reads"
     path.mkdir(exist_ok=True, parents=True)
     return path
 
@@ -43,48 +44,6 @@ async def trimming_input_paths(paired: bool,
     )
 
     return read_paths
-
-
-def compose_trimming_command(
-        output_path: Path,
-        trimming_parameters: Dict[str, Any],
-        number_of_processes: int,
-        input_paths: Iterable[Path]
-) -> List[str]:
-    """
-    Compose a shell command to run skewer on the read data located by the :obj:`input_paths`.
-
-    :param output_path: The Path to a directory where the output from skewer should be stored
-    :param trimming_parameters: The trimming parameters
-        (see virtool_workflow.analysis.trimming_parameters)
-    :param number_of_processes: The number of allowable processes to be used by skewer
-    :param input_paths: The paths to the un-trimmed read data
-    :return: The trimming command.
-    """
-    command = [
-        "skewer",
-        "-r", str(trimming_parameters["max_error_rate"]),
-        "-d", str(trimming_parameters["max_indel_rate"]),
-        "-m", str(trimming_parameters["mode"]),
-        "-l", str(trimming_parameters["min_length"]),
-        "-q", str(trimming_parameters["end_quality"]),
-        "-Q", str(trimming_parameters["mean_quality"]),
-        "-t", str(number_of_processes),
-        "-o", str(output_path/"reads"),
-        "-n",
-        "-z",
-        "--quiet",
-    ]
-
-    if trimming_parameters["max_length"]:
-        command += [
-            "-L", str(trimming_parameters["max_length"]),
-            "-e"
-        ]
-
-    command += [str(path) for path in input_paths]
-
-    return command
 
 
 @fixture

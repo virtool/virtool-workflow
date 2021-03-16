@@ -2,11 +2,10 @@
 from typing import Dict, Union
 
 from virtool_core.samples.utils import TRIM_PARAMETERS
+
 from .library_types import LibraryType
-from .. import fixture
 
 
-@fixture
 def trimming_min_length(library_type: LibraryType, sample_read_length: int):
     """
     The minimum length of a read.
@@ -30,7 +29,6 @@ def trimming_min_length(library_type: LibraryType, sample_read_length: int):
     return 160
 
 
-@fixture
 def trimming_parameters(
         library_type: LibraryType,
         trimming_min_length: int
