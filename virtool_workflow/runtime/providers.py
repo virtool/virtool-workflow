@@ -15,6 +15,7 @@ providers = FixtureGroup(config.job_id,
                          jobs.acquire_job,
                          jobs.push_status,
                          **api_fixtures)
+"""A :class:`FixtureGroup` containing all data provider fixtures."""
 
 
 @providers.fixture
