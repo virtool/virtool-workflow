@@ -1,15 +1,15 @@
 import os
 from pathlib import Path
 
-from virtool_workflow.analysis.utils import ReadPaths
+from virtool_workflow.analysis.utils import ReadPaths, rename_trimming_results
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
 class Trimming:
-    input_paths: ReadPaths
-
-    def __init__(self, parameters: dict, number_of_processes: int, run_subprocess: RunSubprocess):
+    def __init__(self, parameters: dict, input_paths: ReadPaths, number_of_processes: int,
+                 run_subprocess: RunSubprocess):
         self.parameters = parameters
+        self.input_paths = input_paths
         self.number_of_processes = number_of_processes
         self.run_subprocess = run_subprocess
 
@@ -43,4 +43,5 @@ class Trimming:
     async def run_trimming(self, output_path: Path):
         env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
         await self.run_subprocess(self.trimming_command(output_path), env=env)
+        rename_trimming_results(output_path)
         return output_path
