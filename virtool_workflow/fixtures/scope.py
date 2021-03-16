@@ -126,6 +126,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             fixture = provider(name, request_from)
             if fixture is not None:
                 return fixture
+        raise KeyError(name)
 
     async def get_or_instantiate(self, name: str, requested_by: Callable = None):
         """
