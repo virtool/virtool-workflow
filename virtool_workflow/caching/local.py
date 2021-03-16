@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from virtool_workflow.abc.caches.cache import CacheExists
+from virtool_workflow.abc.caches.cache import CacheExists, CacheNotFinalized
 from virtool_workflow.caching.caches import GenericCacheWriter, GenericCaches, GenericCache
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
@@ -11,7 +11,6 @@ class LocalCacheWriter(GenericCacheWriter):
 
     def __init__(self, key: str, path: Path, run_in_executor: FunctionExecutor):
         self.run_in_executor = run_in_executor
-
         super(LocalCacheWriter, self).__init__(key, path)
 
     async def upload(self, path: Path):
@@ -35,7 +34,7 @@ class LocalCaches(GenericCaches):
         """Get a cache if one exists."""
         try:
             return self._caches[key].cache
-        except AttributeError:
+        except (AttributeError, CacheNotFinalized):
             del self._caches[key]
             raise KeyError(key)
 
