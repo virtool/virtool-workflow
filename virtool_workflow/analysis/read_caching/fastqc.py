@@ -10,7 +10,7 @@ class FastQC:
 
         self.run_subprocess = run_subprocess
 
-    def run(self, input_paths: ReadPaths):
+    async def run(self, input_paths: ReadPaths):
         """Run fastqc on the input path and return the parsed result."""
         command = [
             "fastqc",
