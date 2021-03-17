@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from typing import Tuple, Callable, Union
 
@@ -33,31 +32,3 @@ def make_legacy_read_paths(
         paired: bool
 ) -> ReadPaths:
     return _make_paired_paths(reads_dir_path, paired, lambda n: f"reads_{n}.fastq")
-
-
-def rename_trimming_results(path: Path):
-    """
-    Rename Skewer output to a simple name used in Virtool.
-
-    :param path: The path containing the results from Skewer
-    """
-    try:
-        shutil.move(
-            path / "reads-trimmed.fastq.gz",
-            path / "reads_1.fq.gz",
-        )
-    except FileNotFoundError:
-        shutil.move(
-            path / "reads-trimmed-pair1.fastq.gz",
-            path / "reads_1.fq.gz",
-        )
-
-        shutil.move(
-            path / "reads-trimmed-pair2.fastq.gz",
-            path / "reads_2.fq.gz",
-        )
-
-    shutil.move(
-        path / "reads-trimmed.log",
-        path / "trim.log",
-    )
