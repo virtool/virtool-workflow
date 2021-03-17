@@ -189,19 +189,21 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
                             raise FixtureNotAvailable(key_error.args[0], signature=sig, func=func, scope=self)
             return fixtures
 
+        if inspect.iscoroutinefunction(func):
+            async def _call(_func, *args, **kwargs):
+                return await _func(*args, **kwargs)
+        else:
+            async def _call(_func, *args, **kwargs):
+                return _func(*args, **kwargs)
+
         @wraps(func)
         async def _bound(*args, **_kwargs):
             fixtures = await _bind(func, {})
             fixtures.update(_kwargs)
             try:
-                return await func(*args, **fixtures)
-            except TypeError as e:
-                if not inspect.iscoroutinefunction(func):
-                    try:
-                        return func(*args, **fixtures)
-                    except TypeError as missing_params:
-                        raise FixtureNotAvailable(missing_params.args[0], sig, func, self) from missing_params
-                raise e
+                return await _call(func, *args, **fixtures)
+            except TypeError as missing_params:
+                raise FixtureNotAvailable(missing_params.args[0], sig, func, self) from missing_params
 
         return _bound
 

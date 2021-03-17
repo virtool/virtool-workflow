@@ -45,6 +45,9 @@ class FixtureGroup(FixtureProvider, dict):
             return self[name]
 
     def fixture(self, func: callable):
+        if func.__name__.startswith("_"):
+            func.__name__ = func.__name__.lstrip("_")
+           
         self[func.__name__] = func
         return func
 
