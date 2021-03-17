@@ -1,18 +1,38 @@
 import os
 import shutil
+from asyncio.subprocess import Process
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List
+
+from virtool_workflow.analysis.library_types import LibraryType
+from virtool_workflow.analysis.utils import ReadPaths
+
+
+@dataclass
+class SkewerResult:
+    read_paths: ReadPaths
+    process: Process
+    command: List[str]
+
+    def __post_init__(self):
+        self.left = self.read_paths[0]
+        try:
+            self.right = self.read_paths[1]
+        except IndexError:
+            self.right = None
 
 
 def skewer(
-        max_error_rate: float,
-        max_indel_rate: float,
-        mode: str,
         min_length: int,
+        mode: str = "pe",
+        max_error_rate: float = 0.1,
+        max_indel_rate: float = 0.03,
         end_quality: int = 0,
         mean_quality: int = 0,
         number_of_processes: int = 1,
-        other_options: Iterable[str] = ("-n", "-z", "--quiet"),
+        quiet: bool = True,
+        other_options: Iterable[str] = ("-n", "-z"),
 ):
     """Create a coroutine function that will run skewer with the given parameters."""
     command = [
@@ -27,14 +47,23 @@ def skewer(
         *other_options
     ]
 
-    async def run_skewer(output_path, run_subprocess, run_in_executor):
+    if quiet:
+        command.append("--quiet")
+
+    async def run_skewer(read_paths, run_subprocess, run_in_executor):
         nonlocal command
-        command += ["-o", str(output_path)]
+        command += [str(read_path) for read_path in read_paths]
+        command += ["-o", "reads"]
+
         env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
 
-        await run_subprocess(command, env=env)
+        reads_path = read_paths[0].parent
 
-        await run_in_executor(rename_trimming_results, output_path)
+        process = await run_subprocess(command, env=env, cwd=reads_path)
+
+        read_paths = await run_in_executor(rename_trimming_results, reads_path)
+
+        return SkewerResult(read_paths, process, command)
 
     return run_skewer
 
@@ -45,23 +74,47 @@ def rename_trimming_results(path: Path):
 
     :param path: The path containing the results from Skewer
     """
-    try:
-        shutil.move(
-            path / "reads-trimmed.fastq.gz",
-            path / "reads_1.fq.gz",
-        )
-    except FileNotFoundError:
-        shutil.move(
-            path / "reads-trimmed-pair1.fastq.gz",
-            path / "reads_1.fq.gz",
-        )
-
-        shutil.move(
-            path / "reads-trimmed-pair2.fastq.gz",
-            path / "reads_2.fq.gz",
-        )
-
     shutil.move(
         path / "reads-trimmed.log",
         path / "trim.log",
     )
+
+    try:
+        return (shutil.move(
+            path / "reads-trimmed.fastq.gz",
+            path / "reads_1.fq.gz",
+        ),)
+    except FileNotFoundError:
+        return (
+            shutil.move(
+                path / "reads-trimmed-pair1.fastq.gz",
+                path / "reads_1.fq.gz",
+            ),
+            shutil.move(
+                path / "reads-trimmed-pair2.fastq.gz",
+                path / "reads_2.fq.gz",
+            )
+        )
+
+
+def trimming_min_length(library_type: LibraryType, sample_read_length: int):
+    """
+    The minimum length of a read.
+
+    This takes into account the library type (eg. srna)
+    and the maximum observed read length in the sample.
+
+    :param library_type: the sample library type
+    :param sample_read_length: the maximum read length observed in the sample
+    :return: the minimum allowed trimmed read length
+    """
+    if library_type == LibraryType.amplicon:
+        return round(0.95 * sample_read_length)
+
+    if sample_read_length < 80:
+        return 35
+
+    if sample_read_length < 160:
+        return 100
+
+    return 160
