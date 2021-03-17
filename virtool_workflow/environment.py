@@ -4,7 +4,6 @@ from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractWorkflowEnvironment
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow.runtime import fixtures
 from virtool_workflow.workflow import Workflow
 
 
@@ -12,7 +11,6 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
 
     def __init__(self, *providers, **instances):
         super(WorkflowEnvironment, self).__init__(
-            fixtures.workflow,
             *providers,
             **instances)
 
