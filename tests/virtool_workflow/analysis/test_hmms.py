@@ -21,8 +21,7 @@ class TestHMMsProvider(AbstractHMMsProvider):
     async def get_profiles(self) -> Path:
         pass
 
-    @property
-    def hmm_list(self) -> List[HMM]:
+    async def hmm_list(self) -> List[HMM]:
         return [
             make_mock_hmm("foo", 1),
             make_mock_hmm("bar", 3)
