@@ -1,7 +1,4 @@
 from collections import UserList
-from os import makedirs
-
-import shutil
 from functools import cached_property
 from pathlib import Path
 from typing import Iterable
@@ -37,12 +34,8 @@ async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, data_path: 
     Returns a data object containing the path to the HMM profile file and a `dict` that maps HMM cluster numbers to
     database IDs.
     """
-    hmms_path = work_path / "hmms"
+    await hmms_provider.get_profiles()
 
-    await run_in_executor(makedirs, hmms_path)
-    await run_in_executor(shutil.copy, data_path / "hmm" / "profiles.hmm", hmms_path)
+    await run_subprocess(["hmmpress", str(hmms_provider)])
 
-    profiles_path = hmms_path / "profiles.hmm"
-    await run_subprocess(["hmmpress", str(profiles_path)])
-
-    return HMMs(hmms_provider.hmm_list, profiles_path)
+    return HMMs(await hmms_provider.hmm_list(), hmms_provider.path)

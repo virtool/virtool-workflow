@@ -6,6 +6,7 @@ from virtool_workflow.data_model import HMM
 
 
 class AbstractHMMsProvider(ABC):
+    path: Path
 
     @abstractmethod
     async def get(self, hmm_id: str):
