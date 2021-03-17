@@ -2,32 +2,19 @@ from typing import Dict, Any
 
 from virtool_workflow import hooks
 from virtool_workflow.abc import AbstractWorkflowEnvironment
-from virtool_workflow.data_model import Job
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.fixtures.scope import FixtureScope
-from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
+from virtool_workflow.runtime import fixtures
 from virtool_workflow.workflow import Workflow
 
 
 class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
 
-    def __init__(self, job: Job, *providers, **instances):
-        self.load_plugins(
-            "virtool_workflow.execution.fixtures",
-            "virtool_workflow.storage.paths",
-            "virtool_workflow.config.configuration"
-        )
-
-        self.job = self["job"] = job
-
+    def __init__(self, *providers, **instances):
         super(WorkflowEnvironment, self).__init__(
-            workflow_fixtures,
+            fixtures.workflow,
             *providers,
             **instances)
-
-        self.override("job_args", lambda: job.args)
-
-        self["results"] = {}
 
     async def execute(self, workflow: Workflow) -> Dict[str, Any]:
         """Execute a Workflow."""
