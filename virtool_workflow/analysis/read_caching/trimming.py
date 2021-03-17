@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
 
-from virtool_workflow.analysis.utils import ReadPaths, rename_trimming_results
+from virtool_workflow.analysis.read_prep.skewer import rename_trimming_results
+from virtool_workflow.analysis.utils import ReadPaths
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
