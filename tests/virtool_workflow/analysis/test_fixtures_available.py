@@ -7,6 +7,7 @@ from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
 from virtool_workflow.analysis.analysis import Analysis
 from virtool_workflow.analysis.indexes import Index
+from virtool_workflow.analysis.reads import Reads
 from virtool_workflow.data_model import Subtraction, Sample, HMM
 from virtool_workflow.environment import WorkflowEnvironment
 
@@ -26,13 +27,15 @@ def environment(http, jobs_api_url):
     return env
 
 
-def use_all(analysis, indexes, subtractions, sample, hmms):
+def use_all(analysis, indexes, subtractions, sample, hmms, reads):
     assert isinstance(analysis, Analysis)
     assert isinstance(indexes[0], Index)
     assert isinstance(subtractions[0], Subtraction)
     assert isinstance(sample, Sample)
     assert isinstance(hmms[0], HMM)
+    assert isinstance(reads, Reads)
 
 
 async def test_fixtures_available(environment):
+    await environment.get_or_instantiate("hmms")
     await environment.execute_function(use_all)

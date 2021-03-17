@@ -5,6 +5,7 @@ from typing import Iterable
 
 from virtool_workflow.abc.data_providers.hmms import AbstractHMMsProvider
 from virtool_workflow.data_model import HMM
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.fixtures import fixture
 
@@ -23,7 +24,8 @@ class HMMs(UserList):
 
 
 @fixture
-async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subprocess: RunSubprocess):
+async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, data_path: Path,
+               run_in_executor: FunctionExecutor, run_subprocess: RunSubprocess):
     """
     A fixture for accessing HMM data.
 
@@ -34,6 +36,6 @@ async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subproc
     """
     await hmms_provider.get_profiles()
 
-    await run_subprocess(["hmmpress", str(hmms_provider.path)])
+    await run_subprocess(["hmmpress", str(hmms_provider)])
 
     return HMMs(await hmms_provider.hmm_list(), hmms_provider.path)
