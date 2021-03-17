@@ -6,29 +6,6 @@ from virtool_core.samples.utils import TRIM_PARAMETERS
 from .library_types import LibraryType
 
 
-def trimming_min_length(library_type: LibraryType, sample_read_length: int):
-    """
-    The minimum length of a read.
-
-    This takes into account the library type (eg. srna)
-    and the maximum observed read length in the sample.
-
-    :param library_type: the sample library type
-    :param sample_read_length: the maximum read length observed in the sample
-    :return: the minimum allowed trimmed read length
-    """
-    if library_type == LibraryType.amplicon:
-        return round(0.95 * sample_read_length)
-
-    if sample_read_length < 80:
-        return 35
-
-    if sample_read_length < 160:
-        return 100
-
-    return 160
-
-
 def trimming_parameters(
         library_type: LibraryType,
         trimming_min_length: int

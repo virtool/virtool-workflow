@@ -1,6 +1,7 @@
 from contextlib import suppress
 
 import virtool_workflow
+import virtool_workflow.analysis.read_prep.skewer
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis import trim_parameters
 from virtool_workflow.analysis.read_caching.fastqc import FastQC
@@ -18,7 +19,7 @@ async def trimming(sample: Sample,
                    raw_reads: ReadPaths) -> Trimming:
     parameters = trim_parameters.trimming_parameters(
         sample.library_type,
-        trim_parameters.trimming_min_length(sample.library_type, sample.quality["length"][1])
+        virtool_workflow.analysis.read_prep.skewer.trimming_min_length(sample.library_type, sample.quality["length"][1])
     )
 
     return Trimming(parameters, raw_reads, number_of_processes, run_subprocess)

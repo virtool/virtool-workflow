@@ -4,7 +4,7 @@ from typing import List
 from virtool_workflow.analysis.library_types import LibraryType
 
 
-@dataclass(frozen=True)
+@dataclass
 class Sample:
     """A Virtool Sample."""
     id: str
@@ -18,3 +18,6 @@ class Sample:
     nuvs: bool = False
     pathoscope: bool = False
     files: List[dict] = field(default_factory=lambda: [])
+
+    def __post_init__(self):
+        self.min_length, self.max_length = self.quality["length"]
