@@ -20,7 +20,7 @@ providers = FixtureGroup(config.job_id,
 
 @providers.fixture
 async def _job(job_id, acquire_job) -> Job:
-    return acquire_job(job_id)
+    return await acquire_job(job_id)
 
 
 @providers.fixture
