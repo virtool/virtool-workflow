@@ -35,5 +35,4 @@ def use_all(analysis, indexes, subtractions, sample, hmms):
 
 
 async def test_fixtures_available(environment):
-    await environment.get_or_instantiate("hmms")
     await environment.execute_function(use_all)
