@@ -20,7 +20,7 @@ workflow = FixtureGroup(
     *_workflow_fixtures,
     providers["job"],
     mem=lambda job: job.mem,
-    proc=lambda job: job.proc
+    proc=lambda job: job.proc,
 )
 """A :class:`FixtureGroup` containing all fixtures available within workflows."""
 
