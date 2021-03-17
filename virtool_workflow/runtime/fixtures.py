@@ -1,5 +1,6 @@
 from virtool_workflow.analysis import fixtures as analysis_fixtures
 from virtool_workflow.config import fixtures as config
+from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor
 from virtool_workflow.execution.run_subprocess import run_subprocess
 from virtool_workflow.fixtures import FixtureGroup
@@ -33,3 +34,8 @@ analysis = FixtureGroup(
 
 runtime = FixtureGroup(**analysis)
 """A :class:`FixtureGroup` containing all fixtures available to the runtime."""
+
+
+@runtime.fixture
+def environment(is_analysis_workflow: bool):
+    return WorkflowEnvironment(analysis) if is_analysis_workflow else WorkflowEnvironment(workflow)
