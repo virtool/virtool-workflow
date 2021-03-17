@@ -15,6 +15,9 @@ def make_mock_hmm(id_, cluster):
 
 
 class TestHMMsProvider(AbstractHMMsProvider):
+    def __init__(self, path):
+        self.path = path
+
     async def get(self, hmm_id: str):
         pass
 
@@ -37,7 +40,7 @@ async def test_hmms(run_in_executor, run_subprocess, tmpdir):
 
     copy(FAKE_PROFILES_PATH, hmms_path)
 
-    hmms_obj = await hmms(TestHMMsProvider(), tmpdir / "work", data_path, run_in_executor, run_subprocess)
+    hmms_obj = await hmms(TestHMMsProvider(hmms_path), tmpdir / "work", data_path, run_in_executor, run_subprocess)
 
     assert hmms_obj.cluster_annotation_map == {
         1: "foo",
