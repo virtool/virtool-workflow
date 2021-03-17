@@ -4,20 +4,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope
-from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
-from virtool_workflow.api.analysis import AnalysisProvider
-from virtool_workflow.api.indexes import IndexProvider
-from virtool_workflow.api.scope import api_fixtures
-from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.config.configuration import load_config, config_fixtures
-from virtool_workflow.environment import WorkflowEnvironment
-from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
-from virtool_workflow.fixtures import workflow_fixtures
 from virtool_workflow.hooks import on_load_config
+from virtool_workflow.runtime import fixtures
 
 logger = logging.getLogger(__name__)
-
-on_load_api = FixtureHook("on_load_api")
 
 
 @on_load_config
@@ -45,70 +36,14 @@ def extract_workflow(workflow_file_path: Path, scope):
     scope["workflow"] = _workflow
 
 
-@on_load_api
-async def init_environment(
-        acquire_job,
-        job_id,
-        is_analysis_workflow,
-        scope,
-        http,
-        jobs_api_url,
-        work_path: Path,
-):
-    job = await acquire_job(job_id)
-
-    if is_analysis_workflow:
-        try:
-            analysis_api = AnalysisProvider(
-                job.args["analysis_id"], http, jobs_api_url
-            )
-        except KeyError:
-            analysis_api = None
-
-        try:
-            index_path = work_path / f"indexes/{job.args['index_id']}"
-            index_path.mkdir(parents=True, exist_ok=True)
-
-            indexes_api = IndexProvider(
-                index_id=job.args["index_id"],
-                ref_id=job.args["ref_id"],
-                http=http,
-                jobs_api_url=jobs_api_url,
-            )
-        except KeyError:
-            indexes_api = None
-
-        try:
-            subtraction_ids = job.args["subtraction_id"]
-            if isinstance(subtraction_ids, str):
-                subtraction_ids = [subtraction_ids]
-
-            subtractions_api = [
-                SubtractionProvider(subtraction_id, http, jobs_api_url, work_path / f"subtractions/{subtraction_id}")
-                for subtraction_id in subtraction_ids
-            ]
-
-            for provider in subtractions_api:
-                provider.path.mkdir(parents=True, exist_ok=True)
-        except KeyError:
-            subtractions_api = None
-
-        scope["environment"] = AnalysisWorkflowEnvironment(job,
-                                                           analysis_provider=analysis_api,
-                                                           index_provider=indexes_api,
-                                                           subtraction_providers=subtractions_api)
-    else:
-        scope["environment"] = WorkflowEnvironment(job)
-
-
 @asynccontextmanager
 async def prepare_environment(**config):
     scope = FixtureScope(config_fixtures)
     await load_config(scope=scope, **config)
-    scope.add_providers(api_fixtures, workflow_fixtures)
-    await on_load_api.trigger(scope)
+    scope.add_provider(fixtures.runtime)
 
-    environment, workflow = scope["environment"], scope["workflow"]
+    environment = await scope.get_or_instantiate("environment")
+    workflow = scope["workflow"]
 
     async with environment:
         yield environment, workflow
