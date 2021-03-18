@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope
+from virtool_workflow.analysis import features
 from virtool_workflow.config.configuration import load_config, config_fixtures
 from virtool_workflow.hooks import on_load_config
 from virtool_workflow.runtime import fixtures
@@ -46,6 +47,7 @@ async def prepare_environment(**config):
     workflow = scope["workflow"]
 
     async with environment:
+        await features.install_into_environment(environment)
         yield environment, workflow
 
 
