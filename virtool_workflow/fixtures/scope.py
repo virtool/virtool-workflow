@@ -230,3 +230,6 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         if name in self:
             del self[name]
         self._overrides[name] = callable_
+
+    def fixture(self, fixture_: callable):
+        return self.override(fixture_.__name__, fixture_)
