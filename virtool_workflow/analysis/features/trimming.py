@@ -8,7 +8,6 @@ from virtool_workflow import Workflow
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.read_prep.fastqc import fastqc
 from virtool_workflow.analysis.read_prep.skewer import skewer
-from virtool_workflow.analysis.utils import ReadPaths
 from virtool_workflow.caching.caches import GenericCaches
 from virtool_workflow.data_model import Sample
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
@@ -43,7 +42,7 @@ class Trimming(WorkflowFeature):
         )
 
     async def __modify_workflow__(self, workflow: Workflow) -> Workflow:
-        workflow.steps.insert(0, self.load_read_cache)
+        workflow.steps.insert(0, self.load_or_create_read_cache)
         return workflow
 
     async def _run_trimming(
@@ -64,21 +63,29 @@ class Trimming(WorkflowFeature):
 
         return sample.read_paths
 
-    async def _check_quality(
+    async def load_or_create_read_cache(
             self,
-            read_paths: ReadPaths,
+            sample: Sample,
+            sample_caches: GenericCaches[ReadsCache],
             work_path: Path,
+            run_in_executor: FunctionExecutor,
             run_subprocess: RunSubprocess
     ):
-        run_fastqc = fastqc(work_path, run_subprocess)
-        return await run_fastqc(read_paths)
+        """
+        Get trimmed reads from an existing cache if one exists.
 
-    async def load_read_cache(self,
-                              sample: Sample,
-                              sample_caches: GenericCaches[ReadsCache],
-                              work_path: Path,
-                              run_in_executor: FunctionExecutor,
-                              run_subprocess: RunSubprocess):
+        If not cache is found perform read trimming and create a new cache.
+        """
+        key = self._compute_cache_key(sample)
+        try:
+            cache = await sample_caches.get(key)
+        except KeyError:
+            cache = await self._create_read_cache(key, sample, sample_caches,
+                                                  work_path, run_subprocess, run_in_executor)
+
+        await run_in_executor(shutil.copytree(cache.path, sample.reads_path))
+
+    def _compute_cache_key(self, sample):
         trim_param_json = json.dumps({
             "id": sample.id,
             "min_length": sample.min_length,
@@ -87,17 +94,25 @@ class Trimming(WorkflowFeature):
 
         raw_key = "reads-" + trim_param_json
 
-        key = hashlib.sha256(raw_key.encode()).hexdigest()
+        return hashlib.sha256(raw_key.encode()).hexdigest()
 
-        try:
-            cache = await sample_caches.get(key)
-            await run_in_executor(shutil.copytree(cache.path, sample.reads_path))
-        except KeyError:
-            trimmed_reads = await self._run_trimming(sample, run_subprocess, run_in_executor)
-            quality = await self._check_quality(sample.read_paths, work_path, run_subprocess)
+    async def _create_read_cache(
+            self,
+            key: str,
+            sample: Sample,
+            sample_caches: GenericCaches[ReadsCache],
+            work_path: Path,
+            run_subprocess: RunSubprocess,
+            run_in_executor: FunctionExecutor
+    ):
+        trimmed_reads = await self._run_trimming(sample, run_subprocess, run_in_executor)
+        run_fastqc = fastqc(work_path, run_subprocess)
+        quality = await run_fastqc(trimmed_reads)
 
-            async with sample_caches.create(key) as cache:
-                for path in trimmed_reads:
-                    await cache.upload(path)
+        async with sample_caches.create(key) as cache:
+            for path in trimmed_reads:
+                await cache.upload(path)
 
-                cache.quality = quality
+            cache.quality = quality
+
+            return cache
