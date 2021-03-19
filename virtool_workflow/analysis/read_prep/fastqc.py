@@ -6,7 +6,7 @@ def fastqc(work_path, run_subprocess):
     fastqc_path = work_path / "fastqc"
     fastqc_path.mkdir()
 
-    async def run_fastqc(self, input_paths: ReadPaths):
+    async def run_fastqc(input_paths: ReadPaths):
         """Run fastqc on the input path and return the parsed result."""
         command = [
             "fastqc",
@@ -18,6 +18,6 @@ def fastqc(work_path, run_subprocess):
 
         await run_subprocess(command)
 
-        return parse_fastqc(self.path, self.path)
+        return parse_fastqc(fastqc_path, fastqc_path)
 
     return run_fastqc
