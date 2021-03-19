@@ -39,7 +39,7 @@ def install(*features: WorkflowFeature):
     _features.extend(features)
 
 
-async def install_into_environment(environment: WorkflowEnvironment, features=None):
+async def install_into_environment(environment: WorkflowEnvironment, *features):
     """
     Apply any installed workflow features to the workflow environment and workflow object.
 
@@ -54,6 +54,7 @@ async def install_into_environment(environment: WorkflowEnvironment, features=No
         environment.add_provider(feature.__fixtures__)
         await feature.__modify_environment__(environment)
 
-    features.clear()
+    if features is _features:
+        features.clear()
 
     return environment

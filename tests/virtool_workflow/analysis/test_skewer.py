@@ -4,8 +4,10 @@ from pathlib import Path
 
 from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from virtool_workflow import features, Workflow
+from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.features.trimming import Trimming
 from virtool_workflow.analysis.read_prep.skewer import skewer, trimming_min_length
+from virtool_workflow.caching.local import LocalCaches
 from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
@@ -49,14 +51,24 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
     assert os.stat(TEST_CORRECT_2).st_size == os.stat(result.right).st_size
 
 
-async def test_trimming_feature(runtime):
-    features.install(Trimming())
-
+async def test_trimming_feature(runtime, tmpdir, run_in_executor):
+    runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
+    runtime["workflow"] = Workflow()
     job = await runtime.get_or_instantiate("job")
     job.args["sample_id"] = TEST_SAMPLE_ID
 
-    await runtime.get_or_instantiate("sample_provider")
-    runtime["workflow"] = Workflow()
+    trimming_feature = Trimming()
 
-    await features.install_into_environment(runtime)
+    async def _mock_check_quality(*args, **kwargs):
+        return {"mock": True}
+
+    trimming_feature._check_quality = _mock_check_quality
+
+    await features.install_into_environment(runtime, trimming_feature)
     await runtime.execute()
+
+    sample = runtime["sample"]
+
+    assert sample.reads_path.exists()
+    for path in sample.read_paths:
+        assert path.exists()
