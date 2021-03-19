@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC
 
 from virtool_workflow import Workflow
 from virtool_workflow.environment import WorkflowEnvironment
@@ -9,7 +9,6 @@ _features = []
 
 class WorkflowFeature(ABC):
 
-    @abstractmethod
     async def __modify_workflow__(self, workflow: Workflow) -> Workflow:
         """
         Called before the workflow is executed.
@@ -26,7 +25,6 @@ class WorkflowFeature(ABC):
         """A :class:`FixtureProvider` which will be included in the workflow environment."""
         return FixtureGroup()
 
-    @abstractmethod
     async def __modify_environment__(self, environment: WorkflowEnvironment):
         """
         Called before the workflow is executed.

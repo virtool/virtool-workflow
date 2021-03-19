@@ -21,3 +21,5 @@ class Sample:
 
     def __post_init__(self):
         self.min_length, self.max_length = self.quality["length"]
+        self.read_path = None
+        self.reads_path = None
