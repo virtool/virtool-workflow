@@ -3,6 +3,8 @@ import shutil
 from pathlib import Path
 
 from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
+from virtool_workflow import features, Workflow
+from virtool_workflow.analysis.features.trimming import Trimming
 from virtool_workflow.analysis.read_prep.skewer import skewer, trimming_min_length
 from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
@@ -45,3 +47,16 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
 
     assert os.stat(TEST_CORRECT_1).st_size == os.stat(result.left).st_size
     assert os.stat(TEST_CORRECT_2).st_size == os.stat(result.right).st_size
+
+
+async def test_trimming_feature(runtime):
+    features.install(Trimming())
+
+    job = await runtime.get_or_instantiate("job")
+    job.args["sample_id"] = TEST_SAMPLE_ID
+
+    await runtime.get_or_instantiate("sample_provider")
+    runtime["workflow"] = Workflow()
+
+    await features.install_into_environment(runtime)
+    await runtime.execute()

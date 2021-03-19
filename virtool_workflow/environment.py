@@ -16,8 +16,10 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
             *providers,
             **instances)
 
-    async def execute(self, workflow: Workflow) -> Dict[str, Any]:
+    async def execute(self, workflow: Workflow = None) -> Dict[str, Any]:
         """Execute a Workflow."""
+        if workflow is None:
+            workflow = self["workflow"]
         await hooks.on_load_fixtures.trigger(self)
         return await WorkflowExecution(workflow, self)
 
