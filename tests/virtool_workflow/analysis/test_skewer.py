@@ -51,6 +51,12 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
     assert os.stat(TEST_CORRECT_2).st_size == os.stat(result.right).st_size
 
 
+async def test_trimming_feature_trimming_correctness():
+    trimming = Trimming()
+
+    await trimming._run_trimming()
+
+
 async def test_trimming_feature(runtime, tmpdir, run_in_executor):
     runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
     runtime["workflow"] = Workflow()
@@ -58,11 +64,6 @@ async def test_trimming_feature(runtime, tmpdir, run_in_executor):
     job.args["sample_id"] = TEST_SAMPLE_ID
 
     trimming_feature = Trimming()
-
-    async def _mock_check_quality(*args, **kwargs):
-        return {"mock": True}
-
-    trimming_feature._check_quality = _mock_check_quality
 
     await features.install_into_environment(runtime, trimming_feature)
     await runtime.execute()
