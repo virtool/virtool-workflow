@@ -4,12 +4,14 @@ import shutil
 from functools import partial
 from pathlib import Path
 
-from virtool_workflow import Workflow
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.read_prep.fastqc import fastqc
 from virtool_workflow.analysis.read_prep.skewer import skewer
+from virtool_workflow.analysis.utils import make_read_paths
+from virtool_workflow.api.samples import SampleProvider
 from virtool_workflow.caching.caches import GenericCaches
 from virtool_workflow.data_model import Sample
+from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.features import WorkflowFeature
@@ -41,9 +43,32 @@ class Trimming(WorkflowFeature):
             **self.trimming_params
         )
 
-    async def __modify_workflow__(self, workflow: Workflow) -> Workflow:
-        workflow.steps.insert(0, self.load_or_create_read_cache)
-        return workflow
+    async def __modify_environment__(self, environment: WorkflowEnvironment):
+        environment.override("sample", self._sample_fixture)
+
+    async def _sample_fixture(self,
+                              sample_provider: SampleProvider,
+                              sample_caches: GenericCaches[ReadsCache],
+                              work_path: Path,
+                              run_subprocess: RunSubprocess,
+                              run_in_executor: FunctionExecutor):
+        """Alternate sample fixture which performs trimming and caching of reads."""
+        sample = await sample_provider.get()
+        key = self._compute_cache_key(sample)
+
+        sample.reads_path = work_path / "reads"
+        sample.reads_path.mkdir()
+        sample.read_paths = make_read_paths(sample.reads_path, sample.paired)
+
+        try:
+            cache = await sample_caches.get(key)
+        except KeyError:
+            cache = await self._create_read_cache(key, sample, sample_caches,
+                                                  work_path, run_subprocess, run_in_executor)
+
+        await run_in_executor(shutil.copytree(cache.path, sample.reads_path))
+
+        return sample
 
     async def _run_trimming(
             self,
