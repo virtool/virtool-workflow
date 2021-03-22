@@ -1,4 +1,4 @@
-FROM virtool/external-tools
+FROM virtool/external-tools:0.2.0
 
 RUN pip install poetry tox tox-docker
 
