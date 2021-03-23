@@ -16,10 +16,20 @@ async def jobs_api_url():
 
 
 @pytest.fixture
-async def http(loop, aiohttp_client) -> aiohttp.ClientSession:
+async def aiohttp_app(loop):
     app = web.Application(loop=loop)
 
     for route_table in mock_routes:
         app.add_routes(route_table)
 
-    return await aiohttp_client(app, auto_decompress=False)
+    return app
+
+
+@pytest.fixture
+async def http_no_decompress(aiohttp_client, aiohttp_app):
+    return await aiohttp_client(aiohttp_app, auto_decompress=False)
+
+
+@pytest.fixture
+async def http(aiohttp_app, aiohttp_client) -> aiohttp.ClientSession:
+    return await aiohttp_client(aiohttp_app, auto_decompress=True)
