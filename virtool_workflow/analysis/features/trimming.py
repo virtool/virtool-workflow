@@ -4,6 +4,7 @@ import shutil
 from functools import partial
 from pathlib import Path
 
+from virtool_workflow import FixtureScope
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.read_prep.fastqc import fastqc
 from virtool_workflow.analysis.read_prep.skewer import skewer
@@ -51,7 +52,8 @@ class Trimming(WorkflowFeature):
                               sample_caches: GenericCaches[ReadsCache],
                               work_path: Path,
                               run_subprocess: RunSubprocess,
-                              run_in_executor: FunctionExecutor):
+                              run_in_executor: FunctionExecutor,
+                              scope: FixtureScope):
         """Alternate sample fixture which performs trimming and caching of reads."""
         sample = await sample_provider.get()
         key = self._compute_cache_key(sample)
@@ -63,10 +65,15 @@ class Trimming(WorkflowFeature):
         try:
             cache = await sample_caches.get(key)
         except KeyError:
+            await sample_provider.download_reads(sample.reads_path, sample.paired)
             cache = await self._create_read_cache(key, sample, sample_caches,
                                                   work_path, run_subprocess, run_in_executor)
 
-        await run_in_executor(shutil.copytree(cache.path, sample.reads_path))
+        scope["reads_cache"] = cache
+        scope["fastqc_quality"] = cache.cache.quality
+
+        await run_in_executor(shutil.rmtree, sample.reads_path)
+        await run_in_executor(shutil.copytree, cache.path, sample.reads_path)
 
         return sample
 
@@ -87,28 +94,6 @@ class Trimming(WorkflowFeature):
         sample.read_paths = skewer_result.read_paths
 
         return sample.read_paths
-
-    async def load_or_create_read_cache(
-            self,
-            sample: Sample,
-            sample_caches: GenericCaches[ReadsCache],
-            work_path: Path,
-            run_in_executor: FunctionExecutor,
-            run_subprocess: RunSubprocess
-    ):
-        """
-        Get trimmed reads from an existing cache if one exists.
-
-        If not cache is found perform read trimming and create a new cache.
-        """
-        key = self._compute_cache_key(sample)
-        try:
-            cache = await sample_caches.get(key)
-        except KeyError:
-            cache = await self._create_read_cache(key, sample, sample_caches,
-                                                  work_path, run_subprocess, run_in_executor)
-
-        await run_in_executor(shutil.copytree(cache.path, sample.reads_path))
 
     def _compute_cache_key(self, sample):
         trim_param_json = json.dumps({
@@ -131,6 +116,7 @@ class Trimming(WorkflowFeature):
             run_in_executor: FunctionExecutor
     ):
         trimmed_reads = await self._run_trimming(sample, run_subprocess, run_in_executor)
+
         run_fastqc = fastqc(work_path, run_subprocess)
         quality = await run_fastqc(trimmed_reads)
 

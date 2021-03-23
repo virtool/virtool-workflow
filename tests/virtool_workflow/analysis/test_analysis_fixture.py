@@ -2,6 +2,7 @@ from functools import wraps
 from pathlib import Path
 
 import aiohttp
+
 from virtool_workflow import hooks
 from virtool_workflow.analysis.analysis import Analysis
 from virtool_workflow.api.analysis import AnalysisProvider
@@ -19,7 +20,8 @@ def _count_calls(func):
 
 
 async def test_analysis_fixture(runtime, http: aiohttp.ClientSession, jobs_api_url: str):
-    provider = runtime["analysis_provider"] = AnalysisProvider(runtime["job"].args["analysis_id"], http, jobs_api_url)
+    job = await runtime.get_or_instantiate("job")
+    provider = runtime["analysis_provider"] = AnalysisProvider(job.args["analysis_id"], http, jobs_api_url)
 
     provider.upload = _count_calls(provider.upload)
 

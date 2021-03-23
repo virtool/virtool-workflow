@@ -31,7 +31,7 @@ async def test_get(sample_api):
 
 
 async def test_finalize(sample_api):
-    mock_quality = {"quality": True}
+    mock_quality = {"length": [0, 100]}
     sample = await sample_api.finalize(mock_quality)
 
     assert isinstance(sample, Sample)
@@ -43,7 +43,7 @@ async def test_delete(sample_api):
 
 
 async def test_delete_after_finalize(sample_api):
-    await sample_api.finalize({})
+    await sample_api.finalize({"length": [0, 100]})
 
     with pytest.raises(AlreadyFinalized):
         await sample_api.delete()
