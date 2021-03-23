@@ -1,4 +1,4 @@
-import os
+import gzip
 import shutil
 from pathlib import Path
 
@@ -47,17 +47,14 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
         await run_in_executor(shutil.copyfile, result.left, TEST_CORRECT_1)
         await run_in_executor(shutil.copyfile, result.right, TEST_CORRECT_2)
 
-    assert os.stat(TEST_CORRECT_1).st_size == os.stat(result.left).st_size
-    assert os.stat(TEST_CORRECT_2).st_size == os.stat(result.right).st_size
+    with gzip.open(TEST_CORRECT_1) as expected:
+        with gzip.open(result.left) as f:
+            for line1, line2 in zip(f.readlines(), expected.readlines()):
+                assert line1 == line2
 
 
-async def test_trimming_feature_trimming_correctness():
-    trimming = Trimming()
-
-    await trimming._run_trimming()
-
-
-async def test_trimming_feature(runtime, tmpdir, run_in_executor, data_regression):
+async def test_trimming_feature(runtime, tmpdir, http_no_decompress, run_in_executor, data_regression):
+    runtime["http"] = http_no_decompress
     TEST_SAMPLE["paired"] = True
     runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
     job = await runtime.get_or_instantiate("job")
