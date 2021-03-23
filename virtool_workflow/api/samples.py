@@ -76,8 +76,8 @@ class SampleProvider(AbstractSampleProvider):
 
         if paired:
             async with self.http.get(f"{self.url}/reads/2") as response:
-                await read_file_from_response(response, target_path / "reads_1.fq.gz")
-
+                await read_file_from_response(response, target_path / "reads_2.fq.gz")
+               
         return make_read_paths(target_path, paired)
 
     async def download_artifact(self, filename: str, target_path: Path):

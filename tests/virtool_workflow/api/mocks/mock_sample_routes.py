@@ -15,6 +15,8 @@ with TEST_SAMPLE_PATH.open('r') as f:
     TEST_SAMPLE = json.load(f)
 TEST_SAMPLE_ID = TEST_SAMPLE["id"]
 
+ANALYSIS_TEST_FILES_DIR = Path(__file__).parent.parent.parent / "analysis"
+
 
 @mock_routes.get("/api/samples/{sample_id}")
 async def get_sample(request):
@@ -73,19 +75,17 @@ async def upload_read_files(request):
     return json_response(file, status=201)
 
 
-@mock_routes.get("/api/samples/{sample_id}/reads/1")
+@mock_routes.get("/api/samples/{sample_id}/reads/{n}")
 async def download_reads_file(request):
     sample_id = request.match_info["sample_id"]
+    n = request.match_info["n"]
 
-    if sample_id != TEST_SAMPLE_ID:
+    if sample_id != TEST_SAMPLE_ID or n not in ("1", "2"):
         return not_found()
 
-    tempdir = Path(tempfile.mkdtemp())
+    file_name = "paired_small_1.fq.gz" if n == "1" else "paired_small_2.fq.gz"
 
-    reads_1 = tempdir / "reads_1.fq.gz"
-    reads_1.touch()
-
-    return FileResponse(reads_1)
+    return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name)
 
 
 @mock_routes.get("/api/samples/{sample_id}/artifacts/{filename}")

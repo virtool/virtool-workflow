@@ -2,7 +2,7 @@ import os
 import shutil
 from pathlib import Path
 
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
+from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID, TEST_SAMPLE
 from virtool_workflow import features, Workflow
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.features.trimming import Trimming
@@ -57,19 +57,22 @@ async def test_trimming_feature_trimming_correctness():
     await trimming._run_trimming()
 
 
-async def test_trimming_feature(runtime, tmpdir, run_in_executor):
+async def test_trimming_feature(runtime, tmpdir, run_in_executor, data_regression):
+    TEST_SAMPLE["paired"] = True
     runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
-    runtime["workflow"] = Workflow()
     job = await runtime.get_or_instantiate("job")
     job.args["sample_id"] = TEST_SAMPLE_ID
+    runtime["workflow"] = Workflow()
 
     trimming_feature = Trimming()
 
     await features.install_into_environment(runtime, trimming_feature)
-    await runtime.execute()
 
-    sample = runtime["sample"]
+    sample = await runtime.get_or_instantiate("sample")
 
     assert sample.reads_path.exists()
     for path in sample.read_paths:
         assert path.exists()
+
+    assert runtime["fastqc_quality"]
+    data_regression.check(runtime["fastqc_quality"])
