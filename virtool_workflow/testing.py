@@ -39,7 +39,6 @@ def mock_fixture(fixture: Union[str, Callable]):
 def install_as_pytest_fixtures(_globals, *fixtures):
     """Create pytest fixtures for each fixture in a given :class:`FixtureGroup`."""
     for fixture in fixtures:
-        print(fixture)
         _globals[fixture.__name__] = pytest.fixture(fixture)
 
 
