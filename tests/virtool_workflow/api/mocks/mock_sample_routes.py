@@ -145,5 +145,37 @@ async def upload_artifact_to_cache(request):
         return not_found()
 
     document = await read_file_from_request(request, name, type)
-   
+
     return json_response(document, status=201)
+
+
+@mock_routes.put("/api/samples/{sample_id}/caches/{key}/reads/{name}")
+async def upload_reads_to_cache(request):
+    name = request.match_info["name"]
+    sample_id = request.match_info["sample_id"]
+    key = request.match_info["key"]
+
+    if name not in ["reads_1.fq.gz", "reads_2.fq.gz"]:
+        return not_found()
+
+    if sample_id != TEST_SAMPLE_ID or key != TEST_CACHE["key"]:
+        return not_found()
+
+    document = await read_file_from_request(request, name, "fastq")
+    return json_response(document, status=201)
+
+
+@mock_routes.patch("/api/samples/{sample_id}/caches/{key}")
+async def finalize_cache(request):
+    sample_id = request.match_info["sample_id"]
+    key = request.match_info["key"]
+
+    if sample_id != TEST_SAMPLE_ID or key != TEST_CACHE["key"]:
+        return not_found()
+
+    _json = await request.json()
+
+    quality = _json["quality"]
+    TEST_CACHE["quality"] = quality
+
+    return json_response(TEST_CACHE)
