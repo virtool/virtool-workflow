@@ -177,5 +177,33 @@ async def finalize_cache(request):
 
     quality = _json["quality"]
     TEST_CACHE["quality"] = quality
+    TEST_CACHE["ready"] = True
 
     return json_response(TEST_CACHE)
+
+
+@mock_routes.get("/api/samples/{sample_id}/caches/{key}")
+async def get_cache(request):
+    sample_id = request.match_info["sample_id"]
+    key = request.match_info["key"]
+
+    if sample_id != TEST_SAMPLE_ID or key != TEST_CACHE["key"]:
+        return not_found()
+
+    return json_response(TEST_CACHE)
+
+
+@mock_routes.delete("/api/samples/{sample_id}/caches/{key}")
+async def delete_cache(request):
+    sample_id = request.match_info["sample_id"]
+    key = request.match_info["key"]
+
+    if sample_id != TEST_SAMPLE_ID or key != TEST_CACHE["key"]:
+        return not_found()
+
+    if TEST_CACHE["ready"] is True:
+        return json_response({"message": "Cache is finalized."}, status=409)
+
+    del TEST_CACHE
+
+    return Response(status=204)

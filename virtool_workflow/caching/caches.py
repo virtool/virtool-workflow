@@ -19,9 +19,9 @@ class GenericCacheWriter(AbstractCacheWriter):
 
     def __init__(self, key, path):
         self._expected_attrs = list(signature(self.cache_class.__init__).parameters)[1:]
-       
-        for key in self._expected_attrs:
-            setattr(self, key, None)
+
+        for key_ in self._expected_attrs:
+            setattr(self, key_, None)
 
         self.key = key
         self.path = path
