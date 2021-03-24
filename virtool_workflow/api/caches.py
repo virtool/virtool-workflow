@@ -1,11 +1,15 @@
+import asyncio
 import shutil
 from pathlib import Path
 
+import aiohttp
+
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.api.errors import NotFound, JobsAPIServerError, raising_errors_by_status_code
-from virtool_workflow.api.utils import upload_file_via_post, upload_file_via_put
-from virtool_workflow.caching.caches import GenericCacheWriter
+from virtool_workflow.api.utils import upload_file_via_post, upload_file_via_put, read_file_from_response
+from virtool_workflow.caching.caches import GenericCacheWriter, GenericCaches, GenericCache
 from virtool_workflow.data_model.files import VirtoolFileFormat
+from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
 
 class CacheAlreadyOpen(Exception):
@@ -59,6 +63,7 @@ class RemoteReadsCacheWriter(GenericCacheWriter[ReadsCache]):
         })
 
     async def close(self):
+        """Finalize the cache."""
         await super(RemoteReadsCacheWriter, self).close()
 
         response = await self.http.patch(f"{self.url}/{self.key}", json={
@@ -73,3 +78,69 @@ class RemoteReadsCacheWriter(GenericCacheWriter[ReadsCache]):
         response = await self.http.delete(f"{self.url}/{self.key}")
         async with raising_errors_by_status_code(response, accept=[204]):
             pass
+
+
+class RemoteReadCaches(GenericCaches[ReadsCache]):
+    def __init__(
+            self,
+            sample_id: str,
+            paired: bool,
+            path: Path,
+            http: aiohttp.ClientSession,
+            jobs_api_url: str,
+            run_in_executor: FunctionExecutor,
+            poll_rate: int = 5,
+    ):
+        self.sample_id = sample_id
+        self.paired = paired
+        self.path = path
+        self.http = http
+        self.url = f"{jobs_api_url}/samples/{self.sample_id}/caches"
+        self.jobs_api_url = jobs_api_url
+        self.run_in_executor = run_in_executor
+        self.poll_rate = poll_rate
+
+    async def get(self, key: str) -> ReadsCache:
+        """
+        Get the cache with the given key.
+
+        If a cache exists, but is not ready, this method will not return until the
+        cache is ready. This occurs when multiple instances of a workflow are attempting
+        to create a cache with the same key.
+        """
+        response = await self.http.get(f"{self.url}/{key}")
+
+        if response.status == 404:
+            raise KeyError(key)
+
+        if response.status != 200:
+            raise JobsAPIServerError(response.status)
+
+        cache = await response.json()
+
+        if cache["ready"] is not True:
+            # Continually request cache until it is ready.
+            await asyncio.sleep(self.poll_rate)
+            return await self.get(key)
+
+        cache_path = self.path / key
+        cache_path.mkdir()
+
+        files = ("reads_1.fq.gz", "reads_2.fq.gz") if self.paired else ("reads_1.fq.gz",)
+
+        for filename in files:
+            response = await self.http.get(f"{self.url}/{key}/reads/{filename}")
+            await read_file_from_response(response, cache_path)
+
+        return ReadsCache(
+            key=key,
+            path=cache_path,
+            quality=cache["quality"],
+        )
+
+    def create(self, key: str) -> GenericCacheWriter[GenericCache]:
+        """Create a new cache writer."""
+        cache_path = self.path / key
+        cache_path.mkdir()
+        return RemoteReadsCacheWriter(key, cache_path, self.sample_id,
+                                      self.http, self.jobs_api_url, self.run_in_executor)

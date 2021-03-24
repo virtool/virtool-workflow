@@ -71,10 +71,6 @@ class GenericCaches(AbstractCaches):
     def create(self, key: str) -> GenericCacheWriter[GenericCache]:
         pass
 
-    @abstractmethod
-    def __contains__(self, item: str):
-        pass
-
     def __class_getitem__(cls, item):
         """Set the cache_class."""
         cls.cache_class = item

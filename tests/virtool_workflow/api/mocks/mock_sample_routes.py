@@ -102,6 +102,7 @@ async def download_reads_file(request):
     return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name)
 
 
+@mock_routes.get("/api/samples/{sample_id}/caches/{key}/artifacts/{filename}")
 @mock_routes.get("/api/samples/{sample_id}/artifacts/{filename}")
 async def download_artifact(request):
     sample_id = request.match_info["sample_id"]
@@ -207,3 +208,15 @@ async def delete_cache(request):
     del TEST_CACHE
 
     return Response(status=204)
+
+
+@mock_routes.get("/api/samples/{sample_id}/caches/{key}/reads/{name}")
+async def download_cached_reads(request):
+    name = request.match_info["name"]
+
+    tmpdir = Path(tempfile.mkdtemp())
+
+    file = (tmpdir / name)
+    file.touch()
+
+    return FileResponse(file)
