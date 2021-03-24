@@ -132,3 +132,18 @@ async def create_mock_cache(request):
         return json_response(TEST_CACHE, status=201)
     else:
         return not_found()
+
+
+@mock_routes.post("/api/samples/{sample_id}/caches/{key}/artifacts")
+async def upload_artifact_to_cache(request):
+    sample_id = request.match_info["sample_id"]
+    key = request.match_info["key"]
+    type = request.query.get("type")
+    name = request.query.get("name")
+
+    if sample_id != TEST_SAMPLE_ID or key != TEST_CACHE["key"]:
+        return not_found()
+
+    document = await read_file_from_request(request, name, type)
+   
+    return json_response(document, status=201)
