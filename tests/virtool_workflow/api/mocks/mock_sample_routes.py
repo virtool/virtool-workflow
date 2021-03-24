@@ -15,6 +15,20 @@ with TEST_SAMPLE_PATH.open('r') as f:
     TEST_SAMPLE = json.load(f)
 TEST_SAMPLE_ID = TEST_SAMPLE["id"]
 
+TEST_CACHE = {
+    "id": "test_cache",
+    "created_at": None,
+    "files": list(),
+    "key": "test_cache",
+    "legacy": False,
+    "missing": False,
+    "paired": TEST_SAMPLE["paired"],
+    "ready": False,
+    "sample": {
+        "id": TEST_SAMPLE_ID
+    }
+}
+
 ANALYSIS_TEST_FILES_DIR = Path(__file__).parent.parent.parent / "analysis"
 
 
@@ -75,7 +89,7 @@ async def upload_read_files(request):
     return json_response(file, status=201)
 
 
-@mock_routes.get("/api/samples/{sample_id}/reads/{n}")
+@mock_routes.get("/api/samples/{sample_id}/reads/1")
 async def download_reads_file(request):
     sample_id = request.match_info["sample_id"]
     n = request.match_info["n"]
@@ -102,3 +116,19 @@ async def download_artifact(request):
     file.touch()
 
     return FileResponse(file)
+
+
+@mock_routes.post("/api/samples/{sample_id}/caches")
+async def create_mock_cache(request):
+    sample_id = request.match_info["sample_id"]
+
+    if sample_id != TEST_SAMPLE_ID:
+        return not_found()
+
+    _json = await request.json()
+    key = _json["key"]
+
+    if key == TEST_CACHE["key"]:
+        return json_response(TEST_CACHE, status=201)
+    else:
+        return not_found()
