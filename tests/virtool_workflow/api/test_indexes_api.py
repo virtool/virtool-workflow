@@ -37,15 +37,14 @@ async def test_upload(indexes_api: IndexProvider, tmpdir):
     assert file.size == 7
 
 
-@pytest.mark.skip
 async def test_download(indexes_api: IndexProvider, tmpdir):
     await indexes_api.download(Path(tmpdir))
 
     print(set(p.name for p in Path(tmpdir).iterdir()))
 
     assert set(p.name for p in Path(tmpdir).iterdir()) == {
+        "otus.json.gz",
         "reference.fa.gz",
-        "reference.json.gz",
         "reference.1.bt2",
         "reference.2.bt2",
         "reference.3.bt2",
