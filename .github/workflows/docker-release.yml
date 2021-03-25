@@ -16,7 +16,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: virtool/workflow-{{ GITHUB_REF }}
+          tags: virtool/workflow-${{ GITHUB_REF }}
           context: ./docker
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
