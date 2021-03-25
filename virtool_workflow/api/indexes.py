@@ -80,7 +80,7 @@ class IndexProvider(AbstractIndexProvider):
         """Download files associated with the current index."""
         if not names:
             names = {
-                "reference.json.gz",
+                "otus.json.gz",
                 "reference.fa.gz",
                 "reference.1.bt2",
                 "reference.2.bt2",
