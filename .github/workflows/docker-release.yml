@@ -1,6 +1,8 @@
 name: Release Workflow Docker Image
 
-on: [ release, workflow_dispatch ]
+on:
+  release:
+    types: [ published ]
 
 jobs:
   push_to_dockerhub:
@@ -14,11 +16,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          tags: virtool/workflow-{{ GITHUB_REF }}
           context: ./docker
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: virtool/workflow
-          tag_with_ref: true
 
       - name: Update README on Docker Hub
         uses: peter-evans/dockerhub-description@v2
