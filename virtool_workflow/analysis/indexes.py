@@ -24,8 +24,8 @@ class Index(data_model.Index):
     def __post_init__(self):
         self.bowtie_path: Path = self.path / "reference"
         self.fasta_path: Path = self.path / "ref.fa"
-        self.compressed_json_path: Path = self.path / "reference.json.gz"
-        self.json_path: Path = self.path / "reference.json"
+        self.compressed_json_path: Path = self.path / "otus.json.gz"
+        self.json_path: Path = self.path / "otus.json"
 
     async def decompress_json(self, processes: int):
         """
@@ -51,7 +51,7 @@ class Index(data_model.Index):
         sequence_lengths = dict()
         sequence_otu_map = dict()
 
-        for otu in data["otus"]:
+        for otu in data:
             for isolate in otu["isolates"]:
                 for sequence in isolate["sequences"]:
                     sequence_id = sequence["_id"]
@@ -70,6 +70,7 @@ class Index(data_model.Index):
         :return: the matching OTU ID
 
         """
+        print(self._sequence_otu_map)
         try:
             return self._sequence_otu_map[sequence_id]
         except KeyError:
@@ -104,7 +105,7 @@ class Index(data_model.Index):
         async with aiofiles.open(self.json_path) as f:
             data = json.loads(await f.read())
 
-        otus = [otu for otu in data["otus"] if otu["_id"] in unique_otu_ids]
+        otus = [otu for otu in data if otu["_id"] in unique_otu_ids]
 
         lengths = dict()
 
@@ -161,7 +162,7 @@ async def indexes(
     index_work_path = work_path / "indexes" / index_.id
     index_work_path.mkdir(parents=True, exist_ok=True)
 
-    await index_provider.download(index_work_path, "reference.json.gz")
+    await index_provider.download(index_work_path, "otus.json.gz")
 
     index = Index(
         id=index_.id,

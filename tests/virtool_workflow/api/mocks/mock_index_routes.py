@@ -1,7 +1,10 @@
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
 from aiohttp import web
+
+from tests.conftest import ANALYSIS_TEST_FILES_DIR
 
 mock_routes = web.RouteTableDef()
 
@@ -101,7 +104,18 @@ def download_index_files(request):
     index_id = request.match_info["index_id"]
     filename = request.match_info["filename"]
 
-    path = Path(__file__).parent.parent / f"files/{filename}"
+    if filename in (
+            "reference.fa.gz",
+            "reference.1.bt2",
+            "reference.2.bt2",
+            "reference.3.bt2",
+            "reference.4.bt2",
+            "reference.rev.1.bt2",
+            "reference.rev.2.bt2"
+    ):
+        path = Path(tempfile.mkstemp()[1])
+    else:
+        path = ANALYSIS_TEST_FILES_DIR / filename
 
     if index_id != TEST_INDEX_ID or not path.exists():
         return web.json_response({
