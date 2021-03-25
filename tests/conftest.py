@@ -20,11 +20,20 @@ def db_connection_string(pytestconfig):
     return pytestconfig.getoption("db_connection_string")
 
 
+TEST_FILES_DIR = Path(__file__).parent / "files"
+ANALYSIS_TEST_FILES_DIR = TEST_FILES_DIR / "analysis"
+
+
 @pytest.fixture
 def files() -> Path:
-    return Path(__file__).parent / "files"
+    return TEST_FILES_DIR
 
 
 @pytest.fixture
-def analysis_files(files) -> Path:
-    return files / "analysis"
+def analysis_files() -> Path:
+    return ANALYSIS_TEST_FILES_DIR
+
+
+@pytest.fixture
+def work_path(tmpdir):
+    return Path(tmpdir)

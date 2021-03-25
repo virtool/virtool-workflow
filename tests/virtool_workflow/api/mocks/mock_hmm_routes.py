@@ -6,6 +6,8 @@ from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_response import json_response
 from aiohttp.web_routedef import RouteTableDef
 
+from tests.conftest import ANALYSIS_TEST_FILES_DIR
+
 mock_routes = RouteTableDef()
 
 MOCK_HMM = {
@@ -43,7 +45,7 @@ MOCK_HMM = {
     "id": "zltnktou"
 }
 
-HMM_PROFILES = Path(__file__).parent.parent / "files/profiles.hmm"
+HMM_PROFILES = ANALYSIS_TEST_FILES_DIR / "profiles.hmm"
 
 
 @mock_routes.get("/api/hmm/{hmm_id}")
