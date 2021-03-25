@@ -2,13 +2,7 @@
 FROM debian:buster as debian
 WORKDIR /build
 RUN apt-get update && apt-get install -y build-essential wget bioperl
-RUN wget https://bitbucket.org/wenchen_aafc/aodp_v2.0_release/raw/5fcd5d2dfde61cd87ad3c63b8c92babd281fc0dc/aodp-2.5.0.1.tar.gz && \
-    tar -xvf aodp-2.5.0.1.tar.gz && \
-    cd aodp-2.5.0.1 && \
-    ./configure && \
-    make && \
-    mv b/aodp /build && \
-    wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz && \
+RUN wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz && \
     tar -xf hmmer-3.2.1.tar.gz && \
     cd hmmer-3.2.1 && \
     ./configure --prefix /build/hmmer && \
