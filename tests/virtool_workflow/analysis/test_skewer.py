@@ -12,7 +12,7 @@ from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
 
-async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executor):
+async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executor, analysis_files):
     tmpdir = Path(tmpdir)
 
     job = Job(
@@ -28,8 +28,8 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
         quiet=True
     )
 
-    TEST_READ_1 = Path(__file__).parent / "paired_small_1.fq.gz"
-    TEST_READ_2 = Path(__file__).parent / "paired_small_2.fq.gz"
+    TEST_READ_1 = analysis_files / "paired_small_1.fq.gz"
+    TEST_READ_2 = analysis_files / "paired_small_2.fq.gz"
     read_1 = await run_in_executor(shutil.copyfile, TEST_READ_1, tmpdir / TEST_READ_1.name)
     read_2 = await run_in_executor(shutil.copyfile, TEST_READ_2, tmpdir / TEST_READ_2.name)
 
@@ -40,8 +40,8 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
     assert result.left.name == "reads_1.fq.gz"
     assert result.right.name == "reads_2.fq.gz"
 
-    TEST_CORRECT_1 = Path(__file__).parent / "reads_1.fq.gz"
-    TEST_CORRECT_2 = Path(__file__).parent / "reads_2.fq.gz"
+    TEST_CORRECT_1 = analysis_files / "reads_1.fq.gz"
+    TEST_CORRECT_2 = analysis_files / "reads_2.fq.gz"
 
     if not TEST_CORRECT_1.exists() or not TEST_CORRECT_2.exists():
         await run_in_executor(shutil.copyfile, result.left, TEST_CORRECT_1)
