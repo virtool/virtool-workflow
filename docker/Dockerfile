@@ -46,7 +46,7 @@ RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
 
 
 FROM python:3.9 as pip_install
-ARG VIRTOOL_WORKFLOW_PIP_PACKAGE="virtool-workflow==0.4.0"
+ARG VIRTOOL_WORKFLOW_PIP_PACKAGE="virtool-workflow"
 RUN pip install --user $VIRTOOL_WORKFLOW_PIP_PACKAGE
 
 FROM python:3.9-slim as main
