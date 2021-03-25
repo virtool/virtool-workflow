@@ -89,7 +89,7 @@ async def upload_read_files(request):
     return json_response(file, status=201)
 
 
-@mock_routes.get("/api/samples/{sample_id}/reads/1")
+@mock_routes.get("/api/samples/{sample_id}/reads/{n}")
 async def download_reads_file(request):
     sample_id = request.match_info["sample_id"]
     n = request.match_info["n"]
