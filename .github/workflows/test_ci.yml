@@ -20,10 +20,7 @@ jobs:
 
       - name: Run Tests Using Docker Compose
         run: >-
-          docker-compose
-          -f tests/docker-compose.yml
-          -f tests/docker-compose.ci.yml
-          up
+          docker-compose up
           --exit-code-from tests
 
       - name: Print Files
