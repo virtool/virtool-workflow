@@ -43,8 +43,7 @@ RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
     cd pigz-2.6 && \
     make
 
-
-
+# virtool-workflow dependencies
 FROM python:3.9 as pip_install
 ARG VIRTOOL_WORKFLOW_PIP_PACKAGE="virtool-workflow"
 RUN pip install --user $VIRTOOL_WORKFLOW_PIP_PACKAGE
