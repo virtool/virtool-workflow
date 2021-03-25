@@ -14,7 +14,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          file: ${{GITHUB_WORKSPACE}}/docker/Dockerfile
+          file: ${{ GITHUB_WORKSPACE }}/docker/Dockerfile
           repository: virtool/workflow
           tag_with_ref: true
 
@@ -24,4 +24,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: virtool/workflow
+          readme-filepath: ${{ GITHUB_WORKSPACE }}/docker/README.md
 
