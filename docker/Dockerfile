@@ -34,6 +34,17 @@ WORKDIR /build
 RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip && \
     unzip fastqc_v0.11.5.zip
 
+# Pigz
+FROM debian:buster as pigz
+WORKDIR /build
+RUN apt-get update && apt-get install -y make gcc zlib1g-dev wget
+RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
+    tar -xzvf pigz-2.6.tar.gz && \
+    cd pigz-2.6 && \
+    make
+
+
+
 FROM python:3.9 as pip_install
 ARG VIRTOOL_WORKFLOW_PIP_PACKAGE="virtool-workflow==0.4.0"
 RUN pip install --user $VIRTOOL_WORKFLOW_PIP_PACKAGE
@@ -44,9 +55,9 @@ COPY --from=bowtie /build/bowtie2/* /usr/local/bin/
 COPY --from=debian /build/hmmer /opt/hmmer
 COPY --from=debian /build/skewer /usr/local/bin/
 COPY --from=fastqc /build/FastQC /opt/fastqc
+COPY --from=pigz /build/pigz-2.6/pigz /usr/local/bin/pigz
 ENV PATH $PATH:/root/.local/bin
 
-RUN apt-get install -y pigz
 ENTRYPOINT ["workflow", "run"]
 
 
