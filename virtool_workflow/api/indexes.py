@@ -53,7 +53,7 @@ class IndexProvider(AbstractIndexProvider):
                     await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
                 )
 
-    async def upload(self, path: Path, format: VirtoolFileFormat = "fasta") -> VirtoolFile:
+    async def upload(self, path: Path, format_: VirtoolFileFormat = "fasta") -> VirtoolFile:
         """
         Upload a file associated with the current Index.
 
@@ -69,12 +69,12 @@ class IndexProvider(AbstractIndexProvider):
             - reference.rev.2.bt2
 
         :param path: The path to the file.
-        :param format: The format of the file.
+        :param format_: The format of the file.
         :return: A :class:`VirtoolFile` object.
         """
         return await upload_file_via_post(self.http,
                                           f"{self.jobs_api_url}/indexes/{self._index_id}/files",
-                                          path, format)
+                                          path, format_)
 
     async def download(self, target_path: Path, *names) -> Path:
         """Download files associated with the current index."""
