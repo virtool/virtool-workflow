@@ -13,6 +13,7 @@ jobs:
       - name: Push to Docker Hub
         uses: docker/build-push-action@v2
         with:
+          push: true
           context: ./docker
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -22,7 +23,6 @@ jobs:
       - name: Update README on Docker Hub
         uses: peter-evans/dockerhub-description@v2
         with:
-          push: true
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: virtool/workflow
