@@ -45,6 +45,8 @@ COPY --from=debian /build/hmmer /opt/hmmer
 COPY --from=debian /build/skewer /usr/local/bin/
 COPY --from=fastqc /build/FastQC /opt/fastqc
 ENV PATH $PATH:/root/.local/bin
+
+RUN apt-get install -y pigz
 ENTRYPOINT ["workflow", "run"]
 
 
