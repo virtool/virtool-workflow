@@ -22,6 +22,7 @@ jobs:
       - name: Update README on Docker Hub
         uses: peter-evans/dockerhub-description@v2
         with:
+          push: true
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: virtool/workflow
