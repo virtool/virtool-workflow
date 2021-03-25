@@ -1,0 +1,46 @@
+name: Release Workflow Docker Image
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  push_to_dockerhub:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get Tag
+        id: tags
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: virtool/workflow:${{ steps.tags.outputs.TAG }}
+          context: ./docker
+
+      - name: Update README on Docker Hub
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: virtool/workflow
+          readme-filepath: ./docker/README.md
+
