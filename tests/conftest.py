@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 pytest_plugins = [
@@ -16,3 +18,13 @@ def pytest_addoption(parser):
 @pytest.fixture
 def db_connection_string(pytestconfig):
     return pytestconfig.getoption("db_connection_string")
+
+
+@pytest.fixture
+def files() -> Path:
+    return Path(__file__).parent / "files"
+
+
+@pytest.fixture
+def analysis_files(files) -> Path:
+    return files / "analysis"
