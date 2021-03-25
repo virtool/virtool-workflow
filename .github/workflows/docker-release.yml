@@ -25,5 +25,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: virtool/workflow
-          readme-filepath: $GITHUB_WORKSPACE/docker/README.md
+          readme-filepath: ./docker/README.md
 
