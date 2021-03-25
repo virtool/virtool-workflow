@@ -21,11 +21,6 @@ install_as_pytest_fixtures(globals(), run_in_executor, run_subprocess, thread_po
 
 
 @pytest.fixture
-def work_path(tmpdir):
-    return Path(tmpdir)
-
-
-@pytest.fixture
 async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path: Path):
     return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_url)
 

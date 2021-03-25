@@ -1,9 +1,14 @@
 from pathlib import Path
 
+import pytest
+
 from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.api.hmm import HMMsProvider
 
-FAKE_PROFILES_PATH = Path(__file__).parent / "profiles.hmm"
+
+@pytest.fixture
+def profiles_path(analysis_files):
+    return analysis_files / "profiles.hmm"
 
 
 async def test_hmms(http, jobs_api_url, run_in_executor, run_subprocess, tmpdir):
