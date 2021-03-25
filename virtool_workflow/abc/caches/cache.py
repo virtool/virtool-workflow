@@ -109,8 +109,3 @@ class AbstractCaches(ABC):
         :raises CacheExists: When a cache already exists for the given key.
         """
         ...
-
-    @abstractmethod
-    def __contains__(self, item: str):
-        """Check if there is an existing cache with the given key."""
-        ...
