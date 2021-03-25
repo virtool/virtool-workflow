@@ -9,12 +9,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Push to Docker Hub
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          file: ${{ GITHUB_WORKSPACE }}/docker/Dockerfile
+          file: $GITHUB_WORKSPACE/docker/Dockerfile
           repository: virtool/workflow
           tag_with_ref: true
 
@@ -24,5 +25,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: virtool/workflow
-          readme-filepath: ${{ GITHUB_WORKSPACE }}/docker/README.md
+          readme-filepath: $GITHUB_WORKSPACE/docker/README.md
 
