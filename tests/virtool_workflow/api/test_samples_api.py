@@ -1,3 +1,4 @@
+import gzip
 from pathlib import Path
 
 import pytest
@@ -61,13 +62,16 @@ async def test_upload(sample_api, tmpdir):
     await sample_api.upload(artifact)
 
 
-async def test_download(sample_api, tmpdir):
+async def test_download(sample_api, tmpdir, file_regression):
     tmpdir = Path(tmpdir)
 
-    read_files = await sample_api.download_reads(tmpdir)
+    read_files = await sample_api.download_reads(tmpdir, paired=True)
 
-    assert read_files == (tmpdir / "reads_1.fq.gz",) or read_files == (tmpdir / "reads_1.fq.gz",
-                                                                       tmpdir / "reads_2.fq.gz")
+    for read_file in read_files:
+        with gzip.open(read_file) as f:
+            file_regression.check(f.read(), basename=read_file.name, binary=True)
+
+    assert read_files == read_files == (tmpdir / "reads_1.fq.gz", tmpdir / "reads_2.fq.gz")
 
     await sample_api.download_artifact("artifact.json", tmpdir)
 
