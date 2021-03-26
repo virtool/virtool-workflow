@@ -1,4 +1,3 @@
-import filecmp
 from pathlib import Path
 from typing import Sequence
 
@@ -80,7 +79,7 @@ async def test_write_isolate_fasta(work_path, indexes, otu_ids, analysis_files, 
         file_regression.check(await f.read())
 
 
-async def test_build_index(work_path, indexes, otu_ids, analysis_files):
+async def test_build_index(work_path, indexes, otu_ids, analysis_files, file_regression):
     index = indexes[0]
 
     path = work_path / "isolates_1"
@@ -96,7 +95,5 @@ async def test_build_index(work_path, indexes, otu_ids, analysis_files):
         "rev.2.bt2",
         "fa",
     ]:
-        assert filecmp.cmp(
-            work_path /
-            f"isolates_1.{extension}", f"{analysis_files}/reference.{extension}"
-        )
+        async with aiofiles.open(work_path / f"isolates_1.{extension}", "rb") as f:
+            file_regression.check(await f.read(), binary=True, basename=extension)

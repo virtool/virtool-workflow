@@ -6,6 +6,7 @@ from aiohttp.web import RouteTableDef
 from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_response import json_response, Response
 
+from tests.conftest import ANALYSIS_TEST_FILES_DIR
 from tests.virtool_workflow.api.mocks.utils import not_found, read_file_from_request
 
 mock_routes = RouteTableDef()
@@ -28,8 +29,6 @@ TEST_CACHE = {
         "id": TEST_SAMPLE_ID
     }
 }
-
-ANALYSIS_TEST_FILES_DIR = Path(__file__).parent.parent.parent / "analysis"
 
 
 @mock_routes.get("/api/samples/{sample_id}")
@@ -89,15 +88,15 @@ async def upload_read_files(request):
     return json_response(file, status=201)
 
 
-@mock_routes.get("/api/samples/{sample_id}/reads/{n}")
+@mock_routes.get("/api/samples/{sample_id}/reads/{filename}")
 async def download_reads_file(request):
     sample_id = request.match_info["sample_id"]
-    n = request.match_info["n"]
+    filename = request.match_info["filename"]
 
-    if sample_id != TEST_SAMPLE_ID or n not in ("1", "2"):
+    if sample_id != TEST_SAMPLE_ID or filename not in ("reads_1.fq.gz", "reads_2.fq.gz"):
         return not_found()
 
-    file_name = "paired_small_1.fq.gz" if n == "1" else "paired_small_2.fq.gz"
+    file_name = "paired_small_1.fq.gz" if filename == "reads_1.fq.gz" else "paired_small_2.fq.gz"
 
     return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name)
 

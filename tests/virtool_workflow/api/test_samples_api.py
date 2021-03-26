@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import aiohttp
 import pytest
 
 from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID, TEST_SAMPLE
@@ -10,10 +9,10 @@ from virtool_workflow.data_model import Sample
 
 
 @pytest.fixture
-def sample_api(http: aiohttp.ClientSession, jobs_api_url: str):
+def sample_api(http_no_decompress, jobs_api_url: str):
     if "ready" in TEST_SAMPLE:
         del TEST_SAMPLE["ready"]
-    return SampleProvider(TEST_SAMPLE_ID, http, jobs_api_url)
+    return SampleProvider(TEST_SAMPLE_ID, http_no_decompress, jobs_api_url)
 
 
 async def test_get(sample_api):

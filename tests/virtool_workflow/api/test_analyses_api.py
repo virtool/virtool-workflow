@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-import aiohttp
 import pytest
 
 import virtool_workflow.api.errors
@@ -12,16 +11,16 @@ from virtool_workflow.data_model.files import VirtoolFile
 
 
 @pytest.fixture
-def analysis_api(http: aiohttp.ClientSession, jobs_api_url: str):
-    return AnalysisProvider("test_analysis", http, jobs_api_url)
+def analysis_api(http_no_decompress, jobs_api_url: str):
+    return AnalysisProvider("test_analysis", http_no_decompress, jobs_api_url)
 
 
-async def test_get_analysis(http: aiohttp.ClientSession, jobs_api_url: str):
-    analysis = await get_analysis_by_id("test_analysis", http, jobs_api_url)
+async def test_get_analysis(http_no_decompress, jobs_api_url: str):
+    analysis = await get_analysis_by_id("test_analysis", http_no_decompress, jobs_api_url)
     assert isinstance(analysis, Analysis)
 
     with pytest.raises(virtool_workflow.api.errors.NotFound):
-        await get_analysis_by_id("not_an_id", http, jobs_api_url)
+        await get_analysis_by_id("not_an_id", http_no_decompress, jobs_api_url)
 
 
 async def test_analysis_provider_get(analysis_api):

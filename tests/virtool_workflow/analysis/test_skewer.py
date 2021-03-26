@@ -12,7 +12,7 @@ from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
 
-async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executor, analysis_files):
+async def test_skewer(http_no_decompress, jobs_api_url, tmpdir, run_subprocess, run_in_executor, analysis_files):
     tmpdir = Path(tmpdir)
 
     job = Job(
@@ -21,7 +21,7 @@ async def test_skewer(http, jobs_api_url, tmpdir, run_subprocess, run_in_executo
             "sample_id": TEST_SAMPLE_ID
         },
     )
-    sample = await sample_provider(job, http, jobs_api_url).get()
+    sample = await sample_provider(job, http_no_decompress, jobs_api_url).get()
 
     run_skewer = skewer(
         min_length=trimming_min_length(sample.library_type, sample.max_length),
