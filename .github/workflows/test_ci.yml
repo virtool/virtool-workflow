@@ -26,7 +26,7 @@ jobs:
       - name: Run Tests Using Docker Compose
         run: |
           cd tests
-          docker-compose up --exit-code-from pytest
+          docker-compose up --build --exit-code-from pytest
 
       - name: Print Files
         run: >-
