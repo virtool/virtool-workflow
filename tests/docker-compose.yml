@@ -14,7 +14,7 @@ services:
     build:
       dockerfile: tests/Dockerfile
       context: ..
-    command: --cov --cov-report xml:/test/coverage/coverage.xml
+    command: --cov --cov-report xml:/test/coverage/coverage.xml --disable-pytest-warnings tests/virtool_workflow/caching
     environment:
       - VT_JOB_API_URL=http://jobsapi:9950
       - VT_DB_CONNECTION_STRING=mongodb://mongo:27017
