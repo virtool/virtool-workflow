@@ -77,8 +77,9 @@ async def test_trimming_feature(runtime, tmpdir,
     sample = await runtime.get_or_instantiate("sample")
 
     with gzip.open(sample.read_paths[0]) as left:
-        file_regression.check(right.read(), basename="right", binary=True)
-        file_regression.check(left.read(), basename="left", binary=True)
+        with gzip.open(sample.read_paths[1]) as right:
+            file_regression.check(right.read(), basename="right", binary=True)
+            file_regression.check(left.read(), basename="left", binary=True)
 
     assert runtime["fastqc_quality"]
     data_regression.check(runtime["fastqc_quality"])
