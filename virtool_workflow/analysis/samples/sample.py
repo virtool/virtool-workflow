@@ -12,6 +12,7 @@ async def sample(sample_provider: AbstractSampleProvider, work_path: Path) -> Sa
     """The sample associated with the current job."""
     read_path = work_path / "reads"
     read_path.mkdir()
+
     sample_ = await sample_provider.get()
     await sample_provider.download_reads(read_path, sample_.paired)
     sample_.reads_path = read_path
