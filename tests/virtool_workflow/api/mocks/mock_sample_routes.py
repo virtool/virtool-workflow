@@ -204,8 +204,6 @@ async def delete_cache(request):
     if TEST_CACHE["ready"] is True:
         return json_response({"message": "Cache is finalized."}, status=409)
 
-    del TEST_CACHE
-
     return Response(status=204)
 
 
