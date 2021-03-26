@@ -1,4 +1,6 @@
+import gzip
 import json
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -41,11 +43,17 @@ class Index(data_model.Index):
             raise FileExistsError(
                 "Index JSON file has already been decompressed")
 
-        await self._run_in_executor(
-            decompress_file, self.compressed_json_path, self.json_path, processes
-        )
+        try:
+            await self._run_in_executor(
+                decompress_file, self.compressed_json_path, self.json_path
+            )
+        except gzip.BadGzipFile:
+            await self._run_in_executor(
+                shutil.copyfile, self.compressed_json_path, self.json_path
+            )
 
         async with aiofiles.open(self.json_path) as f:
+            print(f.read())
             data = json.loads(await f.read())
 
         sequence_lengths = dict()

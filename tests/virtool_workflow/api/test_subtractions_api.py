@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import aiohttp
 import pytest
 from pytest import fixture
 
@@ -17,7 +16,7 @@ def work_path(tmpdir):
 
 
 @fixture
-def subtraction_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path):
+def subtraction_api(http_no_decompress, jobs_api_url: str, work_path):
     subtraction_work_path = work_path / "subtractions"
     subtraction_work_path.mkdir(parents=True)
 
@@ -25,7 +24,7 @@ def subtraction_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path):
 
     return SubtractionProvider(
         TEST_SUBTRACTION_ID,
-        http,
+        http_no_decompress,
         jobs_api_url,
         subtraction_work_path
     )

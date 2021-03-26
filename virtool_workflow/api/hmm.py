@@ -1,13 +1,17 @@
+import gzip
 import json
+import shutil
 from operator import itemgetter
 from pathlib import Path
 from typing import List
 
 import aiofiles
 import aiohttp
+from virtool_core.utils import decompress_file
 
 from virtool_workflow.abc.data_providers import AbstractHMMsProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
+from virtool_workflow.api.utils import read_file_from_response
 from virtool_workflow.data_model import HMM
 
 
@@ -26,10 +30,12 @@ class HMMsProvider(AbstractHMMsProvider):
     def __init__(self,
                  http: aiohttp.ClientSession,
                  jobs_api_url: str,
-                 work_path: Path):
+                 work_path: Path,
+                 number_of_processes: int = 3):
         self.http = http
         self.url = f"{jobs_api_url}/hmm"
         self.path = work_path / "hmms"
+        self.number_of_processes = number_of_processes
 
         self.path.mkdir(parents=True, exist_ok=True)
 
@@ -40,9 +46,14 @@ class HMMsProvider(AbstractHMMsProvider):
 
     async def hmm_list(self) -> List[HMM]:
         async with self.http.get(f"{self.url}/files/annotations.json.gz") as response:
-            async with raising_errors_by_status_code(response, accept=[200]):
-                async with aiofiles.open(self.path / "annotations.json", "wb") as f:
-                    await f.write(await response.read())
+            await read_file_from_response(response, self.path / "annotations.json.gz")
+
+        try:
+            decompress_file(str(self.path / "annotations.json.gz"),
+                            str(self.path / "annotations.json"),
+                            self.number_of_processes)
+        except gzip.BadGzipFile:
+            shutil.copyfile(self.path / "annotations.json.gz", self.path / "annotations.json")
 
         async with aiofiles.open(self.path / "annotations.json") as f:
             hmms_json = json.loads(await f.read())

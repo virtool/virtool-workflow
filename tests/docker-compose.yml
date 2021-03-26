@@ -14,7 +14,7 @@ services:
     build:
       dockerfile: tests/Dockerfile
       context: ..
-    command: --cov --cov-report xml:/test/coverage/coverage.xml tests/virtool_workflow/analysis
+    command: --cov --cov-report xml:/test/coverage/coverage.xml tests/virtool_workflow/analysis/test_indexes.py
     environment:
       - VT_JOB_API_URL=http://jobsapi:9950
       - VT_DB_CONNECTION_STRING=mongodb://mongo:27017
