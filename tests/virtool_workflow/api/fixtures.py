@@ -31,5 +31,5 @@ async def http_no_decompress(aiohttp_client, aiohttp_app):
 
 
 @pytest.fixture
-async def http_no_decompress(aiohttp_app, aiohttp_client) -> aiohttp.ClientSession:
+async def http(aiohttp_app, aiohttp_client) -> aiohttp.ClientSession:
     return await aiohttp_client(aiohttp_app, auto_decompress=True)
