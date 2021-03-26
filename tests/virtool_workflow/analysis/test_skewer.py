@@ -12,7 +12,9 @@ from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
 
-async def test_skewer(http_no_decompress, jobs_api_url, tmpdir, run_subprocess, run_in_executor, analysis_files):
+async def test_skewer(http_no_decompress, jobs_api_url,
+                      tmpdir, run_subprocess, run_in_executor,
+                      analysis_files, file_regression):
     tmpdir = Path(tmpdir)
 
     job = Job(
@@ -47,10 +49,10 @@ async def test_skewer(http_no_decompress, jobs_api_url, tmpdir, run_subprocess, 
         await run_in_executor(shutil.copyfile, result.left, TEST_CORRECT_1)
         await run_in_executor(shutil.copyfile, result.right, TEST_CORRECT_2)
 
-    with gzip.open(TEST_CORRECT_1) as expected:
-        with gzip.open(result.left) as f:
-            for line1, line2 in zip(f.readlines(), expected.readlines()):
-                assert line1 == line2
+    with gzip.open(result.right) as right:
+        with gzip.open(result.left) as left:
+            file_regression.check(right.read(), basename="right", binary=True)
+            file_regression.check(left.read(), basename="left", binary=True)
 
 
 async def test_trimming_feature(runtime, tmpdir, http_no_decompress, run_in_executor, data_regression):
