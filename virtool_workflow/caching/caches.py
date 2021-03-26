@@ -15,7 +15,11 @@ class GenericCacheWriter(AbstractCacheWriter):
     This class will have attributes for each parameter in the signature of the :func:`__init__`
     method of the class given as a type argument.
     """
-    cache_class = Cache
+
+    def __init_subclass__(cls, cache_class: GenericCache = None, **kwargs):
+        if cache_class is not None:
+            cls.cache_class = cache_class
+        super(GenericCacheWriter, cls).__init_subclass__(**kwargs)
 
     def __init__(self, key, path):
         self._expected_attrs = list(signature(self.cache_class.__init__).parameters)[1:]
@@ -56,8 +60,13 @@ class GenericCacheWriter(AbstractCacheWriter):
 
     def __class_getitem__(cls, item):
         """Set the cache_class."""
-        cls.cache_class = item
-        return cls
+
+        class _Temp(cls, cache_class=item):
+            ...
+
+        _Temp.__name__ = f"{cls.__name__}[{item.__name__}]"
+
+        return _Temp
 
 
 class GenericCaches(AbstractCaches):
