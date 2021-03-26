@@ -42,20 +42,18 @@ async def test_skewer(http_no_decompress, jobs_api_url,
     assert result.left.name == "reads_1.fq.gz"
     assert result.right.name == "reads_2.fq.gz"
 
-    TEST_CORRECT_1 = analysis_files / "reads_1.fq.gz"
-    TEST_CORRECT_2 = analysis_files / "reads_2.fq.gz"
-
-    if not TEST_CORRECT_1.exists() or not TEST_CORRECT_2.exists():
-        await run_in_executor(shutil.copyfile, result.left, TEST_CORRECT_1)
-        await run_in_executor(shutil.copyfile, result.right, TEST_CORRECT_2)
-
     with gzip.open(result.right) as right:
         with gzip.open(result.left) as left:
             file_regression.check(right.read(), basename="right", binary=True)
             file_regression.check(left.read(), basename="left", binary=True)
 
 
-async def test_trimming_feature(runtime, tmpdir, http_no_decompress, run_in_executor, data_regression):
+async def test_trimming_feature(runtime, tmpdir,
+                                http_no_decompress,
+                                run_in_executor,
+                                data_regression,
+                                file_regression,
+                                analysis_files):
     runtime["http"] = http_no_decompress
     TEST_SAMPLE["paired"] = True
     runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
@@ -67,11 +65,21 @@ async def test_trimming_feature(runtime, tmpdir, http_no_decompress, run_in_exec
 
     await features.install_into_environment(runtime, trimming_feature)
 
+    sample_provider = await runtime.get_or_instantiate("sample_provider")
+
+    async def copy_read_files(target, paired):
+        await run_in_executor(shutil.copyfile, analysis_files / "paired_small_1.fq.gz", target / "reads_1.fq.gz")
+        if paired:
+            await run_in_executor(shutil.copyfile, analysis_files / "paired_small_2.fq.gz", target / "reads_2.fq.gz")
+
+    sample_provider.download_reads = copy_read_files
+
     sample = await runtime.get_or_instantiate("sample")
 
-    assert sample.reads_path.exists()
-    for path in sample.read_paths:
-        assert path.exists()
+    with gzip.open(sample.read_paths[0]) as left:
+        with gzip.open(sample.read_paths[1]) as right:
+            file_regression.check(right.read(), basename="right", binary=True)
+            file_regression.check(left.read(), basename="left", binary=True)
 
     assert runtime["fastqc_quality"]
     data_regression.check(runtime["fastqc_quality"])
