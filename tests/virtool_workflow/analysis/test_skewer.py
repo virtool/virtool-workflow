@@ -55,6 +55,9 @@ async def test_trimming_feature(runtime, tmpdir,
                                 file_regression,
                                 analysis_files):
     runtime["http"] = http
+||||||| parent of f5ca739... Reduce CI Test Runtime (#133)
+async def test_trimming_feature(runtime, tmpdir, http_no_decompress, run_in_executor, data_regression):
+    runtime["http"] = http_no_decompress
     TEST_SAMPLE["paired"] = True
     runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
     job = await runtime.get_or_instantiate("job")

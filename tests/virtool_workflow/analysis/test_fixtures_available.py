@@ -14,6 +14,8 @@ from virtool_workflow.environment import WorkflowEnvironment
 
 @pytest.fixture
 async def environment(http, jobs_api_url):
+||||||| parent of f5ca739... Reduce CI Test Runtime (#133)
+def environment(http_no_decompress, jobs_api_url):
     env = WorkflowEnvironment(virtool_workflow.runtime.fixtures.analysis)
 
     env["http"] = http
