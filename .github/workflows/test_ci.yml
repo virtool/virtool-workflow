@@ -18,6 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+
+      - name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
+
+
       - name: Run Tests Using Docker Compose
         run: |
           cd tests
