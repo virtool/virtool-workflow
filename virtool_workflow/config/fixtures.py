@@ -19,7 +19,6 @@ INIT_FILE_ENV = "VT_WORKFLOW_INIT_FILE"
 FIXTURES_FILE_ENV = "VT_WORKFLOW_FIXTURES_FILE"
 
 
-@fixture
 @config_fixture(env=TEMP_PATH_ENV, default=f"{os.getcwd()}/temp")
 def work_path(value: str) -> Path:
     """The path where temporary data should be stored."""
@@ -27,7 +26,6 @@ def work_path(value: str) -> Path:
         yield temp
 
 
-@fixture
 @config_fixture(DATA_PATH_ENV, default=f"{os.getcwd()}/virtool")
 def data_path(value: str) -> Path:
     """The path where persistent data should be stored."""
@@ -37,14 +35,12 @@ def data_path(value: str) -> Path:
     return _data_path
 
 
-@fixture
 @config_fixture(env=PROC_ENV, default=2, type_=int)
 def proc(_):
     """The number of processes as an integer."""
     ...
 
 
-@fixture
 @config_fixture(env=MEM_ENV, default=8, type_=int)
 def mem(_):
     """The amount of RAM in GB available for use."""
