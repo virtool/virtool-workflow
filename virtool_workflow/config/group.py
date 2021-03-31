@@ -30,6 +30,11 @@ class ConfigFixtureGroup(FixtureGroup):
         return super().fixture(_fixture)
 
     def add_options(self, func: Callable):
+        """
+        Add click options based on the config fixtures of this group.
+
+        :param func: A `click` command or group.
+        """
         for name, fixture in self.items():
             option_name = "--" + fixture.name.replace("_", "-")
             func = click.option(option_name, type=fixture.type, help=fixture.help)(func)
