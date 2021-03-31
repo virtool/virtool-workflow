@@ -11,3 +11,5 @@ coverage.xml
 env
 _build
 *egg-info
+*.prof
+tags
