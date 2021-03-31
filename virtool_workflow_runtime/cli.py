@@ -5,20 +5,26 @@ import click
 
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._docker
+
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._docker_events
+
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime._redis
+
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.cancellations
+
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.config
+
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.new_jobs
+
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.on_init
-from virtool_workflow.cli_utils import apply_config_options
 from virtool_workflow.config.configuration import load_config
+from virtool_workflow.config.fixtures import options
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import hooks
 from virtool_workflow_runtime.job_loop import job_loop
@@ -49,13 +55,15 @@ async def main(**config):
         except Exception as error:
             fixtures["error"] = error
         finally:
-            await hooks.on_exit.trigger(fixtures, suppress=isinstance(fixtures["error"], Exception))
+            await hooks.on_exit.trigger(
+                fixtures, suppress=isinstance(fixtures["error"], Exception)
+            )
 
             if fixtures["error"]:
                 raise fixtures["error"]
 
 
-@apply_config_options
+@options.add_options
 @click.command
 def runner(**config):
     asyncio.run(main(**config))

@@ -1,6 +1,14 @@
+import pytest
 import click
-from inspect import signature
+import click.testing
 from virtool_workflow.config.group import ConfigFixtureGroup
+from virtool_workflow.config.fixtures import options
+from virtool_workflow.cli import cli
+
+
+@pytest.fixture
+def click_runner():
+    return click.testing.CliRunner()
 
 
 def test_fixture_group_adds_command_line_option():
@@ -19,8 +27,8 @@ def test_fixture_group_adds_command_line_option():
     assert fixture.env == "VT_SOME_CONFIG_OPTION"
 
 
-def test_fixture_group_can_be_aplied_to_click_command():
-    @click.command
+def test_fixture_group_can_be_applied_to_click_command(click_runner):
+    @click.command()
     def command():
         ...
 
@@ -32,4 +40,13 @@ def test_fixture_group_can_be_aplied_to_click_command():
 
     cmd = grp.add_options(command)
 
-    assert len(signature(cmd).parameters) == 1
+    result = click_runner.invoke(cmd, ["--help"])
+
+    assert "--option" in result.output
+
+
+def test_config_fixtures_get_added_as_options(click_runner):
+    result = click_runner.invoke(cli, ["--help"])
+
+    for opt in ("--data-path", "--work-path"):
+        assert opt in result.output
