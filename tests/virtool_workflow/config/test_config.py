@@ -1,3 +1,5 @@
+import click
+from inspect import signature
 from virtool_workflow.config.group import ConfigFixtureGroup
 
 
@@ -15,3 +17,19 @@ def test_fixture_group_adds_command_line_option():
     assert fixture.type == int
     assert fixture.help == "Some config option"
     assert fixture.env == "VT_SOME_CONFIG_OPTION"
+
+
+def test_fixture_group_can_be_aplied_to_click_command():
+    @click.command
+    def command():
+        ...
+
+    grp = ConfigFixtureGroup()
+
+    @grp.fixture
+    def option():
+        ...
+
+    cmd = grp.add_options(command)
+
+    assert len(signature(cmd).parameters) == 1
