@@ -1,3 +1,4 @@
+import click
 from typing import Callable
 
 from virtool_workflow.config.configuration import ConfigFixture
@@ -15,7 +16,7 @@ class ConfigFixtureGroup(FixtureGroup):
             return _decorator
 
         env_name = "VT_" + func.__name__.upper().replace("-", "_")
-        help_text = func.__doc__
+        help_text = func.__doc__ or ""
 
         _fixture = ConfigFixture(
             name=func.__name__,
@@ -28,9 +29,9 @@ class ConfigFixtureGroup(FixtureGroup):
 
         return super().fixture(_fixture)
 
-    def add_options(func: Callable):
+    def add_options(self, func: Callable):
         for name, fixture in self.items():
-            option_name = fixture.name.replace("_", "-")
+            option_name = "--" + fixture.name.replace("_", "-")
             func = click.option(option_name, type=fixture.type, help=fixture.help)(func)
 
         return func
