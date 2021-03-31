@@ -10,14 +10,12 @@ class ConfigFixture(Callable):
     def __init__(
         self,
         name: str,
-        env: str,
         type_: Type[Union[str, int, bool]],
         default: Any,
         help_: str,
         transform: Callable = None,
     ):
         self.name = name
-        self.env = env
         self.type = type_
         self.default = default
         self.help = help_
@@ -53,6 +51,10 @@ class ConfigFixture(Callable):
     @property
     def option_name(self):
         return f"--{self.name}".replace("_", "-")
+
+    @property
+    def env(self):
+        return "VT_" + func.__name__.upper().replace("-", "_")
 
 
 async def load_config(scope=None, hook=None, **kwargs):
