@@ -1,10 +1,11 @@
-from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow import hooks
+from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+from virtool_workflow.fixtures.scope import FixtureScope
 
 from .fixtures import options
 
 
-async def load_config(scope=None, hook=None, **kwargs):
+async def load_config(scope: FixtureScope = None, hook: FixtureHook = None, **kwargs):
     """
     Override config fixture values with those from :obj:`kwargs`.
 
