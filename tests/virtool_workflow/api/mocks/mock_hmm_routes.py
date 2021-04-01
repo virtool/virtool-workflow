@@ -67,7 +67,7 @@ async def download_hmm_profiles(request):
 
 @mock_routes.get('/api/hmm/files/annotations.json.gz')
 async def download_annotations(request):
-    annotations_path = Path("annotations.json")
+    annotations_path = ANALYSIS_TEST_FILES_DIR/"annotations.json"
     compressed_annotations_path = annotations_path.with_suffix(".json.gz")
 
     if not compressed_annotations_path.exists():
