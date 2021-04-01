@@ -1,7 +1,7 @@
 """Main definitions for Virtool Workflows."""
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Callable, Sequence, Optional, Iterable, Any, Coroutine
+from typing import Any, Callable, Coroutine, Iterable, Optional, Sequence
 
 WorkflowStep = Callable[..., Coroutine[Any, Any, None]]
 
@@ -79,3 +79,12 @@ class Workflow:
         """Decorator for adding a step to the workflow."""
         self.steps.append(_make_async(step))
         return step
+
+
+    def merge(self, *workflows: "Workflow"):
+        """Merge steps from other workflows into this workflow."""
+        self.steps += [*w.steps for w in workflows]
+        self.on_startup += [*.on_startup for w in workflows]
+        self.on_cleanup += [*.on_cleanup for w in workflows]
+
+        return self
