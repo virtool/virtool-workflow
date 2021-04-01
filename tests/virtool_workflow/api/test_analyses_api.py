@@ -48,7 +48,7 @@ async def test_analysis_provider_upload(analysis_api):
 async def test_analysis_file_download(analysis_api):
     file_path = await analysis_api.download("0", Path("download.txt"))
 
-    assert file_path.read_text() == "TEST"
+    assert file_path.read_text() == "TEST\n"
 
     file_path.unlink()
 
