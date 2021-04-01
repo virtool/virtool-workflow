@@ -83,8 +83,8 @@ class Workflow:
 
     def merge(self, *workflows: "Workflow"):
         """Merge steps from other workflows into this workflow."""
-        self.steps += [*w.steps for w in workflows]
-        self.on_startup += [*.on_startup for w in workflows]
-        self.on_cleanup += [*.on_cleanup for w in workflows]
+        self.steps += [w.steps for w in workflows]
+        self.on_startup += [w.on_startup for w in workflows]
+        self.on_cleanup += [w.on_cleanup for w in workflows]
 
         return self
