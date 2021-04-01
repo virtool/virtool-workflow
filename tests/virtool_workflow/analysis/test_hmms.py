@@ -12,9 +12,17 @@ def profiles_path(analysis_files):
 
 
 async def test_hmms(http, jobs_api_url, run_in_executor, run_subprocess, tmpdir):
+||||||| parent of 77bc830... Raise a RuntimeError if hmmpress is not availible.
+async def test_hmms(http_no_decompress, jobs_api_url, run_in_executor, run_subprocess, tmpdir):
     work_path = Path(tmpdir) / "work"
     work_path.mkdir()
 
     provider = HMMsProvider(http, jobs_api_url, work_path)
 
-    await hmms(provider, work_path, run_subprocess)
+    try:
+        await hmms(provider, work_path, run_subprocess)
+    except FileNotFoundError as e:
+        if "hmmpress" in e.args[0]:
+            raise RuntimeError("hmmpress not installed.")
+        else:
+            raise e

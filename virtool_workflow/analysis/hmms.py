@@ -2,6 +2,7 @@ from collections import UserList
 from functools import cached_property
 from pathlib import Path
 from typing import Iterable
+from shutil import which
 
 from virtool_workflow.abc.data_providers.hmms import AbstractHMMsProvider
 from virtool_workflow.data_model import HMM
@@ -33,6 +34,9 @@ async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subproc
     database IDs.
     """
     await hmms_provider.get_profiles()
+
+    if which("hmmpress") is None:
+        raise RuntimeError("hmmpress is not installed.")
 
     await run_subprocess(["hmmpress", str(hmms_provider.path)])
 

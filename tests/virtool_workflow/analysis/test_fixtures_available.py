@@ -1,9 +1,8 @@
+
 import pytest
 
 import virtool_workflow.runtime.fixtures
 from tests.virtool_workflow.analysis.test_sample_fixture import no_op
-from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
-||||||| merged common ancestors
 from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
 from tests.virtool_workflow.api.mocks.mock_job_routes import TEST_JOB
 from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
@@ -46,3 +45,5 @@ def use_all(analysis, indexes, subtractions, sample, hmms):
 
 async def test_fixtures_available(environment):
     await environment.execute_function(use_all)
+
+
