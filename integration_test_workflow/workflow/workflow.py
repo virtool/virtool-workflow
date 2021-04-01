@@ -13,10 +13,10 @@ from virtool_workflow.workflow_feature.merge_workflows import MergeWorkflows
 features.install(
     Trimming(),
     MergeWorkflows(
-        collect(test_hmms),
-        collect(test_indexes),
-        collect(test_sample),
-        collect(test_subtractions),
+        test_hmms,
+        test_indexes,
+        test_sample,
+        test_subtractions,
     ),
 )
 

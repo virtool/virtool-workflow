@@ -36,17 +36,18 @@ class Workflow:
         2. a set of step functions which will be executed in order (.steps)
         3. a set of functions to be executed once all steps are completed (.on_cleanup)
     """
+
     on_startup: Sequence[WorkflowStep]
     on_cleanup: Sequence[WorkflowStep]
     steps: Sequence[WorkflowStep]
 
     def __new__(
-            cls,
-            *args,
-            startup: Optional[Iterable[WorkflowStep]] = None,
-            cleanup: Optional[Iterable[WorkflowStep]] = None,
-            steps: Optional[Iterable[WorkflowStep]] = None,
-            **kwargs
+        cls,
+        *args,
+        startup: Optional[Iterable[WorkflowStep]] = None,
+        cleanup: Optional[Iterable[WorkflowStep]] = None,
+        steps: Optional[Iterable[WorkflowStep]] = None,
+        **kwargs
     ):
         """
         :param startup: An initial set of startup steps.
@@ -80,11 +81,10 @@ class Workflow:
         self.steps.append(_make_async(step))
         return step
 
-
     def merge(self, *workflows: "Workflow"):
         """Merge steps from other workflows into this workflow."""
-        self.steps += [w.steps for w in workflows]
-        self.on_startup += [w.on_startup for w in workflows]
-        self.on_cleanup += [w.on_cleanup for w in workflows]
+        self.steps.extend(step for w in workflows for step in w.steps)
+        self.on_startup.extend(step for w in workflows for step in w.on_startup)
+        self.on_cleanup.extend(step for w in workflows for step in w.on_cleanup)
 
         return self
