@@ -24,8 +24,8 @@ def otu_ids():
 
 
 @pytest.fixture
-async def indexes_api(http_no_decompress: aiohttp.ClientSession, jobs_api_url: str, work_path: Path):
-    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http_no_decompress, jobs_api_url)
+async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path: Path):
+    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_url)
 
 
 @pytest.fixture

@@ -12,7 +12,7 @@ from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
 
-async def test_skewer(http_no_decompress, jobs_api_url,
+async def test_skewer(http, jobs_api_url,
                       tmpdir, run_subprocess, run_in_executor,
                       analysis_files, file_regression):
     tmpdir = Path(tmpdir)
@@ -23,7 +23,7 @@ async def test_skewer(http_no_decompress, jobs_api_url,
             "sample_id": TEST_SAMPLE_ID
         },
     )
-    sample = await sample_provider(job, http_no_decompress, jobs_api_url).get()
+    sample = await sample_provider(job, http, jobs_api_url).get()
 
     run_skewer = skewer(
         min_length=trimming_min_length(sample.library_type, sample.max_length),
@@ -49,12 +49,12 @@ async def test_skewer(http_no_decompress, jobs_api_url,
 
 
 async def test_trimming_feature(runtime, tmpdir,
-                                http_no_decompress,
+                                http,
                                 run_in_executor,
                                 data_regression,
                                 file_regression,
                                 analysis_files):
-    runtime["http"] = http_no_decompress
+    runtime["http"] = http
     TEST_SAMPLE["paired"] = True
     runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
     job = await runtime.get_or_instantiate("job")

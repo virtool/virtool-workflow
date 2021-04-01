@@ -17,10 +17,11 @@ def _count_calls(func):
     return _counting
 
 
-async def test_analysis_fixture(runtime, http_no_decompress, jobs_api_url: str):
+async def test_analysis_fixture(runtime, http, jobs_api_url: str):
     job = await runtime.get_or_instantiate("job")
-    provider = runtime["analysis_provider"] = AnalysisProvider(job.args["analysis_id"], http_no_decompress,
-                                                               jobs_api_url)
+    provider = runtime["analysis_provider"] = AnalysisProvider(
+        job.args["analysis_id"], http, jobs_api_url
+    )
 
     provider.upload = _count_calls(provider.upload)
 

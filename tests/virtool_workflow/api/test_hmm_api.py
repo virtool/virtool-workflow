@@ -8,9 +8,9 @@ from virtool_workflow.data_model import HMM
 
 
 @fixture
-def hmms_api(http_no_decompress, jobs_api_url: str, tmpdir):
+def hmms_api(http, jobs_api_url: str, tmpdir):
     return HMMsProvider(
-        http=http_no_decompress,
+        http=http,
         jobs_api_url=jobs_api_url,
         work_path=Path(tmpdir),
     )
