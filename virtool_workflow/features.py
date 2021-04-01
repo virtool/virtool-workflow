@@ -8,7 +8,6 @@ _features = []
 
 
 class WorkflowFeature(ABC):
-
     async def __modify_workflow__(self, workflow: Workflow) -> Workflow:
         """
         Called before the workflow is executed.
@@ -39,9 +38,11 @@ def install(*features: WorkflowFeature):
     _features.extend(features)
 
 
-async def install_into_environment(environment: WorkflowEnvironment,
-                                   *features: WorkflowFeature,
-                                   workflow: Workflow = None):
+async def install_into_environment(
+    environment: WorkflowEnvironment,
+    *features: WorkflowFeature,
+    workflow: Workflow = None
+):
     """
     Apply any installed workflow features to the workflow environment and workflow object.
 
@@ -52,6 +53,7 @@ async def install_into_environment(environment: WorkflowEnvironment,
     if not features:
         features = _features
 
+
     if workflow is None:
         workflow = environment["workflow"]
 
@@ -61,6 +63,6 @@ async def install_into_environment(environment: WorkflowEnvironment,
         await feature.__modify_environment__(environment)
 
     if features is _features:
-        features.clear()
+        _features.clear()
 
     return environment
