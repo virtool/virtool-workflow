@@ -30,7 +30,7 @@ def test_load_fixtures():
 
     assert "data_path" in options
     assert "work_path" in options
-    assert "thread_pool_executor" in options
+    assert "is_analysis_workflow" in options
 
 
 async def test_run_discovery(runtime: AnalysisWorkflowEnvironment):

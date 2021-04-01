@@ -10,7 +10,7 @@ def editor(_):
 
 async def test_environment_variable_fixture():
     editor_ = editor()
-    assert editor_ == os.getenv("EDITOR", default="/usr/bin/nano")
+    assert editor_ == os.getenv("VT_EDITOR", default="/usr/bin/nano")
 
 
 async def test_types(runtime):
@@ -21,8 +21,8 @@ async def test_types(runtime):
     value = await runtime.instantiate(boolean)
     assert not value
 
-    os.environ["BOOLEAN"] = "yes"
-    assert os.getenv("BOOLEAN") == "yes"
+    os.environ["VT_BOOLEAN"] = "yes"
+    assert os.getenv("VT_BOOLEAN") == "yes"
 
     del runtime["boolean"]
 
@@ -30,11 +30,11 @@ async def test_types(runtime):
 
     assert value
 
-    @configuration.config_fixture("BOOLEAN", type_=int)
+    @options.fixture(type_=int)
     def integer(_):
         ...
 
-    os.environ["BOOLEAN"] = "49"
+    os.environ["VT_INTEGER"] = "49"
     integer_ = await runtime.instantiate(integer)
 
     assert integer_ == 49
