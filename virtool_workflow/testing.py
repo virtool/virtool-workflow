@@ -15,12 +15,12 @@ def testing_data_path():
 
 
 @pytest.fixture
-async def runtime(http_no_decompress, jobs_api_url):
+async def runtime(http, jobs_api_url):
     async with WorkflowEnvironment(
             fixtures.runtime
     ) as _runtime:
         _runtime.override("data_path", testing_data_path)
-        _runtime["http"] = http_no_decompress
+        _runtime["http"] = http
         _runtime["jobs_api_url"] = jobs_api_url
         yield _runtime
 

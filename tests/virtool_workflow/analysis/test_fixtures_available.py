@@ -13,10 +13,10 @@ from virtool_workflow.environment import WorkflowEnvironment
 
 
 @pytest.fixture
-async def environment(http_no_decompress, jobs_api_url):
+async def environment(http, jobs_api_url):
     env = WorkflowEnvironment(virtool_workflow.runtime.fixtures.analysis)
 
-    env["http"] = http_no_decompress
+    env["http"] = http
     env["jobs_api_url"] = jobs_api_url
 
     TEST_JOB["args"]["index_id"] = TEST_INDEX_ID

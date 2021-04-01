@@ -11,10 +11,10 @@ def profiles_path(analysis_files):
     return analysis_files / "profiles.hmm"
 
 
-async def test_hmms(http_no_decompress, jobs_api_url, run_in_executor, run_subprocess, tmpdir):
+async def test_hmms(http, jobs_api_url, run_in_executor, run_subprocess, tmpdir):
     work_path = Path(tmpdir) / "work"
     work_path.mkdir()
 
-    provider = HMMsProvider(http_no_decompress, jobs_api_url, work_path)
+    provider = HMMsProvider(http, jobs_api_url, work_path)
 
     await hmms(provider, work_path, run_subprocess)

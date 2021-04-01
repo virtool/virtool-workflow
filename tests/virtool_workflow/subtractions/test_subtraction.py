@@ -6,8 +6,8 @@ from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.data_model import Subtraction
 
 
-async def test_subtractions(http_no_decompress, jobs_api_url: str, tmpdir):
-    subtraction_provider = SubtractionProvider(TEST_SUBTRACTION_ID, http_no_decompress, jobs_api_url, Path(tmpdir))
+async def test_subtractions(http, jobs_api_url: str, tmpdir):
+    subtraction_provider = SubtractionProvider(TEST_SUBTRACTION_ID, http, jobs_api_url, Path(tmpdir))
 
     _subtractions = await subtractions([subtraction_provider])
 

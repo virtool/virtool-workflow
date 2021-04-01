@@ -4,7 +4,7 @@ from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_CACHE, TEST
 from virtool_workflow.api.caches import RemoteReadsCacheWriter
 
 
-async def test_api_caching(tmpdir, http_no_decompress, jobs_api_url, run_in_executor):
+async def test_api_caching(tmpdir, http, jobs_api_url, run_in_executor):
     tmpdir = Path(tmpdir)
     cache_dir = tmpdir / "cache"
     cache_dir.mkdir()
@@ -12,7 +12,7 @@ async def test_api_caching(tmpdir, http_no_decompress, jobs_api_url, run_in_exec
     writer = RemoteReadsCacheWriter(TEST_CACHE["key"],
                                     cache_dir,
                                     TEST_SAMPLE_ID,
-                                    http_no_decompress,
+                                    http,
                                     jobs_api_url,
                                     run_in_executor)
 

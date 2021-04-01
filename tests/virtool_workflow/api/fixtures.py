@@ -16,7 +16,7 @@ async def jobs_api_url():
 
 
 @pytest.fixture
-async def aiohttp_app(loop):
+async def mock_jobs_api_app(loop):
     app = web.Application(loop=loop)
 
     for route_table in mock_routes:
@@ -26,10 +26,6 @@ async def aiohttp_app(loop):
 
 
 @pytest.fixture
-async def http_no_decompress(aiohttp_client, aiohttp_app):
-    return await aiohttp_client(aiohttp_app, auto_decompress=False)
-
-
-@pytest.fixture
-async def http(aiohttp_app, aiohttp_client) -> aiohttp.ClientSession:
-    return await aiohttp_client(aiohttp_app, auto_decompress=True)
+async def http(mock_jobs_api_app, aiohttp_client) -> aiohttp.ClientSession:
+    """Create an http client for accessing the mocked Jobs API."""
+    return await aiohttp_client(mock_jobs_api_app, auto_decompress=False)
