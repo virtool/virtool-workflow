@@ -15,16 +15,12 @@ class ConfigFixtureGroup(FixtureGroup):
 
             return _decorator
 
-        env_name = "VT_" + func.__name__.upper().replace("-", "_")
-        help_text = func.__doc__ or ""
-
         _fixture = ConfigFixture(
             name=func.__name__,
-            env=env_name,
             type_=type_,
             default=default,
             transform=func,
-            help_=help_text,
+            help_=func.__doc__ or "",
         )
 
         return super().fixture(_fixture)

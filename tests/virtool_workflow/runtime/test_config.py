@@ -1,9 +1,9 @@
 import os
 
-from virtool_workflow.config import configuration
+from virtool_workflow.config.fixtures import options
 
 
-@configuration.config_fixture("EDITOR", type_=str, default="/usr/bin/nano")
+@options.fixture(default="/usr/bin/nano")
 def editor(_):
     ...
 
@@ -14,15 +14,15 @@ async def test_environment_variable_fixture():
 
 
 async def test_types(runtime):
-    @configuration.config_fixture("TEST_ENV_VARIABLE", type_=bool, default=False)
+    @options.fixture(type_=bool, default=False)
     def boolean(_):
         ...
 
     value = await runtime.instantiate(boolean)
     assert not value
 
-    os.environ["TEST_ENV_VARIABLE"] = "yes"
-    assert os.getenv("TEST_ENV_VARIABLE") == "yes"
+    os.environ["BOOLEAN"] = "yes"
+    assert os.getenv("BOOLEAN") == "yes"
 
     del runtime["boolean"]
 
@@ -30,11 +30,11 @@ async def test_types(runtime):
 
     assert value
 
-    @configuration.config_fixture("TEST_ENV_VARIABLE", type_=int)
+    @configuration.config_fixture("BOOLEAN", type_=int)
     def integer(_):
         ...
 
-    os.environ["TEST_ENV_VARIABLE"] = "49"
+    os.environ["BOOLEAN"] = "49"
     integer_ = await runtime.instantiate(integer)
 
     assert integer_ == 49

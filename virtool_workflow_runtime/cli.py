@@ -23,7 +23,8 @@ import virtool_workflow_runtime.new_jobs
 
 # noinspection PyUnresolvedReferences
 import virtool_workflow_runtime.on_init
-from virtool_workflow.config.configuration import load_config
+
+from virtool_workflow.config.loading import load_config
 from virtool_workflow.config.fixtures import options
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow_runtime import hooks

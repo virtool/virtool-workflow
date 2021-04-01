@@ -24,8 +24,6 @@ class ConfigFixture(Callable):
 
         self.__name__ = self.name
 
-        options[name] = ConfigOption(name=name, type=type_, help=help_, fixture=self)
-
     def __call__(self):
         if self.override_value:
             return self.override_value
@@ -54,29 +52,4 @@ class ConfigFixture(Callable):
 
     @property
     def env(self):
-        return "VT_" + func.__name__.upper().replace("-", "_")
-
-
-async def load_config(scope=None, hook=None, **kwargs):
-    """
-    Override config fixture values with those from :obj:`kwargs`.
-
-    Triggers `on_load_config` hook.
-
-    :param kwargs: Values for any config options to be used before the fixtures.
-    """
-    if not hook:
-        hook = hooks.on_load_config
-
-    for option in options.values():
-        if option.name in kwargs and kwargs[option.name] is not None:
-            option.fixture.override_value = (
-                option.fixture.transform(kwargs[option.name]) or kwargs[option.name]
-            )
-
-    if not scope:
-        async with FixtureScope(config_fixtures) as config_scope:
-            await hook.trigger(config_scope)
-    else:
-        scope.add_provider(config_fixtures)
-        await hook.trigger(scope)
+        return "VT_" + self.name.upper().replace("-", "_")
