@@ -4,7 +4,6 @@ from pathlib import Path
 import virtool_workflow
 import virtool_workflow.storage.paths
 from virtool_workflow import fixture
-from virtool_workflow.config.configuration import config_fixture
 from .group import ConfigFixtureGroup
 
 options = ConfigFixtureGroup()

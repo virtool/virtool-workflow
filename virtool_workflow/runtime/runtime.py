@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope, features
-from virtool_workflow.config.configuration import load_config, config_fixtures
+from virtool_workflow.config.loading import load_config
+from virtool_workflow.config.fixtures import options
 from virtool_workflow.hooks import on_load_config
 from virtool_workflow.runtime import fixtures
 
@@ -22,9 +23,13 @@ def set_log_level_to_debug(dev_mode: bool):
 @on_load_config
 def load_scripts(init_file: Path, fixtures_file: Path):
     if init_file.exists():
-        discovery.import_module_from_file(module_name=init_file.name.rstrip(".py"), path=init_file)
+        discovery.import_module_from_file(
+            module_name=init_file.name.rstrip(".py"), path=init_file
+        )
     if fixtures_file.exists():
-        discovery.import_module_from_file(module_name=fixtures_file.name.rstrip(".py"), path=fixtures_file)
+        discovery.import_module_from_file(
+            module_name=fixtures_file.name.rstrip(".py"), path=fixtures_file
+        )
 
 
 @on_load_config
@@ -38,7 +43,7 @@ def extract_workflow(workflow_file_path: Path, scope):
 
 @asynccontextmanager
 async def prepare_environment(**config):
-    scope = FixtureScope(config_fixtures)
+    scope = FixtureScope(options)
     await load_config(scope=scope, **config)
     scope.add_provider(fixtures.runtime)
 

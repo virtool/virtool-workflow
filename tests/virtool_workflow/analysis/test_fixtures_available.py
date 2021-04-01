@@ -3,6 +3,8 @@ import pytest
 import virtool_workflow.runtime.fixtures
 from tests.virtool_workflow.analysis.test_sample_fixture import no_op
 from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
+||||||| merged common ancestors
+from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
 from tests.virtool_workflow.api.mocks.mock_job_routes import TEST_JOB
 from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
@@ -20,6 +22,7 @@ def environment(http_no_decompress, jobs_api_url):
 
     env["http"] = http
     env["jobs_api_url"] = jobs_api_url
+    env["proc"] = 1
 
     TEST_JOB["args"]["index_id"] = TEST_INDEX_ID
     TEST_JOB["args"]["ref_id"] = TEST_REF_ID
