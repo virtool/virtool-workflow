@@ -1,0 +1,5 @@
+FROM python:3.9-buster as pip_install
+RUN pip install --user git+https://github.com/virtool/virtool-workflow
+
+FROM virtool/workflow:0.0.0
+COPY --from=pip_install /root/.local /root/.local
