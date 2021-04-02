@@ -1,6 +1,7 @@
 FROM virtool/workflow:0.0.0
 
 COPY ./workflow ./workflow
+COPY . .
 
-ENTRYPOINT ["workflow", "run", "-f workflow/__init__.py", "test_job"]
+ENTRYPOINT ["workflow", "run", "test_job"]
 
