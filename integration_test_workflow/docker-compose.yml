@@ -61,6 +61,8 @@ services:
         volumes:
           - vt_pgadmin4_data:/var/lib/pgadmin4/data
         depends_on: [ postgres ]
+        logging:
+          driver: none
 
 volumes:
   vt_mongo_data:

@@ -1,4 +1,4 @@
-FROM virtool/workflow:0.0.0
+FROM virtool/workflow
 
 COPY . .
 
