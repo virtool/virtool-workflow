@@ -26,7 +26,7 @@ def test_results_available(results):
 
 
 @step
-def test_builtin_fixtures_available(workflow, run_in_executor, run_subprocess)
+def test_builtin_fixtures_available(workflow, run_in_executor, run_subprocess):
     assert isinstance(workflow, Workflow)
     assert isinstance(run_in_executor, FunctionExecutor)
     assert isinstance(run_subprocess,  RunSubprocess)
