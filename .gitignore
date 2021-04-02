@@ -13,4 +13,3 @@ _build
 *egg-info
 *.prof
 tags
-||||||| parent of 61cb079... Add .prof files to .gitignore
