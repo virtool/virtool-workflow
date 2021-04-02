@@ -6,7 +6,7 @@
 ./build.sh
 ```
 
-This builds the `virtool/integration_test_workflow` and `virtool/jobs-api` docker images.
+This builds the `virtool/integration_test_workflow` and `virtool/job-api` docker images.
 
 ## Running the Tests
 
