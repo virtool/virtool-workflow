@@ -4,3 +4,5 @@ services:
         image: virtool/integration_test_workflow
         depends_on:
             - job-api
+        command: >
+            --dev-mode true
