@@ -66,7 +66,7 @@ test_dockerfile=$(realpath workflow/Dockerfile)
 workflow_latest_dockerfile=$(realpath latest-workflow-Dockerfile)
 
 _print "Building 'virtool/workflow' image with the latest version of 'virtool_workflow'..."
-docker build -t virtool/workflow -f $workflow_latest_dockerfile --build-arg "VIRTOOL_WORKFLOW_REPO=$virtool_workflow_repo" .
+docker build -t virtool/workflow -f $workflow_latest_dockerfile --build-arg "VIRTOOL_WORKFLOW_REPO=$virtool_workflow_repo" --no-cache .
 
 _print "Building 'virtool/integration_test_workflow'..."
 docker build -t virtool/integration_test_workflow -f $test_dockerfile workflow

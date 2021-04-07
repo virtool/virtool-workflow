@@ -16,10 +16,11 @@ async def _run(**kwargs):
 
 
 @options.add_options
+@click.argument("job_id")
 @cli.command()
-def run(**kwargs):
+def run(job_id, **kwargs):
     """Run a workflow."""
-    asyncio.run(_run(**kwargs))
+    asyncio.run(_run(job_id=job_id, **kwargs))
 
 
 def cli_main():
