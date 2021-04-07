@@ -2,14 +2,13 @@
 import asyncio
 import click
 
-from virtool_workflow import runtime
+from virtool_workflow.runtime import runtime
 from virtool_workflow.config.fixtures import options
 
 
 @click.group()
-def cli(**kwargs):
+def cli():
     ...
-
 
 
 async def _run(**kwargs):
@@ -20,7 +19,7 @@ async def _run(**kwargs):
 @cli.command()
 def run(**kwargs):
     """Run a workflow."""
-    asyncio.run(_run(**obj, **kwargs))
+    asyncio.run(_run(**kwargs))
 
 
 def cli_main():
