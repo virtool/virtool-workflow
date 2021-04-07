@@ -8,8 +8,9 @@ from virtool_workflow.config.fixtures import options
 
 @options.add_options
 @click.group()
-def cli():
-    pass
+@click.pass_context
+def cli(ctx, **kwargs):
+    ctx.obj = kwargs
 
 
 async def _run(**kwargs):
@@ -17,9 +18,10 @@ async def _run(**kwargs):
 
 
 @cli.command()
-def run(**kwargs):
+@click.pass_obj
+def run(obj, **kwargs):
     """Run a workflow."""
-    asyncio.run(_run(**kwargs))
+    asyncio.run(_run(**obj, **kwargs))
 
 
 def cli_main():

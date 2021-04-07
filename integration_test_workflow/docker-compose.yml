@@ -17,6 +17,7 @@ services:
             --postgres-connection-string="postgresql+asyncpg://virtool:virtool@postgres/virtool"
             --redis-connection-string="redis://redis:6379"
             jobsAPI
+            --fake
 
     mongo:
         image: mongo:4.4
