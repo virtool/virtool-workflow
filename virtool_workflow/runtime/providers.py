@@ -11,10 +11,9 @@ from virtool_workflow.config import fixtures as config
 from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures import FixtureGroup
 
-providers = FixtureGroup(config.job_id,
-                         jobs.acquire_job,
-                         jobs.push_status,
-                         **api_fixtures)
+providers = FixtureGroup(
+    config.job_id, jobs.acquire_job, jobs.push_status, **api_fixtures
+)
 """A :class:`FixtureGroup` containing all data provider fixtures."""
 
 
@@ -44,7 +43,9 @@ def sample_provider(job, http, jobs_api_url) -> SampleProvider:
 
 
 @providers.fixture
-def subtraction_providers(job, http, jobs_api_url, work_path) -> List[SubtractionProvider]:
+def subtraction_providers(
+    job, http, jobs_api_url, work_path
+) -> List[SubtractionProvider]:
     ids = job.args["subtraction_id"]
     if isinstance(ids, str) or isinstance(ids, bytes):
         ids = [ids]
@@ -52,5 +53,7 @@ def subtraction_providers(job, http, jobs_api_url, work_path) -> List[Subtractio
     subtraction_work_path = work_path / "subtractions"
     subtraction_work_path.mkdir()
 
-    return [SubtractionProvider(id_, http, jobs_api_url, subtraction_work_path)
-            for id_ in ids]
+    return [
+        SubtractionProvider(id_, http, jobs_api_url, subtraction_work_path)
+        for id_ in ids
+    ]

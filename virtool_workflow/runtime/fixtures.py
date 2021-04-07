@@ -1,3 +1,5 @@
+import logging
+from virtool_workflow import hooks
 from virtool_workflow.analysis import fixtures as analysis_fixtures
 from virtool_workflow.config import fixtures as config
 from virtool_workflow.environment import WorkflowEnvironment
@@ -7,6 +9,9 @@ from virtool_workflow.execution.run_subprocess import run_subprocess
 from virtool_workflow.fixtures import FixtureGroup
 from virtool_workflow.results import results
 from virtool_workflow.runtime.providers import providers
+
+
+logger = logging.getLogger(__name__)
 
 _workflow_fixtures = [
     results,
@@ -39,8 +44,18 @@ runtime = FixtureGroup(**analysis)
 
 @runtime.fixture
 def environment(is_analysis_workflow: bool):
-    return (
-        WorkflowEnvironment(analysis)
-        if is_analysis_workflow
-        else WorkflowEnvironment(workflow)
-    )
+    if is_analysis_workflow:
+
+        @hooks.on_success
+        async def upload_results(results, analysis_provider):
+            logger.info("Uploading results...")
+            await analysis_provider.upload_result(results)
+            logger.info("Results uploaded")
+
+        @hooks.on_failure
+        async def delete(analysis_provider):
+            await analysis_provider.delete()
+
+        return WorkflowEnvironment(analysis)
+
+    return WorkflowEnvironment(workflow)
