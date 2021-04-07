@@ -13,6 +13,9 @@ services:
             --redis-connection-string="redis://redis:6379"
             jobsAPI
             --fake
+            --host=0.0.0.0
+        ports:
+            - "9950:9950"
 
     mongo:
         image: mongo:4.4
