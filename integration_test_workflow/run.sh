@@ -9,7 +9,7 @@ _print() {
 }
 
 _print 'Running build script...'
-./build.sh $@
-_print 'Starting docker-compose...'
+./build.sh && \
+_print 'Starting docker-compose...' && \
 docker-compose up --exit-code-from=integration_test_workflow
 _print "DONE"

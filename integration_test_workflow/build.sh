@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 format='\e[1;34m%-6s\e[m'
 
 _print_one_line(){
