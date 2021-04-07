@@ -30,15 +30,23 @@ The `build.sh` script accepts some options to allow use of forks.
 ```text
     Build the docker images for the 'virtool_workflow' integration tests.
 
-    Syntax: ./build.sh [--virtool-repo|--virtool-workflow-repo]
+    Syntax: ./build.sh [--virtool-repo|--virtool-workflow-repo|--local-virtool-workflow|--local-virtool]
     Options:
     --virtool-repo             The URL of the virtool github repo (to use your fork).
     --virtool-branch           The name of the branch to pull from the virtool repo.
     --virtool-workflow-repo    The URL of the virtool-workflow github repo (to use your fork).
+    --local-virtool-workflow   The path to the local virtool-workflow directory.
+    --local-virtool            The path to the local virtool directory.
 ```
 
 To use a specific branch of `virtool_workflow` you can give;
 
 ```shell script
 ./build.sh --virtool-workflow-repo pip install git+https://github.com/{username}/{repo_name}.git@{branch_name}
+```
+
+To use local files instead of pulling from github use;
+
+```shell script
+./build.sh --local-virtool "/path/to/virtool" --local-virtool-workflow "/path/to/local/virtool-workflow"
 ```

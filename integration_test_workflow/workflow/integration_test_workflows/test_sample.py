@@ -3,5 +3,5 @@ from virtool_workflow.data_model.samples import Sample
 
 
 @step
-def test_sample_fixture_available(sample):
-    assert isinstance(sample, Sample)
+def test_sample_fixture_available():
+    ...
