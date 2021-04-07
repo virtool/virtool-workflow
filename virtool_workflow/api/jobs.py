@@ -16,7 +16,9 @@ async def acquire_job_by_id(job_id: str, http: aiohttp.ClientSession, jobs_api_u
 
     :return: a :class:`virtool_workflow.data_model.Job` instance with an api key (.key attribute)
     """
-    async with http.patch(f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True}) as response:
+    async with http.patch(
+        f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True}
+    ) as response:
         async with raising_errors_by_status_code(response) as document:
             return Job(
                 id=document["id"],
@@ -43,13 +45,18 @@ def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> Pus
     """Update the status of the current job."""
 
     async def _push_status(state: str, stage: str, progress: int, error: str = None):
-        async with http.post(f"{jobs_api_url}/jobs/{job.id}/status", json={
-            "state": state,
-            "stage": stage,
-            "error": error,
-            "progress": progress,
-        }) as response:
-            async with raising_errors_by_status_code(response, accept=[200]) as status_json:
+        async with http.post(
+            f"{jobs_api_url}/jobs/{job.id}/status",
+            json={
+                "state": state,
+                "stage": stage,
+                "error": error,
+                "progress": progress,
+            },
+        ) as response:
+            async with raising_errors_by_status_code(
+                response, accept=[200]
+            ) as status_json:
                 return Status(**status_json)
 
     return _push_status

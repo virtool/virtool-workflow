@@ -133,10 +133,15 @@ class WorkflowExecution:
     async def execute(self) -> Dict[str, Any]:
         """Execute the workflow and return the result."""
         try:
-            return await self._execute()
+            result = await self._execute()
         except Exception as e:
             await hooks.on_failure.trigger(self.scope, e)
             raise e
+
+        await hooks.on_result.trigger(self.scope)
+        await hooks.on_success.trigger(self.scope)
+
+        return result
 
     async def _execute(self) -> Dict[str, Any]:
         logger.debug(f"Starting execution of {self.workflow}")
@@ -161,9 +166,6 @@ class WorkflowExecution:
 
         logger.debug("Workflow finished")
         logger.debug(f"Result: \n{pprint.pformat(result)}")
-
-        await hooks.on_result.trigger(self.scope)
-        await hooks.on_success.trigger(self.scope)
 
         return result
 
