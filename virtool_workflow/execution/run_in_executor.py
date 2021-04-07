@@ -1,6 +1,6 @@
 """Helper functions for threading and running subprocesses within Virtool Workflows."""
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Any, Protocol, Coroutine
+from typing import Callable, Any, Protocol, Coroutine, runtime_checkable
 
 from virtool_workflow.fixtures.workflow_fixture import fixture
 
@@ -11,6 +11,7 @@ def thread_pool_executor() -> ThreadPoolExecutor:
     return ThreadPoolExecutor()
 
 
+@runtime_checkable
 class FunctionExecutor(Protocol):
     def __call__(self, func: Callable[[Any], Any], *args: Any, **kwargs: Any) -> Coroutine:
         ...
