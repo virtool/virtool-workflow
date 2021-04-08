@@ -6,3 +6,4 @@ services:
             - job-api
         command: >
             --dev-mode true
+            --jobs-api-url http://job-api:9990/api
