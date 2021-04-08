@@ -4,11 +4,13 @@ import logging
 import pprint
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
-from inspect import signature, Parameter
+from inspect import Parameter, signature
 from typing import Any, Callable
 
-from virtool_workflow.fixtures.errors import FixtureMultipleYield, FixtureNotAvailable
-from virtool_workflow.fixtures.providers import FixtureProvider, InstanceFixtureGroup, FixtureGroup
+from virtool_workflow.fixtures.errors import (FixtureMultipleYield,
+                                              FixtureNotAvailable)
+from virtool_workflow.fixtures.providers import (FixtureGroup, FixtureProvider,
+                                                 InstanceFixtureGroup)
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -44,7 +46,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
 
     async def __aenter__(self):
         """Return this instance when `with` statement is used."""
-        logger.debug(f"Opening a new {FixtureScope.__name__}")
+        logger.info(f"Opening a new {FixtureScope.__name__}")
         return self
 
     async def close(self):
@@ -54,7 +56,8 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         Return execution to each of the generator fixtures and remove
         references to them.
         """
-        logger.debug(f"Closing {FixtureScope.__name__} {self}")
+        logger.info(f"Closing {FixtureScope.__name__}")
+        logger.debug(f"Closed {pprint.pformat(self)}")
         # return control to the generator fixtures which are still left open
         self.clear()
 
