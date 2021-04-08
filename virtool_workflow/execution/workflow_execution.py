@@ -108,6 +108,8 @@ class WorkflowExecution:
             logger.debug(f"Beginning step #{self.current_step}: {step.__name__}")
             return await step()
         except Exception as exception:
+            logger.exception(exception)
+
             self.error = exception
             error = WorkflowError(cause=exception, workflow=self.workflow, context=self)
             callback_results = await hooks.on_error.trigger(self.scope, error)

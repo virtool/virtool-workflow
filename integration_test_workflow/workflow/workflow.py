@@ -13,6 +13,7 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from virtool_workflow.workflow import Workflow
 from virtool_workflow.workflow_feature.merge_workflows import MergeWorkflows
+from virtool_workflow.data_model.jobs import Job
 
 features.install(
     Trimming(),
@@ -44,6 +45,9 @@ def test_builtin_fixtures_available(workflow, run_in_executor, run_subprocess):
     assert isinstance(run_subprocess, RunSubprocess)
     return "Builtin fixtures available"
 
+@step
+def test_job_availaible(job):
+    assert isinstance(job, Job)
 
 @step
 async def test_execution_fixture(execution):
@@ -60,3 +64,8 @@ async def test_execution_fixture(execution):
     assert "UPDATE" in updates
 
     return "`execution.send_update()` working"
+
+
+@step
+async def test_scope_fixture(scope):
+    ...
