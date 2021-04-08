@@ -11,7 +11,7 @@ def generator_fixture():
 async def test_workflow_scope_closes():
     workflow_scope["item"] = "value"
 
-    await hooks.on_finish.trigger(workflow_scope)
+    await hooks.on_finalize.trigger(workflow_scope)
 
     assert "item" not in workflow_scope
 
@@ -22,15 +22,8 @@ async def test_generator_fixture_finishes():
     assert workflow_scope["generator_fixture"]
 
     try:
-        await hooks.on_finish.trigger(workflow_scope)
+        await hooks.on_finalize.trigger(workflow_scope)
     except ValueError:
         return
 
     assert False
-
-
-
-
-
-
-
