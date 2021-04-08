@@ -22,6 +22,10 @@ FixtureImportType = Iterable[
 ]
 
 
+class WorkflowDiscoveryError(Exception):
+    ...
+
+
 def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
     Import a module from a file.
@@ -102,7 +106,10 @@ def discover_workflow(path: Path) -> Workflow:
     :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
     """
     logger.info(f"Importing module from {path}")
-    module = import_module_from_file(path.name.rstrip(path.suffix), path)
+    try:
+        module = import_module_from_file(path.name.rstrip(path.suffix), path)
+    except FileNotFoundError as not_found:
+        raise WorkflowDiscoveryError(f"There is no such file {path}") from not_found
 
     workflow = next((attr for attr in module.__dict__.values() if isinstance(attr, Workflow)), None)
 

@@ -18,11 +18,11 @@ class WorkflowError(Exception):
     """An exception occurring during the execution of a workflow."""
 
     def __init__(
-            self,
-            cause: Exception,
-            workflow: Workflow,
-            context: Optional["WorkflowExecution"],
-            max_traceback_depth: int = 50
+        self,
+        cause: Exception,
+        workflow: Workflow,
+        context: Optional["WorkflowExecution"],
+        max_traceback_depth: int = 50,
     ):
         """
 
@@ -40,15 +40,17 @@ class WorkflowError(Exception):
         self.traceback_data = {
             "type": exception.__name__,
             "traceback": traceback.format_tb(trace_info, max_traceback_depth),
-            "details": [str(arg) for arg in value.args]
+            "details": [str(arg) for arg in value.args],
         }
 
         super().__init__(str(cause))
 
     def __str__(self):
-        return (f"{self.cause}\n\n"
-                f"Context: {self.context}\n"
-                f"Workflow: {self.workflow}\n")
+        return (
+            f"{self.cause}\n\n"
+            f"Context: {self.context}\n"
+            f"Workflow: {self.workflow}\n"
+        )
 
 
 State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
@@ -94,24 +96,22 @@ class WorkflowExecution:
 
         :param new_state: The new state that should be applied.
         """
-        logger.debug(
-            f"Changing the execution state from {self._state} to {new_state}")
+        logger.debug(f"Changing the execution state from {self._state} to {new_state}")
         await hooks.on_state_change.trigger(self.scope, self._state, new_state)
         self._state = new_state
         return new_state
 
     async def _run_step(
-            self,
-            step: Callable[[], Coroutine[Any, Any, Optional[str]]],
+        self, step: Callable[[], Coroutine[Any, Any, Optional[str]]],
     ):
         try:
-            logger.info(
-                f"Beginning step #{self.current_step}: {step.__name__}")
+            logger.debug(f"Beginning step #{self.current_step}: {step.__name__}")
             return await step()
         except Exception as exception:
+            logger.exception(exception)
+
             self.error = exception
-            error = WorkflowError(
-                cause=exception, workflow=self.workflow, context=self)
+            error = WorkflowError(cause=exception, workflow=self.workflow, context=self)
             callback_results = await hooks.on_error.trigger(self.scope, error)
 
             if callback_results:
@@ -123,8 +123,9 @@ class WorkflowExecution:
         for step in steps:
             if count_steps:
                 self.current_step += 1
-                self.progress = float(self.current_step) / \
-                                float(len(self.workflow.steps))
+                self.progress = float(self.current_step) / float(
+                    len(self.workflow.steps)
+                )
             update = await self._run_step(step)
             if count_steps:
                 await hooks.on_workflow_step.trigger(self.scope, update)
@@ -134,13 +135,18 @@ class WorkflowExecution:
     async def execute(self) -> Dict[str, Any]:
         """Execute the workflow and return the result."""
         try:
-            return await self._execute()
+            result = await self._execute()
         except Exception as e:
             await hooks.on_failure.trigger(self.scope, e)
             raise e
 
+        await hooks.on_result.trigger(self.scope)
+        await hooks.on_success.trigger(self.scope)
+
+        return result
+
     async def _execute(self) -> Dict[str, Any]:
-        logger.info(f"Starting execution of {self.workflow}")
+        logger.debug(f"Starting execution of {self.workflow}")
 
         self.scope["workflow"] = self.workflow
         self.scope["execution"] = self
@@ -148,9 +154,11 @@ class WorkflowExecution:
 
         bound_workflow = await self.scope.bind_to_workflow(self.workflow)
 
-        for state, steps, count_steps in ((State.STARTUP, bound_workflow.on_startup, False),
-                                          (State.RUNNING, bound_workflow.steps, True),
-                                          (State.CLEANUP, bound_workflow.on_cleanup, False)):
+        for state, steps, count_steps in (
+            (State.STARTUP, bound_workflow.on_startup, False),
+            (State.RUNNING, bound_workflow.steps, True),
+            (State.CLEANUP, bound_workflow.on_cleanup, False),
+        ):
             await self._set_state(state)
             await self._run_steps(steps, count_steps)
 
@@ -158,11 +166,8 @@ class WorkflowExecution:
 
         result = self.scope["results"]
 
-        logger.info("Workflow finished")
+        logger.debug("Workflow finished")
         logger.debug(f"Result: \n{pprint.pformat(result)}")
-
-        await hooks.on_result.trigger(self.scope)
-        await hooks.on_success.trigger(self.scope)
 
         return result
 

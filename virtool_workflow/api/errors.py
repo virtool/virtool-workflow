@@ -4,7 +4,9 @@ from typing import Dict, Type, List
 
 class JobAlreadyAcquired(Exception):
     def __init__(self, job_id: str):
-        super(JobAlreadyAcquired, self).__init__(f"Job {job_id} is has already been acquired.")
+        super(JobAlreadyAcquired, self).__init__(
+            f"Job {job_id} is has already been acquired."
+        )
 
 
 class JobsAPIServerError(Exception):
@@ -24,9 +26,11 @@ class AlreadyFinalized(Exception):
 
 
 @asynccontextmanager
-async def raising_errors_by_status_code(response,
-                                        accept: List[int] = None,
-                                        status_codes_to_exceptions: Dict[int, Type[Exception]] = None):
+async def raising_errors_by_status_code(
+    response,
+    accept: List[int] = None,
+    status_codes_to_exceptions: Dict[int, Type[Exception]] = None,
+):
     """
     Raise exceptions based on the result status code.
 
@@ -50,7 +54,7 @@ async def raising_errors_by_status_code(response,
         accept = list(range(200, 299))
 
     response_json = None
-    if response.content_type == 'application/json':
+    if response.content_type == "application/json":
         try:
             response_json = await response.json()
         except UnicodeDecodeError:
@@ -58,7 +62,11 @@ async def raising_errors_by_status_code(response,
 
     if response.status in status_codes_to_exceptions:
         if response_json:
-            response_message = response_json["message"] if "message" in response_json else str(response_json)
+            response_message = (
+                response_json["message"]
+                if "message" in response_json
+                else str(response_json)
+            )
         else:
             try:
                 response_message = await response.text()
@@ -69,4 +77,6 @@ async def raising_errors_by_status_code(response,
     if response.status in accept:
         yield response_json
     else:
-        raise ValueError(f"Status code {response.status} not handled")
+        raise ValueError(
+            f"Status code {response.status} not handled for response\n {response}"
+        )

@@ -42,6 +42,14 @@ Triggered when a job finishes, regardless of success or failure.
 """
 
 
+on_finalize = FixtureHook("on_finalize")
+"""
+Triggered after job finishes, regardless of success or failure.
+
+Intended for finalization actions such as closing the fixture scope.
+"""
+
+
 @on_success
 async def _trigger_on_finish_from_on_success(scope):
     await on_finish.trigger(scope)
@@ -125,6 +133,7 @@ __all__ = [
     "on_workflow_step",
     "on_success",
     "on_failure",
+    "on_finalize",
     "on_workflow_failure",
     "on_workflow_finish",
     "on_finish",

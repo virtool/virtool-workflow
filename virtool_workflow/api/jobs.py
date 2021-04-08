@@ -1,12 +1,22 @@
-from typing import Callable, Optional, Awaitable
+import asyncio
+import logging
+from typing import Awaitable, Callable, Optional
 
 import aiohttp
 
-from .errors import raising_errors_by_status_code
 from ..data_model import Job, Status
+from .errors import (
+    JobAlreadyAcquired,
+    JobsAPIServerError,
+    raising_errors_by_status_code,
+)
+
+logger = logging.getLogger(__name__)
 
 
-async def acquire_job_by_id(job_id: str, http: aiohttp.ClientSession, jobs_api_url):
+async def acquire_job_by_id(
+    job_id: str, http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: int
+):
     """
     Acquire the job with a given ID using the jobs API.
 
@@ -16,22 +26,35 @@ async def acquire_job_by_id(job_id: str, http: aiohttp.ClientSession, jobs_api_u
 
     :return: a :class:`virtool_workflow.data_model.Job` instance with an api key (.key attribute)
     """
-    async with http.patch(f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True}) as response:
-        async with raising_errors_by_status_code(response) as document:
+    async with http.patch(
+        f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True}
+    ) as response:
+        async with raising_errors_by_status_code(
+            response, status_codes_to_exceptions={"400": JobAlreadyAcquired}
+        ) as document:
+            logger.info(document)
             return Job(
                 id=document["id"],
                 args=document["args"],
-                mem=document["mem"],
-                proc=document["proc"],
+                mem=document["mem"] if "mem" in document else mem,
+                proc=document["proc"] if "proc" in document else proc,
                 status=document["status"],
                 task=document["task"],
                 key=document["key"],
             )
 
 
-def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str):
-    async def _job_provider(job_id: str):
-        return await acquire_job_by_id(job_id, http, jobs_api_url)
+def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: int):
+    async def _job_provider(job_id: str, retry=3, timeout=3):
+        try:
+            logger.debug(f"Acquiring {job_id}")
+            return await acquire_job_by_id(job_id, http, jobs_api_url, mem, proc)
+        except aiohttp.client_exceptions.ClientConnectionError as error:
+            if retry > 0:
+                await asyncio.sleep(timeout)
+                return await _job_provider(job_id, retry=retry - 1)
+
+        raise JobsAPIServerError("Unable to connect to server.")
 
     return _job_provider
 
@@ -43,13 +66,18 @@ def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> Pus
     """Update the status of the current job."""
 
     async def _push_status(state: str, stage: str, progress: int, error: str = None):
-        async with http.post(f"{jobs_api_url}/jobs/{job.id}/status", json={
-            "state": state,
-            "stage": stage,
-            "error": error,
-            "progress": progress,
-        }) as response:
-            async with raising_errors_by_status_code(response, accept=[200]) as status_json:
+        async with http.post(
+            f"{jobs_api_url}/jobs/{job.id}/status",
+            json={
+                "state": state,
+                "stage": stage,
+                "error": error,
+                "progress": progress,
+            },
+        ) as response:
+            async with raising_errors_by_status_code(
+                response, accept=[200]
+            ) as status_json:
                 return Status(**status_json)
 
     return _push_status

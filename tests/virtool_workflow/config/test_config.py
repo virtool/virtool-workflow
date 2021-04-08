@@ -46,7 +46,7 @@ def test_fixture_group_can_be_applied_to_click_command(click_runner):
 
 
 def test_config_fixtures_get_added_as_options(click_runner):
-    result = click_runner.invoke(cli, ["--help"])
+    result = click_runner.invoke(cli, ["run", "--help"])
 
     for opt in ("--data-path", "--work-path"):
         assert opt in result.output

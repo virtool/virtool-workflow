@@ -6,7 +6,7 @@ workflow_scope = FixtureScope(workflow_fixtures)
 """The :class:`FixtureScope` to be used for workflow runs."""
 
 
-@hooks.on_finish
+@hooks.on_finalize
 async def _close_scopes():
     """Close :class:`FixtureScope` instances when the workflow finishes."""
     await workflow_scope.close()

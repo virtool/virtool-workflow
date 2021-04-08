@@ -2,26 +2,25 @@
 import asyncio
 import click
 
-from virtool_workflow import runtime
+from virtool_workflow.runtime import runtime
 from virtool_workflow.config.fixtures import options
 
 
-@options.add_options
 @click.group()
-@click.pass_context
-def cli(ctx, **kwargs):
-    ctx.obj = kwargs
+def cli():
+    ...
 
 
 async def _run(**kwargs):
     await runtime.start(**kwargs)
 
 
+@options.add_options
+@click.argument("job_id")
 @cli.command()
-@click.pass_obj
-def run(obj, **kwargs):
+def run(job_id, **kwargs):
     """Run a workflow."""
-    asyncio.run(_run(**obj, **kwargs))
+    asyncio.run(_run(job_id=job_id, **kwargs))
 
 
 def cli_main():

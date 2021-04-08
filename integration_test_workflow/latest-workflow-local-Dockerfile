@@ -1,0 +1,8 @@
+FROM python:3.9-buster as local_pip_install
+WORKDIR install
+COPY . .
+RUN pip install --user .
+
+
+FROM virtool/workflow:0.0.0
+COPY --from=local_pip_install /root/.local /root/.local
