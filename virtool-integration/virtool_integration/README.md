@@ -1,52 +1,86 @@
 # Virtool Workflow Integration Tests
 
+## Installation
+
+The `virtool_integration` package can be installed by;
+
+```shell script
+pip install .
+```
+
+Or to run in a poetry virtual environment;
+
+```
+poetry install
+```
+
 ## Building the Docker Images
 
-```shell script
-./build.sh
-```
-
-The latest version of the `virtool_workflow` library is pulled from github and installed into the 
-`virtool/workflow` image. This allows new features of `virtool_workflow` to be tested before they 
-released to pypi.
-
-The `virtool/integration_test_workflow` and `virtool/job-api` docker images are produced.
-
-## Running the Tests
+The `workflow-test` script is included in the pip/poetry install. This utility is used to build the required images
+with the latest version of the code. 
 
 ```shell script
-./build.sh
-docker-compose up
-```
-
-### Using a fork
-
-The `build.sh` script accepts some options to allow use of forks.
-
-```shell script
-./build.sh --help
+workflow-test build all --help
 ```
 
 ```text
-    Build the docker images for the 'virtool_workflow' integration tests.
+    Usage: workflow-test build all [OPTIONS]
 
-    Syntax: ./build.sh [--virtool-repo|--virtool-workflow-repo|--local-virtool-workflow|--local-virtool]
+      Build all of the required images.
+
     Options:
-    --virtool-repo             The URL of the virtool github repo (to use your fork).
-    --virtool-branch           The name of the branch to pull from the virtool repo.
-    --virtool-workflow-repo    The URL of the virtool-workflow github repo (to use your fork).
-    --local-virtool-workflow   The path to the local virtool-workflow directory.
-    --local-virtool            The path to the local virtool directory.
+      --virtool-workflow-remote TEXT  The virtool-workflow git repository to pull
+                                      from.
+
+      --virtool-workflow-path PATH    The path to a local clone of the virtool-
+                                      workflow git repository.
+
+      --virtool-path TEXT             The path to a local clone of the virtool git
+                                      repository.
+
+      --virtool-remote TEXT           The virtool git repository to pull from.
+      --help                          Show this message and exit.
 ```
 
-To use a specific branch of `virtool_workflow` you can give;
+
+You can also build individual images using the subcommands of `workflow-test build`.
 
 ```shell script
-./build.sh --virtool-workflow-repo pip install git+https://github.com/{username}/{repo_name}.git@{branch_name}
+workflow-test build --help
 ```
 
-To use local files instead of pulling from github use;
+```text
+    Usage: workflow-test build [OPTIONS] COMMAND [ARGS]...
+
+      Build the required docker images with the latest version of the code.
+
+    Options:
+      --help  Show this message and exit.
+
+    Commands:
+      all          Build all of the required images.
+      integration  Build the `virtool/integration_test_workflow` image.
+      jobs-api     Build the `virtool/jobs-api` image.
+      workflow     Build the `virtool/workflow` image.
+```
+
+Each subcommand accepts either a `--path` or `--remote` option indictating which version 
+of the code should be used.
+
+For example, to build the `virtool/workflow` image based on the master branch of the `virtool/virtool_workflow` repository;
+
 
 ```shell script
-./build.sh --local-virtool "/path/to/virtool" --local-virtool-workflow "/path/to/local/virtool-workflow"
+workflow-test build workflow --remote https://github.com/virtool/virtool-workflow@master
 ```
+
+
+## Running the Tests
+
+Once the docker images have been build using the desired version of the source code, you can start the test environment using;
+
+```shell script
+workflow-test up
+```
+
+This simply runs a `docker-compose up` command with some options preset.
