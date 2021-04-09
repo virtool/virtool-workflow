@@ -41,4 +41,8 @@ def clone(repo: str, branch: str = None, cwd: os.PathLike = None):
 
 
 def docker_build(dockerfile: os.PathLike, context: os.PathLike, tag: str, *args):
-    call(f"docker build -t {tag} -f {dockerfile} {' '.join(args)} .", shell=True, cwd=context)
+    call(
+        f"docker build -t {tag} -f {dockerfile} {' '.join(args)} .",
+        shell=True,
+        cwd=context,
+    )

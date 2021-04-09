@@ -1,5 +1,6 @@
 import tempfile
 from pathlib import Path
+from subprocess import call
 
 import click
 
@@ -15,15 +16,21 @@ def cli():
     ...
 
 
+@cli.command()
+@click.pass_context
+def up(ctx):
+    """Run the integration tests using docker-compose"""
+    call("docker-compose up", shell=True, cwd=Path(__file__).parent)
+
+
 @cli.group()
 def build():
     """Build the required docker images with the latest version of the code."""
-    ...
 
 
 @click.option(
     "--path",
-    default="..",
+    default=Path(__file__).parent.parent.parent,
     type=click.Path(),
     help="The path to a local clone of the virtool-workflow git repository.",
 )
@@ -64,7 +71,7 @@ def integration():
 
 @click.option(
     "--remote",
-    default="https://github.com/virtool/virtool",
+    default="https://github.com/virtool/virtool@release/5.0.0",
     help="The virtool git repository to pull from.",
 )
 @click.option(
@@ -97,7 +104,7 @@ def jobs_api(path, remote):
 
 @click.option(
     "--virtool-remote",
-    default="https://github.com/virtool/virtool",
+    default="https://github.com/virtool/virtool@release/5.0.0",
     help="The virtool git repository to pull from.",
 )
 @click.option(
