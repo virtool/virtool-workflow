@@ -20,7 +20,11 @@ def cli():
 @click.pass_context
 def up(ctx):
     """Run the integration tests using docker-compose"""
-    call("docker-compose up", shell=True, cwd=Path(__file__).parent)
+    call(
+        "docker-compose up --exit-code-from=integration_test_workflow",
+        shell=True,
+        cwd=Path(__file__).parent,
+    )
 
 
 @cli.group()
