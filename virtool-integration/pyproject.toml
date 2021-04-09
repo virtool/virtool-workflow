@@ -8,8 +8,6 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.8"
 click = "^7.1.2"
-docker = "^5.0.0"
-docker-compose = "^1.29.0"
 
 [tool.poetry.dev-dependencies]
 
