@@ -2,7 +2,11 @@ from pathlib import Path
 
 import pytest
 
-from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
+from tests.virtool_workflow.api.mocks.mock_index_routes import (
+    TEST_INDEX_ID,
+    TEST_INDEX,
+    TEST_REF_ID,
+)
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFile
@@ -49,5 +53,11 @@ async def test_download(indexes_api: IndexProvider, tmpdir):
         "reference.3.bt2",
         "reference.4.bt2",
         "reference.rev.1.bt2",
-        "reference.rev.2.bt2"
+        "reference.rev.2.bt2",
     }
+
+
+async def test_finalize(indexes_api: IndexProvider):
+    await indexes_api.finalize()
+
+    assert TEST_INDEX["ready"] is True

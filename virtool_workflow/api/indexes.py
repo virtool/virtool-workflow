@@ -4,9 +4,10 @@ import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractIndexProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import upload_file_via_post, read_file_from_response
+from virtool_workflow.api.utils import (read_file_from_response,
+                                        upload_file_via_post)
 from virtool_workflow.data_model import Reference
-from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
+from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 from virtool_workflow.data_model.indexes import Index
 
 
@@ -97,4 +98,11 @@ class IndexProvider(AbstractIndexProvider):
         return target_path
 
     async def finalize(self):
-        raise NotImplementedError()
+        """Finalize the current index."""
+        async with self.http.patch(f"{self.jobs_api_url}/indexes/{self._index_id}") as response:
+            async with raising_errors_by_status_code(response) as index_document:
+                return Index(
+                    index_document["id"],
+                    index_document["manifest"],
+                    await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
+                )
