@@ -2,6 +2,7 @@ from typing import List
 
 from virtool_workflow.api import jobs
 from virtool_workflow.api.analysis import AnalysisProvider
+from virtool_workflow.api.client import authenticated_http
 from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.api.samples import SampleProvider
@@ -10,7 +11,6 @@ from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.config import fixtures as config
 from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures import FixtureGroup
-from virtool_workflow.api.client import authenticated_http
 
 providers = FixtureGroup(
     config.job_id, jobs.acquire_job, jobs.push_status, **api_fixtures
@@ -22,9 +22,7 @@ providers = FixtureGroup(
 async def _job(job_id, acquire_job, scope) -> Job:
     job = await acquire_job(job_id)
 
-    scope["key"] = job.key
-    await scope.instantiate(authenticated_http)
-    scope["http"] = authenticated_http
+    scope["http"] = await authenticated_http(job.id, job.key, scope["http"])
 
     return job
 
@@ -46,6 +44,7 @@ def index_provider(job, http, jobs_api_url) -> IndexProvider:
 
 @providers.fixture
 def sample_provider(job, http, jobs_api_url) -> SampleProvider:
+    print(http)
     return SampleProvider(job.args["sample_id"], http, jobs_api_url)
 
 

@@ -1,10 +1,11 @@
 import aiohttp
 import pytest
 
-from virtool_workflow.api.client import authenticated_http
+from virtool_workflow.api.client import authenticated_http, JobApiHttpSession
 from virtool_workflow.api.scope import api_scope
 from virtool_workflow.runtime import fixtures
 from virtool_workflow.fixtures.scope import FixtureScope
+from tests.virtool_workflow.api.mocks.mock_job_routes import TEST_JOB
 
 
 @pytest.fixture
@@ -13,11 +14,11 @@ async def client():
 
 
 async def test_http_client_does_close(client):
-    assert isinstance(client, aiohttp.ClientSession)
+    assert isinstance(client, JobApiHttpSession)
 
     await api_scope.close()
 
-    assert client.closed
+    assert client.client.closed
 
 
 async def test_add_auth_headers_adds_auth():
@@ -33,11 +34,12 @@ async def test_add_auth_headers_adds_auth():
     assert client.auth.password == job_key
 
 
-async def test_auth_headers_applied_once_job_is_ready():
+async def test_auth_headers_applied_once_job_is_ready(http, jobs_api_url):
     async with FixtureScope(fixtures.workflow) as scope:
+        scope["http"] = http
+        scope["job_id"] = TEST_JOB["id"]
+        scope["jobs_api_url"] = jobs_api_url
         job = await scope.get_or_instantiate("job")
 
-        http = scope["http"]
-
-        assert client.auth.login == f"job-{job.id}"
-        assert client.auth.password == job.key
+        assert http.auth.login == f"job-{job.id}"
+        assert http.auth.password == job.key
