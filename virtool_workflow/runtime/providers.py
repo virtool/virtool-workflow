@@ -10,6 +10,7 @@ from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.config import fixtures as config
 from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures import FixtureGroup
+from virtool_workflow.api.client import authenticated_http
 
 providers = FixtureGroup(
     config.job_id, jobs.acquire_job, jobs.push_status, **api_fixtures
@@ -18,8 +19,14 @@ providers = FixtureGroup(
 
 
 @providers.fixture
-async def _job(job_id, acquire_job) -> Job:
-    return await acquire_job(job_id)
+async def _job(job_id, acquire_job, scope) -> Job:
+    job = await acquire_job(job_id)
+
+    scope["key"] = job.key
+    await scope.instantiate(authenticated_http)
+    scope["http"] = authenticated_http
+
+    return job
 
 
 @providers.fixture
