@@ -1,3 +1,4 @@
+import os
 import tempfile
 from pathlib import Path
 from subprocess import call
@@ -6,14 +7,38 @@ import click
 
 from .utils import DONE, bcolors, clone, color, docker_build
 
-JOBS_API_DOCKERFILE = Path(__file__).parent / "api-server-Dockerfile"
-WORKFLOW_DOCKER_FILE = Path(__file__).parent / "latest-workflow-local-Dockerfile"
-INTEGRATION_WORKFLOW_DOCKER_FILE = Path(__file__).parent / "workflow/Dockerfile"
+HERE = Path(__file__).parent
+
+JOBS_API_DOCKERFILE = HERE / "api-server-Dockerfile"
+WORKFLOW_DOCKER_FILE = HERE / "latest-workflow-local-Dockerfile"
+SPECIFIC_WORKFLOW_DOCKERFILE = HERE / "specific-workflow-Dockerfile"
+INTEGRATION_WORKFLOW_DOCKER_FILE = HERE / "workflow/Dockerfile"
+
+SUB_WORKFLOWS_PATH = HERE / "workflow/integration_test_workflows"
 
 
 @click.group()
 def cli():
     ...
+
+
+@cli.group()
+def run():
+    ...
+
+
+for sub_workflow_path in SUB_WORKFLOWS_PATH.glob(r"*.py"):
+    name = sub_workflow_path.with_suffix("").name
+    if name.startswith("_"):
+        continue
+
+    @run.command(name, help=f"Run the {name} test workflow.")
+    @click.pass_context
+    def __cmd(ctx):
+        os.environ["VT_WORKFLOW_FILE"] = str(sub_workflow_path.relative_to(HERE/"workflow"))
+        ctx.invoke(up)
+
+    __cmd.__name__ = __cmd.__qualname__ = name
 
 
 @cli.command()
@@ -23,18 +48,20 @@ def up(ctx):
     call(
         "docker-compose up --exit-code-from=integration_test_workflow",
         shell=True,
-        cwd=Path(__file__).parent,
+        cwd=HERE,
+        env=os.environ,
     )
 
 
 @cli.group()
 def build():
     """Build the required docker images with the latest version of the code."""
+    ...
 
 
 @click.option(
     "--path",
-    default=Path(__file__).parent.parent.parent,
+    default=HERE.parent.parent,
     type=click.Path(),
     help="The path to a local clone of the virtool-workflow git repository.",
 )
@@ -66,9 +93,7 @@ def integration():
     tag = "virtool/integration_test_workflow"
     print(color(bcolors.OKBLUE, f"\nBuilding `{color(bcolors.OKGREEN, tag)}`...\n"))
     docker_build(
-        dockerfile=INTEGRATION_WORKFLOW_DOCKER_FILE,
-        context=Path(__file__).parent / "workflow",
-        tag=tag,
+        dockerfile=INTEGRATION_WORKFLOW_DOCKER_FILE, context=HERE / "workflow", tag=tag,
     )
     print(DONE)
 

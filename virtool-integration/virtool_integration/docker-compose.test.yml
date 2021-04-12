@@ -7,3 +7,4 @@ services:
         command: >
             --dev-mode true
             --jobs-api-url http://job-api:9990/api
+            --workflow-file-path ${VT_WORKFLOW_FILE}

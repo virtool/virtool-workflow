@@ -1,9 +1,9 @@
 import logging
 from integration_test_workflows import (
-    test_hmms,
-    test_indexes,
-    test_sample,
-    test_subtractions,
+    hmms,
+    indexes,
+    sample,
+    subtractions,
 )
 from virtool_workflow import features, hooks, fixture
 from virtool_workflow.analysis.features.trimming import Trimming
@@ -17,7 +17,7 @@ from virtool_workflow.data_model.jobs import Job
 
 features.install(
     Trimming(),
-    MergeWorkflows(test_hmms, test_indexes, test_sample, test_subtractions,),
+    MergeWorkflows(hmms, indexes, sample, subtractions,),
 )
 
 
@@ -45,9 +45,11 @@ def test_builtin_fixtures_available(workflow, run_in_executor, run_subprocess):
     assert isinstance(run_subprocess, RunSubprocess)
     return "Builtin fixtures available"
 
+
 @step
 def test_job_availaible(job):
     assert isinstance(job, Job)
+
 
 @step
 async def test_execution_fixture(execution):

@@ -84,3 +84,32 @@ workflow-test up
 ```
 
 This simply runs a `docker-compose up` command with some options preset.
+
+### Running Specific Sub-Workflows
+
+The main integration test workflow is split up into several sub-workflows.
+
+To see which sub-workflows can be executed use;
+
+```shell script
+workflow-test run --help
+```
+
+```text
+    Usage: workflow-test run [OPTIONS] COMMAND [ARGS]...
+
+    Options:
+      --help  Show this message and exit.
+
+    Commands:
+      hmms          Run the hmms test workflow.
+      indexes       Run the indexes test workflow.
+      sample        Run the sample test workflow.
+      subtractions  Run the subtractions test workflow.
+```
+
+For example, to run the integration tests relating to subtractions;
+
+```
+workflow-test run subtractions
+```
