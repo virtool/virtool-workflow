@@ -1,6 +1,7 @@
 import aiohttp
 import pytest
 from aiohttp import web
+from virtool_workflow.api.client import JobApiHttpSession
 
 from tests.virtool_workflow.api.mocks.mock_api import mock_routes
 
@@ -28,4 +29,5 @@ async def mock_jobs_api_app(loop):
 @pytest.fixture
 async def http(mock_jobs_api_app, aiohttp_client) -> aiohttp.ClientSession:
     """Create an http client for accessing the mocked Jobs API."""
-    return await aiohttp_client(mock_jobs_api_app, auto_decompress=False)
+    session = await aiohttp_client(mock_jobs_api_app, auto_decompress=False)
+    return JobApiHttpSession(session)
