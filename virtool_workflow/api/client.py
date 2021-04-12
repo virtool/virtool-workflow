@@ -8,6 +8,7 @@ async def http():
 
 
 async def authenticated_http(job_id, key, http):
+    """:class:`Aiohttp.ClientSession` instance which includes authentication headers for the jobs API."""
     auth = aiohttp.BasicAuth(login=f"job-{job_id}", password=key)
 
     async with aiohttp.ClientSession(auto_decompress=False, auth=auth) as session:
