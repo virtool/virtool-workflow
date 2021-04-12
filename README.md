@@ -282,7 +282,7 @@ functions. Any standard function provided will be wrapped into an async function
 
 ### Poetry
 
-(poetry)[https://python-poetry.org/] is used to manage dependencies for the project.
+[poetry](https://python-poetry.org/) is used to manage dependencies for the project.
 
 To build the distribution;
 
