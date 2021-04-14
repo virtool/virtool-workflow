@@ -35,6 +35,7 @@ pytest-cov = "^2.11.1"
 pytest-aiohttp = "0.3.0"
 pytest-regressions = "^2.2.0"
 pytest-profiling = "^1.7.0"
+lovely-pytest-docker = "^0.2.0"
 
 [tool.poetry.scripts]
 workflow = "virtool_workflow.cli:cli_main"
