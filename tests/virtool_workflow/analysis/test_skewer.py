@@ -1,5 +1,6 @@
 import gzip
 import shutil
+import pytest
 from pathlib import Path
 
 from tests.virtool_workflow.api.mocks.mock_sample_routes import (
@@ -15,6 +16,7 @@ from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
 
+@pytest.mark.skipif(shutil.which("skewer") is None, reason="Skewer is not installed.")
 async def test_skewer(
     http,
     jobs_api_url,
@@ -26,7 +28,10 @@ async def test_skewer(
 ):
     tmpdir = Path(tmpdir)
 
-    job = Job("test_job", {"sample_id": TEST_SAMPLE_ID},)
+    job = Job(
+        "test_job",
+        {"sample_id": TEST_SAMPLE_ID},
+    )
     sample = await sample_provider(job, http, jobs_api_url).get()
 
     run_skewer = skewer(
@@ -36,12 +41,10 @@ async def test_skewer(
 
     TEST_READ_1 = analysis_files / "paired_small_1.fq.gz"
     TEST_READ_2 = analysis_files / "paired_small_2.fq.gz"
-    read_1 = await run_in_executor(
-        shutil.copyfile, TEST_READ_1, tmpdir / TEST_READ_1.name
-    )
-    read_2 = await run_in_executor(
-        shutil.copyfile, TEST_READ_2, tmpdir / TEST_READ_2.name
-    )
+    read_1 = await run_in_executor(shutil.copyfile, TEST_READ_1,
+                                   tmpdir / TEST_READ_1.name)
+    read_2 = await run_in_executor(shutil.copyfile, TEST_READ_2,
+                                   tmpdir / TEST_READ_2.name)
 
     reads = (read_1, read_2)
 
@@ -56,6 +59,8 @@ async def test_skewer(
             file_regression.check(left.read(), basename="left", binary=True)
 
 
+@pytest.mark.skipif(shutil.which("skewer") is None, reason="Skewer is not installed.")
+@pytest.mark.skipif(shutil.which("fastqc") is None, reason="Fastqc is not installed.")
 async def test_trimming_feature(
     runtime,
     tmpdir,
@@ -67,7 +72,8 @@ async def test_trimming_feature(
 ):
     runtime["http"] = http
     TEST_SAMPLE["paired"] = True
-    runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir), run_in_executor)
+    runtime["sample_caches"] = LocalCaches[ReadsCache](Path(tmpdir),
+                                                       run_in_executor)
     job = await runtime.get_or_instantiate("job")
     job.args["sample_id"] = TEST_SAMPLE_ID
     runtime["workflow"] = Workflow()

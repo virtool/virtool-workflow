@@ -1,4 +1,4 @@
-
+import shutil
 import pytest
 
 import virtool_workflow.runtime.fixtures
@@ -33,15 +33,47 @@ async def environment(http, jobs_api_url):
     return env
 
 
-def use_all(analysis, indexes, subtractions, sample, hmms):
+def use_analysis(analysis):
     assert isinstance(analysis, Analysis)
+
+
+def use_index(indexes):
     assert isinstance(indexes[0], Index)
+
+
+def use_subtractions(subtractions):
     assert isinstance(subtractions[0], Subtraction)
+
+
+def use_sample(sample):
     assert isinstance(sample, Sample)
+
+
+def use_hmms(hmms):
     assert isinstance(hmms[0], HMM)
 
 
-async def test_fixtures_available(environment):
-    await environment.execute_function(use_all)
+async def test_analysis_available(environment):
+    await environment.execute_function(use_analysis)
 
 
+@pytest.mark.skipif(shutil.which("fastqc") is None,
+                    reason="Fastqc is not installed.")
+@pytest.mark.skipif(shutil.which("Skewer") is None,
+                    reason="Skewer is not installed.")
+async def test_sample_available(environment):
+    await environment.execute_function(use_sample)
+
+
+async def test_subtractions_available(environment):
+    await environment.execute_function(use_subtractions)
+
+
+@pytest.mark.skipif(shutil.which("Hmmpress") is None,
+                    reason="Hmmpress is not installed.")
+async def test_hmms_available(environment):
+    await environment.execute_function(use_hmms)
+
+
+async def test_index_available(environment):
+    await environment.execute_function(use_index)
