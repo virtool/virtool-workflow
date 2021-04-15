@@ -1,10 +1,12 @@
 import shutil
+import pytest
 from pathlib import Path
 
 from virtool_workflow.analysis.read_prep.fastqc import fastqc
 from virtool_workflow.analysis.utils import make_read_paths
 
 
+@pytest.mark.skipif(shutil.which("fastqc") is None, reason="Fastqc is not installed.")
 async def test_correct_fastqc(tmpdir, run_subprocess, run_in_executor, data_regression, analysis_files):
     work_path = Path(tmpdir)
     run = fastqc(work_path, run_subprocess)
