@@ -1,9 +1,0 @@
-version: "3.1"
-services:
-    integration_test_workflow:
-        image: virtool/integration_test_workflow
-        depends_on:
-            - job-api
-        command: >
-            --dev-mode true
-            --jobs-api-url http://job-api:9990/api
