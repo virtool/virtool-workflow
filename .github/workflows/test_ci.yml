@@ -18,21 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-
-      - name: Docker Layer Caching
-        uses: satackey/action-docker-layer-caching@v0.0.11
-
-
       - name: Run Tests Using Docker Compose
         run: |
           cd tests
           docker-compose up --build --exit-code-from pytest
-
-      - name: Print Files
-        run: >-
-          ls -la -R &&
-          ls -la tests &&
-          echo "$GITHUB_WORKSPACE"
 
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2
