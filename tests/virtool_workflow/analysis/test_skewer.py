@@ -16,6 +16,7 @@ from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
 
+@pytest.mark.slow
 @pytest.mark.skipif(shutil.which("skewer") is None, reason="Skewer is not installed.")
 async def test_skewer(
     http,
@@ -59,6 +60,7 @@ async def test_skewer(
             file_regression.check(left.read(), basename="left", binary=True)
 
 
+@pytest.mark.slow
 @pytest.mark.skipif(shutil.which("skewer") is None, reason="Skewer is not installed.")
 @pytest.mark.skipif(shutil.which("fastqc") is None, reason="Fastqc is not installed.")
 async def test_trimming_feature(
