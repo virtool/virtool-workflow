@@ -34,8 +34,6 @@ services:
           - "6379:6379"
         volumes:
           - vt_redis_data:/data
-        logging:
-          driver: none
 
     postgres:
         image: postgres:13.1
