@@ -59,7 +59,7 @@ async def test_analysis_available(environment):
 
 @pytest.mark.skipif(shutil.which("fastqc") is None,
                     reason="Fastqc is not installed.")
-@pytest.mark.skipif(shutil.which("Skewer") is None,
+@pytest.mark.skipif(shutil.which("skewer") is None,
                     reason="Skewer is not installed.")
 async def test_sample_available(environment):
     await environment.execute_function(use_sample)
@@ -69,7 +69,7 @@ async def test_subtractions_available(environment):
     await environment.execute_function(use_subtractions)
 
 
-@pytest.mark.skipif(shutil.which("Hmmpress") is None,
+@pytest.mark.skipif(shutil.which("hmmpress") is None,
                     reason="Hmmpress is not installed.")
 async def test_hmms_available(environment):
     await environment.execute_function(use_hmms)
