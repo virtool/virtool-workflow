@@ -9,10 +9,8 @@ from virtool_workflow.execution.run_subprocess import run_subprocess
 from virtool_workflow.fixtures import FixtureGroup
 from virtool_workflow.results import results
 from virtool_workflow.runtime.providers import providers
-from virtool_workflow.api.jobs import acquire_job
 from virtool_workflow.config.fixtures import job_id
 from virtool_workflow.api.scope import api_fixtures
-
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +19,12 @@ _workflow_fixtures = [
     results,
     config.work_path,
     config.data_path,
-    config.mem, 
+    config.mem,
     config.proc,
     run_in_executor,
     thread_pool_executor,
     run_subprocess,
 ]
-
 
 workflow = FixtureGroup(
     *_workflow_fixtures,
@@ -39,7 +36,8 @@ workflow = FixtureGroup(
 analysis = FixtureGroup(
     *_workflow_fixtures,
     **dict(providers, **api_fixtures),
-    **{k: getattr(analysis_fixtures, k) for k in analysis_fixtures.__all__},
+    **{k: getattr(analysis_fixtures, k)
+       for k in analysis_fixtures.__all__},
 )
 """A :class:`FixtureGroup` containing all fixtures excusive to analysis workflows."""
 

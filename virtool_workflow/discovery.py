@@ -14,12 +14,7 @@ from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
-FixtureImportType = Iterable[
-    Union[
-        str,
-        Iterable[str]
-    ]
-]
+FixtureImportType = Iterable[Union[str, Iterable[str]]]
 
 
 class WorkflowDiscoveryError(Exception):
@@ -30,8 +25,9 @@ def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
     Import a module from a file.
 
-    The parent directory of `path` will also be added to `sys.path` prior to importing. This
-    ensures that modules and packages defined in that directory can be properly imported.
+    The parent directory of `path` will also be added to `sys.path` prior to 
+    importing. This ensures that modules and packages defined in that directory 
+    can be properly imported.
 
     :param module_name: The name of the python module.
     :param path: The :class:`pathlib.Path` of the python file
@@ -55,9 +51,13 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
     """
 
     if isinstance(module, Path):
-        module = import_module_from_file(module.name.rstrip(module.suffix), module)
+        module = import_module_from_file(
+            module.name.rstrip(module.suffix), module)
 
-    return [attr for attr in module.__dict__.values() if isinstance(attr, Callable)]
+    return [
+        attr for attr in module.__dict__.values()
+        if isinstance(attr, Callable)
+    ]
 
 
 def load_fixture_plugins(fixture_modules: Iterable[str]):
@@ -74,8 +74,10 @@ def load_fixture_plugins(fixture_modules: Iterable[str]):
         else:
             iter_ = iter(fixture_set)
             module = import_module(next(iter_))
-            fixtures.extend(getattr(module, name) for name in iter_
-                            if isinstance(getattr(module, name), Callable))
+            fixtures.extend(
+                getattr(module, name) for name in iter_
+                if isinstance(getattr(module, name), Callable)
+            )
 
     return fixtures
 
@@ -84,8 +86,9 @@ def load_fixtures_from__fixtures__(path: Path) -> List[Callable]:
     """
     Load all fixtures specified by the __fixtures__ attribute of a module.
 
-    :param path: The path to a python module containing __fixtures__: FixtureImportType attribute
-    :return: A list of discovered fixtures, or an empty list if the `__fixtures__` attribute is absent
+    :param path: The path to a python module containing __fixtures__ attribute
+    :return: A list of discovered fixtures, or an empty list
+             if the `__fixtures__` attribute is absent
     """
     module = import_module_from_file(path.name.rstrip(path.suffix), path)
 
@@ -98,23 +101,33 @@ def load_fixtures_from__fixtures__(path: Path) -> List[Callable]:
 
 def discover_workflow(path: Path) -> Workflow:
     """
-    Find a instance of virtool_workflow.Workflow in the python module located at the given path.
+    Find a instance of virtool_workflow.Workflow in the
+    python module located at the given path.
 
-    :param path: The #pathlib.Path to the python file containing the module
-    :returns: The first instance of #virtool_workflow.Workflow occurring in `dir(module)`
+    :param path: The :class:`pathlib.Path` to the python file
+                 containing the module.
+    :returns: The first instance of :class:`virtool_workflow.Workflow`
+              occurring in `dir(module)`
 
-    :raises StopIteration: When no instance of virtool_workflow.Workflow can be found.
+    :raises StopIteration:
+        When no instance of virtool_workflow.Workflow can be found.
     """
     logger.info(f"Importing module from {path}")
     try:
         module = import_module_from_file(path.name.rstrip(path.suffix), path)
     except FileNotFoundError as not_found:
-        raise WorkflowDiscoveryError(f"There is no such file {path}") from not_found
+        raise WorkflowDiscoveryError(
+            f"There is no such file {path}") from not_found
 
-    workflow = next((attr for attr in module.__dict__.values() if isinstance(attr, Workflow)), None)
+    workflow = next(
+
+        (attr
+         for attr in module.__dict__.values() if isinstance(attr, Workflow)
+         ),
+        None
+    )
 
     if not workflow:
-        logger.debug("No Workflow instance found, collecting startup, step, and cleanup functions.")
         return collect(module)
 
     return workflow
@@ -127,18 +140,13 @@ def run_discovery(
     """
     Discover a workflow and fixtures from the given path(s).
 
-    Fixtures are loaded in the following order:
-
-        1. virtool_workflow_runtime.autoload, used to standard runtime fixtures.
-        2. __fixtures__ attribute from the workflow file (located by `path`)
-        3. Any #WorkflowFixture instances from the module located by `fixture_path`
-
-    :param path: A Path locating a python module which contains a #Workflow instance
-    :param fixture_path: A Path locating a file containing #WorkflowFixture instances
-    :return: The Workflow instance from `path` and a list of discovered fixtures.
+    :param path: A Path to the workflow module
+    :param fixture_path: A Path to a module conaining addtional fitures.
+    :return: A :class:`Workflow` instance and a list of fixtures.
     """
     logger.info("Beginning workflow discovery.")
-    fixtures = load_fixtures_from__fixtures__(Path(__file__).parent / "autoload.py")
+    fixtures = load_fixtures_from__fixtures__(
+        Path(__file__).parent / "autoload.py")
 
     logger.info("Loaded fixtures from `autoload.py`")
 

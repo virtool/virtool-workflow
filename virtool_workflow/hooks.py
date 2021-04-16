@@ -21,12 +21,13 @@ Parameters supplied are the `Workflow` instance and the results dict.
 
 on_failure = FixtureHook("on_failure")
 """
-Triggered when a job fails to complete.
+Triggered when a job fails to complete. The exception
+which caused the failure will be found in the `error` fixture.
 
 .. code-block:: python
 
     @on_failure
-    async def perform_on_failure(error: WorkflowError):
+    async def perform_on_failure(error: Exception):
         ...
 """
 

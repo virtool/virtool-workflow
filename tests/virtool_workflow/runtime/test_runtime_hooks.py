@@ -1,7 +1,6 @@
 from contextlib import suppress
 
 from virtool_workflow import hooks, Workflow
-from virtool_workflow.execution.workflow_execution import WorkflowError
 
 
 async def test_on_finish_triggered(runtime):
@@ -38,7 +37,7 @@ async def test_on_failure_triggered(runtime):
     def step():
         raise ValueError("test error")
 
-    with suppress(WorkflowError):
+    with suppress(Exception):
         await runtime.execute(workflow)
 
     assert failure_called

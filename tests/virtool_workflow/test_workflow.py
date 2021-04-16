@@ -1,5 +1,4 @@
 from virtool_workflow import hooks
-from virtool_workflow.execution.workflow_execution import WorkflowError
 
 
 async def test_respond_errors(test_workflow, runtime):
@@ -8,7 +7,7 @@ async def test_respond_errors(test_workflow, runtime):
         raise Exception()
 
     @hooks.on_error(until=hooks.on_result)
-    async def handle_error(error: WorkflowError):
+    async def handle_error(error: Exception):
         assert error.context.current_step == 3
         return "Step 3 skipped due to internal error"
 
@@ -20,24 +19,6 @@ async def test_respond_errors(test_workflow, runtime):
 
     await runtime.execute(test_workflow)
     assert "Step 3 skipped due to internal error" in updates
-
-
-async def test_correct_traceback_data(test_workflow, runtime):
-    arg1, arg2 = "arg1", "arg2"
-
-    @test_workflow.step
-    async def raise_exception():
-        raise ValueError(arg1, arg2)
-
-    def assert_correct_traceback(_error):
-        tb = _error.traceback_data
-        assert tb["type"] == "ValueError"
-        assert arg1, arg2 in tb["details"]
-
-    try:
-        await runtime.execute(test_workflow)
-    except WorkflowError as error:
-        assert_correct_traceback(error)
 
 
 async def test_correct_progress(test_workflow, runtime):
