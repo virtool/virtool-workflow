@@ -4,7 +4,6 @@ import pytest
 
 from virtool_workflow import hooks
 from virtool_workflow.execution.run_subprocess import run_subprocess as _run_subprocess
-from virtool_workflow.execution.workflow_execution import WorkflowError
 
 run_subprocess = _run_subprocess()
 
@@ -72,8 +71,8 @@ async def trigger_finish(test_workflow, scope):
     try:
         await asyncio.sleep(1)
         raise Exception("Foo")
-    except Exception as exc:
-        await hooks.on_failure.trigger(scope, WorkflowError(exc, workflow=test_workflow, context=None))
+    except Exception as error:
+        await hooks.on_failure.trigger(scope, error)
 
 
 async def test_command_can_be_terminated(bash_sleep, test_workflow, runtime):

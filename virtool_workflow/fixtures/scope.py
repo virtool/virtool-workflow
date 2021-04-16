@@ -7,10 +7,15 @@ from functools import wraps
 from inspect import Parameter, signature
 from typing import Any, Callable
 
-from virtool_workflow.fixtures.errors import (FixtureMultipleYield,
-                                              FixtureNotAvailable)
-from virtool_workflow.fixtures.providers import (FixtureGroup, FixtureProvider,
-                                                 InstanceFixtureGroup)
+from virtool_workflow.fixtures.errors import (
+    FixtureMultipleYield,
+    FixtureNotAvailable,
+)
+from virtool_workflow.fixtures.providers import (
+    FixtureGroup,
+    FixtureProvider,
+    InstanceFixtureGroup,
+)
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -25,9 +30,10 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
 
     def __init__(self, *providers: FixtureProvider, **instances):
         """
-        :param providers: :class:`FixtureProvider` functions for accessing fixtures. Providers will be checked
-            in the order they are given. The `virtool_workflow.fixtures.data_providers.workflow_fixture` provider is
-            already included.
+        :param providers: :class:`FixtureProvider` functions for accessing
+            fixtures. Providers will be checked in the order they are given.
+            The `virtool_workflow.fixtures.data_providers.workflow_fixture`
+            provider is already included.
 
         :param instances: Any objects to be maintained as instance fixtures.
             Values in this dictionary will be accessible as fixtures by their key. Also note that these
@@ -131,7 +137,9 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
                 return fixture
         raise KeyError(name)
 
-    async def get_or_instantiate(self, name: str, requested_by: Callable = None):
+    async def get_or_instantiate(
+        self, name: str, requested_by: Callable = None
+    ):
         """
         Get an instance of the fixture with a given name. If there exists an
         instance cached in this :class:`FixtureScope` it will be returned, else a new instance
@@ -165,7 +173,9 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
     async def bind(self, func, strict=False):
         return self.bound(func, strict)
 
-    def bound(self, func: Callable[..., Any], strict: bool = False) -> Callable[[], Any]:
+    def bound(
+        self, func: Callable[..., Any], strict: bool = False
+    ) -> Callable[[], Any]:
         """
         Bind fixtures to the parameters of a function.
 
@@ -184,18 +194,28 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         async def _bind(func, fixtures):
             for name, parameter in sig.parameters.items():
                 try:
-                    fixtures[name] = await self.get_or_instantiate(name, requested_by=func)
+                    fixtures[name] = await self.get_or_instantiate(
+                        name, requested_by=func
+                    )
                 except KeyError as key_error:
                     if strict:
                         if parameter.default == Parameter.empty:
                             # Parameter does not have a default value.
-                            raise FixtureNotAvailable(key_error.args[0], signature=sig, func=func, scope=self)
+                            raise FixtureNotAvailable(
+                                key_error.args[0],
+                                signature=sig,
+                                func=func,
+                                scope=self,
+                            )
             return fixtures
 
         if inspect.iscoroutinefunction(func):
+
             async def _call(_func, *args, **kwargs):
                 return await _func(*args, **kwargs)
+
         else:
+
             async def _call(_func, *args, **kwargs):
                 return _func(*args, **kwargs)
 
@@ -206,7 +226,9 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             try:
                 return await _call(func, *args, **fixtures)
             except TypeError as missing_params:
-                raise FixtureNotAvailable(missing_params.args[0], sig, func, self) from missing_params
+                raise FixtureNotAvailable(
+                    missing_params.args[0], sig, func, self
+                )
 
         return _bound
 
@@ -218,8 +240,12 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         :return: A new workflow with fixtures bound to all functions
         """
         bound_workflow = Workflow()
-        bound_workflow.on_startup = [await self.bind(f) for f in workflow.on_startup]
-        bound_workflow.on_cleanup = [await self.bind(f) for f in workflow.on_cleanup]
+        bound_workflow.on_startup = [
+            await self.bind(f) for f in workflow.on_startup
+        ]
+        bound_workflow.on_cleanup = [
+            await self.bind(f) for f in workflow.on_cleanup
+        ]
         bound_workflow.steps = [await self.bind(f) for f in workflow.steps]
         return bound_workflow
 
