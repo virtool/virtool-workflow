@@ -1,13 +1,24 @@
 """Exceptions relating to workflow fixtures."""
 from inspect import Signature, getsourcefile, getsourcelines
+import logging
+import inspect
+import pprint
+import logging
+import pprint
+import inspect
 from typing import Callable
 
 
 class FixtureMultipleYield(ValueError):
     """Raised when a generator workflow fixture yields more than once."""
 
+class FixtureNotFound(KeyError):
+    def __init__(self, name, scope):
+        super().__init__(f"{name} is not a fixture.",
+                f"Available: {', '.join(scope.available.keys())}")
 
-class FixtureNotAvailable(RuntimeError):
+
+class FixtureBindingError(Exception):
     """Raised when a required fixture is not available."""
 
     def _get_source_location(self, func: Callable):
@@ -26,29 +37,27 @@ class FixtureNotAvailable(RuntimeError):
         except TypeError:
             return None, None
 
-    def __init__(self, exception_message: str, signature: Signature, func: Callable, scope, *args):
+        f = inspect.getsourcefile(func)
+        _, linenumber = inspect.getsourcelines(func)
+        return f"{f}:{linenumber}"
+
+    def __init__(self, func: Callable, key: str,
+                 reason="Exception occured while binding fixtures."):
         """
-        :param message: The message of the cause exception.
-        :param signature: The signature of the function requiring the unavailable fixture.
-        :param func: The function requiring the unavailable fixture.
-        :param args: Arguments passed to ValueError's __init__
+        :param func: The function requiring the unavailable fixture
+        :param key: The name of the fixture which could not be instatiated
+        :param reason: The reason for the error
         """
         self.message = exception_message
         self.signature = signature
         self.func = func
-        self.available_fixtures = {
-            name: self._get_source_location(callable_)[1]
-            if callable(callable_) else str(callable_)
-            for name, callable_ in scope.available.items()
-        }
 
-        self.available_fixtures = {k: v or "Source location not available" for k, v in self.available_fixtures.items()}
-        super().__init__(*args)
+        func_location = self._get_source_location(func)
+        message = (f"Failed to bind fixture '{key}'\r\n"
+                   f"Reason: {reason}\r\n"
+                   f"Function: {func} \r\n"
+                   f"Source Location: {func_location}\r\n")
+        super().__init__(message)
 
     def __str__(self):
-        _, location = self._get_source_location(self.func)
-        available_fixture_lines = "\n".join(f'{name}: \n   {loc}'
-                                            for name, loc in self.available_fixtures.items())
-        return f"'\n{self.message}\n" \
-               f"{location if location else ''}\n" \
-               f"Available fixtures:\n {available_fixture_lines}\n"
+        return self.args[0]

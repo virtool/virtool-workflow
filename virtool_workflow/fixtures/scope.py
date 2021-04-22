@@ -8,8 +8,8 @@ from inspect import Parameter, signature
 from typing import Any, Callable
 
 from virtool_workflow.fixtures.errors import (
-    FixtureMultipleYield,
-    FixtureNotAvailable,
+    FixtureNotFound,
+    FixtureBindingError,
 )
 from virtool_workflow.fixtures.providers import (
     FixtureGroup,
@@ -153,12 +153,59 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         with suppress(KeyError):
             return self[name]
 
-        try:
-            fixture = self._get_fixture_from_providers(name, requested_by)
-        except TypeError:
-            raise KeyError(f"{name} is not a fixture within this FixtureScope.")
-
+        fixture = self._get_fixture_from_providers(name, requested_by)
         return await self.instantiate(fixture)
+
+    async def bind(self, func):
+        """
+        Bind fixture values to the parameters of a function.
+
+        Fixtures are instantiated as need at the time that this function is called.
+        """
+        sig = signature(func)
+        func = coerce_to_coroutine_function(func)
+
+        fixture = self._get_fixture_from_providers(name, requested_by)
+        return await self.instantiate(fixture)
+
+    async def bind(self, func, **kwargs):
+        """
+        Bind fixture values to the parameters of a function.
+
+        Fixtures are instantiated at the time that this function is called.
+
+        :raise FixtureNotFound: When there is a parameter which does not
+                                correspond to a fixture.
+        """
+        sig = signature(func)
+        func = coerce_to_coroutine_function(func)
+
+        fixtures = {
+            name: await self.get_or_instantiate(name, requested_by=func)
+            for name in sig.parameters
+        }
+
+        self.update(fixtures)
+
+        return partial(func, **fixtures)
+
+    async def partial(self, func, *args, **kwargs):
+        """
+        Bind fixtures to the function using :func:`functools.partial`.
+        """
+        sig = signature(func)
+
+        fixtures = {}
+        for name in sig.parameters:
+            try:
+                fixtures[name] = await self.get_or_instantiate(name, func)
+            except FixtureNotFound:
+                pass
+
+        self.update(fixtures)
+
+        kwargs.update(fixtures)
+        return partial(func, *args, **kwargs)
 
     def __getitem__(self, item: str):
         """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""

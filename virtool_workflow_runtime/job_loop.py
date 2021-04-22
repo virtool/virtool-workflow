@@ -28,27 +28,33 @@ async def process_job(job: Job, image: str, args: List[str], docker, containers,
     container_finished_future = asyncio.get_running_loop().create_future()
 
     @on_job_cancelled
-    async def stop_container_when_job_is_cancelled(id_):
-        if id_ == job.id:
-            logger.debug(f"Stopping {container} running {container.image} due to cancellation of {id_}.")
+    async def stop_container_when_job_is_cancelled(job_id):
+        if job_id == job.id:
+            logger.info(
+                f"Stopping {container} running {container.image} due to cancellation of {job_id}.")
             container.stop(timeout=3)
 
     @on_container_exit(container)
     async def _handle_container_failure():
         container_exit = container.wait()
-        logger.info(f"{container} exited with status code: {container_exit['StatusCode']}")
+        logger.info(
+            f"{container} exited with status code: {container_exit['StatusCode']}")
         container_finished_future.set_result(container_exit)
 
-    await on_job_processed.trigger(scope, job)
+    scope["job"] = job
+
+    await on_job_processed.trigger(scope)
 
     await container_finished_future
 
-    await on_job_finished.trigger(scope, job)
+    await on_job_finished.trigger(scope)
+
+    del scope["job"]
 
 
 async def job_loop(jobs, workflow_to_docker_image, scope):
     """Process incoming jobs."""
-    _process_job = await scope.bind(process_job, strict=False)
+    _process_job = await scope.partial(process_job)
     async for job in jobs:
         logger.info(f"Processing job {job}")
         image = workflow_to_docker_image[job.task]

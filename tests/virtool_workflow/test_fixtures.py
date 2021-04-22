@@ -1,7 +1,7 @@
 from contextlib import suppress
 
 from virtool_workflow import Workflow
-from virtool_workflow.fixtures.errors import FixtureNotAvailable
+from virtool_workflow.fixtures.errors import FixtureNotFound, FixtureBindingError
 from virtool_workflow.fixtures.workflow_fixture import fixture
 
 
@@ -81,7 +81,7 @@ async def test_workflow_using_fixtures(runtime):
 
 
 async def test_exception_is_raised_when_fixture_not_available(runtime):
-    with suppress(FixtureNotAvailable):
+    with suppress(FixtureBindingError):
         assert await runtime.execute_function(lambda non_existent_fixture: False)
 
 

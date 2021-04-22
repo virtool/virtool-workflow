@@ -7,8 +7,8 @@ async def test_respond_errors(test_workflow, runtime):
         raise Exception()
 
     @hooks.on_error(until=hooks.on_result)
-    async def handle_error(error: Exception):
-        assert error.context.current_step == 3
+    async def handle_error(execution):
+        assert execution.current_step == 3
         return "Step 3 skipped due to internal error"
 
     updates = []

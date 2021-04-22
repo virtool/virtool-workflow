@@ -4,11 +4,14 @@ import shutil
 from functools import partial
 from pathlib import Path
 
+import aiohttp
 from virtool_workflow import FixtureScope
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.read_prep.fastqc import fastqc
-from virtool_workflow.analysis.read_prep.skewer import skewer, trimming_min_length
+from virtool_workflow.analysis.read_prep.skewer import (skewer,
+                                                        trimming_min_length)
 from virtool_workflow.analysis.utils import make_read_paths
+from virtool_workflow.api.caches import RemoteReadCaches
 from virtool_workflow.api.samples import SampleProvider
 from virtool_workflow.caching.caches import GenericCaches
 from virtool_workflow.data_model import Sample
@@ -49,10 +52,11 @@ class Trimming(WorkflowFeature):
 
     async def _sample_fixture(self,
                               sample_provider: SampleProvider,
-                              sample_caches: GenericCaches[ReadsCache],
                               work_path: Path,
                               run_subprocess: RunSubprocess,
                               run_in_executor: FunctionExecutor,
+                              http: aiohttp.ClientSession,
+                              jobs_api_url: str,
                               scope: FixtureScope):
         """Alternate sample fixture which performs trimming and caching of reads."""
         sample = await sample_provider.get()
@@ -61,6 +65,15 @@ class Trimming(WorkflowFeature):
         sample.reads_path = work_path / "reads"
         sample.reads_path.mkdir()
         sample.read_paths = make_read_paths(sample.reads_path, sample.paired)
+
+        sample_caches = RemoteReadCaches(
+            sample.id,
+            sample.paired,
+            sample.reads_path,
+            http,
+            jobs_api_url,
+            run_in_executor
+        )
 
         try:
             cache = await sample_caches.get(key)
@@ -89,7 +102,8 @@ class Trimming(WorkflowFeature):
         :obj:`sample.read_paths` and :obj:`sample.reads_path` will be updated
         to locate the trimmed fastq files.
         """
-        run_skewer = self.skewer(trimming_min_length(sample.library_type, sample.max_length))
+        run_skewer = self.skewer(trimming_min_length(
+            sample.library_type, sample.max_length))
         skewer_result = await run_skewer(sample.read_paths, run_subprocess, run_in_executor)
         sample.read_paths = skewer_result.read_paths
 

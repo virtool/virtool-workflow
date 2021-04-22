@@ -44,7 +44,6 @@ def index_provider(job, http, jobs_api_url) -> IndexProvider:
 
 @providers.fixture
 def sample_provider(job, http, jobs_api_url) -> SampleProvider:
-    print(http)
     return SampleProvider(job.args["sample_id"], http, jobs_api_url)
 
 
