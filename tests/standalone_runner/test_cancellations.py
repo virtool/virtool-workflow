@@ -31,8 +31,8 @@ async def test_running_jobs_get_cancelled(loopless_main):
         await asyncio.sleep(0.5)
 
     @on_job_cancelled(once=True)
-    def check_cancelled(_id):
-        assert _id == "1"
+    def check_cancelled(job_id):
+        assert job_id == "1"
         check_cancelled.called = True
 
     await loopless_main()

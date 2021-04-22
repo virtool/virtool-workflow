@@ -33,21 +33,26 @@ async def docker_event_watcher(client: docker.DockerClient,
     for event in client.events(decode=True):
         if main_thread_event_loop.is_closed():
             return
-        asyncio.run_coroutine_threadsafe(on_docker_event.trigger(scope, event), main_thread_event_loop)
+        scope["event"] = event
+        asyncio.run_coroutine_threadsafe(
+            on_docker_event.trigger(scope), main_thread_event_loop)
 
 
 @on_docker_connect
 async def start_docker_event_watcher(docker, scope):
     """Start a new thread which watches for docker events."""
-    run_async_function_in_thread(docker_event_watcher(docker, scope, asyncio.get_running_loop()))
+    run_async_function_in_thread(docker_event_watcher(
+        docker, scope, asyncio.get_running_loop()))
 
 
 @on_docker_event
 async def _remove_dead_container_and_trigger_on_container_exit_hook(event, containers, scope):
     """Filter through incoming docker events and trigger `on_docker_container_exit` hook."""
-    if event["Action"] == "die":
+    if event["Action"] == "die" or event["Action"] == "stop":
         if event["id"] in containers:
             dead_container = containers[event["id"]]
-            logger.info(f"{dead_container} running {dead_container.image} has exited.")
+            logger.info(
+                f"{dead_container} running {dead_container.image} has exited.")
             del containers[event["id"]]
-            await on_docker_container_exit.trigger(scope, dead_container)
+            scope["container"] = dead_container
+            await on_docker_container_exit.trigger(scope)

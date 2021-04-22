@@ -91,7 +91,13 @@ class Hook:
             else:
                 return await callback(*args, **kwargs)
 
-        return await asyncio.gather(*[call_callback(callback) for callback in callbacks])
+        results = await asyncio.gather(*[call_callback(callback) for callback in callbacks], return_exceptions=True)
+
+        for error in results:
+            if isinstance(error, Exception):
+                raise error
+
+        return results
 
     async def trigger(self, *args, suppress=False, **kwargs) -> List[Any]:
         """

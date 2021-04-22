@@ -6,13 +6,13 @@ from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.analysis.analysis import analysis
 
 __all__ = [
-   "sample",
-   "paired",
-   "subtractions",
-   "sample_path",
-   "analysis_path",
-   "hmms",
-   "analysis"
+    "sample",
+    "paired",
+    "subtractions",
+    "sample_path",
+    "analysis_path",
+    "hmms",
+    "analysis"
 ]
 
 __all__.extend(paths.__all__)

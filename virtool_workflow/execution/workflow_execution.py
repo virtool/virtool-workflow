@@ -57,6 +57,7 @@ class WorkflowExecution:
 
     @asynccontextmanager
     async def startup_and_cleanup(self):
+        """Run the startup and cleanup operations of the workflow."""
         workflow = await self.scope.bind_to_workflow(self.workflow)
 
         for startup_step in workflow.on_startup:

@@ -15,7 +15,8 @@ async def watch_cancel(cancel_channel: AsyncGenerator, scope: FixtureScope):
     logger.debug("Starting `watch_cancel` task.")
     async for job_id in cancel_channel:
         logger.info(f"Cancelling job {job_id}.")
-        await on_job_cancelled.trigger(scope, job_id)
+        scope["job_id"] = job_id
+        await on_job_cancelled.trigger(scope)
 
 
 @on_redis_connect
@@ -23,7 +24,8 @@ def start_cancellation_watcher(redis: Redis, redis_cancel_list_name: str,
                                tasks: dict, scope: FixtureScope):
     cancel_channel = redis_channel(redis, redis_cancel_list_name)
     logger.debug("Creating watch_cancel task.")
-    tasks["watch_cancel"] = asyncio.create_task(watch_cancel(cancel_channel, scope))
+    tasks["watch_cancel"] = asyncio.create_task(
+        watch_cancel(cancel_channel, scope))
 
 
 @on_exit

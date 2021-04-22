@@ -5,7 +5,6 @@ from typing import List, Any, Callable
 
 from virtool_workflow import utils
 from virtool_workflow.execution.hooks.hooks import Hook
-from virtool_workflow.fixtures.errors import FixtureNotAvailable
 from virtool_workflow.fixtures.scope import FixtureScope
 
 logger = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ class FixtureHook(Hook):
         self.callbacks.append(callback_)
         return callback_
 
-    async def trigger(self, scope: FixtureScope, *args, suppress=False, **kwargs) -> List[Any]:
+    async def trigger(self, scope: FixtureScope, suppress=False, **kwargs) -> List[Any]:
         """
         Bind fixtures from `scope` to each callback function and invoke them.
 
@@ -37,8 +36,8 @@ class FixtureHook(Hook):
         async def _bind(callback_: Callable):
             logger.debug(f"Binding fixtures to callback {callback_}")
             try:
-                return await scope.bind(callback_, strict=not args)
-            except FixtureNotAvailable as error:
+                return await scope.bind(callback_)
+            except KeyError as error:
                 if suppress:
                     logger.exception(error)
                     return lambda: None
@@ -46,8 +45,5 @@ class FixtureHook(Hook):
                     raise error
 
         _callbacks = [await _bind(callback) for callback in self.callbacks]
-        _callbacks = [utils.coerce_coroutine_function_to_accept_any_parameters(callback)
-                      if len(signature(callback).parameters) == 0 else callback
-                      for callback in _callbacks]
 
-        return await self._trigger(_callbacks, *args, suppress_errors=suppress, **kwargs)
+        return await self._trigger(_callbacks, suppress_errors=suppress)

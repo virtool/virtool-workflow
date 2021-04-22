@@ -72,7 +72,8 @@ async def trigger_finish(test_workflow, scope):
         await asyncio.sleep(1)
         raise Exception("Foo")
     except Exception as error:
-        await hooks.on_failure.trigger(scope, error)
+        scope["error"] = error
+        await hooks.on_failure.trigger(scope)
 
 
 async def test_command_can_be_terminated(bash_sleep, test_workflow, runtime):

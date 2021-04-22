@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 async def test_containers_are_started_when_jobs_are_given_to_redis():
     @on_docker_container_exit(once=True)
-    def job_container_exit(_, tasks):
+    def job_container_exit(tasks):
         job_container_exit.called = True
         tasks["job_loop"].cancel()
 
@@ -35,7 +35,7 @@ async def test_containers_are_started_when_jobs_are_given_to_redis():
 
 async def test_containers_are_stopped_when_jobs_are_cancelled():
     @on_docker_container_exit(once=True)
-    def job_container_exit(_, tasks):
+    def job_container_exit(tasks):
         job_container_exit.called = True
         tasks["job_loop"].cancel()
 

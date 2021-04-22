@@ -18,6 +18,6 @@ async def test_trigger():
     async with FixtureScope() as scope:
         scope["some_fixture"] = "some_fixture"
 
-        await test_hook.trigger(scope, "item1", "item2")
+        await test_hook.trigger(scope, item1="item1", item2="item2")
 
     assert hook_triggered

@@ -20,6 +20,13 @@ class Sample:
     files: List[dict] = field(default_factory=lambda: [])
 
     def __post_init__(self):
-        self.min_length, self.max_length = self.quality["length"]
         self.reads_path = None
         self.read_paths = None
+
+    @property
+    def min_length(self):
+        return self.quality["length"][0] if self.quality else None
+
+    @property
+    def max_length(self):
+        return self.quality["length"][1] if self.quality else None

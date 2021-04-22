@@ -1,3 +1,5 @@
+import logging
+import pprint
 from pathlib import Path
 from typing import Dict, Any
 
@@ -5,14 +7,20 @@ import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSampleProvider
 from virtool_workflow.analysis.utils import ReadPaths, make_read_paths
-from virtool_workflow.api.errors import raising_errors_by_status_code, AlreadyFinalized, JobsAPIServerError
-from virtool_workflow.api.utils import upload_file_via_post, read_file_from_response
+from virtool_workflow.api.errors import (raising_errors_by_status_code,
+                                         AlreadyFinalized,
+                                         JobsAPIServerError)
+from virtool_workflow.api.utils import (upload_file_via_post,
+                                        read_file_from_response)
 from virtool_workflow.data_model import Sample
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
+
+logger = logging.getLogger(__name__)
 
 
 async def _make_sample_from_response(response) -> Sample:
     async with raising_errors_by_status_code(response) as sample_json:
+        logger.debug(pprint.pformat(sample_json))
         return Sample(
             id=sample_json["id"],
             name=sample_json["name"],
@@ -40,6 +48,7 @@ class SampleProvider(AbstractSampleProvider):
 
     async def get(self) -> Sample:
         async with self.http.get(self.url) as response:
+            logger.info("Fetched sample document")
             return await _make_sample_from_response(response)
 
     async def finalize(self, quality: Dict[str, Any]) -> Sample:
