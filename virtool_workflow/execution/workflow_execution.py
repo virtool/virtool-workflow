@@ -1,13 +1,11 @@
 """Execute workflows and manage the execution context."""
 import logging
 import pprint
-from typing import Any, Callable, Coroutine, Dict, Optional
+from typing import Any, Callable, Coroutine, Dict
 
 from virtool_workflow import hooks
-from virtool_workflow.execution import states
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.workflow import Workflow
-from virtool_workflow.execution.errors
 
 logger = logging.getLogger(__name__)
 
@@ -41,33 +39,16 @@ class WorkflowExecution:
         self.scope["update"] = update
         await hooks.on_update.trigger(self.scope)
 
-    async def _run_step(
-        self,
-        step: Callable[[], Coroutine[Any, Any, Optional[str]]],
-    ):
-        try:
-            logger.debug(
-                f"Beginning step #{self.current_step}: {step.__name__}")
-            return await step()
-        except Exception as exception:
-            self.error = exception
-            error = WorkflowError(cause=exception,
-                                  workflow=self.workflow,
-                                  context=self)
-            callback_results = await hooks.on_error.trigger(self.scope, error)
-
-            if callback_results:
-                return next(result for result in callback_results if result)
-
-            raise error
-
     async def _run_steps(self, steps, count_steps=False):
         for step in steps:
             if count_steps:
                 self.current_step += 1
                 self.progress = float(self.current_step) / float(
                     len(self.workflow.steps))
-            update = await self._run_step(step)
+            logger.debug(
+                f"Beginning step #{self.current_step}: {step.__name__}")
+            update = await step()
+
             if count_steps:
                 await hooks.on_workflow_step.trigger(self.scope, update)
             if update:

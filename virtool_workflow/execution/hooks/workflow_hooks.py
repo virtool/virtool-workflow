@@ -62,13 +62,6 @@ Triggered when a workflow finishes, regardless of it's success.
         ...
 """
 
-on_error = FixtureHook("on_error")
-"""
-Triggered when an error occurs in a workflow step. If a string value is returned from this 
-hook it will be used as the update for the step in which the error occurred,  and the workflow 
-will continue.
-"""
-
 
 @on_workflow_failure
 async def _trigger_finish_from_failure(_, scope):
