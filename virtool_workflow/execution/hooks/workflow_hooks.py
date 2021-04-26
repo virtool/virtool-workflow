@@ -40,17 +40,6 @@ Triggered on each workflow step.
         ...
 """
 
-on_state_change = FixtureHook("on_state_change")
-"""
-Triggered on a change of state during workflow execution.
-
-.. code-block:: python
-
-    @on_workflow_step
-    async def do_something_on_state_change(old_state, new_state):
-        ...
-"""
-
 on_workflow_failure = FixtureHook("on_workflow_finish")
 """
 Triggered when a workflow fails to complete.
