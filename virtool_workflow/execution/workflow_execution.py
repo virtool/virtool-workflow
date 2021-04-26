@@ -1,66 +1,45 @@
 """Execute workflows and manage the execution context."""
-import sys
-import traceback
-from enum import Enum
-
 import logging
 import pprint
-from typing import Optional, Callable, Coroutine, Any, Dict
+from typing import Any, Callable, Coroutine, Dict, Optional
 
 from virtool_workflow import hooks
+from virtool_workflow.execution import states
 from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.workflow import Workflow
+from virtool_workflow.execution.errors
 
 logger = logging.getLogger(__name__)
 
 
-State = Enum("State", "WAITING STARTUP RUNNING CLEANUP FINISHED")
-
-
 class WorkflowExecution:
     """An awaitable object providing access to the results of a workflow."""
+
     def __init__(self, workflow: Workflow, scope: FixtureScope):
         """
         :param workflow: The Workflow to be executed
-        :param scope: The WorkflowFixtureScope used to bind fixtures to the workflow.
+        :param scope: The :class:`FixtureScope` instance
         """
-        self.workflow = workflow
-        self.scope = scope
-        self._updates = []
-        self._state = State.WAITING
         self.current_step = 0
-        self.progress = 0.0
         self.error = None
+        self.progress = 0.0
+        self.scope = scope
+        self.state = states.WAITING
+        self.workflow = workflow
+
+        self._updates = []
 
     async def send_update(self, update: str):
         """
         Send an update.
 
-        Triggers the #virtool_workflow.hooks.on_update hook.
+        Triggers the :obj:`virtool_workflow.hooks.on_update` hook.
 
-        :param update: A string update to send.
+        :param update: A string update to send
         """
-        logger.debug(f"Sending update: {update}")
         self._updates.append(update)
-        await hooks.on_update.trigger(self.scope, update)
-
-    @property
-    def state(self):
-        return self._state
-
-    async def _set_state(self, new_state: State):
-        """
-        Change the current state of execution.
-
-        Triggers the :obj:`virtool_workflow.hooks.on_state_change` hook.
-
-        :param new_state: The new state that should be applied.
-        """
-        logger.debug(
-            f"Changing the execution state from {self._state} to {new_state}")
-        await hooks.on_state_change.trigger(self.scope, self._state, new_state)
-        self._state = new_state
-        return new_state
+        self.scope["update"] = update
+        await hooks.on_update.trigger(self.scope)
 
     async def _run_step(
         self,
@@ -118,14 +97,14 @@ class WorkflowExecution:
         bound_workflow = await self.scope.bind_to_workflow(self.workflow)
 
         for state, steps, count_steps in (
-            (State.STARTUP, bound_workflow.on_startup, False),
-            (State.RUNNING, bound_workflow.steps, True),
-            (State.CLEANUP, bound_workflow.on_cleanup, False),
+            (states.STARTUP, bound_workflow.on_startup, False),
+            (states.RUNNING, bound_workflow.steps, True),
+            (states.CLEANUP, bound_workflow.on_cleanup, False),
         ):
-            await self._set_state(state)
+            self.state = state
             await self._run_steps(steps, count_steps)
 
-        await self._set_state(State.FINISHED)
+        self.state = states.FINISHED
 
         result = self.scope["results"]
 

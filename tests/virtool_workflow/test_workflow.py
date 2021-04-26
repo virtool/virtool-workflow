@@ -58,13 +58,7 @@ async def test_on_update_called(test_workflow, runtime):
         nonlocal calls
         calls += 1
 
-    @hooks.on_state_change(until=hooks.on_workflow_finish)
-    async def _on_state_change():
-        nonlocal state_calls
-        state_calls += 1
-
     _on_update.calls = 0
-    _on_state_change.calls = 0
 
     await runtime.execute(test_workflow)
 
