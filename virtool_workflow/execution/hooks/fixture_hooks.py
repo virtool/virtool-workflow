@@ -36,7 +36,7 @@ class FixtureHook(Hook):
         async def _bind(callback_: Callable):
             logger.debug(f"Binding fixtures to callback {callback_}")
             try:
-                return await scope.bind(callback_)
+                return await scope.partial(callback_, **kwargs)
             except KeyError as error:
                 if suppress:
                     logger.exception(error)

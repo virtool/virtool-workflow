@@ -49,9 +49,11 @@ class WorkflowExecution:
             self.scope["error"] = e
             await hooks.on_failure.trigger(self.scope)
             raise e
-
-        await hooks.on_result.trigger(self.scope)
-        await hooks.on_success.trigger(self.scope)
+        else:
+            await hooks.on_result.trigger(self.scope)
+            await hooks.on_success.trigger(self.scope)
+        finally:
+            await hooks.on_finish.trigger(self.scope)
 
         return result
 
@@ -62,7 +64,7 @@ class WorkflowExecution:
 
         for startup_step in workflow.on_startup:
             logger.info(f"Running startup step '{startup_step.__name__}'")
-            await startup_step()
+            await self.send_update(await startup_step())
 
         self.state = states.RUNNING
 
@@ -72,7 +74,7 @@ class WorkflowExecution:
 
         for cleanup_step in workflow.on_cleanup:
             logger.info(f"Running cleanup step '{cleanup_step.__name__}'")
-            await cleanup_step()
+            await self.send_update(await cleanup_step())
 
         self.state = states.FINISHED
 
@@ -80,6 +82,7 @@ class WorkflowExecution:
         self.scope["workflow"] = self.workflow
         self.scope["execution"] = self
         self.scope["current_step"] = self.current_step
+        self.scope["results"] = {}
 
         async with self.startup_and_cleanup() as workflow:
 

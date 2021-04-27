@@ -54,4 +54,4 @@ async def test_on_failure_not_triggered_when_successful(runtime):
 
     result = await runtime.execute(Workflow())
 
-    assert result["SUCCESS"]
+    assert result["SUCCESS"] is True
