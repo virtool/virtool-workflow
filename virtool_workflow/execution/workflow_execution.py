@@ -1,10 +1,12 @@
 """Execute workflows and manage the execution context."""
 import logging
 import pprint
-from typing import Any, Callable, Coroutine, Dict
+from typing import Any, Dict
+from contextlib import asynccontextmanager
 
 from virtool_workflow import hooks
 from virtool_workflow.fixtures.scope import FixtureScope
+from virtool_workflow.execution import states
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -39,21 +41,6 @@ class WorkflowExecution:
         self.scope["update"] = update
         await hooks.on_update.trigger(self.scope)
 
-    async def _run_steps(self, steps, count_steps=False):
-        for step in steps:
-            if count_steps:
-                self.current_step += 1
-                self.progress = float(self.current_step) / float(
-                    len(self.workflow.steps))
-            logger.debug(
-                f"Beginning step #{self.current_step}: {step.__name__}")
-            update = await step()
-
-            if count_steps:
-                await hooks.on_workflow_step.trigger(self.scope, update)
-            if update:
-                await self.send_update(update)
-
     async def execute(self) -> Dict[str, Any]:
         """Execute the workflow and return the result."""
         try:
@@ -68,28 +55,48 @@ class WorkflowExecution:
 
         return result
 
-    async def _execute(self) -> Dict[str, Any]:
-        logger.debug(f"Starting execution of {self.workflow}")
+    @asynccontextmanager
+    async def startup_and_cleanup(self):
+        workflow = await self.scope.bind_to_workflow(self.workflow)
 
-        self.scope["workflow"] = self.workflow
-        self.scope["execution"] = self
-        self.scope["results"] = {}
+        for startup_step in workflow.on_startup:
+            logger.info(f"Running startup step '{startup_step.__name__}'")
+            await startup_step()
 
-        bound_workflow = await self.scope.bind_to_workflow(self.workflow)
+        self.state = states.RUNNING
 
-        for state, steps, count_steps in (
-            (states.STARTUP, bound_workflow.on_startup, False),
-            (states.RUNNING, bound_workflow.steps, True),
-            (states.CLEANUP, bound_workflow.on_cleanup, False),
-        ):
-            self.state = state
-            await self._run_steps(steps, count_steps)
+        yield workflow
+
+        self.state = states.CLEANUP
+
+        for cleanup_step in workflow.on_cleanup:
+            logger.info(f"Running cleanup step '{cleanup_step.__name__}'")
+            await cleanup_step()
 
         self.state = states.FINISHED
 
+    async def _execute(self) -> Dict[str, Any]:
+        self.scope["workflow"] = self.workflow
+        self.scope["execution"] = self
+        self.scope["current_step"] = self.current_step
+
+        async with self.startup_and_cleanup() as workflow:
+
+            for step in workflow.steps:
+                self.current_step += 1
+
+                self.progress = (float(self.current_step) /
+                                 float(len(workflow.steps)))
+
+                logger.info(
+                    f"Running step #{self.current_step}: {step.__name__}")
+
+                update = await step()
+                await self.send_update(update)
+
         result = self.scope["results"]
 
-        logger.debug("Workflow finished")
+        logger.info("Workflow finished")
         logger.debug(f"Result: \n{pprint.pformat(result)}")
 
         return result
