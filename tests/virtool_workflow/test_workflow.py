@@ -1,26 +1,6 @@
 from virtool_workflow import hooks
 
 
-async def test_respond_errors(test_workflow, runtime):
-    @test_workflow.step
-    async def throw_error():
-        raise Exception()
-
-    @hooks.on_error(until=hooks.on_result)
-    async def handle_error(execution):
-        assert execution.current_step == 3
-        return "Step 3 skipped due to internal error"
-
-    updates = []
-
-    @hooks.on_update(until=hooks.on_workflow_finish)
-    async def receive_updates(update):
-        updates.append(update)
-
-    await runtime.execute(test_workflow)
-    assert "Step 3 skipped due to internal error" in updates
-
-
 async def test_correct_progress(test_workflow, runtime):
     correct_progress = {
         0: 0.0,
@@ -51,16 +31,12 @@ async def test_correct_progress(test_workflow, runtime):
 
 async def test_on_update_called(test_workflow, runtime):
     calls = 0
-    state_calls = 0
 
-    @hooks.on_update(until=hooks.on_workflow_finish)
+    @hooks.on_update
     async def _on_update():
         nonlocal calls
         calls += 1
 
-    _on_update.calls = 0
-
     await runtime.execute(test_workflow)
 
     assert calls == 4
-    assert state_calls == 4

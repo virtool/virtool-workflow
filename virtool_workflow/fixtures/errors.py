@@ -1,10 +1,6 @@
 """Exceptions relating to workflow fixtures."""
-from inspect import Signature, getsourcefile, getsourcelines
+from inspect import getsourcefile, getsourcelines
 import logging
-import inspect
-import pprint
-import logging
-import pprint
 import inspect
 from typing import Callable
 
@@ -12,10 +8,11 @@ from typing import Callable
 class FixtureMultipleYield(ValueError):
     """Raised when a generator workflow fixture yields more than once."""
 
+
 class FixtureNotFound(KeyError):
     def __init__(self, name, scope):
         super().__init__(f"{name} is not a fixture.",
-                f"Available: {', '.join(scope.available.keys())}")
+                         f"Available: {', '.join(scope.available.keys())}")
 
 
 class FixtureBindingError(Exception):
@@ -48,11 +45,11 @@ class FixtureBindingError(Exception):
         :param key: The name of the fixture which could not be instatiated
         :param reason: The reason for the error
         """
-        self.message = exception_message
-        self.signature = signature
         self.func = func
+        self.key = key
+        self.reason = reason
 
-        func_location = self._get_source_location(func)
+        _, func_location = self._get_source_location(func)
         message = (f"Failed to bind fixture '{key}'\r\n"
                    f"Reason: {reason}\r\n"
                    f"Function: {func} \r\n"

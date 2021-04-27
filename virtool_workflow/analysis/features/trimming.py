@@ -66,14 +66,17 @@ class Trimming(WorkflowFeature):
         sample.reads_path.mkdir()
         sample.read_paths = make_read_paths(sample.reads_path, sample.paired)
 
-        sample_caches = RemoteReadCaches(
-            sample.id,
-            sample.paired,
-            sample.reads_path,
-            http,
-            jobs_api_url,
-            run_in_executor
-        )
+        if "sample_caches" not in scope:
+            sample_caches = RemoteReadCaches(
+                sample.id,
+                sample.paired,
+                sample.reads_path,
+                http,
+                jobs_api_url,
+                run_in_executor
+            )
+        else:
+            sample_caches = scope["sample_caches"]
 
         try:
             cache = await sample_caches.get(key)

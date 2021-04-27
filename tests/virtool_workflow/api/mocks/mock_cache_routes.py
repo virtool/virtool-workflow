@@ -9,7 +9,7 @@ caches = {}
 mock_routes = RouteTableDef()
 
 
-@mock_routes.post("/api/cached/{key}")
+@mock_routes.post("/api/caches/{key}")
 def create_cache_placeholder(request):
     raise NotImplementedError()
 

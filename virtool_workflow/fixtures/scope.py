@@ -1,11 +1,13 @@
 """Scoping and injection of workflow fixtures."""
 import inspect
+import asyncio
 import logging
-import pprint
+import functools
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
-from inspect import Parameter, signature
+from inspect import signature
 from typing import Any, Callable
+from virtool_workflow.utils import coerce_to_coroutine_function, wrapped_partial
 
 from virtool_workflow.fixtures.errors import (
     FixtureNotFound,
@@ -22,68 +24,87 @@ logger = logging.getLogger(__name__)
 
 
 class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
-    """
-    A scope maintaining instances of workflow fixtures.
+    """A scope maintaining instances of fixtures."""
 
-    Fixture instances can be bound to functions using the :func:`.bind()` method.
-    """
-
-    def __init__(self, *providers: FixtureProvider, **instances):
+    def __init__(self,
+                 *providers: FixtureProvider,
+                 scope_name: str = None,
+                 **instances):
         """
         :param providers: :class:`FixtureProvider` functions for accessing
             fixtures. Providers will be checked in the order they are given.
-            The `virtool_workflow.fixtures.data_providers.workflow_fixture`
-            provider is already included.
 
+        :param scope_name: A name to use for this scope in logging messages.
         :param instances: Any objects to be maintained as instance fixtures.
-            Values in this dictionary will be accessible as fixtures by their key. Also note that these
-            fixtures will take precedence over those provided by the elements of :obj:`data_providers`.
         """
-        self.update(**instances)
-        self["scope"] = self
+        self.update(**instances, scope=self)
         self._overrides = FixtureGroup()
         self._providers = [self, self._overrides, *providers]
-        self._generators = []
-        self._async_generators = []
+        self._generators, self._async_generators = [], []
+
         self.add_provider = self._providers.append
         self.add_providers = self._providers.extend
+
+        self.name = scope_name or id(self)
+        self.open = False
+        self.closed = False
 
         super(FixtureScope, self).__init__()
 
     async def __aenter__(self):
         """Return this instance when `with` statement is used."""
-        logger.info(f"Opening a new {FixtureScope.__name__}")
+        logger.info(f"Opening {FixtureScope.__name__} {self.name}")
+        self.open = True
         return self
 
     async def close(self):
         """
-        Remove references to any instances managed by this WorkflowFixtureScope.
+        Close the :class:`FixtureScope`.
 
-        Return execution to each of the generator fixtures and remove
-        references to them.
+        - Remove references to any instances
+        - Return control to each generator fixture
+        - Return control to each async generator fixture
+        - Remove references to generators and async generators
         """
-        logger.info(f"Closing {FixtureScope.__name__}")
-        logger.debug(f"Closed {pprint.pformat(self)}")
-        # return control to the generator fixtures which are still left open
+        logger.info(f"Closing {FixtureScope.__name__} {self.name}")
+
         self.clear()
 
-        while self._generators:
-            gen = self._generators.pop()
-            logger.debug(f"Returning control to generator fixture {gen}")
-            none = next(gen, None)
-            if none is not None:
-                raise FixtureMultipleYield("Fixture must only yield once")
+        async def return_control_to_generator(gen):
+            with suppress(StopIteration):
+                logger.debug(f"Returning control to {gen}")
+                next(gen)
+                raise RuntimeError("Fixture must only yield once")
 
-        while self._async_generators:
-            gen = self._async_generators.pop()
-            logger.debug(f"Returning control to async generator fixture {gen}")
+        async def return_control_to_async_generator(gen):
             with suppress(StopAsyncIteration):
+                logger.debug(f"Returning control to {gen}")
                 await gen.__anext__()
-                raise FixtureMultipleYield("Fixture must only yield once")
+                raise RuntimeError("Fixture must only yield once")
 
-        for provider in self._providers:
-            if isinstance(provider, FixtureScope) and id(provider) != id(self):
-                await provider.close()
+        tasks = [return_control_to_generator(gen)
+                 for gen in self._generators]
+
+        tasks.extend([
+            return_control_to_async_generator(gen)
+            for gen in self._async_generators
+        ])
+
+        self._generators.clear()
+        self._async_generators.clear()
+
+        tasks.extend([
+            provider.close() for provider in self._providers
+            if id(provider) != id(self) and hasattr(provider, "close")
+        ])
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for error in results:
+            if isinstance(error, Exception):
+                raise error
+
+        self.closed = True
 
     async def __aexit__(self, *args, **kwargs):
         """Close the :class:`FixtureScope` on exit."""
@@ -107,22 +128,19 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
 
         :param fixture_: The fixture class to instantiate
         :return: The instantiated fixture instance.
-
         """
 
         bound = await self.bind(fixture_)
 
         instance = await bound()
 
-        with suppress(TypeError):
-            generator = instance
-            instance = next(generator)
-            self._generators.append(generator)
+        if inspect.isgenerator(instance):
+            self._generators.append(instance)
+            instance = next(instance)
 
-        with suppress(TypeError, AttributeError):
-            async_generator = instance
+        elif inspect.isasyncgen(instance):
+            self._async_generators.append(instance)
             instance = await instance.__anext__()
-            self._async_generators.append(async_generator)
 
         self[fixture_.__name__] = instance
 
@@ -130,40 +148,32 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         return instance
 
     def _get_fixture_from_providers(self, name, request_from: Callable = None):
-        """Get the fixture function with the given name from this :class:`WorkflowFixtureScope`'s data_providers"""
+        """
+        Search all providers for a fixture.
+
+        :param name: The name of the fixture
+        :request_from: The function which the fixture will be bound to
+        :raise KeyError: When the fixture cannot be found
+        """
         for provider in self._providers:
             fixture = provider(name, request_from)
             if fixture is not None:
                 return fixture
-        raise KeyError(name)
+        raise FixtureNotFound(name, self)
 
     async def get_or_instantiate(
         self, name: str, requested_by: Callable = None
     ):
         """
-        Get an instance of the fixture with a given name. If there exists an
-        instance cached in this :class:`FixtureScope` it will be returned, else a new instance
-        will be created and cached.
+        Get the value of a fixture, instantiating the fixture if needed.
 
         :param name: The name of the workflow fixture to get
-        :param requested_by: The callable from which the fixture is being fetched.
-        :return: The workflow fixture instance for this :class:`FixtureScope`
-        :raise KeyError: When the given name does not correspond to a defined workflow fixture.
+        :param requested_by: The function which teh fixture will be bound to
+        :return: The value of the fixture
+        :raise FixtureNotFound: When the fixture cannot be found
         """
         with suppress(KeyError):
             return self[name]
-
-        fixture = self._get_fixture_from_providers(name, requested_by)
-        return await self.instantiate(fixture)
-
-    async def bind(self, func):
-        """
-        Bind fixture values to the parameters of a function.
-
-        Fixtures are instantiated as need at the time that this function is called.
-        """
-        sig = signature(func)
-        func = coerce_to_coroutine_function(func)
 
         fixture = self._get_fixture_from_providers(name, requested_by)
         return await self.instantiate(fixture)
@@ -180,14 +190,21 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         sig = signature(func)
         func = coerce_to_coroutine_function(func)
 
-        fixtures = {
-            name: await self.get_or_instantiate(name, requested_by=func)
-            for name in sig.parameters
-        }
+        kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
+
+        fixtures = {}
+        for name in sig.parameters:
+            if name in kwargs:
+                continue
+            try:
+                fixtures[name] = await self.get_or_instantiate(name, func)
+            except Exception as error:
+                raise FixtureBindingError(func, name) from error
 
         self.update(fixtures)
+        kwargs.update(fixtures)
 
-        return partial(func, **fixtures)
+        return wrapped_partial(func, **kwargs)
 
     async def partial(self, func, *args, **kwargs):
         """
@@ -205,77 +222,33 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         self.update(fixtures)
 
         kwargs.update(fixtures)
-        return partial(func, *args, **kwargs)
+        return wrapped_partial(func, *args, **kwargs)
 
-    def __getitem__(self, item: str):
-        """Get a fixture instance if one is instantiated within this WorkflowFixtureScope."""
-        try:
-            return super().__getitem__(item)
-        except KeyError as error:
-            raise KeyError(
-                f"{error} is not available within this scope.\n"
-                f"Available instances are: \n {pprint.pformat(dict(self))}"
-            )
-
-    async def bind(self, func, strict=False):
-        return self.bound(func, strict)
-
-    def bound(
-        self, func: Callable[..., Any], strict: bool = False
-    ) -> Callable[[], Any]:
+    def bound(self, func: Callable[..., Any]) -> Callable[[], Any]:
         """
         Bind fixtures to the parameters of a function.
 
-        Positional arguments and non-fixture keyword arguments
-        of the function will be preserved. Essentially,The fixtures & other keyword
-        arguments given are added as keyword arguments to the function.
+        Fixtures are instantiated when the bound function is called.
 
         :param func: The function requiring workflow fixtures to be bound
-        :param strict: A flag indicating that all parameters must be bound to a fixture, defaults to True
-        :return: A new function with it's arguments appropriately bound
-        :raise WorkflowFixtureNotAvailable: When `func` requires an argument
-            which cannot be bound due to no fixture of it's name being available.
+        :return: A new function which does not require arguments
+        :raise KeyError: When a fixture cannot be found
         """
         sig = signature(func)
+        func = coerce_to_coroutine_function(func)
 
-        async def _bind(func, fixtures):
+        async def get_values(func, fixtures):
             for name, parameter in sig.parameters.items():
-                try:
-                    fixtures[name] = await self.get_or_instantiate(
-                        name, requested_by=func
-                    )
-                except KeyError as key_error:
-                    if strict:
-                        if parameter.default == Parameter.empty:
-                            # Parameter does not have a default value.
-                            raise FixtureNotAvailable(
-                                key_error.args[0],
-                                signature=sig,
-                                func=func,
-                                scope=self,
-                            )
-            return fixtures
+                fixtures[name] = await self.get_or_instantiate(
+                    name, requested_by=func
+                )
 
-        if inspect.iscoroutinefunction(func):
-
-            async def _call(_func, *args, **kwargs):
-                return await _func(*args, **kwargs)
-
-        else:
-
-            async def _call(_func, *args, **kwargs):
-                return _func(*args, **kwargs)
+                return fixtures
 
         @wraps(func)
-        async def _bound(*args, **_kwargs):
-            fixtures = await _bind(func, {})
-            fixtures.update(_kwargs)
-            try:
-                return await _call(func, *args, **fixtures)
-            except TypeError as missing_params:
-                raise FixtureNotAvailable(
-                    missing_params.args[0], sig, func, self
-                )
+        async def _bound():
+            fixtures = await get_values(func, {})
+            return await func(**fixtures)
 
         return _bound
 

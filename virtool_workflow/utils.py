@@ -1,6 +1,6 @@
 from typing import Callable, Coroutine, Any
 from inspect import iscoroutinefunction
-from functools import wraps
+from functools import wraps, partial
 
 
 def coerce_to_coroutine_function(func: Callable):
@@ -28,3 +28,7 @@ def coerce_coroutine_function_to_accept_any_parameters(func: Callable[[], Corout
         return await func()
 
     return _func
+
+
+def wrapped_partial(func, *args, **kwargs):
+    return wraps(func)(partial(func, *args, **kwargs))

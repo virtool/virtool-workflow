@@ -2,29 +2,9 @@
 from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Any, Callable, Coroutine, Iterable, Optional, Sequence
+from virtool_workflow.utils import coerce_to_coroutine_function
 
 WorkflowStep = Callable[..., Coroutine[Any, Any, None]]
-
-
-def _make_async(func: Callable):
-    """
-    Wrap the provided function into an async function, if it is not
-    already an async function.
-
-    :param func: The function to coerce
-    :return: An equivalent async function
-    """
-
-    if not iscoroutinefunction(func):
-        func_ = func
-
-        @wraps(func_)
-        async def async_func(*args, **kwargs):
-            return func_(*args, **kwargs)
-
-        func = async_func
-
-    return func
 
 
 class Workflow:
@@ -68,17 +48,17 @@ class Workflow:
 
     def startup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow startup."""
-        self.on_startup.append(_make_async(action))
+        self.on_startup.append(coerce_to_coroutine_function(action))
         return action
 
     def cleanup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow cleanup."""
-        self.on_cleanup.append(_make_async(action))
+        self.on_cleanup.append(coerce_to_coroutine_function(action))
         return action
 
     def step(self, step: Callable) -> Callable:
         """Decorator for adding a step to the workflow."""
-        self.steps.append(_make_async(step))
+        self.steps.append(coerce_to_coroutine_function(step))
         return step
 
     def merge(self, *workflows: "Workflow"):

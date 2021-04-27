@@ -51,16 +51,6 @@ Intended for finalization actions such as closing the fixture scope.
 """
 
 
-@on_success
-async def _trigger_on_finish_from_on_success(scope):
-    await on_finish.trigger(scope)
-
-
-@on_failure
-async def _trigger_on_finish_from_on_failure(_, scope):
-    await on_finish.trigger(scope)
-
-
 on_cancelled = FixtureHook("on_cancelled")
 """
 Triggered when a job is cancelled.
@@ -75,7 +65,8 @@ Triggered when a job is cancelled.
 
 @on_failure
 async def _trigger_on_cancelled(error: Exception, scope):
-    if isinstance(error, asyncio.CancelledError) or isinstance(error, futures.CancelledError):
+    if (isinstance(error, asyncio.CancelledError)
+            or isinstance(error, futures.CancelledError)):
         await on_cancelled.trigger(scope, error)
 
 
@@ -130,17 +121,12 @@ before_result_upload = FixtureHook("before_result_upload")
 __all__ = [
     "on_result",
     "on_update",
-    "on_error",
-    "on_workflow_step",
     "on_success",
     "on_failure",
     "on_finalize",
-    "on_workflow_failure",
-    "on_workflow_finish",
     "on_finish",
     "on_load_config",
     "on_load_fixtures",
     "before_result_upload",
     "on_cancelled",
-    "on_state_change",
 ]
