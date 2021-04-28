@@ -3,6 +3,9 @@ services:
 
   job-api:
     image: virtool/jobs-api
+    build:
+        context: ${VT_BUILD_CONTEXT}
+        dockerfile: docker/jobs-api/Dockerfile
     depends_on: 
       - mongo
       - redis
