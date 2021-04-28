@@ -33,4 +33,3 @@ For example to run the integration test for the `samples` fixture:
 cd integration_tests/samples
 docker-compose up --exit-code-from workflow
 ```
-
