@@ -39,14 +39,15 @@ def skewer(
         raise RuntimeError("skewer is not installed.")
 
     command = [
-        "skewer", "-r",
-        str(max_error_rate), "-d",
-        str(max_indel_rate), "-m",
-        str(mode), "-l",
-        str(min_length), "-q",
-        str(end_quality), "-Q",
-        str(mean_quality), "-t",
-        str(number_of_processes), *other_options
+        "skewer",
+        "-r", str(max_error_rate),
+        "-d", str(max_indel_rate), 
+        "-m", str(mode), 
+        "-l", str(min_length), 
+        "-q", str(end_quality), 
+        "-Q", str(mean_quality), 
+        "-t", str(number_of_processes), 
+        *other_options
     ]
 
     if quiet:
@@ -85,16 +86,18 @@ def rename_trimming_results(path: Path):
         return (shutil.move(
             path / "reads-trimmed.fastq.gz",
             path / "reads_1.fq.gz",
-        ), )
+        ),)
     except FileNotFoundError:
-        return (shutil.move(
-            path / "reads-trimmed-pair1.fastq.gz",
-            path / "reads_1.fq.gz",
-        ),
-                shutil.move(
-                    path / "reads-trimmed-pair2.fastq.gz",
-                    path / "reads_2.fq.gz",
-                ))
+        return (
+            shutil.move(
+                path / "reads-trimmed-pair1.fastq.gz",
+                path / "reads_1.fq.gz",
+            ),
+            shutil.move(
+                path / "reads-trimmed-pair2.fastq.gz",
+                path / "reads_2.fq.gz",
+            )
+        )
 
 
 def trimming_min_length(library_type: LibraryType, sample_read_length: int):
