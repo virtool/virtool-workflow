@@ -71,3 +71,4 @@ volumes:
   vt_redis_data:
   vt_postgres_data:
   vt_pgadmin4_data:
+
