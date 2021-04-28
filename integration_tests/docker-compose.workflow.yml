@@ -1,0 +1,13 @@
+version: "3.1"
+
+services:
+    workflow:
+        image: virtool/workflow-${WORKFLOW_NAME}
+        build: ${WORKFLOW_DIR}
+        entrypoint: > 
+            workflow run
+            --jobs-api-url=http://jobs-api:9990/api
+            ${VT_JOB_ID}
+        depends_on:
+            - jobs-api
+
