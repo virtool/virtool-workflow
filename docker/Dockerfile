@@ -43,13 +43,23 @@ WORKDIR install
 COPY . .
 RUN pip install --user .
 
-FROM python:3.9-slim as main
+FROM python:3.9-buster as main
 COPY --from=pip_install /root/.local /root/.local
 COPY --from=bowtie /build/bowtie2/* /usr/local/bin/
 COPY --from=debian /build/hmmer /opt/hmmer
 COPY --from=debian /build/skewer /usr/local/bin/
 COPY --from=fastqc /build/FastQC /opt/fastqc
 COPY --from=pigz /build/pigz-2.6/pigz /usr/local/bin/pigz
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-jre && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN chmod ugo+x /opt/fastqc/fastqc && \
+    ln -fs /opt/fastqc/fastqc /usr/local/bin/fastqc && \
+    for file in `ls /opt/hmmer/bin`; do ln -fs /opt/hmmer/bin/${file} /usr/local/bin/${file};  done
+
 ENV PATH $PATH:/root/.local/bin
 
 ENTRYPOINT ["workflow", "run"]
