@@ -16,17 +16,22 @@ logger = logging.getLogger(__name__)
 
 
 def _analysis_file_from_api_response_json(json):
-    return [
-        VirtoolFile(
-            id=f["id"],
-            name=f["name"],
-            name_on_disk=f["name_on_disk"],
-            size=f["size"],
-            uploaded_at=dateutil.parser.isoparse(f["uploaded_at"]),
-            format=f["format"]
-        )
-        for f in json["files"]
-    ]
+    try:
+        return [
+            VirtoolFile(
+                id=f["id"],
+                name=f["name"],
+                name_on_disk=f["name_on_disk"],
+                size=f["size"],
+                uploaded_at=dateutil.parser.isoparse(f["uploaded_at"]),
+                format=f["format"]
+            )
+            for f in json["files"]
+        ]
+    except KeyError as error:
+        if error.args[0] == "files":
+            return []
+        raise
 
 
 async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs_api_url: str) -> Analysis:
