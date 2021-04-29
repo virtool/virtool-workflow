@@ -23,6 +23,21 @@
 
 The `VT_BUILD_CONTEXT` can also be a path (`VT_BUILD_CONTEXT=/path/to/virtool`).
 
+### Adding Arguments to the `workflow run` Command
+
+any additional arguments to the `workflow run` command you can be included in the value of the
+`VT_ADD_ARGS` environment variable. 
+
+```env
+VT_ADD_ARGS="--dev-mode true --data-path /data/path"
+```
+
+You can also add arguments only for a specific `docker-compose up` run as follows:
+
+```env
+VT_ADD_ARGS="--dev-mode true --data-path /data/path" docker-compose up --exit-code-from workflow
+```
+
 ## Running the Tests
 
 To run any of the integration test cases simply `cd` into the appropriate directory and run `docker-compose up`.
