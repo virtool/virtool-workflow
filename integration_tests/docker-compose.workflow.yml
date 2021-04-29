@@ -7,6 +7,7 @@ services:
         entrypoint: > 
             workflow run
             --jobs-api-url=http://jobs-api:9990/api
+            --is-analysis-workflow true
             ${VT_JOB_ID}
         depends_on:
             - jobs-api
