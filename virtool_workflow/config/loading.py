@@ -28,7 +28,7 @@ async def load_config(scope: FixtureScope = None, hook: FixtureHook = None, **kw
                 option.transform(kwargs[option.name]) or kwargs[option.name]
             )
 
-        del kwargs[option.name]
+            del kwargs[option.name]
 
     if kwargs:
         raise ValueError(f"{list(kwargs)} are not configuration options")
