@@ -32,7 +32,7 @@ async def _make_sample_from_response(response) -> Sample:
             quality=sample_json["quality"],
             nuvs=sample_json["nuvs"],
             pathoscope=sample_json["pathoscope"],
-            files=sample_json["files"],
+            files=sample_json["files"] if "files" in sample_json else [],
         )
 
 
