@@ -3,20 +3,19 @@ from pathlib import Path
 
 import virtool_workflow
 import virtool_workflow.storage.paths
-from virtool_workflow import fixture
 from .group import ConfigFixtureGroup
 
 options = ConfigFixtureGroup()
 
 
-@options.fixture(default=f"{os.getcwd()}/temp")
+@options.fixture(default=f"{os.getcwd()}temp")
 def work_path(value: str) -> Path:
     """The path where temporary data should be stored."""
     with virtool_workflow.storage.paths.context_directory(value) as temp:
         yield temp
 
 
-@options.fixture(default=f"{os.getcwd()}/virtool")
+@options.fixture(default=f"{os.getcwd()}virtool")
 def data_path(value: str) -> Path:
     """The path where persistent data should be stored."""
     _data_path = Path(value)
