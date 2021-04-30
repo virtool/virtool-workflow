@@ -35,8 +35,9 @@ async def upload_file_via_post(http: aiohttp.ClientSession,
                     name=response_json["name"],
                     name_on_disk=response_json["name_on_disk"],
                     size=response_json["size"],
-                    uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
-                    format=response_json["format"],
+                    uploaded_at=dateutil.parser.isoparse(
+                        response_json["uploaded_at"]),
+                    format=response_json["format"] if "format" in response_json else "fastq",
                 )
 
 
@@ -59,6 +60,7 @@ async def upload_file_via_put(http: aiohttp.ClientSession,
                     name=response_json["name"],
                     name_on_disk=response_json["name_on_disk"],
                     size=response_json["size"],
-                    uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
-                    format=response_json["format"],
+                    uploaded_at=dateutil.parser.isoparse(
+                        response_json["uploaded_at"]),
+                    format=response_json["format"] if "format" in response_json else "fastq",
                 )
