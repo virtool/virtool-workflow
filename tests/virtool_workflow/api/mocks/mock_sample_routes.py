@@ -72,8 +72,8 @@ async def delete(request):
     return Response(status=204)
 
 
-@mock_routes.post("/api/samples/{sample_id}/artifacts")
-@mock_routes.post("/api/samples/{sample_id}/reads")
+@mock_routes.put("/api/samples/{sample_id}/artifacts")
+@mock_routes.put("/api/samples/{sample_id}/reads")
 async def upload_read_files(request):
     sample_id = request.match_info["sample_id"]
 
@@ -134,7 +134,7 @@ async def create_mock_cache(request):
         return not_found()
 
 
-@mock_routes.post("/api/samples/{sample_id}/caches/{key}/artifacts")
+@mock_routes.put("/api/samples/{sample_id}/caches/{key}/artifacts")
 async def upload_artifact_to_cache(request):
     sample_id = request.match_info["sample_id"]
     key = request.match_info["key"]

@@ -6,7 +6,7 @@ import aiohttp
 
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.api.errors import NotFound, JobsAPIServerError, raising_errors_by_status_code
-from virtool_workflow.api.utils import upload_file_via_post, upload_file_via_put, read_file_from_response
+from virtool_workflow.api.utils import upload_file_via_put, read_file_from_response
 from virtool_workflow.caching.caches import GenericCacheWriter, GenericCaches, GenericCache
 from virtool_workflow.data_model.files import VirtoolFileFormat
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
@@ -57,7 +57,7 @@ class RemoteReadsCacheWriter(GenericCacheWriter[ReadsCache]):
                                              path,
                                              params={})
 
-        return await upload_file_via_post(self.http, f"{self.url}/{self.key}/artifacts", path, params={
+        return await upload_file_via_put(self.http, f"{self.url}/{self.key}/artifacts", path, params={
             "name": path.name,
             "type": format_,
         })
