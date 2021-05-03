@@ -41,7 +41,7 @@ async def get_analysis(request):
     )
 
 
-@mock_routes.post("/api/analyses/{analysis_id}/files")
+@mock_routes.put("/api/analyses/{analysis_id}/files")
 async def upload_file(request):
     name = request.query.get("name")
     format = request.query.get("format")

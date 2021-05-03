@@ -6,7 +6,7 @@ import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import (upload_file_via_post, 
+from virtool_workflow.api.utils import (upload_file_via_put, 
                                         read_file_from_response,
                                         upload_file_via_put)
 from virtool_workflow.data_model import Subtraction, NucleotideComposition

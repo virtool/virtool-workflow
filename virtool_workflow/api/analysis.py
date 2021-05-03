@@ -8,7 +8,7 @@ import dateutil.parser
 
 from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import upload_file_via_post
+from virtool_workflow.api.utils import upload_file_via_put
 from virtool_workflow.data_model.analysis import Analysis
 from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 
@@ -72,7 +72,7 @@ class AnalysisProvider(AbstractAnalysisProvider):
         return await get_analysis_by_id(self.id, self.http, self.api_url)
 
     async def upload(self, path: Path, format: VirtoolFileFormat):
-        return await upload_file_via_post(self.http,
+        return await upload_file_via_put(self.http,
                                           f"{self.api_url}/analyses/{self.id}/files",
                                           path,
                                           format)

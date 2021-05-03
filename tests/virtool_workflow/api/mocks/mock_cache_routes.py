@@ -14,7 +14,7 @@ def create_cache_placeholder(request):
     raise NotImplementedError()
 
 
-@mock_routes.post("/api/caches/{key}/files")
+@mock_routes.put("/api/caches/{key}/files")
 def upload_cache_file(request):
     raise NotImplementedError()
 

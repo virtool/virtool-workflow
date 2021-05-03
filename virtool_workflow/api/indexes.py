@@ -5,7 +5,7 @@ import aiohttp
 from virtool_workflow.abc.data_providers import AbstractIndexProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import (read_file_from_response,
-                                        upload_file_via_post)
+                                        upload_file_via_put)
 from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 from virtool_workflow.data_model.indexes import Index
@@ -73,7 +73,7 @@ class IndexProvider(AbstractIndexProvider):
         :param format_: The format of the file.
         :return: A :class:`VirtoolFile` object.
         """
-        return await upload_file_via_post(self.http,
+        return await upload_file_via_put(self.http,
                                           f"{self.jobs_api_url}/indexes/{self._index_id}/files",
                                           path, format_)
 
