@@ -46,7 +46,7 @@ def get_subtraction(request):
     return web.json_response(TEST_SUBTRACTION, status=200)
 
 
-@mock_routes.post("/api/subtractions/{subtraction_id}/files")
+@mock_routes.put("/api/subtractions/{subtraction_id}/files")
 async def upload_subtraction_file(request):
     name = request.query.get("name")
 
