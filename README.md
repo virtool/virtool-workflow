@@ -125,10 +125,6 @@ def step_2(mutable_fixture):
     print(mutable_fixture["intermediate value"]) # "some workflow state" 
 ```
 
-### Standard Fixtures
-
-A complete list of fixtures which are included in `virtool_workflow` can be found [here](virtool_workflow/fixtures/README.md).
-
 ## Links
 
 * [PyPi Package](https://pypi.org/project/virtool-workflow/)
