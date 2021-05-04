@@ -155,6 +155,15 @@ poetry install
 poetry run <command>
 ```
 
+### Unit Tests
+
+---
+
+```shell script
+cd tests
+docker-compose up --build --exit-code-from pytest
+```
+
 ### API Documentation
 
 ---
