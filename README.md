@@ -127,6 +127,7 @@ def step_2(mutable_fixture):
 
 ## Links
 
+* [API Docs](https://workflow.virtool.ca/)
 * [PyPi Package](https://pypi.org/project/virtool-workflow/)
 * [Virtool Website](https://www.virtool.ca/)
 
