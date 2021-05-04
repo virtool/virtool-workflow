@@ -1,43 +1,41 @@
-# virtool-workflow
-
-A framework for developing new Virtool workflows.
+# Virtool Workflow
 
 ![Tests](https://github.com/virtool/virtool-workflow/workflows/Tests/badge.svg?branch=master)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/1bf01ed0b27040cc92b4ad2380e650d5)](https://www.codacy.com/gh/virtool/virtool-workflow/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=virtool/virtool-workflow&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/1bf01ed0b27040cc92b4ad2380e650d5)](https://www.codacy.com/gh/virtool/virtool-workflow/dashboard?utm_source=github.com&utm_medium=referral&utm_content=virtool/virtool-workflow&utm_campaign=Badge_Coverage)
 
+
+
+<p>
+  <a href="#installation">Installation</a> •
+  <a href="#quickstart">Quickstart</a> •
+  <a href="#links">Links</a> •
+  <a href="#contributing">Contributing</a> 
+</p>
+
+
+A framework for developing bioinformatic workflows in Python.
+
+
 ## Installation
 
-Install from PyPi using;
+### Latest Stable Release
 
 ```shell script
 pip install virtool-workflow
 ```
 
-Or install from source;
+### Latest Development Changes
 
 ```shell script
-git clone https://github.com/virtool/virtool-workflow.git
-pip install .
-
-#  Or
-
 pip install git+https://github.com/virtool/virtool-workflow.git
 ```
 
-This will install both the `virtool_workflow` library and the `workflow` command line utility.
-
 ## Quickstart
 
-A Workflow is comprised of 
+### Workflow Definition
 
-1. A set of setup functions to execute on before the main steps.
-2. A set of functions (steps) to be executed. 
-3. A set of cleanup functions to be executed once the steps are complete.
-
-### Basic Workflow Definition
-
-A Workflow is defined by an an instance of the [Workflow](#) class. Startup, step, and 
+Workflow steps are defined using the startup, step, and 
 cleanup functions are added using the `startup`, `step`, and `cleanup` decorator methods 
 respectively. 
 
@@ -75,81 +73,41 @@ def non_async_step_function():
     ...
 ```
 
-### Workflow Updates
-
-Workflow's are typically long-running. As such updates about the workflow's progress should be sent to 
-the user regularly. To facilitate this, the return value (string) from any startup, cleanup, or step 
-function will be sent as an update and displayed in the Virtool UI. 
-
-```python
-@step
-def step_that_sends_an_update():
-    ...
-    return "Successfully completed a step"
-
-```
-
-Additional updates can be sent using the [execution](#) fixture, described in the **Standard Fixtures** section.
-
 ### Workflow Fixtures
 
-Workflow fixtures provide a mechanism for injecting dependencies into workflows. They 
-are inspired by and work similarly to [pytest fixtures](https://docs.pytest.org/en/2.8.7/fixture.html).
-
-Fixtures utilize the parameter names of a function as identifiers of a particular instance to supply 
-as an argument.
-
-Fixtures are created using the [virtool_workflow.fixture](#) decorator on a factory function which produces 
-the instance to be injected.
+Inspired by [pytest fixtures](https://docs.pytest.org/en/2.8.7/fixture.html),  workflow fixtures provide access to dependencies via function parameters.
 
 ```python
 from virtool_workflow import fixture
 
 @fixture
-def my_workflow_fixture():
-    return "my_workflow_fixture"
+def package_name():
+    return "virtool_workflow"
 ```
 
-The above defines a fixture with a value of `"my_workflow_fixture"`.
-
-When a startup, cleanup, or step function of a workflow declares a parameter, the appropriate fixture instance will be 
-supplied when the function is executed.
-
+The above defines a fixture `package_name` with a value of `"virtool_workflow"`. This fixture can then be used freely 
+in workflow steps by taking *package_name* as a parameter.
 ```python
 @step
-def step(my_workflow_fixture: str):
-    print(my_workflow_fixture) # "my_workflow_fixture"
+def step(package_name: str):
+    ...
 ```
 
 
 ### Fixtures Using Other Fixtures
 
-Workflow fixtures can use other fixtures as long as they have been defined before the workflow is executed. To do so
-they simply declare a parameter with the same name as the desired fixture.
+Fixtures may depend on other fixtures. Here is an example of how two fixtures (`package_name` and `package_version`) can be composed.
 
 ```python
-from virtool_workflow import fixture, step
 
 @fixture
-def uses_my_fixture(my_workflow_fixture: str):
-    # use my_workflow_fixture
-    ...
-
-@step
-def step(uses_my_fixture):
-    ...
-
+def pinned_package_name(package_name: str, package_version: str):
+    return f"{package_name}=={package_version}"
 ```
 
-Upon execution of the workflow, `my_workflow_fixture` will be instantiated and provided to `uses_my_fixture` as 
-an argument. The value returned will then be used as the instance for `uses_my_fixture` which will be passed to the
-workflow's step function. 
+### Sharing Data Between Steps
 
-### Mutable Fixtures as a Means of Sharing Data Between Workflow Steps
-
-Workflow fixtures are scoped to the execution of a particular workflow. This means that any specific fixture
-will refer to the exact same instance throughout a workflow's execution. This property allows fixtures to be 
-used to pass state between workflow steps. 
+A fixture, once instantiated, will persist through a workflow's entire execution. This means that mutable objects,  such as dictionaries, can be used to pass information between the steps of a workflow.
 
 ```python
 from virtool_workflow import fixture, step
@@ -167,185 +125,55 @@ def step_2(mutable_fixture):
     print(mutable_fixture["intermediate value"]) # "some workflow state" 
 ```
 
-This also means that fixtures which were instantiated in-directly (used by other fixtures) will still only be 
-instantiated once, even if they are later referred to directly within the workflow. 
+## Links
 
-For more details about fixture scope and binding see the [API docs](#).
-
-### Standard Fixtures
-
-Some standard fixtures are always made available when a workflow is executed. These include; 
-
-| Fixture     | Description                           | 
-|-------------|---------------------------------------|
-| results     | The results dictionary                |
-| execution   | The current WorkflowExecution         |
-| workflow    | The Workflow instance being executed  |
-
-A more complete list of available fixtures can be found [here](virtool_workflow/fixtures/README.md)
-
-#### The Results Dictionary
-
-The `results` dictionary is used to store the results of the workflow so that they can be provided to 
-the end user through the Virtool's UI. It is available within workflows as a fixture. The `results` dictionary is
-returned from `virtool_workflow.execute_workflow.execute`. 
-
-```python
-    from virtool_workflow import step, hooks
-
-    @step
-    def add_to_results(results: dict):
-        results["result"] = "some result"
-
-
-    @hooks.on_result
-    def print_result(workflow, results):
-        print(results["result"]) # prints "some_result"
-```
-
-When a workflow is executed as part of a virtool job, the values in the results dictionary will be stored in the 
-database and provided to the user. 
-
-#### The Context/Execution Fixture
-The `execution` fixture provides access to the current `WorkflowExecution` instance.
-It provides information regarding the state of the workflow's execution, such as the current
-step (number) being executed. It can also be used to send additional updates via `.send_update`.
-
-
-```python
-    @step
-    async def send_more_updates(execution: WorkflowExecution):
-        await execution.send_update("Additional update")
-        await execution.send_update("Another update")
-        return "Last update for this step"
-```
-
-### Running a Workflow Outside of the Runtime
-
-Assuming your workflow is defined in `workflow.py` in the current working directory, 
-you can execute it using the `workflow` command line utility. 
-
-```shell script
-    workflow run_local 
-    # or for files other than workflow.py
-    workflow run_local -f "script_with_a_workflow.py"
-```
-
-The `workflow` utility simply looks for an instance of `Workflow` within `workflow.py` 
-(or the provided file).
-
-A workflow can also be executed from python using `virtool_workflow.execute_workflow.execute`.
-
-```python
-    import asyncio
-    from virtool_workflow import Workflow
-    from virtool_workflow.execution.execute_workflow import execute
-    
-    my_workflow = Workflow()
-
-    ...
-
-    asyncio.run(execute(my_workflow))
-```
-
-
-### Responding to Runtime Events
-
-The workflow runtime provides several hooks into it's lifecycle. These
-can be accessed via the [virtool_workflow.hooks](#) module. 
-
-Here is an example using the `on_result` hook, which is triggered after all 
-cleanup steps have been completed.
-
-```python
-from virtool_workflow import hooks, Workflow
-from typing import Dict, Any
-
-@hooks.on_result
-def respond_to_workflow_result(workflow: Workflow, results: Dict[str, Any]):
-    ...
-```
-
-The function `respond_to_workflow_result` will be called once the workflow result is available. The
-`on_result` hook expects two parameters, but all hooks can also accept functions without parameters.
-
-```python
-@hooks.on_result
-async def respond_to_result_but_without_parameters():
-    ...
-```
-
-The callback functions provided for a hook can be either async functions or standard 
-functions. Any standard function provided will be wrapped into an async function.
+* [API Docs](https://workflow.virtool.ca/)
+* [PyPi Package](https://pypi.org/project/virtool-workflow/)
+* [Virtool Website](https://www.virtool.ca/)
 
 ## Contributing
 
-### Poetry
+### Virtual Environment
 
-[poetry](https://python-poetry.org/) is used to manage dependencies for the project.
+---
 
-To build the distribution;
+[Poetry](https://python-poetry.org/) is used to manage the dependencies and virtual environment.
+
+#### Install Dependencies
 
 ```shell script
-poetry build
-```
-
-To install dependencies;
-
-```
+pip install poetry
 poetry install
 ```
 
-To run a command in the context of the venv;
-
-```
-poetry run command
-```
-
-To add a new dependency; 
+#### Run Commands In The Virtual Environment
 
 ```shell script
-poetry add `dependency`
+poetry run <command>
 ```
 
-### Tests
+### Unit Tests
 
-The tests are written using [pytest](https://docs.pytest.org/en/stable/) and run using `tox`.
-
-To install tox;
+---
 
 ```shell script
-pip install tox tox-docker
+cd tests
+docker-compose up --build --exit-code-from pytest
 ```
 
-To run the tests;
-```shell script
-tox
-```
+### API Documentation
 
-Forward arguments to pytest;
-```shell script
-tox -- {pytest args}
-```
+---
 
-To view log output in pytest;
-```
-tox -- --log-cli-level=DEBUG
-```
+For doc-strings, use the [**Sphinx** docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
 
-
-
-### Documentation
-
-For docstrings, use the [**Sphinx** docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
-
-To build the docs; 
+#### Build
 
 ```shell script
 (cd sphinx && ./build-docs.sh)
 ```
 
-To run a live-preview server;
+#### Live Preview
 
 ```
 pip install sphinx-autobuild
