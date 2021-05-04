@@ -3,15 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to virtool_workflow's documentation!
+Virtool Workflow
 ============================================
+
+.. warning::
+    
+    `virtool_workflow` is unfinished and in active development.
 
 .. toctree::
    :maxdepth: 3
-   :caption: Index
 
-   README.md
-   FIXTURE_README.md
+   README.md <README>
    autoapi/virtool_workflow/index.rst
    autoapi/virtool_workflow_runtime/index.rst
 
