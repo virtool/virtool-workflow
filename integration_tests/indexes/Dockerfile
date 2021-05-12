@@ -1,0 +1,3 @@
+FROM virtool/workflow
+
+COPY . .
