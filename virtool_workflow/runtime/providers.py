@@ -11,6 +11,7 @@ from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.config import fixtures as config
 from virtool_workflow.data_model import Job
 from virtool_workflow.fixtures import FixtureGroup
+from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
 
 providers = FixtureGroup(
     config.job_id, jobs.acquire_job, jobs.push_status, **api_fixtures
@@ -39,7 +40,20 @@ def hmms_provider(http, jobs_api_url, work_path) -> HMMsProvider:
 
 @providers.fixture
 def index_provider(job, http, jobs_api_url) -> IndexProvider:
-    return IndexProvider(job.args["index_id"], job.args["ref_id"], http, jobs_api_url)
+    try:
+        return IndexProvider(job.args["index_id"], job.args["ref_id"], http, jobs_api_url)
+    except KeyError as e:
+        key = e.args[0]
+
+        if key == "ref_id":
+            raise IllegalJobArguments(
+                f"Index {job.args['index_id']} given without 'ref_id'."
+            )
+
+        if key == "index_id":
+            raise MissingJobArgument("Missing key 'index_id'")
+
+        raise
 
 
 @providers.fixture
