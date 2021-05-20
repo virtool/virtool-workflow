@@ -10,3 +10,4 @@ class Index:
     id: str
     manifest: Dict[str, int]
     reference: Reference
+    ready: bool

@@ -52,6 +52,7 @@ class IndexProvider(AbstractIndexProvider):
                     index_document["id"],
                     index_document["manifest"],
                     await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
+                    ready="ready" in index_document and index_document["ready"]
                 )
 
     async def upload(self, path: Path, format_: VirtoolFileFormat = "fasta") -> VirtoolFile:
