@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import aiofiles
@@ -58,7 +59,9 @@ async def upload_file_via_put(http: aiohttp.ClientSession,
                 return VirtoolFile(
                     id=response_json["id"],
                     name=response_json["name"],
-                    name_on_disk=response_json["name_on_disk"],
+                    name_on_disk=(response_json["name_on_disk"]
+                                  if "name_on_disk" in response_json
+                                  else response_json["name"]),
                     size=response_json["size"],
                     uploaded_at=dateutil.parser.isoparse(
                         response_json["uploaded_at"]),

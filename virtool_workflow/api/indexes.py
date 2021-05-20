@@ -74,9 +74,11 @@ class IndexProvider(AbstractIndexProvider):
         :param format_: The format of the file.
         :return: A :class:`VirtoolFile` object.
         """
-        return await upload_file_via_put(self.http,
-                                          f"{self.jobs_api_url}/indexes/{self._index_id}/files",
-                                          path, format_)
+        return await upload_file_via_put(
+            self.http,
+            f"{self.jobs_api_url}/indexes/{self._index_id}/files/{path.name}",
+            path, format_
+        )
 
     async def download(self, target_path: Path, *names) -> Path:
         """Download files associated with the current index."""
@@ -106,4 +108,5 @@ class IndexProvider(AbstractIndexProvider):
                     index_document["id"],
                     index_document["manifest"],
                     await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
+                    ready=index_document["ready"]
                 )

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 import aiofiles
-from virtool_core.utils import decompress_file
+from virtool_core.utils import decompress_file, compress_file
 
 from virtool_workflow import data_model
 from virtool_workflow import fixture
@@ -96,7 +96,7 @@ class Index(data_model.Index):
             raise ValueError("The sequence_id does not exist in the index")
 
     async def write_isolate_fasta(
-            self, otu_ids: List[str], path: Path
+            self, otu_ids: List[str], path: Path, processes: int = 1,
     ) -> Dict[str, int]:
         """
         Generate a FASTA file for all of the isolates of the OTUs specified by ``otu_ids``.
@@ -122,6 +122,8 @@ class Index(data_model.Index):
                         await f.write(f">{sequence['_id']}\n{sequence['sequence']}\n")
                         lengths[sequence["_id"]] = len(sequence["sequence"])
 
+        await self._run_in_executor(compress_file, path, path.with_suffix(".fa.gz"), processes)
+
         return lengths
 
     async def build_isolate_index(
@@ -139,7 +141,7 @@ class Index(data_model.Index):
         """
         fasta_path = Path(f"{path}.fa")
 
-        lengths = await self.write_isolate_fasta(otu_ids, fasta_path)
+        lengths = await self.write_isolate_fasta(otu_ids, fasta_path, processes)
 
         command = [
             "bowtie2-build",
