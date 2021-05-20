@@ -53,7 +53,6 @@ class Index(data_model.Index):
             )
 
         async with aiofiles.open(self.json_path) as f:
-            print(f.read())
             data = json.loads(await f.read())
 
         sequence_lengths = dict()
@@ -78,7 +77,6 @@ class Index(data_model.Index):
         :return: the matching OTU ID
 
         """
-        print(self._sequence_otu_map)
         try:
             return self._sequence_otu_map[sequence_id]
         except KeyError:
@@ -151,7 +149,7 @@ class Index(data_model.Index):
             str(path),
         ]
 
-        await self._run_subprocess(command)
+        await self._run_subprocess(command, wait=True)
 
         return fasta_path, lengths
 
@@ -170,13 +168,17 @@ async def indexes(
     index_work_path = work_path / "indexes" / index_.id
     index_work_path.mkdir(parents=True, exist_ok=True)
 
-    await index_provider.download(index_work_path, "otus.json.gz")
+    if index_.ready:
+        await index_provider.download(index_work_path)
+    else:
+        await index_provider.download(index_work_path, "otus.json.gz")
 
     index = Index(
         id=index_.id,
         manifest=index_.manifest,
         reference=index_.reference,
         path=index_work_path,
+        ready=index_.ready,
         _run_in_executor=run_in_executor,
         _run_subprocess=run_subprocess
     )
