@@ -76,12 +76,12 @@ async def get_ref(request):
     }, status=200)
 
 
-@mock_routes.put("/api/indexes/{index_id}/files")
+@mock_routes.put("/api/indexes/{index_id}/files/{name}")
 async def upload_index_file(request):
+    name = request.match_info.get("name")
+
     reader = await request.multipart()
     file = await reader.next()
-
-    name = request.query.get("name")
 
     size = 0
     while True:
