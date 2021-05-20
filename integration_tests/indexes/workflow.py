@@ -2,6 +2,7 @@ from typing import List
 
 from virtool_workflow import step, fixture
 from virtool_workflow.analysis.indexes import Index
+from virtool_workflow.api.indexes import IndexProvider
 
 
 @fixture
@@ -46,3 +47,25 @@ async def write_isolate_fasta(index: Index):
     )
 
     assert path.exists()
+
+
+@step
+async def upload(index: Index, index_provider: IndexProvider):
+    for filename in (
+        "reference.1.bt2",
+        "reference.2.bt2",
+        "reference.3.bt2",
+        "reference.4.bt2",
+        "reference.rev.1.bt2",
+        "reference.rev.2.bt2",
+        "reference.fa.gz",
+    ):
+        await index_provider.upload(
+            index.path / filename,
+            "fasta" if filename.endswith("fa") else "bowtie2",
+        )
+
+
+@step
+async def finalize(index_provider: IndexProvider):
+    await index_provider.finalize()
