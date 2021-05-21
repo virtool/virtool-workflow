@@ -28,12 +28,6 @@ jobs:
           cd tests
           docker-compose up --build --exit-code-from pytest
 
-      - name: Print Files
-        run: >-
-          ls -la -R &&
-          ls -la tests &&
-          echo "$GITHUB_WORKSPACE"
-
       - name: Upload Coverage Report As Artifact
         uses: actions/upload-artifact@v2
         with:
@@ -45,4 +39,4 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: test/tests/coverage/coverage.xml
+          coverage-reports: ./tests/coverage/coverage.xml
