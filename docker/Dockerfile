@@ -40,7 +40,11 @@ RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
 # virtool-workflow dependencies
 FROM python:3.9 as pip_install
 WORKDIR install
-COPY . .
+RUN pip install poetry 
+COPY pyproject.toml ./pyproject.toml
+RUN poetry export > requirements.txt
+RUN pip install -r requirements.txt
+COPY . . 
 RUN pip install --user .
 
 FROM python:3.9-buster as main
