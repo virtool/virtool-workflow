@@ -42,23 +42,26 @@ FROM python:3.9 as pip_install
 WORKDIR install
 RUN pip install poetry 
 COPY pyproject.toml ./pyproject.toml
+COPY poetry.lock ./poetry.lock
 RUN poetry export > requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --user -r requirements.txt
 COPY . . 
 RUN pip install --user .
 
-FROM python:3.9-buster as main
+
+FROM python:3.9-buster as JRE
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-jre && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+FROM JRE as main
 COPY --from=pip_install /root/.local /root/.local
 COPY --from=bowtie /build/bowtie2/* /usr/local/bin/
 COPY --from=debian /build/hmmer /opt/hmmer
 COPY --from=debian /build/skewer /usr/local/bin/
 COPY --from=fastqc /build/FastQC /opt/fastqc
 COPY --from=pigz /build/pigz-2.6/pigz /usr/local/bin/pigz
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-jre && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
 
 RUN chmod ugo+x /opt/fastqc/fastqc && \
     ln -fs /opt/fastqc/fastqc /usr/local/bin/fastqc && \
