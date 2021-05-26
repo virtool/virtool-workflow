@@ -47,6 +47,7 @@ class WorkflowExecution:
             result = await self._execute()
         except Exception as e:
             self.scope["error"] = e
+            logger.exception(e)
             await hooks.on_failure.trigger(self.scope)
             raise e
         else:
@@ -83,6 +84,9 @@ class WorkflowExecution:
         self.scope["execution"] = self
         self.scope["current_step"] = self.current_step
         self.scope["results"] = {}
+        await self.scope.get_or_instantiate("job")
+
+        self.scope["logger"] = logging.getLogger(self.scope["job_id"])
 
         async with self.startup_and_cleanup() as workflow:
 
