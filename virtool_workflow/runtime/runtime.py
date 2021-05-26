@@ -1,6 +1,6 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope, features
@@ -10,6 +10,24 @@ from virtool_workflow.hooks import on_load_config, on_finalize
 from virtool_workflow.runtime import fixtures
 
 logger = logging.getLogger(__name__)
+
+log_level = logging.INFO
+
+
+@on_load_config
+def determine_log_level(dev_mode):
+    global log_level
+
+    if dev_mode is True:
+        log_level = logging.DEBUG
+
+
+@on_load_config
+def install_coloredlogs():
+    with suppress(ModuleNotFoundError):
+        import coloredlogs
+        logging.debug("Installed coloredlogs")
+        coloredlogs.install(level=log_level)
 
 
 @on_load_config
@@ -36,7 +54,8 @@ def load_scripts(init_file: Path, fixtures_file: Path):
 def extract_workflow(workflow_file_path: Path, scope):
     _workflow = discovery.discover_workflow(workflow_file_path)
     if not _workflow:
-        raise RuntimeError(f"{workflow_file_path.name} does not contain a Workflow.")
+        raise RuntimeError(
+            f"{workflow_file_path.name} does not contain a Workflow.")
 
     scope["workflow"] = _workflow
 

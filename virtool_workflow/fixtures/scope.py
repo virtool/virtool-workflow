@@ -2,7 +2,6 @@
 import inspect
 import asyncio
 import logging
-import functools
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from inspect import signature
