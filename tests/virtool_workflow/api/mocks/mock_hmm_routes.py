@@ -48,7 +48,7 @@ MOCK_HMM = {
 HMM_PROFILES = ANALYSIS_TEST_FILES_DIR / "profiles.hmm"
 
 
-@mock_routes.get("/api/hmm/{hmm_id}")
+@mock_routes.get("/api/hmms/{hmm_id}")
 async def get(request):
     hmm_id = request.match_info["hmm_id"]
 
@@ -60,12 +60,12 @@ async def get(request):
     return json_response(MOCK_HMM)
 
 
-@mock_routes.get('/api/hmm/files/profiles.hmm')
+@mock_routes.get('/api/hmms/files/profiles.hmm')
 async def download_hmm_profiles(request):
     return FileResponse(HMM_PROFILES)
 
 
-@mock_routes.get('/api/hmm/files/annotations.json.gz')
+@mock_routes.get('/api/hmms/files/annotations.json.gz')
 async def download_annotations(request):
     annotations_path = ANALYSIS_TEST_FILES_DIR/"annotations.json"
     compressed_annotations_path = annotations_path.with_suffix(".json.gz")
