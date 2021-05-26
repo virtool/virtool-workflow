@@ -38,6 +38,9 @@ async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subproc
     if which("hmmpress") is None:
         raise RuntimeError("hmmpress is not installed.")
 
-    await run_subprocess(["hmmpress", str(hmms_provider.path)])
+    process = await run_subprocess(["hmmpress", str(hmms_provider.path/"profiles.hmm")], wait=True)
+
+    if process.returncode != 0:
+        raise RuntimeError("hmmpress command failed")
 
     return HMMs(await hmms_provider.hmm_list(), hmms_provider.path)
