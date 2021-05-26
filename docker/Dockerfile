@@ -38,18 +38,18 @@ RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
     make
 
 # virtool-workflow dependencies
-FROM python:3.9 as pip_install
+FROM python:3.8-slim as pip_install
 WORKDIR install
-RUN pip install poetry 
+RUN pip install --user poetry 
 COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
-RUN poetry export > requirements.txt
+RUN /root/.local/bin/poetry export > requirements.txt
 RUN pip install --user -r requirements.txt
 COPY . . 
 RUN pip install --user .
 
 
-FROM python:3.9-buster as JRE
+FROM python:3.8-buster as JRE
 RUN apt-get update && \
     apt-get install -y --no-install-recommends default-jre && \
     rm -rf /var/lib/apt/lists/* && \
