@@ -1,7 +1,6 @@
 import gzip
 import json
 import shutil
-from operator import itemgetter
 from pathlib import Path
 from typing import List
 
@@ -17,11 +16,17 @@ from virtool_workflow.data_model import HMM
 
 def _hmm_from_dict(hmm_json) -> HMM:
     return HMM(
-
-        *itemgetter("id", "cluster", "count", "entries",
-                    "families", "genera", "hidden",
-                    "length", "mean_entropy",
-                    "total_entropy", "names")(hmm_json)
+        id=hmm_json["id"],
+        cluster=hmm_json["cluster"],
+        count=hmm_json["count"],
+        entries=hmm_json["entries"],
+        families=hmm_json["families"],
+        genera=hmm_json["genera"],
+        hidden=hmm_json["hidden"] if "hidden" in hmm_json else False,
+        length=hmm_json["length"],
+        mean_entropy=hmm_json["mean_entropy"],
+        total_entropy=hmm_json["total_entropy"],
+        names=hmm_json["names"],
     )
 
 
@@ -33,7 +38,7 @@ class HMMsProvider(AbstractHMMsProvider):
                  work_path: Path,
                  number_of_processes: int = 3):
         self.http = http
-        self.url = f"{jobs_api_url}/hmm"
+        self.url = f"{jobs_api_url}/hmms"
         self.path = work_path / "hmms"
         self.number_of_processes = number_of_processes
 
