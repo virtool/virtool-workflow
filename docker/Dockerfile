@@ -40,7 +40,7 @@ RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
 # virtool-workflow dependencies
 FROM python:3.8-slim as pip_install
 WORKDIR install
-RUN pip install --user poetry 
+RUN pip install --user poetry==1.1.6
 COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
 RUN /root/.local/bin/poetry export > requirements.txt
