@@ -1,0 +1,26 @@
+# Run the virtool-workflow integration tests
+#
+name: Integration Tests
+
+on:
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+
+      - name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
+
+
+      - name: Run Tests Using Docker Compose
+        run: |
+          cd integration_tests
+          python run.py
