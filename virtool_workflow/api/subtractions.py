@@ -6,10 +6,24 @@ import aiohttp
 
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import (upload_file_via_put, 
+from virtool_workflow.api.utils import (upload_file_via_put,
                                         read_file_from_response,
                                         upload_file_via_put)
 from virtool_workflow.data_model import Subtraction, NucleotideComposition
+
+
+def subtraction_from_json(subtraction_json: dict, path: Path) -> Subtraction:
+    return Subtraction(
+        subtraction_json["id"],
+        subtraction_json["name"],
+        subtraction_json["nickname"],
+        subtraction_json["count"] if "count" in subtraction_json else None,
+        subtraction_json["deleted"],
+        NucleotideComposition(
+            **subtraction_json["gc"]) if "gc" in subtraction_json else {},
+        subtraction_json["is_host"],
+        path,
+    )
 
 
 class SubtractionProvider(AbstractSubtractionProvider):
@@ -32,21 +46,14 @@ class SubtractionProvider(AbstractSubtractionProvider):
         self.subtraction_id = subtraction_id
         self.http = http
         self.api_url = f"{jobs_api_url}/subtractions/{subtraction_id}"
-        self.path = subtraction_work_path
+        self.path = subtraction_work_path / subtraction_id
+        if not self.path.exists():
+            self.path.mkdir()
 
     async def get(self) -> Subtraction:
         async with self.http.get(self.api_url) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
-                return Subtraction(
-                    subtraction_json["id"],
-                    subtraction_json["name"],
-                    subtraction_json["nickname"],
-                    subtraction_json["count"],
-                    subtraction_json["deleted"],
-                    NucleotideComposition(**subtraction_json["gc"]) if "gc" in subtraction_json else {},
-                    subtraction_json["is_host"],
-                    self.path,
-                )
+                return subtraction_from_json(subtraction_json, self.path)
 
     async def upload(self, path: Path):
         """
@@ -72,16 +79,7 @@ class SubtractionProvider(AbstractSubtractionProvider):
         """
         async with self.http.patch(self.api_url, json={"gc": gc}) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
-                return Subtraction(
-                    subtraction_json["id"],
-                    subtraction_json["name"],
-                    subtraction_json["nickname"],
-                    subtraction_json["count"],
-                    subtraction_json["deleted"],
-                    NucleotideComposition(**subtraction_json["gc"]),
-                    subtraction_json["is_host"],
-                    self.path,
-                )
+                return subtraction_from_json(subtraction_json, self.path)
 
     async def download(self, target_path: Path = None, *names):
         if not names:
