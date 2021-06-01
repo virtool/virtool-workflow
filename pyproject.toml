@@ -8,7 +8,7 @@ readme = "README.md"
 repository = "https://github.com/virtool/virtool-workflow"
 classifiers = [
     "Topic :: Software Development :: Libraries",
-    "Programming Language:: Python:: 3.8",
+    "Programming Language :: Python :: 3.8"
 ]
 packages = [
     { include = "virtool_workflow" },
