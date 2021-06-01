@@ -53,6 +53,7 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
             return Analysis(
                 id=response_json["id"],
                 files=_analysis_file_from_api_response_json(response_json),
+                ready=response_json["ready"] if "ready" in response_json else False
             )
 
 
