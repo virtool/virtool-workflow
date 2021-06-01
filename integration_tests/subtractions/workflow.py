@@ -9,13 +9,14 @@ from virtool_workflow.data_model.subtractions import (NucleotideComposition,
 @virtool_workflow.step
 def test_correct_subtractions(
         subtractions: List[Subtraction],
-        work_path: Path
+        work_path: Path,
+        logger
 ):
 
     sub1, sub2 = subtractions
 
-    assert sub1.id == "no3nlhgn"
-    assert sub2.id == "f6698qcc"
+    assert sub1.id == "No3NlHGn"
+    assert sub2.id == "F6698QcC"
 
     assert sub1.gc == NucleotideComposition(
         a=0.25, t=0.25, g=0.25, c=0.25, n=0.0
