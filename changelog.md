@@ -26,6 +26,10 @@
 - Re-implement read trimming + caching
 - Support colored logging
 - Add integration tests against Virtool's jobs API
+
+# Release 0.5.1
+
+- Move `virtool/workflow` Dockerfile to repository root
     
 
 

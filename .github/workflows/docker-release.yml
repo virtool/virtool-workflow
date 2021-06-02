@@ -34,7 +34,6 @@ jobs:
         with:
           push: true
           tags: virtool/workflow:${{ steps.tags.outputs.TAG }}
-          context: ./docker
 
       - name: Update README on Docker Hub
         uses: peter-evans/dockerhub-description@v2
