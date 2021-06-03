@@ -13,26 +13,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Extract Tag From Branch
-        id: extract_tag
+      - name: Check For Release Branch
+        id: check_release
         shell: bash
-        run: | 
-            echo "##[set-output name=release;]$(echo ${GITHUB_REF#refs/heads/} | cut -f1 -d'/')"
-            echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/} | cut -f2 -d'/')"
+        run: echo "##[set-output name=release;]$(echo ${GITHUB_REF#refs/heads/} | cut -f1 -d'/')"
 
-      - name: Extract Release Notes
-        if: ${{ steps.extract_tag.outputs.release }} == 'release'
-        id: extract-release-notes
-        uses: ffurrer2/extract-release-notes@v1
+      - name: Get Version Number
+        id: get_version
+        run: | 
+            pip install poetry
+            echo "##[set-output name=version;]$(poetry version | cut -f2 -d' ')"
+            
+
+      - name: Update Changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@v1
+        with:
+            version: ${{ steps.get_version.outputs.version }}
+
 
       - name: Create release
-        if: ${{ steps.extract_tag.outputs.release }} == 'release'
+        if: ${{ steps.check_release.outputs.release }} == 'release'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.extract_tag.outputs.tag }}
-          release_name: ${{ steps.extract_tag.outputs.tag }}
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: ${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: false
           body: ${{ steps.extract-release-notes.outputs.release_notes }}
