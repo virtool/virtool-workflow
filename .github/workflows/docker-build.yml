@@ -1,0 +1,24 @@
+name: Docker Build
+
+on:
+  pull_request:
+    branches:
+      - "release/*"
+      - "master"
+
+  push:
+    branches:
+      - "master"
+
+  workflow_dispatch:
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Docker Container
+        run: docker build -t virtool/workflow .
