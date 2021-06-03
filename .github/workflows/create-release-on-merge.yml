@@ -2,6 +2,8 @@ name: Create Github Release
 on:
   pull_request:
     types: [closed]
+    branches:
+        - master
 
 jobs:
   create-release:
@@ -14,13 +16,16 @@ jobs:
       - name: Extract Tag From Branch
         id: extract_tag
         shell: bash
+        run: echo "##[set-output name=release;]$(echo ${GITHUB_REF#refs/heads/} | cut -f1 -d'/')"
         run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/} | cut -f2 -d'/')"
 
       - name: Extract Release Notes
+        if: ${{ steps.extract_tag.outputs.release }} == 'release'
         id: extract-release-notes
         uses: ffurrer2/extract-release-notes@v1
 
       - name: Create release
+        if: ${{ steps.extract_tag.outputs.release }} == 'release'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
