@@ -1,5 +1,11 @@
+# Changelog
+All notable changes to this project will be documented in this file.
 
-# Release 0.5.0
+The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
+
+## [Unreleased]
+
+### Changed
 
 - Switch back to Sphinx for documentation
 - Add `indexes` fixture and tests
@@ -26,9 +32,6 @@
 - Re-implement read trimming + caching
 - Support colored logging
 - Add integration tests against Virtool's jobs API
-
-# Release 0.5.1
-
 - Move `virtool/workflow` Dockerfile to repository root
     
 
