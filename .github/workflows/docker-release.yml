@@ -3,6 +3,7 @@ name: Release Workflow Docker Image
 on:
   release:
     types: [ created ]
+  workflow_dispatch:
 
 jobs:
   push_to_dockerhub:
