@@ -1,8 +1,10 @@
 name: Enforce Changelog
-  pull_request:
-    branches:
-      - "release/*"
-      - "master"
+
+  on:
+      pull_request:
+        branches:
+          - "release/*"
+          - "master"
 
   changelog:
     runs-on: ubuntu-latest

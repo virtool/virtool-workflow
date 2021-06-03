@@ -8,11 +8,6 @@ on:
       - "release/*"
       - "master"
 
-  push:
-    branches:
-      - "master"
-
-
 jobs:
 
   docker-build:
