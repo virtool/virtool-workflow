@@ -1,0 +1,14 @@
+name: Enforce Changelog
+  pull_request:
+    branches:
+      - "release/*"
+      - "master"
+
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dangoslen/changelog-enforcer@v2
+      with:
+        changeLogPath: 'CHANGELOG.md'
+        skipLabels: 'nochangelog'
