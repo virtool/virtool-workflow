@@ -14,7 +14,7 @@ on:
 
 jobs:
 
-  test:
+  pypi-check:
     runs-on: ubuntu-latest
 
     steps:
