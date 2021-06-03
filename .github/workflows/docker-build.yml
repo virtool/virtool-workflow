@@ -8,12 +8,6 @@ on:
       - "release/*"
       - "master"
 
-  workflow_dispatch:
-
-  push:
-    branches:
-      - "master"
-
 jobs:
 
   docker-build:
