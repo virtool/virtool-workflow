@@ -27,16 +27,10 @@ jobs:
       - name: Update Package Version
         run: poetry version ${{ github.event.inputs.versionName }}
 
-      - name: Update Changelog
-        uses: thomaseizinger/keep-a-changelog-new-release@v1
-        with:
-        version: ${{ github.event.inputs.versionName }}
-
       - name: Commit Changes
         id: make-commit
         run: |
             git add pyproject.toml
-            git add CHANGELOG.md
             git commit --message "Prepare release ${{ github.event.inputs.versionName }}"
             echo "::set-output name=commit::$(git rev-parse HEAD)"
 
