@@ -1,4 +1,3 @@
-# Run test suite using tox.
 name: Tests
 
 on:
