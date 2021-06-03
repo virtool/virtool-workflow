@@ -1,0 +1,30 @@
+name: Poetry Check
+
+on:
+  pull_request:
+    branches:
+      - "release/*"
+      - "master"
+
+  push:
+    branches:
+      - "master"
+
+  workflow_dispatch:
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Poetry & Twine
+        run: pip install poetry twine
+
+      - name: Check pyproject.toml
+        run: |
+            poetry check
+            poetry build
+            twine check --strict dist/*
