@@ -33,6 +33,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Support colored logging
 - Add integration tests against Virtool's jobs API
 - Move `virtool/workflow` Dockerfile to repository root
+
+### Added
+
+- Github action for testing the docker build
+- Github action for testing the PyPi package validity
+- Github action for verifying this changelog
     
 
 
