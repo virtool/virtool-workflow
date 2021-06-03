@@ -1,0 +1,32 @@
+name: Create Github Release
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  create-release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Extract Tag From Branch
+        id: extract_tag
+        shell: bash
+        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/} | cut -f2 -d'/')"
+
+      - name: Extract Release Notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_tag.outputs.tag }}
+          release_name: ${{ steps.extract_tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          body: ${{ steps.extract-release-notes.outputs.release_notes }}
