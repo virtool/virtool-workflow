@@ -16,8 +16,9 @@ jobs:
       - name: Extract Tag From Branch
         id: extract_tag
         shell: bash
-        run: echo "##[set-output name=release;]$(echo ${GITHUB_REF#refs/heads/} | cut -f1 -d'/')"
-        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/} | cut -f2 -d'/')"
+        run: | 
+            echo "##[set-output name=release;]$(echo ${GITHUB_REF#refs/heads/} | cut -f1 -d'/')"
+            echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/} | cut -f2 -d'/')"
 
       - name: Extract Release Notes
         if: ${{ steps.extract_tag.outputs.release }} == 'release'
