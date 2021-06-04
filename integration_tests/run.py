@@ -19,7 +19,7 @@ def run_integration():
                 "--exit-code-from",
                 "workflow"
             ],
-            cwd=test_case_dir,
+            cwd=str(test_case_dir.absolute()),
             stdout=STDOUT,
             stderr=STDOUT,
         )
