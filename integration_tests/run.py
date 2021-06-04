@@ -1,6 +1,6 @@
 import click
 from pathlib import Path
-from subprocess import call
+from subprocess import call, STDOUT
 
 root_dir = Path(__file__).parent
 
@@ -20,6 +20,8 @@ def run_integration():
                 "workflow"
             ],
             cwd=test_case_dir,
+            stdout=STDOUT,
+            stderr=STDOUT,
         )
 
         if return_code != 0:
