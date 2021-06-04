@@ -42,8 +42,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Github action for verifying this changelog
 - Move `virtool/workflow` Dockerfile to repository root
 - Github action to create github releases
+- Github action to run integration tests on PR
+- `run.py` file to run all integration tests
     
-## 0.1.0
-
 
 
