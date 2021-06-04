@@ -1,6 +1,6 @@
 import click
 from pathlib import Path
-from subprocess import call, STDOUT
+from subprocess import Popen, PIPE
 
 root_dir = Path(__file__).parent
 
@@ -9,7 +9,8 @@ root_dir = Path(__file__).parent
 def run_integration():
     test_cases = (dir_ for dir_ in root_dir.iterdir() if dir_.is_dir())
     for test_case_dir in test_cases:
-        return_code = call(
+        print(f"Running test case {test_case_dir}")
+        proc = Popen(
             [
                 "docker-compose",
                 "up",
@@ -19,12 +20,17 @@ def run_integration():
                 "--exit-code-from",
                 "workflow"
             ],
-            cwd=str(test_case_dir.absolute()),
-            stdout=STDOUT,
-            stderr=STDOUT,
+            cwd=test_case_dir,
+            stdout=PIPE,
+            stderr=PIPE,
         )
 
-        if return_code != 0:
+        out, err = proc.communicate()
+
+        print(out)
+        print(err)
+
+        if proc.returncode != 0:
             raise RuntimeError(
                 f"{test_case_dir} exited with error code {return_code}")
 
