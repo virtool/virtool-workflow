@@ -25,14 +25,15 @@ def run_integration():
             stderr=PIPE,
         )
 
-        out, err = proc.communicate()
+        for line in (str(line, encoding="utf-8") for line in proc.stdout):
+            print(line.strip())
 
-        print(out)
-        print(err)
+        for line in (str(line, encoding="utf-8") for line in proc.stderr):
+            print(line.strip())
 
         if proc.returncode != 0:
             raise RuntimeError(
-                f"{test_case_dir} exited with error code {return_code}")
+                f"{test_case_dir} exited with error code {returncode}")
 
 
 if __name__ == "__main__":
