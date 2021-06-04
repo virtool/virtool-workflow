@@ -33,7 +33,7 @@ def run_integration():
 
         if proc.returncode != 0:
             raise RuntimeError(
-                f"{test_case_dir} exited with error code {returncode}")
+                f"{test_case_dir} exited with error code {proc.returncode}")
 
 
 if __name__ == "__main__":
