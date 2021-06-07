@@ -31,6 +31,8 @@ def run_integration():
         for line in (str(line, encoding="utf-8") for line in proc.stderr):
             print(line.strip())
 
+        proc.communicate()
+
         if proc.returncode != 0:
             raise RuntimeError(
                 f"{test_case_dir} exited with error code {proc.returncode}")
