@@ -1,0 +1,27 @@
+# Run the virtool-workflow integration tests
+#
+name: Integration Tests
+
+on:
+  pull_request:
+    branches:
+      - "master"
+      - "release/*"
+ 
+  workflow_dispatch:
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build `virtool/workflow`
+        run: docker build -t virtool/workflow . 
+
+      - name: Run Tests Using Docker Compose
+        run: |
+          cd integration_tests
+          python run.py

@@ -2,10 +2,7 @@ version: "3.1"
 services:
 
   jobs-api:
-    image: virtool/jobs-api
-    build:
-        context: ${VT_BUILD_CONTEXT}
-        dockerfile: ${VT_DOCKERFILE_PATH}
+    image: virtool/virtool:nightly
     depends_on: 
       - mongo
       - redis
