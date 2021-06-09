@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+            ref: develop
 
       - name: Create Release Branch
         run: git checkout -b release/${{ github.event.inputs.versionName }}
