@@ -1,24 +1,17 @@
-name: Merge Master Back To Develop
+name: Merge Master Branch To Develop
 on:
-    workflow_dispatch:
-    pull_request:
-        types: [closed]
-        branches:
-            - master
-
+  push:
+    branches:
+      - 'master'
 jobs:
-    merge-back:
-        if: github.event.pull_request.merged == true || {{$GITHUB_EVENT_NAME}} == "workflow_dispatch"
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout
-            uses: actions/checkout@v2
-            with:
-                ref: develop
+  merge-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
 
-          - name: merge
-            run: |
-                git fetch
-                git merge master
-                git push
-
+      - name: Merge master -> develop
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          target_branch: develop
+          github_token: ${{ github.token }}
