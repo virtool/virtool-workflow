@@ -6,6 +6,7 @@ on:
     branches:
       - "release/*"
       - "master"
+      - "develop"
 
 jobs:
     changelog:
