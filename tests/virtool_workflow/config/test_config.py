@@ -2,7 +2,6 @@ import pytest
 import click
 import click.testing
 from virtool_workflow.config.group import ConfigFixtureGroup
-from virtool_workflow.config.fixtures import options
 from virtool_workflow.cli import cli
 
 
