@@ -1,6 +1,7 @@
 import click
 from pathlib import Path
-from subprocess import Popen, PIPE
+from subprocess import call
+from dotenv import dotenv_values
 
 root_dir = Path(__file__).parent
 
@@ -9,33 +10,16 @@ root_dir = Path(__file__).parent
 def run_integration():
     test_cases = (dir_ for dir_ in root_dir.iterdir() if dir_.is_dir())
     for test_case_dir in test_cases:
-        print(f"Running test case {test_case_dir}")
-        proc = Popen(
-            [
-                "docker-compose",
-                "up",
-                "--build",
-                "--abort-on-container-exit",
-                "--force-recreate",
-                "--exit-code-from",
-                "workflow"
-            ],
-            cwd=test_case_dir,
-            stdout=PIPE,
-            stderr=PIPE,
-        )
+        env = dotenv_values(test_case_dir/".env")
 
-        for line in (str(line, encoding="utf-8") for line in proc.stdout):
-            print(line.strip())
+        cmd = [
+            "workflow",
+            "test",
+            *(arg for arg in env["VT_ADD_ARGS"].split(" ") if arg),
+            env["VT_JOB_ID"]
+        ]
 
-        for line in (str(line, encoding="utf-8") for line in proc.stderr):
-            print(line.strip())
-
-        proc.communicate()
-
-        if proc.returncode != 0:
-            raise RuntimeError(
-                f"{test_case_dir} exited with error code {proc.returncode}")
+        call(cmd, cwd=test_case_dir)
 
 
 if __name__ == "__main__":
