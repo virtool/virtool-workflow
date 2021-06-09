@@ -23,5 +23,5 @@ jobs:
 
       - name: Run Tests Using Docker Compose
         run: |
-          cd integration_tests
-          python run.py
+          pip install .
+          python integration_tests/run.py
