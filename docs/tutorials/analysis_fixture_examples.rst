@@ -5,8 +5,8 @@ A workflow, along with explanations of any non-obvious work they perform.
 
 The fixtures in question are:
 
-- `virtool_workflow.analysis.analysis_info.AnalysisInfo`
-- `virtool_workflow.analysis.analysis_info.AnalysisArguments`
+- ``virtool_workflow.analysis.analysis_info.AnalysisInfo``
+- ``virtool_workflow.analysis.analysis_info.AnalysisArguments``
 - Those fixtures such as `virtool_workflow.analysis_info.paired` which 
   delegate to `virtool_workflow.analysis.analysis_info.AnalysisArguments`
 - Fixtures relating to caching and read preparation. 
