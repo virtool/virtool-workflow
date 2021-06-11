@@ -1,5 +1,6 @@
-import click
 from typing import Callable
+
+import click
 
 from virtool_workflow.config.configuration import ConfigFixture
 from virtool_workflow.fixtures.scope import FixtureGroup
@@ -9,7 +10,6 @@ class ConfigFixtureGroup(FixtureGroup):
     def fixture(self, func: Callable = None, type_=str, default=None):
         """Create a config fixture based on the given callable and include it in this :class:`FixtureGroup`."""
         if func is None:
-
             def _decorator(func: Callable):
                 return self.fixture(func, type_, default)
 

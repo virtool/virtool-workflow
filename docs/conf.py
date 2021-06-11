@@ -14,13 +14,14 @@ import os
 import sys
 import sphinx_rtd_theme
 
+from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'virtool_workflow'
-copyright = '2020, Government of Canada'
 author = 'Ian Boyes, Blake Smith'
 
 # The full version, including alpha/beta/rc tags
@@ -32,15 +33,16 @@ release = '0.0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["myst_parser", "sphinx.ext.autodoc", "autoapi.extension", "sphinx_rtd_theme"]
-autoapi_type = "python"
-autoapi_dirs = ["../virtool_workflow", "../virtool_workflow_runtime"]
+extensions = ["sphinx.ext.autodoc"]
 
-
-autoapi_add_toctree_entry = False
-autoapi_root = "autoapi"
-
-html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
+html_sidebars = {
+    '**': [
+        'globaltoc.html',
+        'relations.html',
+        'sourcelink.html',
+        'searchbox.html'
+    ]
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -56,23 +58,27 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-
 html_favicon = './favicon.ico'
-html_logo = './favicon.ico'
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
-html_theme_options = {
-    'logo_only': True,
-    'display_version': True,
-    # Toc options
-    'collapse_navigation': False,
-    'sticky_navigation': True,
-    'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False
-}
+
+def setup_docstring_formatting(app, what, name, obj, options, lines):
+    if getattr(obj, "is_workflow_fixture", False):
+        for line in lines:
+            print(line)
+
+
+def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
+    if isinstance(obj, FixtureHook):
+        return None, None
+
+    if getattr(obj, "is_workflow_fixture", False):
+        return None, None
+
+    return signature, return_annotation
+
+
+def setup(app):
+    app.connect("autodoc-process-docstring", setup_docstring_formatting)
+    app.connect("autodoc-process-signature", setup_hook_formatting)

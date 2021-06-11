@@ -39,6 +39,7 @@ pytest-profiling = "^1.7.0"
 pytest-instafail = "^0.4.2"
 pytest-sugar = "^0.9.4"
 pytest-picked = "^0.4.6"
+sphinx = "^4.0.2"
 coloredlogs = "^15.0"
 
 [tool.poetry.scripts]

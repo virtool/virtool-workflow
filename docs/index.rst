@@ -11,13 +11,11 @@ Virtool Workflow
     `virtool_workflow` is unfinished and in active development.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
-   README.md <README>
-   autoapi/virtool_workflow/index.rst
-   autoapi/virtool_workflow_runtime/index.rst
-
-
+   fixtures.rst
+   hooks.rst
+   reference.rst
 
 Indices and tables
 ==================

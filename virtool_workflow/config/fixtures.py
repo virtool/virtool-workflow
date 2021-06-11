@@ -1,3 +1,7 @@
+"""
+Fixtures that expose configuration values.
+
+"""
 import os
 from pathlib import Path
 

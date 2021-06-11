@@ -1,3 +1,7 @@
+"""
+Fixture and class for representing the analysis associated with a workflow run.
+
+"""
 from dataclasses import asdict
 from pathlib import Path
 
@@ -28,6 +32,13 @@ class Analysis(data_model.Analysis):
 
 @fixture
 async def analysis(analysis_provider: AbstractAnalysisProvider) -> Analysis:
+    """
+    Returns an :class:`.Analysis` object representing the analysis associated with the running workflow.
+
+    :param analysis_provider: the analysis provider
+    :return: the analysis object
+
+    """
     async def upload_files(files):
         for path, format in files:
             await analysis_provider.upload(path, format)

@@ -170,7 +170,7 @@ For doc-strings, use the [**Sphinx** docstring format](https://sphinx-rtd-tutori
 #### Build
 
 ```shell script
-(cd sphinx && ./build-docs.sh)
+(cd docs && ./build-docs.sh)
 ```
 
 #### Live Preview
