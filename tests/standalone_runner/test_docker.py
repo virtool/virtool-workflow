@@ -58,5 +58,5 @@ async def test_docker_events_trigger_on_docker_event_hook(loopless_main):
 
     await loopless_main()
 
-    assert await asyncio.wait_for(event_triggered, 20) is True
-    assert await asyncio.wait_for(stop_event_triggered, 20) is True
+    assert await asyncio.wait_for(event_triggered, 100) is True
+    assert await asyncio.wait_for(stop_event_triggered, 100) is True
