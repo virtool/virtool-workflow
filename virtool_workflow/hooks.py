@@ -89,21 +89,6 @@ is provided which has an attribute (sharing the same name as the fixture) for ea
             ...
 """
 
-on_load_database = Hook("on_load_database")
-"""
-Triggered before the job document is loaded from the database.
-
-Allows the database to be initialized with additional data.
-"""
-
-use_job = Hook("use_job")
-"""
-Triggered before the job is loaded from the database.
-
-The return value from this hook will be used as the Job for 
-the workflow run.
-"""
-
 before_result_upload = FixtureHook("before_result_upload")
 """Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
 
