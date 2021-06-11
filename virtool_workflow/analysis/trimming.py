@@ -14,7 +14,7 @@ from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.read_prep.fastqc import fastqc
 from virtool_workflow.analysis.read_prep.skewer import (skewer,
-                                                        trimming_min_length)
+                                                        calculate_trimming_min_length)
 from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.api.caches import RemoteReadCaches
 from virtool_workflow.api.samples import SampleProvider
@@ -115,7 +115,7 @@ class Trimming(WorkflowFeature):
         :obj:`sample.read_paths` and :obj:`sample.reads_path` will be updated
         to locate the trimmed fastq files.
         """
-        run_skewer = self.skewer(trimming_min_length(
+        run_skewer = self.skewer(calculate_trimming_min_length(
             sample.library_type, sample.max_length))
         skewer_result = await run_skewer(sample.read_paths, run_subprocess, run_in_executor)
         sample.read_paths = skewer_result.read_paths
