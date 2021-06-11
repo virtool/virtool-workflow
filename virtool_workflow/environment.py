@@ -20,7 +20,7 @@ class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
         """Execute a Workflow."""
         if workflow is None:
             workflow = self["workflow"]
-        await hooks.on_load_fixtures.trigger(self)
+
         return await WorkflowExecution(workflow, self)
 
     async def execute_function(self, func: callable):
