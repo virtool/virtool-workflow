@@ -5,10 +5,12 @@ on:
     branches:
       - "release/*"
       - "master"
+      - "develop"
 
   push:
     branches:
       - "master"
+      - "develop"
 
   workflow_dispatch:
 
