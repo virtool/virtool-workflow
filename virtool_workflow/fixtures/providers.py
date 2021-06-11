@@ -49,6 +49,7 @@ class FixtureGroup(FixtureProvider, dict):
             func.__name__ = func.__name__.lstrip("_")
            
         self[func.__name__] = func
+        func.is_workflow_fixture = True
         return func
 
     def fixtures(self):
