@@ -1,3 +1,8 @@
+"""
+Hooks provide a way to do things when events happen during the workflow lifecycle.
+
+"""
+
 from concurrent import futures
 
 import asyncio

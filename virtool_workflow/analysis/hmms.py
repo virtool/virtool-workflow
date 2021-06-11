@@ -1,8 +1,12 @@
+"""
+A class and fixture for accessing Virtool HMM data for use in analysis workflows.
+
+"""
 from collections import UserList
 from functools import cached_property
 from pathlib import Path
-from typing import Iterable
 from shutil import which
+from typing import Iterable, Dict
 
 from virtool_workflow.abc.data_providers.hmms import AbstractHMMsProvider
 from virtool_workflow.data_model import HMM
@@ -11,15 +15,25 @@ from virtool_workflow.fixtures import fixture
 
 
 class HMMs(UserList):
-    """A list of :class:`virtool_workflow.data_model.HMM` instances, along with a path to the HMM profiles file."""
-    path: Path
+    """
+    A class that exposes:
 
+    1. A :class:`dict` the links `HMMER <http://hmmer.org/>`_ cluster IDs to Virtool annotation IDs.
+    2. The path to the HMM profiles file.
+
+    """
     def __init__(self, hmms: Iterable[HMM], path: Path):
-        self.path = path
+        #: The path to the ``profiles.hmm`` file in the ``work_path`` of the running workflow.
+        self.path: Path = path
         super(HMMs, self).__init__(hmms)
 
     @cached_property
-    def cluster_annotation_map(self):
+    def cluster_annotation_map(self) -> Dict[int, str]:
+        """
+        A :class:`dict` that maps cluster IDs used to identify HMMs in `HMMER <http://hmmer.org/>`_ to annotation IDs
+        used in Virtool.
+
+        """
         return {hmm.cluster: hmm.id for hmm in self}
 
 
@@ -28,10 +42,11 @@ async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subproc
     """
     A fixture for accessing HMM data.
 
-    The *.hmm file is copied from the data directory and `hmmpress` is run to create all the HMM files.
+    The ``*.hmm`` file is copied from the data directory and ``hmmpress`` is run to create all the HMM files.
 
-    Returns a data object containing the path to the HMM profile file and a `dict` that maps HMM cluster numbers to
+    Returns an :class:`.HMMs` object containing the path to the HMM profile file and a `dict` that maps HMM cluster numbers to
     database IDs.
+
     """
     await hmms_provider.get_profiles()
 

@@ -1,8 +1,18 @@
+from pathlib import Path
+
 from virtool_workflow.analysis.fastqc import parse_fastqc
 from virtool_workflow.analysis.utils import ReadPaths
 
 
-def fastqc(work_path, run_subprocess):
+def fastqc(work_path: Path, run_subprocess):
+    """
+    Return a function that can run FastQC.
+
+    :param work_path:
+    :param run_subprocess:
+    :return:
+
+    """
     fastqc_path = work_path / "fastqc"
     output_path = work_path / "fastqc_out"
     fastqc_path.mkdir()
