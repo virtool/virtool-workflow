@@ -39,23 +39,24 @@ async def test_start_container():
 
 
 async def test_docker_events_trigger_on_docker_event_hook(loopless_main):
+    event_triggered = asyncio.Future()
+    stop_event_triggered = asyncio.Future()
+
     @on_docker_event(once=True)
     def check_docker_event_triggered(event):
         logging.debug(f"Docker Event: {event}")
-        check_docker_event_triggered.called = True
+        event_triggered.set_result(True)
 
     @on_docker_container_exit(once=True)
     def check_docker_on_container_exit_triggered(container):
-        check_docker_on_container_exit_triggered.called = True
+        stop_event_triggered.set_result(True)
 
     @on_start(once=True)
     async def start_a_container(docker, containers):
         container = await start_workflow_container(docker, containers, "ubuntu:latest")
         container.stop()
 
-        await asyncio.sleep(1)
-
     await loopless_main()
 
-    assert check_docker_event_triggered.called
-    assert check_docker_on_container_exit_triggered.called
+    assert await asyncio.wait_for(event_triggered, 20) is True
+    assert await asyncio.wait_for(stop_event_triggered, 20) is True
