@@ -1,6 +1,6 @@
 import logging
 from virtool_workflow import step, fixture, features
-from virtool_workflow.analysis.features.trimming import Trimming
+from virtool_workflow.analysis.trimming import Trimming
 from virtool_workflow.data_model import Sample
 
 features.install(Trimming())
