@@ -8,10 +8,6 @@ class CacheExists(Exception):
     ...
 
 
-class CacheFileMissing(ValueError):
-    ...
-
-
 class CacheNotFinalized(ValueError):
     ...
 
