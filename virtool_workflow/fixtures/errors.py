@@ -1,12 +1,7 @@
 """Exceptions relating to workflow fixtures."""
-from inspect import getsourcefile, getsourcelines
-import logging
 import inspect
+from inspect import getsourcefile, getsourcelines
 from typing import Callable
-
-
-class FixtureMultipleYield(ValueError):
-    """Raised when a generator workflow fixture yields more than once."""
 
 
 class FixtureNotFound(KeyError):
