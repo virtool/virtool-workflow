@@ -43,10 +43,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Github action for verifying this changelog
 - Move `virtool/workflow` Dockerfile to repository root
 - Github action to create github releases
+- Github action to perform a a nightly build
 - Github action to create a release branch
 - Github action to run integration tests
 - Github action to performa a nightly build
     - Releases `virtool/workflow:nightly` docker image
 - `workflow test` subcommand
     - Runs a workflow in a test environment using docker-compose
+- Github action to push changes from master branch to develop branch
 
