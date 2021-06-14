@@ -2,7 +2,7 @@ import shutil
 import pytest
 from pathlib import Path
 
-from virtool_workflow.analysis.read_prep.fastqc import fastqc
+from virtool_workflow.analysis.fastqc import fastqc
 from virtool_workflow.analysis.utils import make_read_paths
 
 
