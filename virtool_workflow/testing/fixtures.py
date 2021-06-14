@@ -6,12 +6,6 @@ import pytest
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures.scoping import workflow_fixtures
 from virtool_workflow.runtime import fixtures
-from virtool_workflow.storage.paths import context_directory
-
-
-def testing_data_path():
-    with context_directory("virtool") as data_path:
-        yield data_path
 
 
 @pytest.fixture
@@ -19,7 +13,6 @@ async def runtime(http, jobs_api_url):
     async with WorkflowEnvironment(
             fixtures.runtime
     ) as _runtime:
-        _runtime.override("data_path", testing_data_path)
         _runtime["http"] = http
         _runtime["jobs_api_url"] = jobs_api_url
         yield _runtime
