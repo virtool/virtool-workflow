@@ -100,7 +100,7 @@ def rename_trimming_results(path: Path):
         )
 
 
-def trimming_min_length(library_type: LibraryType, sample_read_length: int):
+def calculate_trimming_min_length(library_type: LibraryType, sample_read_length: int):
     """
     The minimum length of a read.
 

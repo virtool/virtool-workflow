@@ -9,8 +9,8 @@ from tests.virtool_workflow.api.mocks.mock_sample_routes import (
 )
 from virtool_workflow import features, Workflow
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
-from virtool_workflow.analysis.features.trimming import Trimming
-from virtool_workflow.analysis.read_prep.skewer import skewer, trimming_min_length
+from virtool_workflow.analysis.trimming import Trimming
+from virtool_workflow.analysis.read_prep.skewer import skewer, calculate_trimming_min_length
 from virtool_workflow.caching.local import LocalCaches
 from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
@@ -36,7 +36,7 @@ async def test_skewer(
     sample = await sample_provider(job, http, jobs_api_url).get()
 
     run_skewer = skewer(
-        min_length=trimming_min_length(sample.library_type, sample.max_length),
+        min_length=calculate_trimming_min_length(sample.library_type, sample.max_length),
         quiet=True,
     )
 
