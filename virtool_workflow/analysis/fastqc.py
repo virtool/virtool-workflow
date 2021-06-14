@@ -2,6 +2,8 @@ import os
 import shutil
 from pathlib import Path
 
+from virtool_workflow.analysis.utils import ReadPaths
+
 
 def handle_base_quality_nan(split_line: list) -> list:
     """
@@ -169,3 +171,36 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_"):
                 fastqc["sequences"][quality] += int(line[1].split(".")[0])
 
     return fastqc
+
+
+def fastqc(work_path: Path, run_subprocess):
+    """
+    Return a function that can run FastQC.
+
+    :param work_path:
+    :param run_subprocess:
+    :return:
+
+    """
+    fastqc_path = work_path / "fastqc"
+    output_path = work_path / "fastqc_out"
+    fastqc_path.mkdir()
+    output_path.mkdir()
+
+    async def run_fastqc(input_paths: ReadPaths):
+        """Run fastqc on the input path and return the parsed result."""
+        command = [
+            "fastqc",
+            "-f", "fastq",
+            "-o", str(fastqc_path),
+            "--extract",
+            *[str(path) for path in input_paths]
+        ]
+
+        await run_subprocess(command)
+
+        return parse_fastqc(fastqc_path, output_path)
+
+    run_fastqc.output_path = output_path
+
+    return run_fastqc

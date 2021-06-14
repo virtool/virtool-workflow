@@ -12,9 +12,9 @@ from virtool_core.samples.utils import TRIM_PARAMETERS
 from virtool_workflow import FixtureScope
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis.library_types import LibraryType
-from virtool_workflow.analysis.read_prep.fastqc import fastqc
-from virtool_workflow.analysis.read_prep.skewer import (skewer,
-                                                        calculate_trimming_min_length)
+from virtool_workflow.analysis.fastqc import fastqc
+from virtool_workflow.analysis.skewer import (skewer,
+                                              calculate_trimming_min_length)
 from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.api.caches import RemoteReadCaches
 from virtool_workflow.api.samples import SampleProvider
