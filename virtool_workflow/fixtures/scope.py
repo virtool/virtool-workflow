@@ -11,6 +11,7 @@ from virtool_workflow.utils import coerce_to_coroutine_function, wrapped_partial
 from virtool_workflow.fixtures.errors import (
     FixtureNotFound,
     FixtureBindingError,
+    FixtureMultipleYield
 )
 from virtool_workflow.fixtures.providers import (
     FixtureGroup,
@@ -73,13 +74,13 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
             with suppress(StopIteration):
                 logger.debug(f"Returning control to {gen}")
                 next(gen)
-                raise RuntimeError("Fixture must only yield once")
+                raise FixtureMultipleYield("Fixture must only yield once")
 
         async def return_control_to_async_generator(gen):
             with suppress(StopAsyncIteration):
                 logger.debug(f"Returning control to {gen}")
                 await gen.__anext__()
-                raise RuntimeError("Fixture must only yield once")
+                raise FixtureMultipleYield("Fixture must only yield once")
 
         tasks = [return_control_to_generator(gen)
                  for gen in self._generators]
