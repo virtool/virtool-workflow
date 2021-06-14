@@ -29,13 +29,13 @@ any additional arguments to the `workflow run` command you can be included in th
 `VT_ADD_ARGS` environment variable. 
 
 ```env
-VT_ADD_ARGS="--dev-mode true --data-path /data/path"
+VT_ADD_ARGS="--dev-mode true"
 ```
 
 You can also add arguments only for a specific `docker-compose up` run as follows:
 
 ```env
-VT_ADD_ARGS="--dev-mode true --data-path /data/path" docker-compose up --exit-code-from workflow
+VT_ADD_ARGS="--dev-mode true" docker-compose up --exit-code-from workflow
 ```
 
 ## Running the Tests

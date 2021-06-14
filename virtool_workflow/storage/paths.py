@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Union, AnyStr
 from shutil import rmtree
 
-from virtool_workflow.fixtures.workflow_fixture import fixture
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,29 +35,3 @@ def context_directory(path: Union[Path, AnyStr]) -> Path:
         with suppress(FileNotFoundError):
             rmtree(root_path)
             logger.info(f"Deleted temporary directory at {root_path}")
-
-
-@fixture
-def cache_path(data_path: Path):
-    """The virtool cache path."""
-    _cache_path = data_path/"caches"
-    if not _cache_path.exists():
-        _cache_path.mkdir()
-    return _cache_path
-
-
-@fixture
-def subtraction_data_path(data_path: Path):
-    """The path locating subtraction data."""
-    path = data_path/"subtractions"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
-@fixture
-def subtraction_path(work_path):
-    path = work_path / "subtractions"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-

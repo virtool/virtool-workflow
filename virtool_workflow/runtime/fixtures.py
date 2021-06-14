@@ -18,7 +18,6 @@ _workflow_fixtures = [
     job_id,
     results,
     config.work_path,
-    config.data_path,
     config.mem,
     config.proc,
     run_in_executor,

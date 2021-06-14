@@ -19,15 +19,6 @@ def work_path(value: str) -> Path:
         yield temp
 
 
-@options.fixture(default=f"{os.getcwd()}virtool")
-def data_path(value: str) -> Path:
-    """The path where persistent data should be stored."""
-    _data_path = Path(value)
-    if not _data_path.exists():
-        _data_path.mkdir()
-    return _data_path
-
-
 @options.fixture(default=2, type_=int)
 def proc(_):
     """The number of processes as an integer."""

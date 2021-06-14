@@ -28,7 +28,6 @@ def test_discover_fixtures():
 def test_load_fixtures():
     discovery.load_fixtures_from__fixtures__(FIXTURE_TEST_FILE)
 
-    assert "data_path" in options
     assert "work_path" in options
     assert "is_analysis_workflow" in options
 
@@ -41,7 +40,6 @@ async def test_run_discovery(runtime: AnalysisWorkflowEnvironment):
     assert result["fixture_a"] == "a"
     assert result["fixture_b"] == "ab"
     assert result["fixture_c"] == "c"
-    assert result["data_path"]
     assert result["work_path"]
     assert result["thread_pool_executor"]
     assert result["run_in_executor"]
