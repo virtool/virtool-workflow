@@ -1,25 +1,37 @@
-.. virtool_workflow documentation master file, created by
-   sphinx-quickstart on Tue Sep 29 15:18:34 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Virtool Workflow
 ============================================
 
-.. warning::
-    
-    `virtool_workflow` is unfinished and in active development.
+A framework for developing bioinformatic workflows for Virtool.
+
+Virtool Workflow uses decorators to define steps in the workflow.
+
+.. code-block:: python
+
+   from virtool_workflow import startup, step, cleanup
+
+   @startup
+   def startup_function():
+       ...
+
+   @step
+   def step_1():
+       ...
+
+   @step
+   def step_2():
+       ...
+
+   @cleanup
+   def cleanup_function():
+       ...
+
 
 .. toctree::
-   :maxdepth: 2
+    :hidden:
 
-   fixtures.rst
-   hooks.rst
-   reference.rst
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    install.rst
+    quickstart.rst
+    fixtures.rst
+    hooks.rst
+    reference.rst
+    contributing.rst

@@ -1,5 +1,6 @@
+#############
 API Reference
-*************
+#############
 
 ``virtool_workflow.analysis.analysis``
 ======================================
@@ -19,16 +20,36 @@ API Reference
 .. automodule:: virtool_workflow.analysis.hmms
     :members:
 
-``virtool_workflow.analysis.read_prep.fastqc``
-==============================================
+``virtool_workflow.analysis.indexes``
+=====================================
 
-.. automodule:: virtool_workflow.analysis.read_prep.fastqc
+.. automodule:: virtool_workflow.analysis.indexes
     :members:
 
-.. automodule:: virtool_workflow.analysis.samples.sample
+
+``virtool_workflow.analysis.library_types``
+==================================
+
+.. automodule:: virtool_workflow.analysis.library_types
     :members:
 
-.. automodule:: virtool_workflow.analysis.subtractions.subtraction
+
+``virtool_workflow.analysis.reads``
+==================================
+
+.. automodule:: virtool_workflow.analysis.reads
+    :members:
+
+``virtool_workflow.analysis.sample``
+====================================
+
+.. automodule:: virtool_workflow.analysis.sample
+    :members:
+
+``virtool_workflow.analysis.subtraction``
+==========================================
+
+.. automodule:: virtool_workflow.analysis.subtractions
     :members:
 
 ``virtool_workflow.config.configuration``
@@ -37,13 +58,19 @@ API Reference
 .. automodule:: virtool_workflow.config.configuration
     :members:
 
-``virtool_workflow.config.configuration.fixtures``
-==================================================
+``virtool_workflow.config.fixtures``
+====================================
 
 .. automodule:: virtool_workflow.config.fixtures
 
     .. autoclass:: work_path
         :members:
+
+``virtool_workflow.decorator_api``
+==================================
+
+.. automodule:: virtool_workflow.decorator_api
+    :members:
 
 ``virtool_workflow.hooks``
 ==========================
