@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
-from virtool_workflow.analysis.subtractions.subtraction import subtractions
+from virtool_workflow.analysis.subtraction import subtractions
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.data_model import Subtraction
 
