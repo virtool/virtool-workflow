@@ -128,35 +128,33 @@ Non-sample data includes references and indexes, profile hidden Markov models (H
 :func:`.hmms`
 ^^^^^^^^^^^^^
 
-Provides all HMM annotations and the `profiles.hmm` file.
-
-Returns an :class:`.HMMs` object.
-
-.. code-block:: python
-
-    @step
-    def hmmscan(hmms):
-
-
+Provides all HMM annotations and the `profiles.hmm` file. Returns an :class:`.HMMs` object.
 
 :func:`.indexes`
-----------------
+^^^^^^^^^^^^^^^^
 
 The Virtool `reference indexes <https://www.virtool.ca/docs/manual/guide/indexes>`_ available for the current workflow.
 
 Returns a :class:`list` of :class:`.Index` objects.
 
 :func:`.subtractions`
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
-The Virtool `subtractions <https://www.virtool.ca/docs/manual/guide/subtraction>`_ that were set when the analysis workflow was started.
+The Virtool `subtractions <https://www.virtool.ca/docs/manual/guide/subtraction>`_ that were selected by the Virtool
+user when the analysis workflow was started.
 
-Returns a :class:`list` of :class:`.Subtraction` objects.
+Returns a :class:`.list` of :class:`.Subtraction` objects.
 
 Writing Fixtures
 ================
 
 Fixtures are created by decorating functions with :func:`.fixture`.
+
+.. code-block:: python
+
+    @fixture
+    def package_name() -> str:
+        return "virtool-workflow==0.5.2"
 
 Fixtures Using Other Fixtures
 -----------------------------
@@ -196,5 +194,3 @@ such as dictionaries, can be used to pass information between the steps of a wor
     @step
     def step_2(mutable_fixture):
         print(mutable_fixture["intermediate value"]) # "some workflow state"
-
-
