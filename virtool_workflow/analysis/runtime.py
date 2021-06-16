@@ -7,7 +7,7 @@ from virtool_workflow.analysis.analysis import analysis
 from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.analysis.indexes import indexes
 from virtool_workflow.analysis.sample import sample
-from virtool_workflow.analysis.subtraction import subtractions
+from virtool_workflow.analysis.subtractions import subtractions
 from virtool_workflow.data_model import Job
 from virtool_workflow.environment import WorkflowEnvironment
 from virtool_workflow.fixtures import providers
