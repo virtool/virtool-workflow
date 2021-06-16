@@ -13,8 +13,13 @@ from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
 class Analysis(data_model.Analysis):
-    """Operations relating to the current analysis, including file uploads."""
+    """
+    Represents a Virtool analysis.
 
+    Provides access to analysis data and a method :meth:`.upload` that allows selection of files in the workflow
+    environment to be uploaded and associated with the analysis on workflow completion.
+
+    """
     def __init__(self, upload_files: callable, *args, **kwargs):
         self.to_upload = []
 
@@ -33,7 +38,7 @@ class Analysis(data_model.Analysis):
 @fixture
 async def analysis(analysis_provider: AbstractAnalysisProvider) -> Analysis:
     """
-    Returns an :class:`.Analysis` object representing the analysis associated with the running workflow.
+    A fixture that returns an :class:`.Analysis` object representing the analysis associated with the running workflow.
 
     :param analysis_provider: the analysis provider
     :return: the analysis object

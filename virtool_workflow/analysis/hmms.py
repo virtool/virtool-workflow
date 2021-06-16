@@ -47,6 +47,9 @@ async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subproc
     Returns an :class:`.HMMs` object containing the path to the HMM profile file and a `dict` that maps HMM cluster numbers to
     database IDs.
 
+    :raises: :class:`RuntimeError`: hmmpress is not installed
+    :raises: :class:`RuntimeError`: hmmpress command failed
+
     """
     await hmms_provider.get_profiles()
 

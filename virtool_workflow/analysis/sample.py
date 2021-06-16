@@ -9,7 +9,12 @@ from virtool_workflow.data_model.samples import Sample
 
 @fixture
 async def sample(sample_provider: AbstractSampleProvider, work_path: Path) -> Sample:
-    """The sample associated with the current job."""
+    """
+    The sample associated with the current job.
+
+    Returns a :class:`.Sample` object.
+
+    """
     read_path = work_path / "reads"
     read_path.mkdir()
 

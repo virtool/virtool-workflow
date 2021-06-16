@@ -11,8 +11,12 @@ from virtool_workflow.analysis.utils import ReadPaths
 
 @dataclass
 class SkewerResult:
+    """Represents the result of running Skewer to trim a paired or unpaired FASTQ dataset."""
+    #: The paths to the trimmed reads.
     read_paths: ReadPaths
+    #: The process running Skewer.
     process: Process
+    #: The command used to run Skewer.
     command: List[str]
 
     @property
@@ -22,6 +26,8 @@ class SkewerResult:
             - the FASTQ trimming result for an unpaired Illumina dataset
             - the FASTA trimming result for the left reads of a paired Illumina dataset
 
+        :type: :class:`.Path`
+
         """
         return self.read_paths[0]
 
@@ -30,7 +36,9 @@ class SkewerResult:
         """
         The path to the rights reads of a paired Illumina dataset.
 
-        Returns ``None`` if the dataset in unpaired.
+        ``None`` if the dataset in unpaired.
+
+        :type: :class:`.Path`
 
         """
         try:
@@ -116,7 +124,7 @@ def rename_trimming_results(path: Path):
         )
 
 
-def calculate_trimming_min_length(library_type: LibraryType, sample_read_length: int):
+def calculate_trimming_min_length(library_type: LibraryType, sample_read_length: int) -> int:
     """
     The minimum length of a read.
 
