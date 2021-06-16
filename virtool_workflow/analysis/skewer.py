@@ -3,7 +3,7 @@ import shutil
 from asyncio.subprocess import Process
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.utils import ReadPaths
@@ -15,12 +15,28 @@ class SkewerResult:
     process: Process
     command: List[str]
 
-    def __post_init__(self):
-        self.left = self.read_paths[0]
+    @property
+    def left(self) -> Path:
+        """
+        The path to one of:
+            - the FASTQ trimming result for an unpaired Illumina dataset
+            - the FASTA trimming result for the left reads of a paired Illumina dataset
+
+        """
+        return self.read_paths[0]
+
+    @property
+    def right(self) -> Optional[Path]:
+        """
+        The path to the rights reads of a paired Illumina dataset.
+
+        Returns ``None`` if the dataset in unpaired.
+
+        """
         try:
-            self.right = self.read_paths[1]
+            return self.read_paths[1]
         except IndexError:
-            self.right = None
+            return None
 
 
 def skewer(
