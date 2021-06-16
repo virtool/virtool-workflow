@@ -64,6 +64,12 @@ API Reference
 .. automodule:: virtool_workflow.decorator_api
     :members:
 
+``virtool_workflow.api.analysis``
+=================================
+
+.. automodule:: virtool_workflow.api.analysis
+    :members:
+
 ``virtool_workflow.hooks``
 ==========================
 

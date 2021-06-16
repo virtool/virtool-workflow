@@ -1,6 +1,10 @@
+"""
+A data provider for Virtool analysis based on HTTP communication with the Virtool job API.
+
+"""
 import logging
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 
 import aiofiles
 import aiohttp
@@ -15,7 +19,14 @@ from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 logger = logging.getLogger(__name__)
 
 
-def _analysis_file_from_api_response_json(json):
+def get_analysis_files_from_response_json(json) -> List[VirtoolFile]:
+    """
+    Generate a list of :class:`.VirtoolFile` objects from a JSON response representing a Virtool analysis.
+
+    :param json: the analysis JSON data
+    :return: the list of :class:`.VirtoolFile` objects for the analysis
+
+    """
     try:
         return [
             VirtoolFile(
@@ -47,12 +58,13 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
     :raise InsufficientJobRights: When the current job does not have sufficient rights to access the analysis.
     :raise NotFound: When the given :obj:`analysis_id` does not correspond to an existing analysis (HTTP 404).
     :raise KeyError: When the analysis data received from the API is missing a required key.
+
     """
     async with http.get(f"{jobs_api_url}/analyses/{analysis_id}") as response:
         async with raising_errors_by_status_code(response) as response_json:
             return Analysis(
                 id=response_json["id"],
-                files=_analysis_file_from_api_response_json(response_json),
+                files=get_analysis_files_from_response_json(response_json),
                 ready=response_json["ready"] if "ready" in response_json else False
             )
 
@@ -64,8 +76,8 @@ class AnalysisProvider(AbstractAnalysisProvider):
     :param analysis_id: The ID of the current analysis as found in the job args.
     :param http: A :class:`aiohttp.ClientSession` instance to be used when making requests.
     :param jobs_api_url: The url to the Jobs API. It should include the `/api` path.
-    """
 
+    """
     def __init__(self,
                  analysis_id: str,
                  http: aiohttp.ClientSession,
@@ -75,22 +87,38 @@ class AnalysisProvider(AbstractAnalysisProvider):
         self.api_url = jobs_api_url
 
     async def get(self) -> Analysis:
+        """
+        Fetch the current analysis.
+
+        """
         return await get_analysis_by_id(self.id, self.http, self.api_url)
 
     async def upload(self, path: Path, format: VirtoolFileFormat):
-        return await upload_file_via_put(self.http,
-                                          f"{self.api_url}/analyses/{self.id}/files",
-                                          path,
-                                          format)
+        """
+        Upload a file in the workflow environment that should be associated with the current analysis.
+
+        :param path: the path to the file to upload
+        :param format: the format of the file
+
+        """
+        return await upload_file_via_put(
+            self.http,
+            f"{self.api_url}/analyses/{self.id}/files",
+            path,
+            format
+        )
 
     async def download(self, file_id: str, target_path: Path) -> Path:
         """
-        Download a file associated to the current analysis.
+        Download a file associated with the current analysis.
 
         :param file_id: The ID of the file.
         :param target_path: The path which the file data should be stored under.
+
         :return: A path to the downloaded file. It will be the `target_path` if one was given.
+
         :raise NotFound: When either the file or the analysis does not exist (404 status code).
+
         """
         async with self.http.get(f"{self.api_url}/analyses/{self.id}/files/{file_id}") as response:
             async with raising_errors_by_status_code(response):
@@ -104,9 +132,11 @@ class AnalysisProvider(AbstractAnalysisProvider):
         Upload the results dict for the analysis.
 
         :param result: The results dict.
+
         :raise InsufficientJobRights: When the current job does not have sufficient rights to modify the analysis.
         :raise NotFound: When there is no analysis with the ID :obj:`.id`.
         :raise AlreadyFinalized: When there is already a result for the analysis.
+
         """
         async with self.http.patch(f"{self.api_url}/analyses/{self.id}", json={
             "results": result
@@ -114,7 +144,7 @@ class AnalysisProvider(AbstractAnalysisProvider):
             async with raising_errors_by_status_code(response) as analysis_json:
                 return Analysis(
                     analysis_json["id"],
-                    _analysis_file_from_api_response_json(analysis_json)
+                    get_analysis_files_from_response_json(analysis_json)
                 ), analysis_json["results"]
 
     async def delete(self):
