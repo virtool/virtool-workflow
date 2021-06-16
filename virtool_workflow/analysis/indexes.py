@@ -17,6 +17,22 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 @dataclass
 class Index(data_model.Index):
+    """
+    Represents a Virtool reference index.
+
+    Use cases:
+
+
+    1. Access index data when creating an analysis workflow.
+
+       Downloads and provides access to the index JSON, Bowtie2, and FASTA at:
+           - :attr:`.bowtie_path`
+
+       Allows lookup of key index values using
+           - :meth:`.get_otu_id_by_sequence_id`
+           - :meth:`.get_sequence_length`
+
+    """
     path: Path
     _run_in_executor: FunctionExecutor
     _run_subprocess: RunSubprocess
@@ -25,18 +41,34 @@ class Index(data_model.Index):
 
     @property
     def bowtie_path(self) -> Path:
+        """
+        The path to the Bowtie2 index prefix for the Virtool index.
+
+        """
         return self.path / "reference"
 
     @property
     def compressed_json_path(self) -> Path:
+        """
+        The path to the gzip-compressed JSON representation of the reference index in the workflow's work directory.
+
+        """
         return self.path / "otus.json.gz"
 
     @property
     def fasta_path(self) -> Path:
+        """
+        The path to the complete FASTA file for the reference index in the workflow's work directory.
+
+        """
         return self.path / "ref.fa"
 
     @property
     def json_path(self) -> Path:
+        """
+        The path to the JSON representation of the reference index in the workflow's work directory.
+
+        """
         return self.path / "otus.json"
 
     async def decompress_json(self, processes: int):

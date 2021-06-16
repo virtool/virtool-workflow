@@ -28,14 +28,14 @@ API Reference
 
 
 ``virtool_workflow.analysis.library_types``
-==================================
+===========================================
 
 .. automodule:: virtool_workflow.analysis.library_types
     :members:
 
 
 ``virtool_workflow.analysis.reads``
-==================================
+===================================
 
 .. automodule:: virtool_workflow.analysis.reads
     :members:
@@ -46,25 +46,17 @@ API Reference
 .. automodule:: virtool_workflow.analysis.sample
     :members:
 
-``virtool_workflow.analysis.subtraction``
+``virtool_workflow.analysis.skewer``
+==========================================
+
+.. automodule:: virtool_workflow.analysis.skewer
+    :members:
+
+``virtool_workflow.analysis.subtractions``
 ==========================================
 
 .. automodule:: virtool_workflow.analysis.subtractions
     :members:
-
-``virtool_workflow.config.configuration``
-=========================================
-
-.. automodule:: virtool_workflow.config.configuration
-    :members:
-
-``virtool_workflow.config.fixtures``
-====================================
-
-.. automodule:: virtool_workflow.config.fixtures
-
-    .. autoclass:: work_path
-        :members:
 
 ``virtool_workflow.decorator_api``
 ==================================

@@ -7,9 +7,9 @@ from virtool_workflow.analysis.utils import ReadPaths
 
 def handle_base_quality_nan(split_line: list) -> list:
     """
-    Parse a per-base quality line containing NaN values.
+    Parse a per-base quality line from FastQC containing NaN values.
 
-    :param split_line: the quality line split into a List
+    :param split_line: the quality line split into a :class:`.List`
     :return: replacement values
 
     """
@@ -31,8 +31,9 @@ def handle_base_quality_nan(split_line: list) -> list:
     raise ValueError(f"Could not parse base quality values '{joined}'")
 
 
-def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_"):
-    """Parse the FastQC results at `fastqc_path`.
+def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict:
+    """
+    Parse the FastQC results at `fastqc_path`.
 
     All FastQC data except the textual data file are removed. The `prefix` will be prepended to the data file name.
 
@@ -175,11 +176,11 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_"):
 
 def fastqc(work_path: Path, run_subprocess):
     """
-    Return a function that can run FastQC.
+    Returns a function that can run FastQC given a ``work_path`` and ``run_subprocess`` callable.
 
-    :param work_path:
-    :param run_subprocess:
-    :return:
+    :param work_path: the running workflow's ``work_path``
+    :param run_subprocess: the running workflow's ``run_subprocess`` callable
+    :return: a function that can run FastQC
 
     """
     fastqc_path = work_path / "fastqc"
