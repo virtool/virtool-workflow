@@ -40,5 +40,10 @@ class OTU:
     verified: bool = False
     """Flag indicating that the OTU has passed validation."""
 
-    def __post_init__(self):
-        self.lower_name = self.name.lower()
+    @property
+    def lower_name(self) -> str:
+        """
+        The OTU name in all lower case.
+
+        """
+        return self.name.lower()

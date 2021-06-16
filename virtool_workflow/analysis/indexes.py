@@ -23,11 +23,21 @@ class Index(data_model.Index):
     _sequence_lengths: Optional[Dict[str, int]] = None
     _sequence_otu_map: Optional[Dict[str, str]] = None
 
-    def __post_init__(self):
-        self.bowtie_path: Path = self.path / "reference"
-        self.fasta_path: Path = self.path / "ref.fa"
-        self.compressed_json_path: Path = self.path / "otus.json.gz"
-        self.json_path: Path = self.path / "otus.json"
+    @property
+    def bowtie_path(self) -> Path:
+        return self.path / "reference"
+
+    @property
+    def compressed_json_path(self) -> Path:
+        return self.path / "otus.json.gz"
+
+    @property
+    def fasta_path(self) -> Path:
+        return self.path / "ref.fa"
+
+    @property
+    def json_path(self) -> Path:
+        return self.path / "otus.json"
 
     async def decompress_json(self, processes: int):
         """
