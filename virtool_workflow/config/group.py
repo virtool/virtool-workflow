@@ -51,10 +51,12 @@ class ConfigFixtureGroup(FixtureGroup):
         def _deco(func):
             if is_argument:
 
-                click.options.append(
-                    func.__name__,
-                    default=default,
-                    **kwargs
+                self.options.append(
+                    click.argument(
+                        func.__name__,
+                        default=default,
+                        **kwargs
+                    )
                 )
             else:
                 opt_name = "--" + func.__name__.replace("_", "-")

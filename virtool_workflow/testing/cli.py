@@ -13,7 +13,6 @@ COMPOSE_FILE = f"{API_COMPOSE_FILE.absolute()}:{WORKFLOW_COMPOSE_FILE.absolute()
 
 
 @options.add_options
-@click.argument("job_id")
 def test_main(**kwargs):
     """Run a workflow in a test environment"""
 
