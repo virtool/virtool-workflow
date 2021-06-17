@@ -12,7 +12,6 @@ classifiers = [
 ]
 packages = [
     { include = "virtool_workflow" },
-    { include = "virtool_workflow_runtime" },
 ]
 
 [tool.poetry.dependencies]
