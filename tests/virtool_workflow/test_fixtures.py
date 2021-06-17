@@ -1,7 +1,7 @@
 from contextlib import suppress
 
 from virtool_workflow import Workflow
-from virtool_workflow.fixtures.errors import FixtureNotFound, FixtureBindingError
+from virtool_workflow.fixtures.errors import FixtureBindingError
 from virtool_workflow.fixtures.workflow_fixture import fixture
 
 

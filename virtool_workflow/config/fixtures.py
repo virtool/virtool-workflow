@@ -19,13 +19,13 @@ def work_path(value: str) -> Path:
         yield temp
 
 
-@options.fixture(default=2, type_=int)
+@options.fixture(default=2, type=int)
 def proc(_):
     """The number of processes as an integer."""
     ...
 
 
-@options.fixture(default=8, type_=int)
+@options.fixture(default=8, type=int)
 def mem(_):
     """The amount of RAM in GB available for use."""
     ...
@@ -43,7 +43,7 @@ def jobs_api_url(_):
     ...
 
 
-@options.fixture(type_=bool, default=True)
+@options.fixture(type=bool, default=True)
 def is_analysis_workflow(_):
     """A flag indicating that analysis fixtures should be loaded."""
     ...
