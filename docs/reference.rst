@@ -40,6 +40,7 @@ API Reference
 .. automodule:: virtool_workflow.analysis.reads
     :members:
 
+<<<<<<< HEAD
 ``virtool_workflow.analysis.sample``
 ====================================
 
@@ -51,6 +52,11 @@ API Reference
 
 .. automodule:: virtool_workflow.analysis.skewer
     :members:
+``virtool_workflow.config.configuration.fixtures``
+==================================================
+
+.. automodule:: virtool_workflow.config.fixtures
+   :members:
 
 ``virtool_workflow.analysis.subtractions``
 ==========================================
