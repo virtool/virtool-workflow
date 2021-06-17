@@ -1,29 +1,37 @@
 from typing import Callable
+from functools import wraps
 
 import click
 
-from virtool_workflow.config.configuration import ConfigFixture
 from virtool_workflow.fixtures.scope import FixtureGroup
 
 
 class ConfigFixtureGroup(FixtureGroup):
-    def fixture(self, func: Callable = None, type_=str, default=None):
-        """Create a config fixture based on the given callable and include it in this :class:`FixtureGroup`."""
-        if func is None:
-            def _decorator(func: Callable):
-                return self.fixture(func, type_, default)
 
-            return _decorator
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.options = []
 
-        _fixture = ConfigFixture(
-            name=func.__name__,
-            type_=type_,
-            default=default,
-            transform=func,
-            help_=func.__doc__ or "",
-        )
+    def fixture(self, type_=str, default=None):
 
-        return super().fixture(_fixture)
+        def _deco(func):
+            def _fixture():
+                try:
+                    return func(_fixture.override_value)
+                except AttributeError:
+                    return func(default)
+
+            _fixture.__name__ = _fixture.__qualname__ = func.__name__
+
+            _fixture = super(ConfigFixtureGroup, self).fixture(_fixture)
+
+            # wraps copys the signature of `func` to `_fixture`
+            # this is required for sphinx to work properly, but
+            # it causes problems with fixture binding.
+            # so we only wrap the function on return
+            return wraps(func)(_fixture)
+
+        return _deco
 
     def add_options(self, func: Callable):
         """
@@ -33,6 +41,7 @@ class ConfigFixtureGroup(FixtureGroup):
         """
         for name, fixture in self.items():
             option_name = "--" + fixture.name.replace("_", "-")
-            func = click.option(option_name, type=fixture.type, help=fixture.help)(func)
+            func = click.option(
+                option_name, type=fixture.type, help=fixture.help)(func)
 
         return func
