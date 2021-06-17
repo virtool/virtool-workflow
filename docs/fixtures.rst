@@ -2,9 +2,11 @@
 Fixtures
 ########
 
-Fixtures are functions whose return values can be requested and provided to other functions.
+Fixtures are functions whose return values can be requested and provided to other functions. Their implementation in
+Virtool Workflow was inspired by `pytest <https://docs.pytest.org/en/2.8.7/fixture.html>`_.
 
-The concept of fixtures in Virtool Workflow was inspired by `pytest fixtures <https://docs.pytest.org/en/2.8.7/fixture.html>`_.
+:ref:`Built-in fixtures <Built-in Fixtures>` are used in Virtool to allow controlled access to Virtool application data
+required for the workflow to run. Users can also create their own fixtures to share data between steps or to reuse code.
 
 Fixtures are requested in a by including the fixture name as an argument in the requesting function. For example:
 
