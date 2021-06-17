@@ -75,6 +75,12 @@ API Reference
 .. automodule:: virtool_workflow.api.analysis
     :members:
 
+``virtool_workflow.data_model.samples``
+=======================================
+
+.. automodule:: virtool_workflow.data_model.samples
+    :members:
+
 ``virtool_workflow.hooks``
 ==========================
 
