@@ -1,9 +1,7 @@
 import logging
 from virtool_workflow import step, fixture, features
-from virtool_workflow.analysis.trimming import Trimming
+from virtool_workflow.analysis.reads import Reads
 from virtool_workflow.data_model import Sample
-
-features.install(Trimming())
 
 
 @fixture
@@ -18,3 +16,11 @@ def fetch_sample(sample: Sample, log: logging.Logger):
         assert read.exists()
 
     log.info(sample)
+
+
+@step
+def fetch_reads(reads: Reads):
+    for path in reads.paths:
+        assert path.exists()
+
+    # TODO: test other attirbutes of reads
