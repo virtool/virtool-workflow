@@ -88,10 +88,7 @@ async def upload_result(request):
     except (ContentTypeError, KeyError):
         return web.json_response({"message": "Invalid JSON body."}, status=422)
 
-    if "ready" in TEST_ANALYSIS and TEST_ANALYSIS["ready"] is True:
-        return web.json_response({"message": "There is already a result."}, status=409)
-
-    TEST_ANALYSIS.update({"results": results, "ready": True})
+    TEST_ANALYSIS.update({"results": results})
 
     return web.json_response(TEST_ANALYSIS, status=200)
 
