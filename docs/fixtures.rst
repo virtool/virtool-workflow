@@ -54,10 +54,23 @@ Returns a :class:`~pathlib.Path` object.
     async def prepare(work_path: Path):
         work_path.mkdir("output")
 
+
 :func:`.proc`
 ^^^^^^^^^^^^^
 
 The maximum number of processors that the workflow can use at once.
+
+Use this fixture to provide thread or process count options to external tools. Virtool Workflow will use the allowed
+number of processors for automatic operations like decompression.
+
+Returns an :class:`int`
+
+.. code-block:: python
+
+    @step
+    async def prepare(proc: int):
+        await run_bowtie(num_cpu=proc)
+
 
 :func:`.mem`
 ^^^^^^^^^^^^
