@@ -12,24 +12,37 @@ class ConfigFixtureGroup(FixtureGroup):
         super().__init__(*args, **kwargs)
         self.options = []
 
-    def fixture(self, type_=str, default=None):
+    def fixture(self, default=None, short_name: str = None, **kwargs):
 
         def _deco(func):
+            opt_name = "--" + func.__name__.replace("_", "-")
+            names = (
+                (short_name, opt_name)
+                if short_name is not None
+                else (opt_name,)
+            )
+
+            self.options.append(
+                click.option(
+                    *names,
+                    envvar="VT_" + func.__name__.upper(),
+                    default=default,
+                    help=func.__doc__,
+                    **kwargs,
+                )
+            )
+
+            @wraps(func)
             def _fixture():
                 try:
                     return func(_fixture.override_value)
                 except AttributeError:
                     return func(default)
 
-            _fixture.__name__ = _fixture.__qualname__ = func.__name__
+            # Use signature of wrapper when fixture binding
+            _fixture.__follow_wrapped__ = False
 
-            _fixture = super(ConfigFixtureGroup, self).fixture(_fixture)
-
-            # wraps copys the signature of `func` to `_fixture`
-            # this is required for sphinx to work properly, but
-            # it causes problems with fixture binding.
-            # so we only wrap the function on return
-            return wraps(func)(_fixture)
+            return super(ConfigFixtureGroup, self).fixture(_fixture)
 
         return _deco
 
@@ -39,9 +52,7 @@ class ConfigFixtureGroup(FixtureGroup):
 
         :param func: A `click` command or group.
         """
-        for name, fixture in self.items():
-            option_name = "--" + fixture.name.replace("_", "-")
-            func = click.option(
-                option_name, type=fixture.type, help=fixture.help)(func)
+        for option in self.options:
+            func = option(func)
 
         return func

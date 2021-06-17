@@ -20,14 +20,14 @@ async def load_config(scope: FixtureScope = None, hook: FixtureHook = None, **kw
         hook = hooks.on_load_config
 
     for option in options.values():
-        if option.name in kwargs:
-            if kwargs[option.name] is not None:
+        if option.__name__ in kwargs:
+            if kwargs[option.__name__] is not None:
                 logger.info(
-                    f"Overriding '{option.name}'"
-                    f"with value '{kwargs[option.name]}'")
-                option.override_value = kwargs[option.name]
+                    f"Overriding '{option.__name__}'"
+                    f"with value '{kwargs[option.__name__]}'")
+                option.override_value = kwargs[option.__name__]
 
-            del kwargs[option.name]
+            del kwargs[option.__name__]
 
     if kwargs:
         raise ValueError(f"{list(kwargs)} are not configuration options")
