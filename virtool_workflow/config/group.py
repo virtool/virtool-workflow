@@ -34,7 +34,7 @@ class ConfigFixtureGroup(FixtureGroup):
         2. A fixture providing access to the value of the click argument/option
 
         The target for the decorator will take a single argument corresponding
-        to the expected value returned by click. The return value of the target 
+        to the expected value returned by click. The return value of the target
         function will be used as the value of the fixture.
 
         :param default: The default value for the fixture.
