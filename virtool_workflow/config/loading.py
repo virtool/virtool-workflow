@@ -25,7 +25,7 @@ async def load_config(scope: FixtureScope = None, hook: FixtureHook = None, **kw
                 logger.info(
                     f"Overriding '{option.__name__}'"
                     f"with value '{kwargs[option.__name__]}'")
-                option.override_value = kwargs[option.__name__]
+                option.__value__ = kwargs[option.__name__]
 
             del kwargs[option.__name__]
 
