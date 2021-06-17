@@ -23,15 +23,3 @@ async def sample(sample_provider: AbstractSampleProvider, work_path: Path) -> Sa
     sample_.reads_path = read_path
     sample_.read_paths = make_read_paths(read_path, sample_.paired)
     return sample_
-
-
-@fixture
-def paired(sample: Sample) -> bool:
-    """A boolean indicating that the sample data for the current job is paired."""
-    return sample.paired
-
-
-@fixture
-def library_type(sample: Sample) -> LibraryType:
-    """The library type for the sample being analyzed."""
-    return sample.library_type
