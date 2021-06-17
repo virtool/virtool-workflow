@@ -44,7 +44,10 @@ The ID of the Virtool job for the running workflow.
 :func:`.work_path`
 ^^^^^^^^^^^^^^^^^^
 
-The path to a temporary directory where all files for the running workflow should be stored.
+The path to a temporary work directory where all files for the running workflow should be stored.
+
+Application data automatically loaded by data fixtures like :ref:`samples` or :ref:`subtractions` will be stored in the
+work directory.
 
 Returns a :class:`~pathlib.Path` object.
 
