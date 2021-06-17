@@ -23,6 +23,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Support colored logging
 - Move `virtool/workflow` Dockerfile to repository root
 - Run integration tests
+- Config fixtures are funtions instead of `ConfigFixture` instances
+- CLI options such as `--dev-mode` are now flags instead of boolean options.
 
 ### Added
 
