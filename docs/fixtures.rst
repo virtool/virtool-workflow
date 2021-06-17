@@ -62,50 +62,31 @@ The maximum number of processors that the workflow can use at once.
 
 The maximum memory (GB) the the workflow can use at once.
 
-Sample
-------
+Data
+----
 
 :func:`.sample`
 ^^^^^^^^^^^^^^^
 
 The `sample <https://www.virtool.ca/docs/manual/guide/samples>`_ associated with the workflow run.
 
-Returns a :class:`.Sample` object.
+Returns a :class:`.Sample` object that can be used to access sample data. For analysis workflows, this will be the
+sample being analyzed.
 
 .. code-block:: python
 
     @step
-    async def align(sample):
-        pass
+    async def align(sample: Sample):
+        # The library type of the sample: normal, srna, or amplicon.
+        library_type: str = sample.library_type
 
-:func:`.paired`
-^^^^^^^^^^^^^^^
-
-Indicates whether the sample associated with the workflow run contains paired data.
-
-.. code-block:: python
-
-    @step
-    async def align(paired: bool):
-        if paired:
-            align_paired_data()
-        else:
-            align_unpaired_data()
+        # Whether the sample Illumina dataset is paired or not.
+        paired: bool = sample.paired
 
 
-:func:`.library_type`
-^^^^^^^^^^^^^^^^^^^^^
 
-The library type of the sample associated with the workflow run.
-
-One of ``"normal"``, ``"srna"``, or ``"amplicon"``.
-
-.. code-block:: python
-
-    @step
-    def deduplicate(library_type: LibraryType):
-        if library_type == "amplicon":
-            deduplicate_amplicon_reads()
+.. autoclass:: `virtool_workflow.data_model.samples.Sample`
+    :members:
 
 Analysis
 --------
