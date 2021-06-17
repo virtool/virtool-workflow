@@ -17,7 +17,6 @@ async def _run(**kwargs):
 
 
 @options.add_options
-@click.argument("job_id")
 @cli.command()
 def run(job_id, **kwargs):
     """Run a workflow."""
