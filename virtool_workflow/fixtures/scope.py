@@ -187,7 +187,11 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         :raise FixtureNotFound: When there is a parameter which does not
                                 correspond to a fixture.
         """
-        sig = signature(func)
+        if hasattr(func, "__follow_wrapped__"):
+            sig = signature(func, follow_wrapped=func.__follow_wrapped__)
+        else:
+            sig = signature(func, follow_wrapped=True)
+
         func = coerce_to_coroutine_function(func)
 
         kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
