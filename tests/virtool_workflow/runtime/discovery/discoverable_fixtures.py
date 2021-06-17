@@ -34,9 +34,7 @@ def start(fixture_a, fixture_b, fixture_c, results):
 
 
 @wf.step
-def step(work_path, thread_pool_executor, run_in_executor, results):
-    results["work_path"] = work_path
-    results["thread_pool_executor"] = thread_pool_executor
-    results["run_in_executor"] = run_in_executor
+def step(work_path, results):
+    results["work_path"] = str(work_path)
 
     return "__fixtures__ loaded correctly"

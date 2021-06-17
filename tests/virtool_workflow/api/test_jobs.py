@@ -1,9 +1,20 @@
 from virtool_workflow.api import jobs
 from virtool_workflow.data_model import Status
 from virtool_workflow.testing.fixtures import install_as_pytest_fixtures
-from virtool_workflow.config import fixtures as config
+from pytest import fixture
 
-install_as_pytest_fixtures(globals(), jobs.acquire_job, config.mem, config.proc)
+
+@fixture
+def mem():
+    return 8
+
+
+@fixture
+def proc():
+    return 4
+
+
+install_as_pytest_fixtures(globals(), jobs.acquire_job)
 
 
 async def test_job_can_be_acquired(acquire_job):

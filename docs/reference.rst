@@ -40,7 +40,6 @@ API Reference
 .. automodule:: virtool_workflow.analysis.reads
     :members:
 
-<<<<<<< HEAD
 ``virtool_workflow.analysis.sample``
 ====================================
 

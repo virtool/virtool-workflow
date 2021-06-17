@@ -41,8 +41,6 @@ async def test_run_discovery(runtime: AnalysisWorkflowEnvironment):
     assert result["fixture_b"] == "ab"
     assert result["fixture_c"] == "c"
     assert result["work_path"]
-    assert result["thread_pool_executor"]
-    assert result["run_in_executor"]
 
 
 async def test_import_workflow_with_other_imports():
