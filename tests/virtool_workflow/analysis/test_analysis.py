@@ -1,9 +1,11 @@
 from pathlib import Path
 
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
+from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.reads import Reads, reads
 from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.caching.local import LocalCacheWriter
+from virtool_workflow.data_model import Sample
 
 
 async def test_get_reads_from_existing_cache(tmpdir, run_in_executor):
@@ -23,7 +25,21 @@ async def test_get_reads_from_existing_cache(tmpdir, run_in_executor):
             "count": 10
         }
 
-    _reads = await reads(reads_cache=reads_cache_writer.cache, paired=False)
+    sample = Sample(
+        id="foo",
+        name="Foo",
+        host="",
+        isolate="",
+        locale="",
+        library_type=LibraryType.other,
+        paired=False,
+        quality=dict(),
+        nuvs=False,
+        pathoscope=False,
+        files=[]
+    )
+
+    _reads = await reads(sample, reads_cache=reads_cache_writer.cache)
 
     assert isinstance(_reads, Reads)
 
