@@ -66,3 +66,5 @@ async def test_get_reads_without_cache(
     assert trimmed_reads.sample.id == "hl5v0i0y"
 
     assert data_regression.check(trimmed_reads.quality)
+    assert file_regression.check(trimmed_reads.left)
+    assert file_regression.check(trimmed_reads.right)
