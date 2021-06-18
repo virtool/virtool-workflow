@@ -40,6 +40,8 @@ Basic fixtures for using the workflow environment.
 
 The ID of the Virtool job for the running workflow.
 
+Returns a :class:`str`.
+
 
 :func:`.work_path`
 ^^^^^^^^^^^^^^^^^^
@@ -80,6 +82,11 @@ Returns an :class:`int`
 
 The maximum memory (GB) the the workflow can use at once.
 
+Use this fixture to configure memory limit options on external tools. Virtool Workflow will automatically limit memory
+usage for internal operations like decompression.
+
+Returns an :class:`int`.
+
 Data
 ----
 
@@ -102,13 +109,6 @@ sample being analyzed.
         paired: bool = sample.paired
 
 
-
-.. autoclass:: `virtool_workflow.data_model.samples.Sample`
-    :members:
-
-Analysis
---------
-
 :func:`.analysis`
 ^^^^^^^^^^^^^^^^^
 
@@ -116,25 +116,58 @@ The analysis associated with the running workflow.
 
 This fixture will be assigned if the workflow is responsible for populating a new analysis.
 
+Returns an :class:`.Analysis` object.
 
-Non-Sample Data
----------------
-
-Fixtures provide access to Virtool's non-sample data.
-
-Non-sample data includes references and indexes, profile hidden Markov models (HMMs), and subtractions.
 
 :func:`.hmms`
 ^^^^^^^^^^^^^
 
-Provides all HMM annotations and the `profiles.hmm` file. Returns an :class:`.HMMs` object.
+Returns an :class:`.HMMs` object that:
+
+1. A `cluster_annotation_map` attribute for mapping HMM cluster numbers to Virtool annotation records.
+2. Downloads and provides the path to `HMMER <http://hmmer.org/>`_-compatible HMM files in the workflow work directory.
+
+When the :func:`.hmms` fixture is requested, the HMM data is automatically downloaded and processed so it is ready to
+use.
+
+.. code-block:: python
+
+    @step
+    async def hmmer(hmms: HMMs, work_path: Path):
+        """
+        Calls run_hmmer(), a function that executes hmmscan using the
+        passed FASTA file and profile paths.
+
+        Then, get the annotation ID for the first HMM hit. The function
+        get_first_hit() returns the first hit from an HMMER output file
+        given its path.
+
+        """
+        result_path = await run_hmmer(
+            work_path / "query.fa",
+            hmms.path
+        )
+
+        first_hit = get_first_hit(result_path)
+
+        annotation_id = hmms.cluster_annotation_map[first_hit.cluster_id]
+
 
 :func:`.indexes`
 ^^^^^^^^^^^^^^^^
 
 The Virtool `reference indexes <https://www.virtool.ca/docs/manual/guide/indexes>`_ available for the current workflow.
 
+When the :func:`.indexes` fixtures is requested,
+
 Returns a :class:`list` of :class:`.Index` objects.
+
+.. code-block:: python
+
+    @step
+    async def map_to_first_index(index: List[Index]):
+        pass
+
 
 :func:`.subtractions`
 ^^^^^^^^^^^^^^^^^^^^^
