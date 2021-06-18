@@ -6,7 +6,12 @@ API Reference
 ======================================
 
 .. automodule:: virtool_workflow.analysis.analysis
-    :members:
+    :members: analysis
+
+    .. autoclass:: Analysis
+        :members:
+        :inherited-members:
+        :undoc-members:
 
 ``virtool_workflow.analysis.fastqc``
 ====================================
@@ -47,7 +52,7 @@ API Reference
     :members:
 
 ``virtool_workflow.analysis.skewer``
-==========================================
+====================================
 
 .. automodule:: virtool_workflow.analysis.skewer
     :members:
@@ -73,6 +78,12 @@ API Reference
 =================================
 
 .. automodule:: virtool_workflow.api.analysis
+    :members:
+
+``virtool_workflow.data_model.analysis``
+=======================================
+
+.. automodule:: virtool_workflow.data_model.analysis
     :members:
 
 ``virtool_workflow.data_model.samples``
