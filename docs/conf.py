@@ -36,6 +36,11 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx"]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
 
+html_theme_options = {
+    "page_width": "1200px",
+    "sidebar_width": "20%"
+}
+
 html_sidebars = {
     '**': [
         'globaltoc.html',
