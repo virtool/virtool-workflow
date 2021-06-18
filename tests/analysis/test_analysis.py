@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
+from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis import reads
 from virtool_workflow.caching.local import LocalCaches
@@ -55,16 +55,3 @@ async def test_get_reads_from_existing_cache(
     assert trimmed_reads.quality == {}
     assert trimmed_reads.left == cache_path/"reads_1.fq.gz"
     assert trimmed_reads.right == cache_path/"reads_2.fq.gz"
-
-
-async def test_get_reads_without_cache(
-        scope,
-        data_regression,
-        file_regression
-):
-    trimmed_reads = await scope.instantiate(reads.reads)
-    assert trimmed_reads.sample.id == "hl5v0i0y"
-
-    assert data_regression.check(trimmed_reads.quality)
-    assert file_regression.check(trimmed_reads.left)
-    assert file_regression.check(trimmed_reads.right)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
+from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from virtool_workflow.analysis.skewer import (calculate_trimming_min_length,
                                               skewer)
 from virtool_workflow.data_model import Job

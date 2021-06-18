@@ -23,13 +23,16 @@ fixtures = FixtureGroup(
 
 @dataclass
 class Reads:
-    """The prepared reads for an analysis workflow."""
+    """
+    Dataclass storing the trimmed reads for a sample.
+
+    :param sample: The target sample.
+    :param quality: The fastqc results for the trimmed reads.
+    :param path: The path to the directory containing the trimmed read files.
+    """
     sample: Sample
-    """The target sample."""
     quality: dict
-    """The quality dict for the trimmed reads."""
     path: Path
-    """The path where the trimmed read files are stored."""
 
     @property
     def left(self):
@@ -93,4 +96,4 @@ async def reads(
 
                 cache.quality = quality
 
-        return Reads(sample=sample, quality=quality, path=result.read_paths)
+        return Reads(sample=sample, quality=quality, path=result.left.parent)

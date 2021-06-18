@@ -8,7 +8,7 @@ from virtool_workflow.data_model.samples import Sample
 
 @fixture
 async def sample(
-        sample_provider: AbstractSampleProvider, 
+        sample_provider: AbstractSampleProvider,
         work_path: Path
 ) -> Sample:
     """
