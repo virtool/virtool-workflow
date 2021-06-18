@@ -31,7 +31,13 @@ class Analysis(data_model.Analysis):
         super(Analysis, self).__init__(*args, **kwargs)
 
     def upload(self, path: Path, format: VirtoolFileFormat):
-        """Mark a file to be uploaded at the end of a workflow run."""
+        """
+        Mark a file to be uploaded at the end of a workflow run.
+
+        :param path: the path to the file in the workflow work directory
+        :param format: the format of the file being uploaded
+
+        """
         self.to_upload.append((path, format))
 
 
