@@ -7,7 +7,7 @@ from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_response import json_response, Response
 
 from tests.conftest import ANALYSIS_TEST_FILES_DIR
-from tests.virtool_workflow.api.mocks.utils import not_found, read_file_from_request
+from tests.api.mocks.utils import not_found, read_file_from_request
 
 mock_routes = RouteTableDef()
 

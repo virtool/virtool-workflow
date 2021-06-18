@@ -2,11 +2,11 @@ import shutil
 import pytest
 
 import virtool_workflow.runtime.fixtures
-from tests.virtool_workflow.analysis.test_sample_fixture import no_op
-from tests.virtool_workflow.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
-from tests.virtool_workflow.api.mocks.mock_job_routes import TEST_JOB
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
-from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
+from tests.analysis.test_sample_fixture import no_op
+from tests.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
+from tests.api.mocks.mock_job_routes import TEST_JOB
+from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
+from tests.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID
 from virtool_workflow.analysis.analysis import Analysis
 from virtool_workflow.analysis.indexes import Index
 from virtool_workflow.data_model import Subtraction, Sample, HMM

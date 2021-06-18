@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pytest import fixture
 
-from tests.virtool_workflow.api.mocks.mock_hmm_routes import MOCK_HMM
+from tests.api.mocks.mock_hmm_routes import MOCK_HMM
 from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.data_model import HMM
 

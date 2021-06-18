@@ -1,6 +1,6 @@
 from aiohttp import web, ContentTypeError
 
-from tests.virtool_workflow.api.mocks.utils import read_file_from_request
+from tests.api.mocks.utils import read_file_from_request
 from tests.conftest import TEST_FILES_DIR
 
 mock_routes = web.RouteTableDef()

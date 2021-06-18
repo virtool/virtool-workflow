@@ -1,11 +1,10 @@
-import aiohttp
 import pytest
 
 from virtool_workflow.api.client import authenticated_http, JobApiHttpSession
 from virtool_workflow.api.scope import api_scope
 from virtool_workflow.runtime import fixtures
 from virtool_workflow.fixtures.scope import FixtureScope
-from tests.virtool_workflow.api.mocks.mock_job_routes import TEST_JOB
+from tests.api.mocks.mock_job_routes import TEST_JOB
 
 
 @pytest.fixture

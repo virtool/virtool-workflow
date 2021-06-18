@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pytest import fixture
 
-from tests.virtool_workflow.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID, TEST_SUBTRACTION
+from tests.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID, TEST_SUBTRACTION
 from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.data_model import Subtraction

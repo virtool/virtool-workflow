@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 
 pytest_plugins = [
-    "tests.virtool_workflow.fixtures.workflow",
-    "tests.virtool_workflow.fixtures.execution",
-    "tests.virtool_workflow.api.fixtures",
+    "tests.fixtures.workflow",
+    "tests.fixtures.execution",
+    "tests.api.fixtures",
     "virtool_workflow.testing.fixtures",
 ]
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID, TEST_SAMPLE
+from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID, TEST_SAMPLE
 from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.samples import SampleProvider
 from virtool_workflow.data_model import Sample
