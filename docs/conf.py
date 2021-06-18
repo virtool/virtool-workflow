@@ -12,7 +12,6 @@
 #
 import os
 import sys
-import sphinx_rtd_theme
 
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 
