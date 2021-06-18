@@ -69,12 +69,6 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 
-def setup_docstring_formatting(app, what, name, obj, options, lines):
-    if getattr(obj, "is_workflow_fixture", False):
-        for line in lines:
-            print(line)
-
-
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
     if isinstance(obj, FixtureHook):
         return None, None
@@ -86,5 +80,4 @@ def setup_hook_formatting(app, what, name, obj, options, signature, return_annot
 
 
 def setup(app):
-    app.connect("autodoc-process-docstring", setup_docstring_formatting)
     app.connect("autodoc-process-signature", setup_hook_formatting)
