@@ -86,6 +86,12 @@ API Reference
 .. automodule:: virtool_workflow.data_model.analysis
     :members:
 
+``virtool_workflow.execution.run_subprocess``
+=============================================
+
+.. automodule:: virtool_workflow.execution.run_subprocess
+    :members:
+
 ``virtool_workflow.data_model.samples``
 =======================================
 
