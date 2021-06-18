@@ -57,6 +57,7 @@ def skewer(
         number_of_processes: int = 1,
         quiet: bool = True,
         other_options: Iterable[str] = ("-n", "-z"),
+        **kwargs
 ):
     """Create a coroutine function that will run skewer with the given parameters."""
     if shutil.which("skewer") is None:
@@ -65,12 +66,12 @@ def skewer(
     command = [
         "skewer",
         "-r", str(max_error_rate),
-        "-d", str(max_indel_rate), 
-        "-m", str(mode), 
-        "-l", str(min_length), 
-        "-q", str(end_quality), 
-        "-Q", str(mean_quality), 
-        "-t", str(number_of_processes), 
+        "-d", str(max_indel_rate),
+        "-m", str(mode),
+        "-l", str(min_length),
+        "-q", str(end_quality),
+        "-Q", str(mean_quality),
+        "-t", str(number_of_processes),
         *other_options
     ]
 

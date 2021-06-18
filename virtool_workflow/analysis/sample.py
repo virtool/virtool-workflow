@@ -2,13 +2,15 @@ from pathlib import Path
 
 from virtool_workflow import fixture
 from virtool_workflow.abc.data_providers import AbstractSampleProvider
-from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.data_model.samples import Sample
 
 
 @fixture
-async def sample(sample_provider: AbstractSampleProvider, work_path: Path) -> Sample:
+async def sample(
+        sample_provider: AbstractSampleProvider,
+        work_path: Path
+) -> Sample:
     """
     The sample associated with the current job.
 
