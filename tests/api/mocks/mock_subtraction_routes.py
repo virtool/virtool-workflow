@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from tests.virtool_workflow.api.mocks.utils import read_file_from_request
+from tests.api.mocks.utils import read_file_from_request
 
 mock_routes = web.RouteTableDef()
 

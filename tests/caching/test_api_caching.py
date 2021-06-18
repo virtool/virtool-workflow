@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_CACHE, TEST_SAMPLE_ID
+from tests.api.mocks.mock_sample_routes import TEST_CACHE, TEST_SAMPLE_ID
 from virtool_workflow.api.caches import RemoteReadsCacheWriter
 
 

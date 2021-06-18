@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.virtool_workflow.api.mocks.mock_index_routes import (
+from tests.api.mocks.mock_index_routes import (
     TEST_INDEX_ID,
     TEST_INDEX,
     TEST_REF_ID,

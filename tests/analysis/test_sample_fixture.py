@@ -1,5 +1,5 @@
-from tests.virtool_workflow.api.mocks.mock_job_routes import TEST_JOB
-from tests.virtool_workflow.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
+from tests.api.mocks.mock_job_routes import TEST_JOB
+from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 
 
 async def no_op(*args, **kwargs):

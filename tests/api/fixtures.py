@@ -3,7 +3,7 @@ import pytest
 from aiohttp import web
 from virtool_workflow.api.client import JobApiHttpSession
 
-from tests.virtool_workflow.api.mocks.mock_api import mock_routes
+from tests.api.mocks.mock_api import mock_routes
 
 
 @pytest.fixture
