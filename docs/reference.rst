@@ -98,6 +98,12 @@ API Reference
 .. automodule:: virtool_workflow.data_model.samples
     :members:
 
+``virtool_workflow.data_model.subtractions``
+============================================
+
+.. automodule:: virtool_workflow.data_model.subtractions
+    :members:
+
 ``virtool_workflow.hooks``
 ==========================
 
