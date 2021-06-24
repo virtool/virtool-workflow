@@ -3,7 +3,7 @@ import json
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Callable, Awaitable
 
 import aiofiles
 from virtool_core.utils import decompress_file, compress_file
@@ -13,6 +13,7 @@ from virtool_workflow import fixture
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
+from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
 @dataclass
@@ -34,6 +35,7 @@ class Index(data_model.Index):
 
     """
     path: Path
+    upload: Callable[[Path, VirtoolFileFormat], Awaitable[None]] = None
     _run_in_executor: FunctionExecutor
     _run_subprocess: RunSubprocess
     _sequence_lengths: Optional[Dict[str, int]] = None
@@ -223,6 +225,7 @@ async def indexes(
         reference=index_.reference,
         path=index_work_path,
         ready=index_.ready,
+        upload=index_provider.upload,
         _run_in_executor=run_in_executor,
         _run_subprocess=run_subprocess
     )
