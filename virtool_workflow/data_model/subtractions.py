@@ -26,16 +26,58 @@ class NucleotideComposition:
 @dataclass
 class Subtraction(ABC):
     """A dataclass representing a subtraction in Virtool."""
+
     id: str
+    """
+    The unique database ID for the subtraction.
+
+    """
+
     name: str
+    """
+    The user-defined subtraction name.
+
+    Usually the species name (eg. *Malus domestica*).
+
+    """
+
     nickname: str
+    """
+    A user-defined nickname for the subtraction.
+
+    Usually the common name of the species (eg. Apple).
+    """
+
     count: int
+    """
+    The number of distinct sequences in the subtraction dataset.
+
+    For a plant host, this would be the number of chromosomes and plastid genomes.
+
+    """
+
     gc: NucleotideComposition
+    """
+    The nucleotide composition of the subtraction represented as a :class:`.NucleotideComposition` object.
+    """
+
     path: Path
+    """
+    The path to the subtraction directory in the workflow work directory.
+    
+    The subtraction directory contains the FASTA and Bowtie2 files for the subtraction. 
+    """
 
     @property
     def fasta_path(self) -> Path:
-        """The path in the running workflow's work_path to the GZIP-compressed FASTA file for the subtraction"""
+        """
+        The path in the running workflow's work_path to the GZIP-compressed FASTA file for the subtraction.
+
+        eg. ``<work_path>/subtractions/<id>/subtraction.fa.gz``
+
+        :type: :class:`.Path`
+
+        """
         return self.path / "subtraction.fa.gz"
 
     @property
@@ -43,11 +85,15 @@ class Subtraction(ABC):
         """
         The path to Bowtie2 prefix in the the running workflow's work_path
 
-        For example, ``/<work_path>/subtractions/<id>/subtraction`` refers to the Bowtie2 index files:
-            - ``/<work_path>/subtractions/<id>/subtraction.1.bt2``
-            - ``/<work_path>/subtractions/<id>/subtraction.2.bt2``
-            - ``/<work_path>/subtractions/<id>/subtraction.3.bt2``
-            - ``/<work_path>/subtractions/<id>/subtraction.rev.1.bt2``
-            - ``/<work_path>/subtractions/<id>/subtraction.rev.2.bt2``
+        For example, ``<work_path>/subtractions/<id>/subtraction`` refers to the Bowtie2 index files:
+            - ``<work_path>/subtractions/<id>/subtraction.1.bt2``
+            - ``<work_path>/subtractions/<id>/subtraction.2.bt2``
+            - ``<work_path>/subtractions/<id>/subtraction.3.bt2``
+            - ``<work_path>/subtractions/<id>/subtraction.4.bt2``
+            - ``<work_path>/subtractions/<id>/subtraction.rev.1.bt2``
+            - ``<work_path>/subtractions/<id>/subtraction.rev.2.bt2``
+
+        :type: :class:`.Path`
+
         """
-        return f"{self.path}/reference"
+        return self.path / "subtraction"
