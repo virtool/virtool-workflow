@@ -31,7 +31,6 @@ class Subtraction(ABC):
     nickname: str
     count: int
     gc: NucleotideComposition
-    is_host: bool
     path: Path
 
     @property
