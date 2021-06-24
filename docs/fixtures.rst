@@ -33,7 +33,7 @@ application data.
 Configuration
 -------------
 
-Basic fixtures for using the workflow environment.
+Fixtures for accessing workflow configuration data.
 
 :func:`.job_id`
 ^^^^^^^^^^^^^^^
@@ -87,27 +87,74 @@ usage for internal operations like decompression.
 
 Returns an :class:`int`.
 
-Data
-----
 
-:func:`.sample`
-^^^^^^^^^^^^^^^
+Utility Fixtures
+----------------
 
-The `sample <https://www.virtool.ca/docs/manual/guide/samples>`_ associated with the workflow run.
+Virtool Workflow is asynchronous first. There are some utility fixtures to make it easier to run external tools and
+heavier analysis work in Python.
 
-Returns a :class:`.Sample` object that can be used to access sample data. For analysis workflows, this will be the
-sample being analyzed.
+:func:`.run_in_executor`
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A utility for executing Python functions in a separate thread.
+
+This is useful for executing blocking code in a way that prevents it from stopping the running workflow from effectively
+communicating with the server.
 
 .. code-block:: python
 
     @step
-    async def align(sample: Sample):
-        # The library type of the sample: normal, srna, or amplicon.
-        library_type: str = sample.library_type
+    async def compress_index(indexes: List[Index], run_in_executor):
+        """
+        Compress the JSON file associated with the first available index
+        using the function compress_json().
 
-        # Whether the sample Illumina dataset is paired or not.
-        paired: bool = sample.paired
+        """
+        index_json_path = indexes[0].json_path
+        await run_in_executor(compress_json, index_json_path)
 
+
+:func:`.run_subprocess`
+^^^^^^^^^^^^^^^^^^^^^^^
+
+A utility for starting external programs as new processes.
+
+Returns a function with the following signature:
+
+.. autofunction:: virtool_workflow.execution.run_subprocess.run_subprocess
+
+The only required argument is ``command``. All others are keyword arguments.
+
+.. code-block:: python
+
+    @step
+    async def bowtie_build(run_subprocess, proc: int, work_path: Path):
+        """
+        Build a Bowtie2 index in a subprocess.
+
+        """
+        fasta_path = work_path / "index.fa"
+        index_path = work_path / "index"
+
+        command = [
+            "bowtie2-build",
+            "-f",
+            "--threads", str(proc),
+            fasta_path,
+            index_path
+        ]
+
+        await run_subprocess(command)
+
+
+Data Fixtures
+-------------
+
+Fixtures for accessing application data available to the workflow.
+
+These fixtures trigger requests to the Virtool server to retrieve the required data. Data is only downloaded if the
+corresponding fixture is requested in a workflow step or custom fixture.
 
 :func:`.analysis`
 ^^^^^^^^^^^^^^^^^
@@ -116,7 +163,7 @@ The analysis associated with the running workflow.
 
 This fixture will be assigned if the workflow is responsible for populating a new analysis.
 
-Returns an :class:`.Analysis` object.
+Returns an :class:`.analysis.analysis.Analysis` object.
 
 
 :func:`.hmms`
@@ -169,6 +216,80 @@ Returns a :class:`list` of :class:`.Index` objects.
         pass
 
 
+:func:`.reads`
+^^^^^^^^^^^^^^
+
+Provides access to reads files and properties
+
+Does not trim reads if a matching trimmed set is already cached on the Virtool server. Instead the cache will be
+downloaded and paths will be accessible at ``reads.paths``.
+
+If no cache exists, the trimming for the sample will be run and the results cached and provided to the workflow at
+``reads.paths``.
+
+Returns a :class:`.Reads` object.
+
+
+.. code-block:: python
+
+    async def map_reads(indexes: List[Index]: reads: Reads):
+        """
+        Maps reads against the first available index using Bowtie2.
+
+        """
+        left_reads_path, right_reads_path = reads.paths
+
+        await map_against_first_index(
+            indexes[0],
+            left_reads_path,
+            right_reads_path
+        )
+
+
+:func:`.results`
+^^^^^^^^^^^^^^^^
+
+Provides a way to store analysis results that will be attached to the analysis record when the workflow completes.
+
+Returns a :class:`.dict`.
+
+.. code-block:: python
+
+    @step
+    async def final_step(results: dict)
+        """
+        Set a key on the results fixture that will result in the data being
+        retained in the analysis record.
+
+        """
+        results["counts"] = {
+            "ab12": 12031,
+            "bd34": 2019002,
+            "ef56": 2110,
+            "gh78": 48978
+        }
+
+
+:func:`.sample`
+^^^^^^^^^^^^^^^
+
+The `sample <https://www.virtool.ca/docs/manual/guide/samples>`_ associated with the workflow run.
+
+Returns a :class:`.Sample` object that can be used to access sample data. For analysis workflows, this will be the
+sample being analyzed.
+
+.. code-block:: python
+
+    @step
+    async def align(sample: Sample):
+        # The library type of the sample: normal, srna, or amplicon.
+        library_type: str = sample.library_type
+
+        # Whether the sample Illumina dataset is paired or not.
+        paired: bool = sample.paired
+
+
+
 :func:`.subtractions`
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -176,6 +297,21 @@ The Virtool `subtractions <https://www.virtool.ca/docs/manual/guide/subtraction>
 user when the analysis workflow was started.
 
 Returns a :class:`.list` of :class:`.Subtraction` objects.
+
+.. code-block:: python
+
+    async def map_subtraction(reads: Reads, subtractions: List[Subtraction]):
+        """
+        Map reads against a subtraction to eliminate non-pathogen information
+        from the analysis.
+
+        """
+        await run_bowtie(
+            reads_path=reads.left
+            index_path=subtractions[0].bowtie2_index_path
+            num_cpu=proc
+        )
+
 
 Writing Fixtures
 ================
@@ -187,6 +323,7 @@ Fixtures are created by decorating functions with :func:`.fixture`.
     @fixture
     def package_name() -> str:
         return "virtool-workflow==0.5.2"
+
 
 Fixtures Using Other Fixtures
 -----------------------------
@@ -204,6 +341,7 @@ Here is an example of how two fixtures (`package_name` and `package_version`) ca
     @fixture
     def package_version(package_name: str):
         return package_name.split("==")[1]
+
 
 Data Sharing with Fixtures
 --------------------------
