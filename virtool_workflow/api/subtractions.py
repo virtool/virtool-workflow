@@ -18,7 +18,6 @@ def subtraction_from_json(subtraction_json: dict, path: Path) -> Subtraction:
         subtraction_json["name"],
         subtraction_json["nickname"],
         subtraction_json["count"] if "count" in subtraction_json else None,
-        subtraction_json["deleted"],
         NucleotideComposition(
             **subtraction_json["gc"]) if "gc" in subtraction_json else {},
         subtraction_json["is_host"],
