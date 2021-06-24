@@ -30,7 +30,6 @@ class Subtraction(ABC):
     name: str
     nickname: str
     count: int
-    deleted: bool
     gc: NucleotideComposition
     is_host: bool
     path: Path
