@@ -16,6 +16,10 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
 
+async def not_implemented(*args):
+    raise NotImplementedError()
+
+
 @dataclass
 class Index(data_model.Index):
     """
@@ -35,9 +39,11 @@ class Index(data_model.Index):
 
     """
     path: Path
-    upload: Callable[[Path, VirtoolFileFormat], Awaitable[None]] = None
     _run_in_executor: FunctionExecutor
     _run_subprocess: RunSubprocess
+    upload: Callable[[Path, VirtoolFileFormat],
+                     Awaitable[None]] = not_implemented
+    finalize: Callable[[], Awaitable[None]] = not_implemented
     _sequence_lengths: Optional[Dict[str, int]] = None
     _sequence_otu_map: Optional[Dict[str, str]] = None
 
@@ -216,19 +222,28 @@ async def indexes(
 
     if index_.ready:
         await index_provider.download(index_work_path)
+        index = Index(
+            id=index_.id,
+            manifest=index_.manifest,
+            reference=index_.reference,
+            path=index_work_path,
+            ready=index_.ready,
+            _run_in_executor=run_in_executor,
+            _run_subprocess=run_subprocess
+        )
     else:
         await index_provider.download(index_work_path, "otus.json.gz")
-
-    index = Index(
-        id=index_.id,
-        manifest=index_.manifest,
-        reference=index_.reference,
-        path=index_work_path,
-        ready=index_.ready,
-        upload=index_provider.upload,
-        _run_in_executor=run_in_executor,
-        _run_subprocess=run_subprocess
-    )
+        index = Index(
+            id=index_.id,
+            manifest=index_.manifest,
+            reference=index_.reference,
+            path=index_work_path,
+            ready=index_.ready,
+            upload=index_provider.upload,
+            finalize=index_provider.finalize,
+            _run_in_executor=run_in_executor,
+            _run_subprocess=run_subprocess
+        )
 
     await index.decompress_json(proc)
 
