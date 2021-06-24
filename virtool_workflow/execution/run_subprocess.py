@@ -80,7 +80,6 @@ async def _run_subprocess(
     :param cwd: Current working directory for the subprocess.
     :param wait: Flag indicating to wait for the subprocess to finish before returning.
 
-    :return
     """
     logger.info(f"Running command in subprocess: {' '.join(command)}")
 
