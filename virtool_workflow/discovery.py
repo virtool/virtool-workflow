@@ -25,9 +25,9 @@ def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
     Import a module from a file.
 
-    The parent directory of `path` will also be added to `sys.path` prior to 
-    importing. This ensures that modules and packages defined in that directory 
-    can be properly imported.
+    The parent directory of `path` will also be added to `sys.path`
+    prior to importing. This ensures that modules and packages defined
+    in that directory can be properly imported.
 
     :param module_name: The name of the python module.
     :param path: The :class:`pathlib.Path` of the python file
@@ -43,11 +43,10 @@ def import_module_from_file(module_name: str, path: Path) -> ModuleType:
 
 def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
     """
-    Find all instances of #execution.fixtures.workflow_fixture.WorkflowFixture in a python module.
+    Find all instances of :class:`Workflow` in a python module.
 
     :param module: The path to the python module to import
-    :return: A list of all #WorkflowFixture instances contained
-        in the module
+    :return: A list of all fixture instances contained in the module
     """
 
     if isinstance(module, Path):
@@ -102,18 +101,13 @@ def discover_workflow(path: Path) -> Workflow:
         raise WorkflowDiscoveryError(
             f"There is no such file {path}") from not_found
 
-    workflow = next(
-
-        (attr
-         for attr in module.__dict__.values() if isinstance(attr, Workflow)
-         ),
-        None
-    )
-
-    if not workflow:
+    try:
+        return next(
+            attr for attr in module.__dict__.values()
+            if isinstance(attr, Workflow)
+        )
+    except StopIteration:
         return collect(module)
-
-    return workflow
 
 
 def run_discovery(
