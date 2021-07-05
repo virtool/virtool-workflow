@@ -26,7 +26,7 @@ def collect(module: ModuleType) -> Workflow:
     """
     Build a Workflow using marked functions from a module.
 
-    .. note::
+    .. warning::
         Since Python 3.7, dictionaries maintain insertion order.
         A side effect of this is that a module's __dict__ attribute
         maintains **definition** order, since attributes are added to
@@ -59,8 +59,8 @@ def collect(module: ModuleType) -> Workflow:
 
     if (
         len(workflow.steps)
-        + len(workflow.startup)
-        + len(workflow.cleanup)
+        + len(workflow.on_startup)
+        + len(workflow.on_cleanup)
     ) == 0:
         raise ValueError(f"No workflow steps could be found in {module}")
 
