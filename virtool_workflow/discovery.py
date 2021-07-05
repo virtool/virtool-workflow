@@ -82,23 +82,6 @@ def load_fixture_plugins(fixture_modules: Iterable[str]):
     return fixtures
 
 
-def load_fixtures_from__fixtures__(path: Path) -> List[Callable]:
-    """
-    Load all fixtures specified by the __fixtures__ attribute of a module.
-
-    :param path: The path to a python module containing __fixtures__ attribute
-    :return: A list of discovered fixtures, or an empty list
-             if the `__fixtures__` attribute is absent
-    """
-    module = import_module_from_file(path.name.rstrip(path.suffix), path)
-
-    __fixtures__ = getattr(module, "__fixtures__", None)
-    if not __fixtures__:
-        return []
-
-    return load_fixture_plugins(__fixtures__)
-
-
 def discover_workflow(path: Path) -> Workflow:
     """
     Find a instance of virtool_workflow.Workflow in the
@@ -145,15 +128,8 @@ def run_discovery(
     :return: A :class:`Workflow` instance and a list of fixtures.
     """
     logger.info("Beginning workflow discovery.")
-    fixtures = load_fixtures_from__fixtures__(
-        Path(__file__).parent / "autoload.py")
 
-    logger.info("Loaded fixtures from `autoload.py`")
-
-    fixtures.extend(load_fixtures_from__fixtures__(path))
-
-    logger.info(f"Loaded fixtures from __fixtures__ in {path}")
-
+    fixtures = []
     if fixture_path and fixture_path.exists():
         fixtures.extend(discover_fixtures(fixture_path))
 
