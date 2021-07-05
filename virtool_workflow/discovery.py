@@ -17,10 +17,6 @@ logger = logging.getLogger(__name__)
 FixtureImportType = Iterable[Union[str, Iterable[str]]]
 
 
-class WorkflowDiscoveryError(Exception):
-    ...
-
-
 def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
     Import a module from a file.
