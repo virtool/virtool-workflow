@@ -12,9 +12,8 @@ from typing import List, Union, Iterable, Tuple, Optional
 from virtool_workflow.decorator_api import collect
 from virtool_workflow.workflow import Workflow
 
-logger = logging.getLogger(__name__)
 
-FixtureImportType = Iterable[Union[str, Iterable[str]]]
+logger = logging.getLogger(__name__)
 
 
 def import_module_from_file(module_name: str, path: Path) -> ModuleType:
@@ -53,28 +52,6 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
         attr for attr in module.__dict__.values()
         if isinstance(attr, Callable)
     ]
-
-
-def load_fixture_plugins(fixture_modules: Iterable[str]):
-    """
-    Load fixtures from a set of modules.
-
-    :param fixture_modules: A list of python module names
-    :return: A list containing all fixtures present across the given modules.
-    """
-    fixtures = []
-    for fixture_set in fixture_modules:
-        if isinstance(fixture_set, str):
-            fixtures.extend(discover_fixtures(import_module(fixture_set)))
-        else:
-            iter_ = iter(fixture_set)
-            module = import_module(next(iter_))
-            fixtures.extend(
-                getattr(module, name) for name in iter_
-                if isinstance(getattr(module, name), Callable)
-            )
-
-    return fixtures
 
 
 def discover_workflow(path: Path) -> Workflow:
