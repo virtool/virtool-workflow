@@ -24,27 +24,44 @@ step = workflow_marker("step")
 
 def collect(module: ModuleType) -> Workflow:
     """
-    Build a Workflow using the functions in a module which have been marked using a `workflow_marker`.
+    Build a Workflow using marked functions from a module.
 
-    Since Python 3.7 dictionaries maintain insertion order. A side effect of this is that a module's
-    __dict__ attribute maintains **definition** order, since attributes are added to the dict as they
-    are defined.
+    .. note::
+        Since Python 3.7, dictionaries maintain insertion order.
+        A side effect of this is that a module's __dict__ attribute
+        maintains **definition** order, since attributes are added to
+        the dict as they are defined. This is also the case in python 3.6,
+        however it is an implementation detail and not a PEP specification.
 
-    The same is true in Python 3.6, however it is an implementation detail. This function may not work
-    as intended in versions of python previous to 3.6 as it assumes that a module's __dict__ attribute is
-    in definition order.
+        This function may not work as intended in older versions of python.
 
-    :param module: A module containing functions tagged by the `workflow_marker` decorators.
+
+    :param module: A module containing functions tagged by
+                   `workflow_marker` decorators.
     :return Workflow: A workflow build using the tagged functions.
     """
 
     workflow = Workflow()
-    for marked in [value for value in module.__dict__.values() if hasattr(value, "__workflow_marker__")]:
+
+    markers = [
+        value for value
+        in module.__dict__.values()
+        if hasattr(value, "__workflow_marker__")
+    ]
+
+    for marked in markers:
         if marked.__workflow_marker__ == "startup":
             workflow.startup(marked)
         elif marked.__workflow_marker__ == "step":
             workflow.step(marked)
         elif marked.__workflow_marker__ == "cleanup":
             workflow.cleanup(marked)
+
+    if (
+        len(workflow.steps)
+        + len(workflow.startup)
+        + len(workflow.cleanup)
+    ) == 0:
+        raise ValueError(f"No workflow steps could be found in {module}")
 
     return workflow
