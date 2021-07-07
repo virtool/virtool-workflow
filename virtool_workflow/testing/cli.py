@@ -4,7 +4,6 @@ from pathlib import Path
 from shutil import which
 from subprocess import PIPE, Popen
 
-import click
 from virtool_workflow.config.fixtures import options
 
 API_COMPOSE_FILE = Path(__file__).parent/"docker-compose.api.yml"

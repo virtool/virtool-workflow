@@ -64,8 +64,8 @@ class Subtraction(ABC):
     path: Path
     """
     The path to the subtraction directory in the workflow work directory.
-    
-    The subtraction directory contains the FASTA and Bowtie2 files for the subtraction. 
+ 
+    The subtraction directory contains the FASTA and Bowtie2 files for the subtraction.
     """
 
     @property
