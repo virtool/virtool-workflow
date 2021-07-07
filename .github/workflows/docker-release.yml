@@ -9,7 +9,6 @@ on:
       - Create Github Release
     branches:
       - master
-      - main
     types:
       - completed 
 
