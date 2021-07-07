@@ -3,7 +3,7 @@ import json
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Callable, Awaitable
 
 import aiofiles
 from virtool_core.utils import decompress_file, compress_file
@@ -13,21 +13,71 @@ from virtool_workflow import fixture
 from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
+from virtool_workflow.data_model.files import VirtoolFileFormat
+
+
+async def not_implemented(*args):
+    raise NotImplementedError()
 
 
 @dataclass
 class Index(data_model.Index):
+    """
+    Represents a Virtool reference index.
+
+    Use cases:
+
+
+    1. Access index data when creating an analysis workflow.
+
+       Downloads and provides access to the index JSON, Bowtie2, and FASTA at:
+           - :attr:`.bowtie_path`
+
+       Allows lookup of key index values using
+           - :meth:`.get_otu_id_by_sequence_id`
+           - :meth:`.get_sequence_length`
+
+    """
     path: Path
     _run_in_executor: FunctionExecutor
     _run_subprocess: RunSubprocess
+    upload: Callable[[Path, VirtoolFileFormat],
+                     Awaitable[None]] = not_implemented
+    finalize: Callable[[], Awaitable[None]] = not_implemented
     _sequence_lengths: Optional[Dict[str, int]] = None
     _sequence_otu_map: Optional[Dict[str, str]] = None
 
-    def __post_init__(self):
-        self.bowtie_path: Path = self.path / "reference"
-        self.fasta_path: Path = self.path / "ref.fa"
-        self.compressed_json_path: Path = self.path / "otus.json.gz"
-        self.json_path: Path = self.path / "otus.json"
+    @property
+    def bowtie_path(self) -> Path:
+        """
+        The path to the Bowtie2 index prefix for the Virtool index.
+
+        """
+        return self.path / "reference"
+
+    @property
+    def compressed_json_path(self) -> Path:
+        """
+        The path to the gzip-compressed JSON representation of the reference index in the workflow's work directory.
+
+        """
+        return self.path / "otus.json.gz"
+
+    @property
+    def fasta_path(self) -> Path:
+        """
+        The path to the complete FASTA file for the reference index in the workflow's work directory.
+
+        """
+        return self.path / "ref.fa"
+
+    @property
+    def json_path(self) -> Path:
+        """
+        The path to the JSON representation of the reference index in the workflow's work directory.
+
+        """
+        return self.path / "otus.json"
 
     async def decompress_json(self, processes: int):
         """
@@ -172,18 +222,28 @@ async def indexes(
 
     if index_.ready:
         await index_provider.download(index_work_path)
+        index = Index(
+            id=index_.id,
+            manifest=index_.manifest,
+            reference=index_.reference,
+            path=index_work_path,
+            ready=index_.ready,
+            _run_in_executor=run_in_executor,
+            _run_subprocess=run_subprocess
+        )
     else:
         await index_provider.download(index_work_path, "otus.json.gz")
-
-    index = Index(
-        id=index_.id,
-        manifest=index_.manifest,
-        reference=index_.reference,
-        path=index_work_path,
-        ready=index_.ready,
-        _run_in_executor=run_in_executor,
-        _run_subprocess=run_subprocess
-    )
+        index = Index(
+            id=index_.id,
+            manifest=index_.manifest,
+            reference=index_.reference,
+            path=index_work_path,
+            ready=index_.ready,
+            upload=index_provider.upload,
+            finalize=index_provider.finalize,
+            _run_in_executor=run_in_executor,
+            _run_subprocess=run_subprocess
+        )
 
     await index.decompress_json(proc)
 

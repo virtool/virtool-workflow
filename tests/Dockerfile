@@ -13,6 +13,7 @@ WORKDIR test
 ENV VT_DB_CONNECTION_STRING=http://localhost:9050
 
 COPY ./pyproject.toml .
+COPY ./poetry.lock .
 RUN poetry install --no-root
 
 COPY . .

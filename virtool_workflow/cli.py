@@ -4,6 +4,7 @@ import click
 
 from virtool_workflow.runtime import runtime
 from virtool_workflow.config.fixtures import options
+from virtool_workflow.testing.cli import test_main
 
 
 @click.group()
@@ -16,7 +17,6 @@ async def _run(**kwargs):
 
 
 @options.add_options
-@click.argument("job_id")
 @cli.command()
 def run(job_id, **kwargs):
     """Run a workflow."""
@@ -25,4 +25,5 @@ def run(job_id, **kwargs):
 
 def cli_main():
     """Main pip entrypoint."""
+    cli.command("test")(test_main)
     cli()

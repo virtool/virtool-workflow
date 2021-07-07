@@ -31,20 +31,5 @@ def coerce_to_coroutine_function(func: Callable):
     return _func
 
 
-def coerce_coroutine_function_to_accept_any_parameters(func: Callable[[], Coroutine[Any, Any, Any]]):
-    """
-    Wrap a coroutine function to ignore all parameters passed to it.
-
-    :param func: A coroutine function which is callable without parameters.
-    :return: A coroutine function which can take any parameters.
-    """
-
-    @wraps(func)
-    async def _func(*args, **kwargs):
-        return await func()
-
-    return _func
-
-
 def wrapped_partial(func, *args, **kwargs):
     return WrappedPartial(func, *args, **kwargs)

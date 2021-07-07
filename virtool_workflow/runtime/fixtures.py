@@ -11,6 +11,7 @@ from virtool_workflow.results import results
 from virtool_workflow.runtime.providers import providers
 from virtool_workflow.config.fixtures import job_id
 from virtool_workflow.api.scope import api_fixtures
+from virtool_workflow.analysis import reads
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,6 @@ _workflow_fixtures = [
     job_id,
     results,
     config.work_path,
-    config.data_path,
     config.mem,
     config.proc,
     run_in_executor,
@@ -35,6 +35,7 @@ workflow = FixtureGroup(
 
 analysis = FixtureGroup(
     *_workflow_fixtures,
+    **reads.fixtures,
     **dict(providers, **api_fixtures),
     **{k: getattr(analysis_fixtures, k)
        for k in analysis_fixtures.__all__},
