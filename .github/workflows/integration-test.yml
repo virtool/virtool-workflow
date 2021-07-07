@@ -12,7 +12,7 @@ on:
 
 jobs:
 
-  test:
+  integration-test:
     runs-on: ubuntu-latest
 
     steps:

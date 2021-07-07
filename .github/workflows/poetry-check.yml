@@ -27,8 +27,8 @@ jobs:
             poetry build
 
       - name: Poetry Publish Dry Run
-        run: >
+        run: >-
             poetry publish
-            --dry-run
             -u ${{ secrets.PYPI_USERNAME }} 
             -p ${{ secrets.PYPI_TOKEN }}
+            --dry-run
