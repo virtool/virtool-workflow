@@ -25,6 +25,3 @@ jobs:
         run: |
             poetry check
             poetry build
-
-      - name: Poetry Publish Dry Run
-        run: poetry publish --dry-run
