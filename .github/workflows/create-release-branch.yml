@@ -16,7 +16,9 @@ jobs:
             ref: develop
 
       - name: Create Release Branch
-        run: git checkout -b release/${{ github.event.inputs.versionName }}
+        run: |
+          git checkout develop
+          git checkout -b release/${{ github.event.inputs.versionName }}
 
       - name: Initialize mandatory git config
         run: |
