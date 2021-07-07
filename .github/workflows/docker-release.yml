@@ -3,6 +3,15 @@ name: Release Workflow Docker Image
 on:
   release:
     types: [ created ]
+  
+  workflow_run:
+    workflows:
+      - Create Github Release
+    branches:
+      - master
+      - main
+    types:
+      - completed 
   workflow_dispatch:
 
 jobs:
