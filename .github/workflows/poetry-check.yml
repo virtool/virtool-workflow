@@ -13,14 +13,22 @@ jobs:
   pypi-check:
     runs-on: ubuntu-latest
 
+    container: python:3.8
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Poetry & Twine
-        run: pip install poetry twine
+      - name: Install Poetry
+        run: pip3 install poetry
 
-      - name: Check pyproject.toml
+      - name: Poetry Build
         run: |
             poetry check
             poetry build
-            twine check --strict dist/*
+
+      - name: Poetry Publish Dry Run
+        run: >
+            poetry publish
+            --dry-run
+            -u ${{ secrets.PYPI_USERNAME }} 
+            -p ${{ secrets.PYPI_TOKEN }}

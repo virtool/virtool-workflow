@@ -15,11 +15,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  pypi-publish:
     runs-on: ubuntu-latest
+    if: ${{ env.EVENT_NAME != "workflow_run" || github.event.workflow_run.conclusion == 'success' }}
 
-    container:
-      image: python:3.9-buster
+    container: python:3.8
 
     steps:
       - uses: actions/checkout@v2
@@ -31,4 +31,5 @@ jobs:
         run: poetry build
 
       - name: Deploy To PyPi
+        if: ${{ !env.ACT }}
         run: poetry publish -r ${{ secrets.PYPI_REPOSITORY }} -u ${{ secrets.PYPI_USERNAME }} -p {{PYPI_TOKEN}}
