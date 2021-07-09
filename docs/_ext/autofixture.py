@@ -1,10 +1,11 @@
-from sphinx.ext.autodoc import FunctionDocumenter
-from sphinx.domains.python import PyFunction, PyObject
-from sphinx.util.typing import OptionSpec
-from docutils.parsers.rst import directives
-from typing import Any
-import re
 import inspect
+import re
+from typing import Any
+
+from docutils.parsers.rst import directives
+from sphinx.domains.python import PyFunction, PyObject
+from sphinx.ext.autodoc import FunctionDocumenter
+from sphinx.util.typing import OptionSpec
 
 
 class FixtureDirective(PyFunction):
@@ -12,16 +13,13 @@ class FixtureDirective(PyFunction):
 
     option_spec.update({
         'async': directives.flag,
-        'generator': directives.flag,
+        'protocol': directives.flag,
     })
 
     def get_signature_prefix(self, sig: str) -> str:
         prefix = []
         if 'async' in self.options:
             prefix.append('async ')
-
-        if 'generator' in self.options:
-            prefix.append('generator ')
 
         prefix.append('fixture ')
 
@@ -45,26 +43,44 @@ class FixtureDocumenter(FunctionDocumenter):
     def format_args(self, **kwargs: Any) -> str:
         args = super(FixtureDocumenter, self).format_args(**kwargs)
 
-        return re.sub('\(.*?\)', '(...)', args)
+        if hasattr(self.object, "__hide_params__"):
+            if self.object.__hide_params__:
+                args = re.sub(
+                    "\(.*?\)",
+                    "(...)",
+                    args
+                )
+
+        if hasattr(self.object, "__return_protocol__"):
+            args = re.sub(
+                "->.*$",
+                f"-> {inspect.signature(self.object.__return_protocol__.__call__)}",
+                 args
+            )
+
+        return args
 
     
-    def add_directive_header(self, sig: str) -> None:
-        sourcename = self.get_sourcename()
-        super().add_directive_header(sig)
 
-        if inspect.iscoroutinefunction(self.object):
-            self.add_line('   :async:', sourcename)
+def add_protocol_signatures(app, what, name, obj, options, lines):
+    """Add the signature of the protocol __call__ to the docstring"""
+    if what != "fixture":
+        return
 
-        if inspect.isgeneratorfunction(self.object):
-            self.add_line('   :generator:', sourcename)
+    if hasattr(obj, "__return_protocol__"):
+        doc = inspect.getdoc(obj.__return_protocol__.__call__)
 
+        lines.clear()
+        lines.extend(doc.split('\n'))
 
 
 def setup(app):
+
     app.setup_extension('sphinx.ext.autodoc')  # Require autodoc extension
     app.add_autodocumenter(FixtureDocumenter)
     app.add_directive('py:fixture', FixtureDirective)
 
+    app.connect("autodoc-process-docstring", add_protocol_signatures)
     return {
         'version': '0.1',
         'parallel_read_safe': True,
