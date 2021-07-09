@@ -51,7 +51,7 @@ class FixtureGroup(FixtureProvider, dict):
         :param func: The fixture function
         :param protocol: An optional return protocol for the fixture, used when
                          rendering documentation for a fixture which returns a function.
-        :param hide_params: Hide the arguments to the fixture when the documentation 
+        :param hide_params: Hide the arguments to the fixture when the documentation
                           is rendered, defaults to True
         :return: A fixture function, if :obj:`func` was given, or a decorator to create one.
         """
