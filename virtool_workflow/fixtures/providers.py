@@ -44,12 +44,32 @@ class FixtureGroup(FixtureProvider, dict):
         if name in self:
             return self[name]
 
-    def fixture(self, func: callable):
+    def fixture(self, func: callable = None, protocol: Protocol = None, hide_params: bool = True):
+        """
+        Add a fixture to this :class`FixtureGroup`
+
+        :param func: The fixture function
+        :param protocol: An optional return protocol for the fixture, used when
+                         rendering documentation for a fixture which returns a function.
+        :param hide_params: Hide the arguments to the fixture when the documentation
+                          is rendered, defaults to True
+        :return: A fixture function, if :obj:`func` was given, or a decorator to create one.
+        """
+        if func is None:
+            return lambda _func: self.fixture(_func, protocol, hide_params)
+
         if func.__name__.startswith("_"):
             func.__name__ = func.__name__.lstrip("_")
            
         self[func.__name__] = func
+
         func.is_workflow_fixture = True
+
+        if protocol is not None:
+            func.__return_protocol__ = protocol
+
+        func.__hide_params__ = hide_params
+
         return func
 
     def fixtures(self):
