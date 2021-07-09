@@ -32,7 +32,9 @@ release = '0.0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosectionlabel", "sphinx.ext.intersphinx"]
+sys.path.append(os.path.abspath("./_ext"))
+
+extensions = ["autofixture", "sphinx.ext.autodoc", "sphinx.ext.autosectionlabel", "sphinx.ext.intersphinx"]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
 
@@ -71,9 +73,6 @@ html_css_files = ["custom.css"]
 
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
     if isinstance(obj, FixtureHook):
-        return None, None
-
-    if getattr(obj, "is_workflow_fixture", False):
         return None, None
 
     return signature, return_annotation
