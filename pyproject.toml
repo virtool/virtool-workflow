@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "virtool-workflow"
-version = "0.4.0"
+version = "0.5.1"
 description = "A framework for developing bioinformatics workflows for Virtool."
 authors = ["Ian Boyes", "Blake Smith"]
 license = "MIT"

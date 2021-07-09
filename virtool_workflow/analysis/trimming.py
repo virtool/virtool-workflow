@@ -3,11 +3,20 @@ import hashlib
 import json
 from typing import Dict, Union
 
-from virtool_core.samples.utils import TRIM_PARAMETERS
-
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.sample import Sample
 from virtool_workflow.analysis.skewer import calculate_trimming_min_length
+
+
+TRIM_PARAMETERS = {
+    "end_quality": "20",
+    "mode": "pe",
+    "max_error_rate": "0.1",
+    "max_indel_rate": "0.03",
+    "max_length": None,
+    "mean_quality": "25",
+    "min_length": "20"
+}
 
 
 def trimming_min_length(sample: Sample):

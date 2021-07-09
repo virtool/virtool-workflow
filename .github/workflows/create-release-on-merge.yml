@@ -23,13 +23,6 @@ jobs:
         run: | 
             pip install poetry
             echo "##[set-output name=version;]$(poetry version | cut -f2 -d' ')"
-            
-
-      - name: Update Changelog
-        uses: thomaseizinger/keep-a-changelog-new-release@v1
-        with:
-            version: ${{ steps.get_version.outputs.version }}
-
 
       - name: Create release
         if: ${{ steps.check_release.outputs.release }} == 'release'
@@ -41,4 +34,3 @@ jobs:
           release_name: ${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: false
-          body: ${{ steps.extract-release-notes.outputs.release_notes }}

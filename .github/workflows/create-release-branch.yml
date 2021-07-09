@@ -16,7 +16,9 @@ jobs:
             ref: develop
 
       - name: Create Release Branch
-        run: git checkout -b release/${{ github.event.inputs.versionName }}
+        run: |
+          git checkout develop
+          git checkout -b release/${{ github.event.inputs.versionName }}
 
       - name: Initialize mandatory git config
         run: |
@@ -27,7 +29,15 @@ jobs:
         run: pip install poetry
 
       - name: Update Package Version
-        run: poetry version ${{ github.event.inputs.versionName }}
+        id: get_version
+        run: |
+          poetry version ${{ github.event.inputs.versionName }}
+          echo "##[set-output name=version;]$(poetry version | cut -f2 -d' ')"
+
+      - name: Update Changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@v1
+        with:
+            version: ${{ steps.get_version.outputs.version }}
 
       - name: Commit Changes
         id: make-commit
