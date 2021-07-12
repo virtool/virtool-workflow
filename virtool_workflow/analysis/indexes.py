@@ -201,7 +201,7 @@ class Index(data_model.Index):
             str(path),
         ]
 
-        await self._run_subprocess(command, wait=True)
+        await self._run_subprocess(command)
 
         return fasta_path, lengths
 
