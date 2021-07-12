@@ -8,14 +8,22 @@ from virtool_workflow import fixture, hooks
 
 logger = getLogger(__name__)
 
-RunSubprocessHandler = Callable[[str], Awaitable[None]]
+class LineOutputHandler(Protocol):
+    async def __Call__(self, line: str):
+        """
+        Handle input from stdin, or stderr, line by line.
+
+        :param line: A line of output from the stream.
+        :type line: str
+        """
+        ...
 
 
 class RunSubprocess(Protocol):
     def __call__(
             self,
             command: List[str],
-            stdout_handler: Optional[RunSubprocessHandler] = None,
+            stdout_handler: Optional[LineOutputHandler] = None,
             stderr_handler: Optional[Callable[[str], Coroutine]] = None,
             env: Optional[dict] = None,
             cwd: Optional[str] = None,
@@ -63,7 +71,7 @@ async def watch_subprocess(process, stdout_handler, stderr_handler):
 
 async def _run_subprocess(
         command: List[str],
-        stdout_handler: Optional[RunSubprocessHandler] = None,
+        stdout_handler: Optional[LineOutputHandler] = None,
         stderr_handler: Optional[Callable[[str], Coroutine]] = None,
         env: Optional[dict] = None,
         cwd: Optional[str] = None,
