@@ -3,7 +3,7 @@ from typing import Protocol, Dict, List
 from pathlib import Path
 from virtool_workflow import fixture
 from virtool_workflow.api.utils import read_file_from_response
-from virtool_core.data_model.job import Job
+from virtool_workflow.data_model.jobs import Job
 
 
 class FileDownloader(Protocol):
@@ -53,7 +53,7 @@ async def input_files(
     target_dir.mkdir()
 
     downloads = await asyncio.gather(
-        [
+        *[
             download_input_file(f["id"], target_dir/f["name"]) 
             for f in files_list
         ],
