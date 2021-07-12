@@ -23,10 +23,10 @@ class RunSubprocess(Protocol):
     async def __call__(
             self,
             command: List[str],
-            stdout_handler: Optional[LineOutputHandler] = None,
-            stderr_handler: Optional[LineOutputHandler] = None,
-            env: Optional[dict] = None,
-            cwd: Optional[str] = None,
+            stdout_handler: LineOutputHandler = None,
+            stderr_handler: LineOutputHandler = None,
+            env: dict = None,
+            cwd: str = None,
     ) -> asyncio.subprocess.Process:
         """
         Run a shell command in a subprocess.
