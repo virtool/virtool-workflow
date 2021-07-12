@@ -109,3 +109,8 @@ API Reference
 
 .. automodule:: virtool_workflow.hooks
     :members:
+
+``virtool_workflow.api.uploads``
+================================
+
+.. autofixture:: virtool_workflow.api.uploads.download_input_file

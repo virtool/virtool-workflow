@@ -312,6 +312,23 @@ Returns a :class:`.list` of :class:`.Subtraction` objects.
             num_cpu=proc
         )
 
+:func:`.download_input_file`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A function for downloading files which were uploaded via the `uploads API <https://www.virtool.ca/docs/developer/api/uploads/>`_.
+
+.. autofixture:: virtool_workflow.api.uploads.download_input_file
+
+
+:func:`.input_files`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The files which have been listed in the Virtool Job's arguments.
+
+The files are downloaded via :func:`download_input_file` when the fixture is requested.
+
+.. autofixture:: virtool_workflow.api.uploads.input_files
+
 
 Writing Fixtures
 ================
