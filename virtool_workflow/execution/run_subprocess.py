@@ -2,7 +2,7 @@ import asyncio
 import asyncio.subprocess
 import functools
 from logging import getLogger
-from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol, Any, runtime_checkable
+from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol, Any
 
 from virtool_workflow import fixture, hooks
 
@@ -11,7 +11,6 @@ logger = getLogger(__name__)
 RunSubprocessHandler = Callable[[str], Awaitable[None]]
 
 
-@runtime_checkable
 class RunSubprocess(Protocol):
     def __call__(
             self,
