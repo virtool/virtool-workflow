@@ -52,9 +52,17 @@ class FixtureDocumenter(FunctionDocumenter):
                 )
 
         if hasattr(self.object, "__return_protocol__"):
+            if "->" not in args:
+                args = args + " -> "
+
+            if inspect.iscoroutinefunction(self.object.__return_protocol__.__call__):
+                async_prefix = "async "
+            else:
+                async_prefix = ""
+
             args = re.sub(
                 "->.*$",
-                f"-> {inspect.signature(self.object.__return_protocol__.__call__)}",
+                f"-> {async_prefix}{inspect.signature(self.object.__return_protocol__.__call__)}",
                  args
             )
 
