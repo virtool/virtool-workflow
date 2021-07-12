@@ -1,7 +1,8 @@
 import asyncio
 import asyncio.subprocess
+from contextlib import suppress
 from logging import getLogger
-from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol
+from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
 
 from virtool_workflow import fixture, hooks
 
@@ -15,7 +16,7 @@ class LineOutputHandler(Protocol):
         :param line: A line of output from the stream.
         :type line: str
         """
-        ...
+        raise NotImplementedError()
 
 
 class RunSubprocess(Protocol):
@@ -26,7 +27,6 @@ class RunSubprocess(Protocol):
             stderr_handler: Optional[LineOutputHandler] = None,
             env: Optional[dict] = None,
             cwd: Optional[str] = None,
-            wait: bool = True
     ) -> asyncio.subprocess.Process:
         """
         Run a shell command in a subprocess.
@@ -45,7 +45,7 @@ class RunSubprocess(Protocol):
         :return: An :class:`asyncio.subprocess.Process` instance
         :rtype: asyncio.subprocess.Process
         """
-        ...
+        raise NotImplementedError()
 
 
 async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]):
@@ -91,7 +91,6 @@ async def _run_subprocess(
         stderr_handler: Optional[Callable[[str], Coroutine]] = None,
         env: Optional[dict] = None,
         cwd: Optional[str] = None,
-        wait: bool = True,
 ) -> asyncio.subprocess.Process:
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
     logger.info(f"Running command in subprocess: {' '.join(command)}")
@@ -125,8 +124,10 @@ async def _run_subprocess(
             process.terminate()
         _watch_subprocess.cancel()
 
-    if wait:
-        await process.wait()
+    with suppress(asyncio.CancelledError):
+        await _watch_subprocess
+
+    await process.wait()
 
     return process
 
