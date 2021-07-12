@@ -1,8 +1,7 @@
 import asyncio
 import asyncio.subprocess
-import functools
 from logging import getLogger
-from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol, Any
+from typing import Optional, Callable, Awaitable, List, Coroutine, Protocol
 
 from virtool_workflow import fixture, hooks
 
@@ -20,25 +19,31 @@ class LineOutputHandler(Protocol):
 
 
 class RunSubprocess(Protocol):
-    def __call__(
+    async def __call__(
             self,
             command: List[str],
             stdout_handler: Optional[LineOutputHandler] = None,
-            stderr_handler: Optional[Callable[[str], Coroutine]] = None,
+            stderr_handler: Optional[LineOutputHandler] = None,
             env: Optional[dict] = None,
             cwd: Optional[str] = None,
             wait: bool = True
-    ) -> Coroutine[Any, Any, asyncio.subprocess.Process]:
+    ) -> asyncio.subprocess.Process:
         """
-        Run a command as a subprocess and handle stdin and stderr output line-by-line.
+        Run a shell command in a subprocess.
 
-        :param command: The command to run as a subprocess.
-        :param stdout_handler: A function to handle stdout lines.
-        :param stderr_handler: A function to handle stderr lines.
-        :param env: Environment variables to set for the subprocess.
-        :param cwd: Current working directory for the subprocess.
-        :param wait: Flag indicating to wait for the subprocess to finish before returning.
+        :param command: A shell command, as a list of strings including the program name and arguments
+        :type command: List[str]
+        :param stdout_handler: A function to handle stdout output line by line
+        :type stdout_handler: Optional[LineOutputHandler], optional
+        :param stderr_handler: A function to handle stderr output line by line
+        :type stderr_handler: Optional[LineOutputHandler], optional
+        :param env: environment variables which should be available to the subprocess
+        :type env: Optional[dict], optional
+        :param cwd: The current working directory for the subprocess
+        :type cwd: Optional[str], optional
 
+        :return: An :class:`asyncio.subprocess.Process` instance
+        :rtype: asyncio.subprocess.Process
         """
         ...
 
@@ -88,17 +93,7 @@ async def _run_subprocess(
         cwd: Optional[str] = None,
         wait: bool = True,
 ) -> asyncio.subprocess.Process:
-    """
-    Run a command as a subprocess and handle stdin and stderr output line-by-line.
-
-    :param command: The command to run as a subprocess.
-    :param stdout_handler: A function to handle stdout lines.
-    :param stderr_handler: A function to handle stderr lines.
-    :param env: Environment variables to set for the subprocess.
-    :param cwd: Current working directory for the subprocess.
-    :param wait: Flag indicating to wait for the subprocess to finish before returning.
-
-    """
+    """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
     logger.info(f"Running command in subprocess: {' '.join(command)}")
 
     # Ensure the asyncio child watcher has a reference to the running loop, prevents `process.wait` from hanging.
@@ -136,11 +131,7 @@ async def _run_subprocess(
     return process
 
 
-@functools.wraps(_run_subprocess)
-@fixture
+@fixture(protocol=RunSubprocess)
 def run_subprocess() -> RunSubprocess:
     """Fixture to run subprocesses and handle stdin and stderr output line-by-line."""
     return _run_subprocess
-
-
-run_subprocess.__follow_wrapped__ = False
