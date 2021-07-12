@@ -29,6 +29,17 @@ class RunSubprocess(Protocol):
             cwd: Optional[str] = None,
             wait: bool = True
     ) -> Coroutine[Any, Any, asyncio.subprocess.Process]:
+        """
+        Run a command as a subprocess and handle stdin and stderr output line-by-line.
+
+        :param command: The command to run as a subprocess.
+        :param stdout_handler: A function to handle stdout lines.
+        :param stderr_handler: A function to handle stderr lines.
+        :param env: Environment variables to set for the subprocess.
+        :param cwd: Current working directory for the subprocess.
+        :param wait: Flag indicating to wait for the subprocess to finish before returning.
+
+        """
         ...
 
 
