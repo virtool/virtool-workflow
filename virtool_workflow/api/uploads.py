@@ -7,12 +7,12 @@ from virtool_workflow.data_model.jobs import Job
 
 
 class FileDownloader(Protocol):
-    async def __call__(self, id: str, target: Path) -> Path:
+    async def __call__(self, file_id: str, target: Path) -> Path:
         """
         Download a file.
 
-        :param id: The unique ID fo the file.
-        :type id: str
+        :param file_id: The unique ID fo the file.
+        :type file_id: str
         :param target: The path to which the file is downloaded.
         :type target: Path
 
@@ -24,8 +24,8 @@ class FileDownloader(Protocol):
 @fixture(protocol=FileDownloader)
 def download_input_file(http, jobs_api_url: str) -> FileDownloader:
     """Download files from Virtool's uploads API."""
-    async def download(id, target):
-        target_url = f"{jobs_api_url}/uploads/{id}"
+    async def download(file_id, target):
+        target_url = f"{jobs_api_url}/uploads/{file_id}"
         async with http.get(target_url) as response:
             return await read_file_from_response(response, target)
 
@@ -37,15 +37,15 @@ def files_list(job: Job) -> List[dict]:
     """The files dictionary for the current job."""
     return job.args["files"]
 
-            
+
 @fixture
 async def input_files(
     files_list: List[dict],
-    download_input_file: FileDownloader, 
+    download_input_file: FileDownloader,
     work_path: Path
 ) -> Dict[str, Path]:
     """
-    The downloaded input files for the current workflow run. 
+    The downloaded input files for the current workflow run.
 
     :returns: A dictionary mapping file names to their locations on disk.
     """
@@ -54,7 +54,7 @@ async def input_files(
 
     downloads = await asyncio.gather(
         *[
-            download_input_file(f["id"], target_dir/f["name"]) 
+            download_input_file(f["id"], target_dir/f["name"])
             for f in files_list
         ],
         return_exceptions=True

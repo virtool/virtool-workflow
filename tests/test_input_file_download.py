@@ -4,7 +4,7 @@ from pathlib import Path
 
 async def test_input_files_fixture(tmpdir):
 
-    async def mock_download(id, target):
+    async def mock_download(_, target):
         return target
 
     files = await input_files(
