@@ -120,11 +120,9 @@ communicating with the server.
 
 A utility for starting external programs as new processes.
 
-Returns a function with the following signature:
+.. autofixture:: virtool_workflow.execution.run_subprocess.run_subprocess
 
-.. autofunction:: virtool_workflow.execution.run_subprocess.run_subprocess
-
-The only required argument is ``command``. All others are keyword arguments.
+Example:
 
 .. code-block:: python
 
