@@ -1,7 +1,8 @@
 import asyncio
 import pytest
-from fixtures import FixtureScope, fixture
+from fixtures import FixtureScope, fixture, runs_in_new_fixture_context
 
+@runs_in_new_fixture_context(copy_context=False)
 async def test_instantiation_of_fixture_types():
     # Create futures to check which functions have been called.
     sync_called = asyncio.Future()
@@ -74,3 +75,93 @@ async def test_instantiation_of_fixture_types():
 
     assert gen_finished.result() is True
     assert async_gen_finished.result() is True
+
+
+@runs_in_new_fixture_context(copy_context=False)
+async def test_does_not_wrap_noarg_function():
+    no_args_called = asyncio.Future()
+
+    async def no_args():
+        no_args_called.set_result(True)
+
+    async with FixtureScope() as scope:
+        bound = await scope.bind(no_args)
+        await bound()
+
+        # A function with no arguments should not be wrapped.
+        assert bound is no_args
+
+
+@runs_in_new_fixture_context(copy_context=False)
+async def test_non_recursive_bind_posargs():
+
+    @fixture
+    def a():
+        return "a"
+
+    @fixture
+    def b():
+        return "b"
+
+    @fixture
+    def c():
+        return "c"
+
+    def with_args(a, b, c, d="d"):
+        return a + b + c + d
+
+    async with FixtureScope() as scope:
+        bound = await scope.bind(with_args)
+
+
+        # Function should have been wrapped.
+        assert bound is not with_args
+        assert bound() == "abcd"
+        assert bound(c="C") == "abCd"
+        assert bound("A", "B") == "ABcd"
+
+        @fixture
+        def d():
+            return "dd"
+
+        # `d` fixture should not be used, since it wasn't available when `bind` was called.
+        assert bound() == "abcd"
+
+        bound = await scope.bind(with_args)
+
+        # Now  `d` fixture should be used after re-binding.
+        assert bound("A", "B", c="C") == "ABCdd"
+
+
+@runs_in_new_fixture_context(copy_context=False)
+async def test_recursive_bind_posargs():
+    @fixture
+    def a():
+        return "a"
+
+    @fixture
+    def ab(a):
+        return a + "b"
+
+
+    @fixture
+    def c():
+        return "c"
+
+    @fixture
+    def abc(ab, c):
+        return ab + c
+
+    @fixture
+    def letters(abc, a, ab, c):
+        return abc + a + ab + c
+
+
+    def check_letters(letters, ab, a, c, b):
+        return letters == ab + c + a + a + b + c
+
+
+    async with FixtureScope() as scope:
+        bound = await scope.bind(check_letters, b="b")
+
+        assert bound() is True
