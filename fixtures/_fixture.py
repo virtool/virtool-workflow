@@ -68,19 +68,21 @@ def fixture_context(*fixtures: Fixture, copy_context=True) -> Dict[str, Fixture]
         _fixtures.reset(token)
 
 
-def runs_in_new_fixture_context(function: callable):
+def runs_in_new_fixture_context(*fixtures, copy_context=True):
     """Decorator which causes the function to be executed in a new fixture context."""
-    if inspect.iscoroutinefunction(function):
-        @wraps(function)
-        async def _in_new_context(*args, **kwargs):
-            with fixture_context():
-                return await function(*args, **kwargs)
-    else:
-        @wraps(function)
-        def _in_new_context(*args, **kwargs):
-            with fixture_context():
-                return function(*args, **kwargs)
+    def _deco(function: callable):
+        if inspect.iscoroutinefunction(function):
+            @wraps(function)
+            async def _in_new_context(*args, **kwargs):
+                with fixture_context(*fixtures, copy_context=copy_context):
+                    return await function(*args, **kwargs)
+        else:
+            @wraps(function)
+            def _in_new_context(*args, **kwargs):
+                with fixture_context(*fixtures, copy_context=copy_context):
+                    return function(*args, **kwargs)
 
-    return _in_new_context
+        return _in_new_context
+    return _deco
 
 
