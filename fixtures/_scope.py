@@ -1,9 +1,10 @@
 import inspect
-from functools import wraps
 from collections import UserDict
 from contextlib import AsyncExitStack, asynccontextmanager, contextmanager
 from typing import Union
+
 from ._fixture import Fixture
+
 
 class FixtureScope(UserDict):
     """
@@ -28,6 +29,7 @@ class FixtureScope(UserDict):
         :return: This instance of :class:`FixtureScope`.
         """
         self._exit_stack = AsyncExitStack()
+        self.exit_stack = await self._exit_stack.__aenter__()
         return self
 
 
@@ -36,7 +38,7 @@ class FixtureScope(UserDict):
         Close this scope, ensuring that all generator and async generator
         fixtures are completed.
         """
-        self._exit_stack.__aexit__(*args)
+        await self._exit_stack.__aexit__(*args)
 
     async def _instantiate(self, function: Union[callable, Fixture], *args, **kwargs):
         """
@@ -60,16 +62,11 @@ class FixtureScope(UserDict):
         """
         if inspect.isasyncgenfunction(function):
             ctx_manager = asynccontextmanager(function)
-            return await self._exit_stack.enter_context(ctx_manager(*args, **kwargs))
+            return await self.exit_stack.enter_async_context(ctx_manager(*args, **kwargs))
 
         if inspect.isgeneratorfunction(function):
-            sync_ctx_manager = contextmanager(function)
-            @asynccontextmanager
-            async def _async_context_manager():
-                with sync_ctx_manager(*args, **kwargs) as yield_value:
-                    yield yield_value
-
-            return await self._exit_stack.enter_context(_async_context_manager())
+            ctx_manager = contextmanager(function)
+            return self.exit_stack.enter_context(ctx_manager(*args, **kwargs))
         
         if inspect.iscoroutinefunction(function):
             return await function(*args, **kwargs)
