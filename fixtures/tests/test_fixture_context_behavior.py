@@ -1,10 +1,12 @@
+from contextvars import copy_context
 import pytest
 import asyncio
 from fixtures import fixture_context, get_fixtures, runs_in_new_fixture_context
 
 @pytest.fixture
 def fixtures():
-    with fixture_context():
+    # copy_context=False ensures an empty fixtures dictionary for these tests.
+    with fixture_context(copy_context=False):
         yield get_fixtures()
 
 def test_fixture_context_behavior(fixtures):
