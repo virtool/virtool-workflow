@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from fixtures import fixture_context, get_fixtures
+from fixtures import fixture_context, get_fixtures, runs_in_new_fixture_context
 
 @pytest.fixture
 def fixtures():
@@ -103,6 +103,39 @@ async def test_fixture_context_no_copy_behavior(fixtures):
 
     assert "bar" not in fixtures
     assert "<lambda>" not in fixtures
+
+
+async def test_context_decorator(fixtures):
+
+    def baz():
+        ...
+
+    @runs_in_new_fixture_context(baz)
+    async def new_context():
+        context_fixtures = get_fixtures()
+        assert "baz" in context_fixtures
+        context_fixtures["foo"] = lambda: "foo"
+
+    await new_context()
+
+    assert "baz" not in fixtures
+    assert "foo" not in fixtures
+
+    fixtures["cat"] = lambda: "cat"
+
+    @runs_in_new_fixture_context(baz, copy_context=False)
+    async def newer_context():
+        context_fixtures = get_fixtures()
+        assert "baz" in context_fixtures
+        assert "cat" not in context_fixtures
+
+    await newer_context()
+
+    assert "cat" in fixtures
+    assert "baz" not in fixtures
+
+
+
 
 
 
