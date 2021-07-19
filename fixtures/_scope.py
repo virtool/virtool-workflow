@@ -13,18 +13,11 @@ from .errors import FixtureBindingError, FixtureNotFound
 class FixtureScope(UserDict):
     """
     A container for fixture values. It functions as a regular Dict[str, Any]
-    with additional method for binding fixture values.
+    with additional methods for binding fixture values.
 
     It also acts as an async context manager handling generator
     and async generator fixtures.
     """
-    def __init__(self, *args, **instances):
-        super(FixtureScope, self).__init__(*args, **instances)
-
-        self._generators, self._async_generators = [], []
-
-        self.open, self.closed = False, False
-
     async def __aenter__(self):
         """
         Creates a :class:`AsyncExitStack` where context managers
