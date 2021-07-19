@@ -12,7 +12,7 @@ FixtureValue = NewType('FixtureValue', Any)
 class Fixture(Protocol):
     """
     A Protocol formally defining any attributes which are 
-    to a fixture function via @:func:`fixture`.
+    added to a fixture function via @:func:`fixture`.
 
     Enables `isinstance(function, Fixture)` checks to be made.
 
@@ -28,8 +28,12 @@ class Fixture(Protocol):
 _fixtures = ContextVar("fixtures")
 
 
-def get_fixtures():
-    """get the fixtures dictionary for the current context."""
+def get_fixtures() -> Dict[str, Fixture]:
+    """
+    get the fixtures dictionary for the current context.
+
+    If it does not exist, a new dictionary is created. 
+    """
     try:
         return _fixtures.get()
     except LookupError:
@@ -42,7 +46,7 @@ def fixture_context(*fixtures: Fixture, copy_context=True) -> Dict[str, Fixture]
     """
     Enter a new fixture context.
 
-    Any fixtures added within the `with` block will no not be available outside of it.
+    Any fixtures created within the `with` block will not be available outside of it.
 
     :param fixtures: Any fixtures which should be included in the context.
                      If a fixture with the same name is already present, the 
