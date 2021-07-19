@@ -4,7 +4,7 @@ from collections import UserDict
 from contextlib import (AsyncExitStack, asynccontextmanager, contextmanager,
                         suppress)
 from functools import wraps
-from typing import Any, AnyStr, Dict, Union
+from typing import Any, Dict, Union
 
 from ._fixture import Fixture, get_fixtures
 from ._utils import get_arg_spec, get_defaults
@@ -26,6 +26,7 @@ class FixtureScope(UserDict):
 
         :return: This instance of :class:`FixtureScope`.
         """
+        self["scope"] = self
         self.exit_stack = await AsyncExitStack().__aenter__()
         return self
 
@@ -128,7 +129,7 @@ class FixtureScope(UserDict):
     async def bind(
         self,
         function: Union[callable, Fixture],
-        follow_wrapped: bool = False,
+        follow_wrapped: bool = True,
         **kwargs: Any,
     ) -> Union[callable, Fixture]:
         """
@@ -161,6 +162,9 @@ class FixtureScope(UserDict):
         :return: A function wrapping `function` which does not require arguments.
                  If arguments are given they will overwrite the bound fixture values.
         """
+        if hasattr(function, "__follow_wrapped__"):
+            follow_wrapped = function.__follow_wrapped__
+
         argspec = get_arg_spec(function, follow_wrapped)
 
         if argspec.varargs is not None or argspec.varkw is not None:
@@ -212,10 +216,10 @@ class FixtureScope(UserDict):
         **kwargs: Any,
     ):
         """Instantiate a fixture by name, or directly."""
-        if isinstance(fixture, AnyStr):
-            return self.instantiate_by_key(fixture, *args, **kwargs)
+        if isinstance(fixture, str):
+            return await self.instantiate_by_key(fixture, *args, **kwargs)
         else:
-            return self.instantiate(fixture, *args, **kwargs)
+            return await self.instantiate(fixture, *args, **kwargs)
 
     async def instantiate(self, fixture: Fixture, *args, **kwargs):
         """
