@@ -1,6 +1,8 @@
 import asyncio
+
 import pytest
 from fixtures import FixtureScope, fixture, runs_in_new_fixture_context
+
 
 @runs_in_new_fixture_context(copy_context=False)
 async def test_instantiation_of_fixture_types():
@@ -27,7 +29,6 @@ async def test_instantiation_of_fixture_types():
             yield
         finally:
             gen_finished.set_result(True)
-
 
     @fixture
     async def async_gen_fixture():
@@ -113,7 +114,6 @@ async def test_non_recursive_bind_posargs():
     async with FixtureScope() as scope:
         bound = await scope.bind(with_args)
 
-
         # Function should have been wrapped.
         assert bound is not with_args
         assert bound() == "abcd"
@@ -143,7 +143,6 @@ async def test_recursive_bind_posargs():
     def ab(a):
         return a + "b"
 
-
     @fixture
     def c():
         return "c"
@@ -156,10 +155,8 @@ async def test_recursive_bind_posargs():
     def letters(abc, a, ab, c):
         return abc + a + ab + c
 
-
     def check_letters(letters, ab, a, c, b):
         return letters == ab + c + a + a + b + c
-
 
     async with FixtureScope() as scope:
         bound = await scope.bind(check_letters, b="b")

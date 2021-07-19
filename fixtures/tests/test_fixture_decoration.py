@@ -1,8 +1,11 @@
-from fixtures import fixture, get_fixtures, fixture_context, runs_in_new_fixture_context, Fixture
+from fixtures import (Fixture, fixture, fixture_context, get_fixtures,
+                      runs_in_new_fixture_context)
+
 
 @fixture
 def module_level_fixture():
     ...
+
 
 @runs_in_new_fixture_context()
 async def test_fixture_definition_semantics():
@@ -14,7 +17,6 @@ async def test_fixture_definition_semantics():
 
     # Fixtures defined at module level should always be available.
     assert module_level_fixture.__name__ in fixtures
-
 
     assert "a" in fixtures
     assert fixtures["a"] is a
@@ -30,7 +32,6 @@ async def test_fixture_definition_semantics():
         assert "b" in context_fixtures
         assert context_fixtures["b"] is b
 
-    
     # 'b' fixture was created in a sub-context, so shouldn't be seen here.
     assert "b" not in fixtures
 
@@ -51,5 +52,3 @@ async def test_fixture_isinstance_check():
 
     assert isinstance(c, Fixture)
     assert not isinstance(d, Fixture)
-
-
