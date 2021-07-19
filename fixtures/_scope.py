@@ -25,8 +25,7 @@ class FixtureScope(UserDict):
 
         :return: This instance of :class:`FixtureScope`.
         """
-        self._exit_stack = AsyncExitStack()
-        self.exit_stack = await self._exit_stack.__aenter__()
+        self.exit_stack = await AsyncExitStack().__aenter__()
         return self
 
 
@@ -35,7 +34,7 @@ class FixtureScope(UserDict):
         Close this scope, ensuring that all generator and async generator
         fixtures are completed.
         """
-        await self._exit_stack.__aexit__(*args)
+        await self.exit_stack.__aexit__(*args)
 
     async def _instantiate(self, function: Union[callable, Fixture], *args, **kwargs):
         """
