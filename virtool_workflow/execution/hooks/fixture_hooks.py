@@ -1,6 +1,5 @@
 import logging
 import pprint
-from inspect import signature
 from typing import List, Any, Callable
 
 from virtool_workflow import utils
@@ -36,7 +35,7 @@ class FixtureHook(Hook):
         async def _bind(callback_: Callable):
             logger.debug(f"Binding fixtures to callback {callback_}")
             try:
-                return await scope.partial(callback_, **kwargs)
+                return await scope.bind(callback_, **kwargs)
             except KeyError as error:
                 if suppress:
                     logger.exception(error)
