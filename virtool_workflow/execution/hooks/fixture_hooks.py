@@ -1,10 +1,10 @@
 import logging
 import pprint
+from fixtures import FixtureScope
 from typing import List, Any, Callable
 
 from virtool_workflow import utils
 from virtool_workflow.execution.hooks.hooks import Hook
-from virtool_workflow.fixtures.scope import FixtureScope
 
 logger = logging.getLogger(__name__)
 

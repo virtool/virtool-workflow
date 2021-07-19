@@ -1,8 +1,8 @@
 """Main definitions for Virtool Workflows."""
-from functools import wraps
-from inspect import iscoroutinefunction
 from typing import Any, Callable, Coroutine, Iterable, Optional, Sequence
 from virtool_workflow.utils import coerce_to_coroutine_function
+
+from fixtures import FixtureScope
 
 WorkflowStep = Callable[..., Coroutine[Any, Any, None]]
 
@@ -64,7 +64,21 @@ class Workflow:
     def merge(self, *workflows: "Workflow"):
         """Merge steps from other workflows into this workflow."""
         self.steps.extend(step for w in workflows for step in w.steps)
-        self.on_startup.extend(step for w in workflows for step in w.on_startup)
-        self.on_cleanup.extend(step for w in workflows for step in w.on_cleanup)
+        self.on_startup.extend(
+            step for w in workflows for step in w.on_startup)
+        self.on_cleanup.extend(
+            step for w in workflows for step in w.on_cleanup)
+
+        return self
+
+    async def bind_to_fixtures(self, scope: FixtureScope):
+        """
+        Bind a workflow to fixtures.
+
+        This is a convenience method for binding a workflow to a set of fixtures.
+        """
+        self.on_startup = [await scope.bind(f) for f in self.on_startup]
+        self.on_cleanup = [await scope.bind(f) for f in self.on_cleanup]
+        self.steps = [await scope.bind(f) for f in self.steps]
 
         return self

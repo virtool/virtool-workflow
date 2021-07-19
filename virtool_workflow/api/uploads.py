@@ -1,7 +1,8 @@
 import asyncio
-from typing import Protocol, Dict, List
 from pathlib import Path
-from virtool_workflow import fixture
+from typing import Dict, List, Protocol
+
+from fixtures import fixture
 from virtool_workflow.api.utils import read_file_from_response
 from virtool_workflow.data_model.jobs import Job
 

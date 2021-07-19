@@ -5,11 +5,12 @@ Fixture and class for representing the analysis associated with a workflow run.
 from dataclasses import asdict
 from pathlib import Path
 
-from virtool_workflow import data_model
-from virtool_workflow import fixture
-from virtool_workflow import hooks
-from virtool_workflow.abc.data_providers.analysis import AbstractAnalysisProvider
+from virtool_workflow import data_model, hooks
+from virtool_workflow.abc.data_providers.analysis import \
+    AbstractAnalysisProvider
 from virtool_workflow.data_model.files import VirtoolFileFormat
+
+from fixtures import fixture
 
 
 class Analysis(data_model.Analysis):
@@ -20,6 +21,7 @@ class Analysis(data_model.Analysis):
     environment to be uploaded and associated with the analysis on workflow completion.
 
     """
+
     def __init__(self, upload_files: callable, *args, **kwargs):
         self.to_upload = []
 

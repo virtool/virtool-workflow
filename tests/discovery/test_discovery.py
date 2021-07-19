@@ -1,8 +1,7 @@
 from pathlib import Path
 
+from fixtures import get_fixtures
 from virtool_workflow import Workflow, discovery
-from virtool_workflow.analysis.runtime import AnalysisWorkflowEnvironment
-from virtool_workflow.fixtures.workflow_fixture import workflow_fixtures
 
 cwd = Path(__file__).parent
 TEST_FILE = cwd / "discoverable_workflow.py"
@@ -21,10 +20,13 @@ def test_discover_workflow():
 def test_discover_fixtures():
     discovery.discover_fixtures(FIXTURE_TEST_FILE)
 
-    assert all(f"fixture_{letter}" in workflow_fixtures for letter in ("a", "b", "c"))
+    fixtures = get_fixtures()
+
+    assert all(
+        f"fixture_{letter}" in fixtures for letter in ("a", "b", "c"))
 
 
-async def test_run_discovery(runtime: AnalysisWorkflowEnvironment):
+async def test_run_discovery(runtime):
     wf = discovery.discover_workflow(FIXTURE_TEST_FILE)
     result = await runtime.execute(wf)
 

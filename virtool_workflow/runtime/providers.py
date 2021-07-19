@@ -1,25 +1,17 @@
 from typing import List
 
-from virtool_workflow.api import jobs
 from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.api.client import authenticated_http
 from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.api.samples import SampleProvider
-from virtool_workflow.api.scope import api_fixtures
 from virtool_workflow.api.subtractions import SubtractionProvider
-from virtool_workflow.config import fixtures as config
 from virtool_workflow.data_model import Job
-from virtool_workflow.fixtures import FixtureGroup
 from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
-
-providers = FixtureGroup(
-    config.job_id, jobs.acquire_job, jobs.push_status, **api_fixtures
-)
-"""A :class:`FixtureGroup` containing all data provider fixtures."""
+from fixtures import fixture
 
 
-@providers.fixture
+@fixture
 async def _job(job_id, acquire_job, scope) -> Job:
     job = await acquire_job(job_id)
 
@@ -28,17 +20,17 @@ async def _job(job_id, acquire_job, scope) -> Job:
     return job
 
 
-@providers.fixture
+@fixture
 def analysis_provider(job, http, jobs_api_url) -> AnalysisProvider:
     return AnalysisProvider(job.args["analysis_id"], http, jobs_api_url)
 
 
-@providers.fixture
+@fixture
 def hmms_provider(http, jobs_api_url, work_path) -> HMMsProvider:
     return HMMsProvider(http, jobs_api_url, work_path)
 
 
-@providers.fixture
+@fixture
 def index_provider(job, http, jobs_api_url) -> IndexProvider:
     try:
         return IndexProvider(job.args["index_id"], job.args["ref_id"], http, jobs_api_url)
@@ -56,12 +48,12 @@ def index_provider(job, http, jobs_api_url) -> IndexProvider:
         raise
 
 
-@providers.fixture
+@fixture
 def sample_provider(job, http, jobs_api_url) -> SampleProvider:
     return SampleProvider(job.args["sample_id"], http, jobs_api_url)
 
 
-@providers.fixture
+@fixture
 def subtraction_providers(
     job, http, jobs_api_url, work_path
 ) -> List[SubtractionProvider]:

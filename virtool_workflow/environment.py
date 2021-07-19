@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, Any
 
 from virtool_workflow import hooks
@@ -11,6 +12,7 @@ from virtool_workflow.workflow import Workflow
 class WorkflowEnvironment(AbstractWorkflowEnvironment, FixtureScope):
 
     def __init__(self, *providers, **instances):
+        warnings.warn("Workflow environment used.")
         super(WorkflowEnvironment, self).__init__(
             workflow_fixtures,
             *providers,
