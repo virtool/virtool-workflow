@@ -2,6 +2,7 @@
 import hashlib
 import json
 from typing import Dict, Union
+from fixtures import fixture
 
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.sample import Sample
@@ -19,6 +20,7 @@ TRIM_PARAMETERS = {
 }
 
 
+@fixture
 def trimming_min_length(sample: Sample):
     return calculate_trimming_min_length(
         sample.library_type,
@@ -26,6 +28,7 @@ def trimming_min_length(sample: Sample):
     )
 
 
+@fixture
 def trimming_parameters(
         sample: Sample,
         trimming_min_length: int
@@ -58,6 +61,7 @@ def trimming_parameters(
     }
 
 
+@fixture
 def trimming_cache_key(sample: Sample, trimming_parameters: dict):
     """Compute a unique cache key based on the trimming parameters"""
     trim_param_json = json.dumps({

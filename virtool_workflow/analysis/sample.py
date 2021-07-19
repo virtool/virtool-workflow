@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from virtool_workflow import fixture
+from fixtures import fixture
 from virtool_workflow.abc.data_providers import AbstractSampleProvider
 from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.data_model.samples import Sample

@@ -4,6 +4,8 @@ from typing import Awaitable, Callable, Optional
 
 import aiohttp
 
+from fixtures import fixture
+
 from ..data_model import Job, Status
 from .errors import (
     JobAlreadyAcquired,
@@ -44,6 +46,7 @@ async def acquire_job_by_id(
             )
 
 
+@fixture
 def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: int):
     async def _job_provider(job_id: str, retry=3, timeout=3):
         try:
@@ -62,6 +65,7 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
 PushStatus = Callable[[str, str, int, Optional[str]], Awaitable[Status]]
 
 
+@fixture
 def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
     """Update the status of the current job."""
 

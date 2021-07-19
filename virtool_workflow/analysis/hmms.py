@@ -6,12 +6,13 @@ from collections import UserList
 from functools import cached_property
 from pathlib import Path
 from shutil import which
-from typing import Iterable, Dict
+from typing import Dict, Iterable
 
 from virtool_workflow.abc.data_providers.hmms import AbstractHMMsProvider
 from virtool_workflow.data_model import HMM
 from virtool_workflow.execution.run_subprocess import RunSubprocess
-from virtool_workflow.fixtures import fixture
+
+from fixtures import fixture
 
 
 class HMMs(UserList):
@@ -22,6 +23,7 @@ class HMMs(UserList):
     2. The path to the HMM profiles file.
 
     """
+
     def __init__(self, hmms: Iterable[HMM], path: Path):
         #: The path to the ``profiles.hmm`` file in the ``work_path`` of the running workflow.
         self.path: Path = path

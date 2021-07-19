@@ -5,10 +5,10 @@ import warnings
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
-from virtool_workflow import discovery, FixtureScope
+from fixtures import FixtureScope
+from virtool_workflow import discovery
 from virtool_workflow.config.fixtures import options
 from virtool_workflow.hooks import on_finalize
-from virtool_workflow.runtime.fixtures import runtime as runtime_fixtures
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 
 logger = logging.getLogger(__name__)
@@ -38,28 +38,7 @@ def load_scripts(init_file: Path, fixtures_file: Path):
         )
 
 
-@asynccontextmanager
-async def prepare_environment(**config):
-    warnings.warn("Old runtime start called.")
-    configure_logging(config.get("dev_mode", False))
-    load_scripts(config["init_file"], config["fixtures_file"])
-
-    scope = FixtureScope(options)
-    scope["workflow"] = discovery.discover_workflow(
-        config["workflow_file_path"])
-
-    scope.add_provider(runtime_fixtures)
-
-    environment = await scope.get_or_instantiate("environment")
-    workflow = scope["workflow"]
-    environment["workflow"] = workflow
-
-    async with environment:
-        yield environment, workflow
-        await on_finalize.trigger(environment)
-
-
-async def workflow_main(**config):
+async def start(**config):
     """Main entrypoint for a workflow run."""
     configure_logging(config["dev_mode"])
     load_scripts(config["init_file"], config["fixtures_file"])
@@ -71,9 +50,3 @@ async def workflow_main(**config):
     with fixtures.fixture_context():
         async with fixtures.FixtureScope() as scope:
             return await WorkflowExecution(workflow, scope)
-
-
-async def start(**config):
-    warnings.warn("Old runtime start called.")
-    async with prepare_environment(**config) as (environment, workflow):
-        await environment.execute(workflow)

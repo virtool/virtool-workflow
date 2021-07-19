@@ -1,7 +1,7 @@
 import pytest
 import click
 import click.testing
-from virtool_workflow.config.group import ConfigFixtureGroup
+from virtool_workflow.config.group import ConfigOptions
 from virtool_workflow.cli import cli
 
 
@@ -15,7 +15,7 @@ def test_fixture_group_can_be_applied_to_click_command(click_runner):
     def command():
         ...
 
-    grp = ConfigFixtureGroup()
+    grp = ConfigOptions()
 
     @grp.fixture()
     def option():

@@ -4,9 +4,11 @@ from contextlib import suppress
 from logging import getLogger
 from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
 
-from virtool_workflow import fixture, hooks
+from fixtures import fixture
+from virtool_workflow import hooks
 
 logger = getLogger(__name__)
+
 
 class LineOutputHandler(Protocol):
     async def __Call__(self, line: str):
@@ -65,7 +67,6 @@ async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Aw
         await handler(line)
 
 
-
 async def watch_subprocess(process, stdout_handler, stderr_handler):
     """
     Watch both stderr and stdout using :func:`.watch_pipe`.
@@ -116,7 +117,8 @@ async def _run_subprocess(
         cwd=cwd
     )
 
-    _watch_subprocess = asyncio.create_task(watch_subprocess(process, stdout_handler, _stderr_handler))
+    _watch_subprocess = asyncio.create_task(
+        watch_subprocess(process, stdout_handler, _stderr_handler))
 
     @hooks.on_failure
     def _terminate_process():

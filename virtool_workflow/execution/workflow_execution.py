@@ -1,13 +1,14 @@
 """Execute workflows and manage the execution context."""
 import logging
 import pprint
-from typing import Any, Dict
 from contextlib import asynccontextmanager
+from typing import Any, Dict
 
 from virtool_workflow import hooks
-from virtool_workflow.fixtures.scope import FixtureScope
 from virtool_workflow.execution import states
 from virtool_workflow.workflow import Workflow
+
+from fixtures import FixtureScope
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class WorkflowExecution:
     @asynccontextmanager
     async def startup_and_cleanup(self):
         """Run the startup and cleanup operations of the workflow."""
-        workflow = await self.scope.bind_to_workflow(self.workflow)
+        workflow = await self.workflow.bind_to_fixtures(self.scope)
 
         for startup_step in workflow.on_startup:
             logger.info(f"Running startup step '{startup_step.__name__}'")
