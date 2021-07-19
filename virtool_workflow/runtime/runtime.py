@@ -1,13 +1,15 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
+import fixtures
+import warnings
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
 from virtool_workflow import discovery, FixtureScope
-from virtool_workflow.config.loading import load_config
 from virtool_workflow.config.fixtures import options
-from virtool_workflow.hooks import on_load_config, on_finalize
-from virtool_workflow.runtime import fixtures
+from virtool_workflow.hooks import on_finalize
+from virtool_workflow.runtime.fixtures import runtime as runtime_fixtures
+from virtool_workflow.execution.workflow_execution import WorkflowExecution
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +40,15 @@ def load_scripts(init_file: Path, fixtures_file: Path):
 
 @asynccontextmanager
 async def prepare_environment(**config):
+    warnings.warn("Old runtime start called.")
     configure_logging(config.get("dev_mode", False))
     load_scripts(config["init_file"], config["fixtures_file"])
 
     scope = FixtureScope(options)
     scope["workflow"] = discovery.discover_workflow(
         config["workflow_file_path"])
-    scope.add_provider(fixtures.runtime)
+
+    scope.add_provider(runtime_fixtures)
 
     environment = await scope.get_or_instantiate("environment")
     workflow = scope["workflow"]
@@ -55,6 +59,21 @@ async def prepare_environment(**config):
         await on_finalize.trigger(environment)
 
 
+async def workflow_main(**config):
+    """Main entrypoint for a workflow run."""
+    configure_logging(config["dev_mode"])
+    load_scripts(config["init_file"], config["fixtures_file"])
+
+    workflow = discovery.discover_workflow(
+        config["workflow_file_path"]
+    )
+
+    with fixtures.fixture_context():
+        async with fixtures.FixtureScope() as scope:
+            return await WorkflowExecution(workflow, scope)
+
+
 async def start(**config):
+    warnings.warn("Old runtime start called.")
     async with prepare_environment(**config) as (environment, workflow):
         await environment.execute(workflow)
