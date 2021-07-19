@@ -1,13 +1,15 @@
-from contextvars import copy_context
-import pytest
 import asyncio
+
+import pytest
 from fixtures import fixture_context, get_fixtures, runs_in_new_fixture_context
+
 
 @pytest.fixture
 def fixtures():
     # copy_context=False ensures an empty fixtures dictionary for these tests.
     with fixture_context(copy_context=False):
         yield get_fixtures()
+
 
 def test_fixture_context_behavior(fixtures):
     fixtures["identity"] = lambda x: x
@@ -51,7 +53,6 @@ async def test_fixture_context_asyncio_behavior(fixtures):
 
     fixtures["identity"] = lambda x: x
 
-
     async def same_context():
         context_fixtures = get_fixtures()
         assert "identity" in fixtures
@@ -59,7 +60,6 @@ async def test_fixture_context_asyncio_behavior(fixtures):
 
         return context_fixtures, fixtures
 
-    
     context_fixtures, fixtures = await same_context()
     assert context_fixtures is fixtures
 
@@ -110,7 +110,7 @@ async def test_fixture_context_no_copy_behavior(fixtures):
 async def test_context_decorator(fixtures):
 
     def baz():
-        ...
+        return "baz"
 
     @runs_in_new_fixture_context(baz)
     async def new_context():
@@ -135,9 +135,3 @@ async def test_context_decorator(fixtures):
 
     assert "cat" in fixtures
     assert "baz" not in fixtures
-
-
-
-
-
-
