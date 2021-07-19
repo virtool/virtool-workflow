@@ -51,7 +51,7 @@ class FixtureScope(UserDict):
             - `function` is a (synchronous) generator function.
 
         In the case of generator (or async generator) functions,
-        they will be converted into async context managers via :mod:`contextlib` 
+        they will be converted into async context managers via :mod:`contextlib`
         and added to the exit stack.
 
         :param args: arguments to forward to the function.
@@ -81,8 +81,8 @@ class FixtureScope(UserDict):
         fixtures = get_fixtures()
         return dict(fixtures, **self)
 
+    @staticmethod
     def _bind(
-        self,
         function: callable,
         argspec: inspect.FullArgSpec,
         values: dict,
@@ -91,7 +91,7 @@ class FixtureScope(UserDict):
         Bind values to function parameters.
 
         :param function: The function to bind.
-        :param argspec: The argspec for the function, obtained 
+        :param argspec: The argspec for the function, obtained
                         via :func:`inspect.getfullargspec`.
         :param values: Key value pairs to bind to the function.
 
@@ -133,13 +133,13 @@ class FixtureScope(UserDict):
     ) -> Union[callable, Fixture]:
         """
         Instantiate fixtures as needed based on the signature of
-        `function`. Wrap `function` to pass the fixture values as 
+        `function`. Wrap `function` to pass the fixture values as
         parameters where needed.
 
         This function will try to get a value for each key with the following priority:
 
-            :first: 
-                Values from `**kwargs`. if one is present for the given key then 
+            :first:
+                Values from `**kwargs`. if one is present for the given key then
                 the corresponding fixture would not be instantiated.
 
             :second:

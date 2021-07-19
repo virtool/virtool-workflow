@@ -2,7 +2,7 @@ import inspect
 from functools import wraps
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import Any, Dict, NewType, Protocol, runtime_checkable, Type
+from typing import Any, Dict, NewType, Protocol, runtime_checkable
 
 FixtureValue = NewType('FixtureValue', Any)
 """A return value from a :class:`Fixture` callable."""
@@ -11,7 +11,7 @@ FixtureValue = NewType('FixtureValue', Any)
 @runtime_checkable
 class Fixture(Protocol):
     """
-    A Protocol formally defining any attributes which are 
+    A Protocol formally defining any attributes which are
     added to a fixture function via @:func:`fixture`.
 
     Enables `isinstance(function, Fixture)` checks to be made.
@@ -22,7 +22,7 @@ class Fixture(Protocol):
     __hide_params__: bool
 
     async def __call__(self, *args, **kwargs) -> FixtureValue:
-        ...
+        raise NotImplementedError()
 
 
 _fixtures = ContextVar("fixtures")
@@ -32,7 +32,7 @@ def get_fixtures() -> Dict[str, Fixture]:
     """
     get the fixtures dictionary for the current context.
 
-    If it does not exist, a new dictionary is created. 
+    If it does not exist, a new dictionary is created.
     """
     try:
         return _fixtures.get()
@@ -49,10 +49,10 @@ def fixture_context(*fixtures: Fixture, copy_context=True) -> Dict[str, Fixture]
     Any fixtures created within the `with` block will not be available outside of it.
 
     :param fixtures: Any fixtures which should be included in the context.
-                     If a fixture with the same name is already present, the 
+                     If a fixture with the same name is already present, the
                      new fixture will be used instead.
     :param copy_context: Copy the fixtures dict from the current context, defaults to True.
-                     
+
 
     :yield: A dictionary mapping fixture names to :class:`Fixture` functions.
     """
@@ -115,4 +115,3 @@ def fixture(function: callable = None, protocol: Protocol = None, hide_params: b
     fixtures[function.__name__] = function
 
     return function
-
