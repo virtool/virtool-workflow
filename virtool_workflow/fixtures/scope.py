@@ -2,6 +2,7 @@
 import inspect
 import asyncio
 import logging
+import warnings
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from inspect import signature
@@ -37,6 +38,7 @@ class FixtureScope(AbstractAsyncContextManager, InstanceFixtureGroup):
         :param scope_name: A name to use for this scope in logging messages.
         :param instances: Any objects to be maintained as instance fixtures.
         """
+        warnings.warn("Old FixtureScope implementation used.")
         self.update(**instances, scope=self)
         self._overrides = FixtureGroup()
         self._providers = [self, self._overrides, *providers]

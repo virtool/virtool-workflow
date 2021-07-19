@@ -1,44 +1,35 @@
-import pytest
-
+from fixtures import FixtureScope
 from virtool_workflow.api.client import authenticated_http, JobApiHttpSession
-from virtool_workflow.api.scope import api_scope
-from virtool_workflow.runtime import fixtures
-from virtool_workflow.fixtures.scope import FixtureScope
 from tests.api.mocks.mock_job_routes import TEST_JOB
 
 
-@pytest.fixture
-async def client():
-    return await api_scope.get_or_instantiate("http")
-
-
-async def test_http_client_does_close(client):
+async def test_http_client_does_close(runtime):
+    client = runtime.get_or_instantiate("client")
     assert isinstance(client, JobApiHttpSession)
 
-    await api_scope.close()
+    await runtime.__aexit__(None, None, None)
 
     assert client.client.closed
 
 
-async def test_add_auth_headers_adds_auth():
+async def test_add_auth_headers_adds_auth(runtime):
     job_id = "test_job"
     job_key = "foobar"
 
-    api_scope["job_id"] = job_id
-    api_scope["key"] = job_key
+    runtime["job_id"] = job_id
+    runtime["key"] = job_key
 
-    client = await api_scope.instantiate(authenticated_http)
+    client = await runtime.instantiate(authenticated_http)
 
     assert client.auth.login == f"job-{job_id}"
     assert client.auth.password == job_key
 
 
-async def test_auth_headers_applied_once_job_is_ready(http, jobs_api_url):
-    async with FixtureScope(fixtures.workflow) as scope:
-        scope["http"] = http
-        scope["job_id"] = TEST_JOB["id"]
-        scope["jobs_api_url"] = jobs_api_url
-        job = await scope.get_or_instantiate("job")
+async def test_auth_headers_applied_once_job_is_ready(runtime, http, jobs_api_url):
+    runtime["http"] = http
+    runtime["job_id"] = TEST_JOB["id"]
+    runtime["jobs_api_url"] = jobs_api_url
+    job = await runtime.get_or_instantiate("job")
 
-        assert http.auth.login == f"job-{job.id}"
-        assert http.auth.password == job.key
+    assert http.auth.login == f"job-{job.id}"
+    assert http.auth.password == job.key

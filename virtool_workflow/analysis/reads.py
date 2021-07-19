@@ -3,6 +3,8 @@ from pathlib import Path
 
 from aiohttp import ClientSession
 
+from fixtures import fixture
+
 from virtool_workflow.analysis.fastqc import fastqc
 from virtool_workflow.analysis.skewer import skewer
 from virtool_workflow.analysis.trimming import (trimming_cache_key,
@@ -10,11 +12,10 @@ from virtool_workflow.analysis.trimming import (trimming_cache_key,
                                                 trimming_parameters)
 from virtool_workflow.api.caches import RemoteReadCaches
 from virtool_workflow.data_model.samples import Sample
-from virtool_workflow.fixtures.providers import FixtureGroup
 from virtool_workflow.caching.caches import GenericCaches
 from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 
-fixtures = FixtureGroup(
+__depends_on__ = (
     trimming_min_length,
     trimming_cache_key,
     trimming_parameters
@@ -43,7 +44,7 @@ class Reads:
         return self.path / "reads_2.fq.gz"
 
 
-@fixtures.fixture
+@fixture
 def sample_caches(
         sample: Sample,
         work_path: Path,
@@ -63,11 +64,10 @@ def sample_caches(
     )
 
 
-@fixtures.fixture
+@fixture
 async def reads(
     sample: Sample,
     sample_caches: GenericCaches[ReadsCache],
-    trimming_min_length: int,
     trimming_parameters: dict,
     trimming_cache_key: str,
     work_path: Path,

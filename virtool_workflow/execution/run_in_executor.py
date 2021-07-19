@@ -1,8 +1,8 @@
 """Helper functions for threading and running subprocesses within Virtool Workflows."""
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Any, Protocol, Coroutine, runtime_checkable
+from typing import Any, Callable, Coroutine, Protocol, runtime_checkable
 
-from virtool_workflow.fixtures.workflow_fixture import fixture
+from fixtures import fixture
 
 
 @fixture

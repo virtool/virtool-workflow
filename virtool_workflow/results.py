@@ -1,2 +1,0 @@
-def results() -> dict:
-    return {}

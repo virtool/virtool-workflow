@@ -1,8 +1,9 @@
 from typing import List
 
-from virtool_workflow import fixture
 from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.data_model import Subtraction
+
+from fixtures import fixture
 
 
 # noinspection PyTypeChecker

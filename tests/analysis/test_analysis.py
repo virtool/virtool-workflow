@@ -11,8 +11,6 @@ from virtool_workflow.data_model import Job
 
 @pytest.fixture
 def scope(runtime):
-    runtime.add_provider(reads.fixtures)
-
     runtime["job"] = Job(
         id=test_get_reads_from_existing_cache.__name__,
         args={
