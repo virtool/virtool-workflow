@@ -20,6 +20,7 @@ class Fixture(Protocol):
     __name__: str
     __return_protocol__: Protocol
     __hide_params__: bool
+    __follow_wrapped__: bool
 
     async def __call__(self, *args, **kwargs) -> FixtureValue:
         raise NotImplementedError()
@@ -91,7 +92,11 @@ def runs_in_new_fixture_context(*fixtures, copy_context=True):
     return _deco
 
 
-def fixture(function: callable = None, protocol: Protocol = None, hide_params: bool = True):
+def fixture(
+    function: callable = None,
+    protocol: Protocol = None,
+    hide_params: bool = True,
+):
     """
     Create a new fixture.
 
@@ -110,6 +115,7 @@ def fixture(function: callable = None, protocol: Protocol = None, hide_params: b
 
     function.__return_protocol__ = protocol
     function.__hide_params__ = hide_params
+    function.__follow_wrapped__ = True
 
     fixtures = get_fixtures()
     fixtures[function.__name__] = function
