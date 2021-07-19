@@ -11,35 +11,21 @@ from virtool_workflow.runtime import fixtures
 
 logger = logging.getLogger(__name__)
 
-log_level = logging.INFO
 
+def configure_logging(dev_mode):
+    """Set up logging for a workflow run."""
+    log_level = logging.DEBUG if dev_mode else logging.INFO
 
-@on_load_config
-def determine_log_level(dev_mode):
-    global log_level
-
-    if dev_mode is True:
-        log_level = logging.DEBUG
-
-
-@on_load_config
-def install_coloredlogs():
+    logging.basicConfig(level=log_level)
+    # Install coloredlogs if available.
     with suppress(ModuleNotFoundError):
         import coloredlogs
         logging.debug("Installed coloredlogs")
         coloredlogs.install(level=log_level)
 
 
-@on_load_config
-def set_log_level_to_debug(dev_mode: bool):
-    if dev_mode:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
-
-@on_load_config
 def load_scripts(init_file: Path, fixtures_file: Path):
+    """Load the initialization and fixtures scripts."""
     if init_file.exists():
         discovery.import_module_from_file(
             module_name=init_file.name.rstrip(".py"), path=init_file
@@ -50,20 +36,14 @@ def load_scripts(init_file: Path, fixtures_file: Path):
         )
 
 
-@on_load_config
-def extract_workflow(workflow_file_path: Path, scope):
-    _workflow = discovery.discover_workflow(workflow_file_path)
-    if not _workflow:
-        raise RuntimeError(
-            f"{workflow_file_path.name} does not contain a Workflow.")
-
-    scope["workflow"] = _workflow
-
-
 @asynccontextmanager
 async def prepare_environment(**config):
+    configure_logging(config.get("dev_mode", False))
+    load_scripts(config["init_file"], config["fixtures_file"])
+
     scope = FixtureScope(options)
-    await load_config(scope=scope, **config)
+    scope["workflow"] = discovery.discover_workflow(
+        config["workflow_file_path"])
     scope.add_provider(fixtures.runtime)
 
     environment = await scope.get_or_instantiate("environment")
