@@ -1,4 +1,5 @@
-from virtool_workflow import fixture, Workflow
+from fixtures import fixture
+from virtool_workflow import Workflow
 
 
 @fixture
