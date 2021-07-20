@@ -38,3 +38,7 @@ class FixtureBindingError(Exception):
 
     def __str__(self):
         return self.args[0]
+
+
+class FixtureHasDependency(Exception):
+    """Raised when a fixture cannot be instantiated due to an unmet dependency (parameter)."""
