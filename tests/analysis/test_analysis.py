@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 
 from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
-from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 from virtool_workflow.analysis import reads
 from virtool_workflow.caching.local import LocalCaches
+from virtool_workflow.caching.caches import ReadsCache
 from virtool_workflow.data_model import Job
 
 

@@ -3,11 +3,12 @@ import shutil
 from pathlib import Path
 
 import aiohttp
-
-from virtool_workflow.abc.caches.analysis_caches import ReadsCache
-from virtool_workflow.api.errors import NotFound, JobsAPIServerError, raising_errors_by_status_code
-from virtool_workflow.api.utils import upload_file_via_put, read_file_from_response
-from virtool_workflow.caching.caches import GenericCacheWriter, GenericCaches, GenericCache
+from virtool_workflow.api.errors import (JobsAPIServerError, NotFound,
+                                         raising_errors_by_status_code)
+from virtool_workflow.api.utils import (read_file_from_response,
+                                        upload_file_via_put)
+from virtool_workflow.caching.caches import (Cache, Caches,
+                                             CacheWriter, ReadsCache)
 from virtool_workflow.data_model.files import VirtoolFileFormat
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 
@@ -16,7 +17,7 @@ class CacheAlreadyOpen(Exception):
     pass
 
 
-class RemoteReadsCacheWriter(GenericCacheWriter[ReadsCache]):
+class RemoteReadsCacheWriter(CacheWriter[ReadsCache]):
 
     def __init__(self, key, path, sample_id, http, jobs_api_url, run_in_executor):
         super(RemoteReadsCacheWriter, self).__init__(key, path)
@@ -80,7 +81,7 @@ class RemoteReadsCacheWriter(GenericCacheWriter[ReadsCache]):
             pass
 
 
-class RemoteReadCaches(GenericCaches[ReadsCache]):
+class RemoteReadCaches(Caches[ReadsCache]):
     def __init__(
             self,
             sample_id: str,
@@ -126,7 +127,8 @@ class RemoteReadCaches(GenericCaches[ReadsCache]):
         cache_path = self.path / key
         cache_path.mkdir()
 
-        files = ("reads_1.fq.gz", "reads_2.fq.gz") if self.paired else ("reads_1.fq.gz",)
+        files = ("reads_1.fq.gz", "reads_2.fq.gz") if self.paired else (
+            "reads_1.fq.gz",)
 
         for filename in files:
             response = await self.http.get(f"{self.url}/{key}/reads/{filename}")
@@ -138,7 +140,7 @@ class RemoteReadCaches(GenericCaches[ReadsCache]):
             quality=cache["quality"],
         )
 
-    def create(self, key: str) -> GenericCacheWriter[GenericCache]:
+    def create(self, key: str) -> CacheWriter[Cache]:
         """Create a new cache writer."""
         cache_path = self.path / key
         cache_path.mkdir()

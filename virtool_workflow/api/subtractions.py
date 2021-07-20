@@ -4,7 +4,6 @@ from typing import Dict
 
 import aiohttp
 
-from virtool_workflow.abc.data_providers import AbstractSubtractionProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import (upload_file_via_put,
                                         read_file_from_response,
@@ -18,12 +17,13 @@ def subtraction_from_json(subtraction_json: dict, path: Path) -> Subtraction:
         subtraction_json["name"],
         subtraction_json["nickname"],
         subtraction_json["count"] if "count" in subtraction_json else None,
-        NucleotideComposition(**subtraction_json["gc"]) if "gc" in subtraction_json else {},
+        NucleotideComposition(
+            **subtraction_json["gc"]) if "gc" in subtraction_json else {},
         path,
     )
 
 
-class SubtractionProvider(AbstractSubtractionProvider):
+class SubtractionProvider:
     """
     Operations on a Subtraction via the Jobs API.
 
@@ -104,3 +104,6 @@ class SubtractionProvider(AbstractSubtractionProvider):
         async with self.http.delete(self.api_url) as response:
             async with raising_errors_by_status_code(response, accept=[204]):
                 pass
+
+    def __await__(self) -> Subtraction:
+        return self.get().__await__()

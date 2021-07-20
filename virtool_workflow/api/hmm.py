@@ -8,7 +8,6 @@ import aiofiles
 import aiohttp
 from virtool_core.utils import decompress_file
 
-from virtool_workflow.abc.data_providers import AbstractHMMsProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import read_file_from_response
 from virtool_workflow.data_model import HMM
@@ -30,7 +29,7 @@ def _hmm_from_dict(hmm_json) -> HMM:
     )
 
 
-class HMMsProvider(AbstractHMMsProvider):
+class HMMsProvider:
 
     def __init__(self,
                  http: aiohttp.ClientSession,
@@ -58,7 +57,8 @@ class HMMsProvider(AbstractHMMsProvider):
                             str(self.path / "annotations.json"),
                             self.number_of_processes)
         except gzip.BadGzipFile:
-            shutil.copyfile(self.path / "annotations.json.gz", self.path / "annotations.json")
+            shutil.copyfile(self.path / "annotations.json.gz",
+                            self.path / "annotations.json")
 
         async with aiofiles.open(self.path / "annotations.json") as f:
             hmms_json = json.loads(await f.read())

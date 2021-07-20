@@ -6,8 +6,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from virtool_workflow import data_model, hooks
-from virtool_workflow.abc.data_providers.analysis import \
-    AbstractAnalysisProvider
+from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
 from fixtures import fixture
@@ -44,7 +43,7 @@ class Analysis(data_model.Analysis):
 
 
 @fixture
-async def analysis(analysis_provider: AbstractAnalysisProvider) -> Analysis:
+async def analysis(analysis_provider: AnalysisProvider) -> Analysis:
     """
     A fixture that returns an :class:`.Analysis` object representing the analysis associated with the running workflow.
 
