@@ -8,7 +8,7 @@ from typing import Any, Dict, Union
 
 from ._fixture import Fixture, get_fixtures
 from ._utils import get_arg_spec, get_defaults
-from .errors import FixtureBindingError, FixtureNotFound
+from .errors import FixtureBindingError, FixtureNotFound, FixtureHasDependency
 
 
 class FixtureScope(UserDict):
@@ -60,21 +60,26 @@ class FixtureScope(UserDict):
 
         :return: The return (or yield) value of `function`.
         """
-        if inspect.isasyncgenfunction(function):
-            return await self.exit_stack.enter_async_context(
-                asynccontextmanager(function)(*args, **kwargs)
-            )
+        try:
+            if inspect.isasyncgenfunction(function):
+                return await self.exit_stack.enter_async_context(
+                    asynccontextmanager(function)(*args, **kwargs)
+                )
 
-        if inspect.isgeneratorfunction(function):
-            return self.exit_stack.enter_context(
-                contextmanager(function)(*args, **kwargs)
-            )
+            if inspect.isgeneratorfunction(function):
+                return self.exit_stack.enter_context(
+                    contextmanager(function)(*args, **kwargs)
+                )
 
-        if inspect.iscoroutinefunction(function):
-            return await function(*args, **kwargs)
+            if inspect.iscoroutinefunction(function):
+                return await function(*args, **kwargs)
 
-        # Must be a synchronous function..
-        return function(*args, **kwargs)
+            # Must be a synchronous function..
+            return function(*args, **kwargs)
+        except TypeError as e:
+            if "missing" in str(e):
+                raise FixtureHasDependency() from e
+            raise
 
     @property
     def available(self) -> Dict[str, Any]:
@@ -98,31 +103,48 @@ class FixtureScope(UserDict):
 
         :return: The bound function.
         """
-        if inspect.iscoroutinefunction(function):
+        def prep_args(args, kwargs):
+            if args or kwargs:
+                # Since `values` is stored in the closure
+                # updates to it will persist between calls
+                _values = values.copy()
+            else:
+                _values = values
+
+            # Support using keyword arguments when calling `_bound`
+            _values.update(kwargs)
+
+            # Support using positional arguments when calling `_bound`
+            if args:
+                # Remove supplied args from the `values`
+                arg_names = argspec.args[:len(args)]
+                for name in arg_names:
+                    del _values[name]
+
+            return args, _values
+
+        if inspect.isgeneratorfunction(function):
+            @wraps(function)
+            def _bound(*args, **kwargs):
+                _args, _kwargs = prep_args(args, kwargs)
+                yield from function(*_args, **_kwargs)
+        elif inspect.isasyncgenfunction(function):
             @wraps(function)
             async def _bound(*args, **kwargs):
-                values.update(kwargs)
-                return await function(*args, **values)
+                _args, _kwargs = prep_args(args, kwargs)
+                asyncgen = await function(*_args, **_kwargs)
+                async for item in asyncgen:
+                    yield item
+        elif inspect.iscoroutinefunction(function):
+            @wraps(function)
+            async def _bound(*args, **kwargs):
+                _args, _kwargs = prep_args(args, kwargs)
+                return await function(*_args, **_kwargs)
         else:
             @wraps(function)
             def _bound(*args, **kwargs):
-                if args or kwargs:
-                    # Since `values` is stored in the closure
-                    # updates to it will persist between calls
-                    _values = values.copy()
-                else:
-                    _values = values
-
-                # Support using keyword arguments when calling `_bound`
-                _values.update(kwargs)
-
-                # Support using positional arguments when calling `_bound`
-                if args:
-                    # Remove supplied args from the `values`
-                    arg_names = argspec.args[:len(args)]
-                    for name in arg_names:
-                        del _values[name]
-                return function(*args, **_values)
+                _args, _kwargs = prep_args(args, kwargs)
+                return function(*_args, **_kwargs)
 
         return _bound
 
@@ -235,10 +257,7 @@ class FixtureScope(UserDict):
 
         try:
             value = await self._instantiate(fixture, *args, **kwargs)
-        except TypeError as e:
-            if "missing" not in str(e):
-                raise
-
+        except FixtureHasDependency:
             value = await self.instantiate(await self.bind(fixture, follow_wrapped=True), *args, **kwargs)
 
         self[fixture.__name__] = value
