@@ -4,8 +4,18 @@ from typing import Callable
 import pytest
 from virtool_workflow import Workflow
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
+from importlib import import_module
 
-from fixtures import FixtureScope
+from virtool_workflow.builtin_fixtures import *
+from fixtures import FixtureScope, fixture
+
+
+@fixture
+def config():
+    return {
+        "proc": 2,
+        "mem": 8,
+    }
 
 
 class WorkflowTestRunner(FixtureScope):
@@ -23,6 +33,11 @@ class WorkflowTestRunner(FixtureScope):
 @pytest.fixture
 async def runtime(http, jobs_api_url):
     async with WorkflowTestRunner() as _runtime:
+        _runtime["config"] = {
+            "work_path": "temp",
+            "mem": 8,
+            "proc": 2,
+        }
         _runtime["job_id"] = "test_job"
         _runtime["http"] = http
         _runtime["jobs_api_url"] = jobs_api_url
