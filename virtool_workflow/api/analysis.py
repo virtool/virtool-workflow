@@ -10,7 +10,6 @@ import aiofiles
 import aiohttp
 import dateutil.parser
 
-from virtool_workflow.abc.data_providers import AbstractAnalysisProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import upload_file_via_put
 from virtool_workflow.data_model.analysis import Analysis
@@ -69,7 +68,7 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
             )
 
 
-class AnalysisProvider(AbstractAnalysisProvider):
+class AnalysisProvider:
     """
     Use the Virtool Jobs API to perform operations on the current analysis.
 
@@ -78,6 +77,7 @@ class AnalysisProvider(AbstractAnalysisProvider):
     :param jobs_api_url: The url to the Jobs API. It should include the `/api` path.
 
     """
+
     def __init__(self,
                  analysis_id: str,
                  http: aiohttp.ClientSession,
