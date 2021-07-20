@@ -4,14 +4,14 @@ from pathlib import Path
 from shutil import which
 from subprocess import PIPE, Popen
 
-from virtool_workflow.config.fixtures import options
+from virtool_workflow.options import apply_options
 
 API_COMPOSE_FILE = Path(__file__).parent/"docker-compose.api.yml"
 WORKFLOW_COMPOSE_FILE = Path(__file__).parent/"docker-compose.workflow.yml"
 COMPOSE_FILE = f"{API_COMPOSE_FILE.absolute()}:{WORKFLOW_COMPOSE_FILE.absolute()}"
 
 
-@options.add_options
+@apply_options
 def test_main(**kwargs):
     """Run a workflow in a test environment"""
 
