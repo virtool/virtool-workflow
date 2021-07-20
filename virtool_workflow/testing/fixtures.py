@@ -6,8 +6,10 @@ from virtool_workflow import Workflow
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from importlib import import_module
 
-from virtool_workflow.builtin_fixtures import *
 from fixtures import FixtureScope, fixture
+
+
+import_module("virtool_workflow.builtin_fixtures")
 
 
 @fixture
