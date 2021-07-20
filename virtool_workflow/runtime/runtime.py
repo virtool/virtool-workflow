@@ -1,15 +1,12 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
 import fixtures
-import warnings
-from contextlib import asynccontextmanager, suppress
+from contextlib import suppress
 from pathlib import Path
 
-from fixtures import FixtureScope
 from virtool_workflow import discovery
-from virtool_workflow.config.fixtures import options
-from virtool_workflow.hooks import on_finalize
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
+from importlib import import_module
 
 logger = logging.getLogger(__name__)
 
@@ -48,5 +45,7 @@ async def start(**config):
     )
 
     with fixtures.fixture_context():
+        import_module("virtool_workflow.builtin_fixtures")
         async with fixtures.FixtureScope() as scope:
+            scope["config"] = config
             return await WorkflowExecution(workflow, scope)
