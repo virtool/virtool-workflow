@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from virtool_workflow.abc.caches.cache import Cache, CacheExists
+from virtool_workflow.caching.caches import Cache, CacheExists
 from virtool_workflow.caching.local import LocalCacheWriter, LocalCaches
 
 

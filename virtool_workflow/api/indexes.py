@@ -2,7 +2,6 @@ from pathlib import Path
 
 import aiohttp
 
-from virtool_workflow.abc.data_providers import AbstractIndexProvider
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import (read_file_from_response,
                                         upload_file_via_put)
@@ -23,7 +22,7 @@ async def _fetch_reference(ref_id, http, jobs_api_url):
             )
 
 
-class IndexProvider(AbstractIndexProvider):
+class IndexProvider:
     """
     Provide access to Virtool's indexes via the Jobs API.
 
@@ -110,3 +109,6 @@ class IndexProvider(AbstractIndexProvider):
                     await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
                     ready=index_document["ready"]
                 )
+
+    def __await__(self) -> Index:
+        return self.get().__await__()

@@ -1,14 +1,14 @@
 from pathlib import Path
 
 from fixtures import fixture
-from virtool_workflow.abc.data_providers import AbstractSampleProvider
 from virtool_workflow.analysis.utils import make_read_paths
 from virtool_workflow.data_model.samples import Sample
+from virtool_workflow.api.samples import SampleProvider
 
 
 @fixture
 async def sample(
-        sample_provider: AbstractSampleProvider,
+        sample_provider: SampleProvider,
         work_path: Path
 ) -> Sample:
     """

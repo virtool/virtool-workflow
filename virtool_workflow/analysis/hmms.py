@@ -8,7 +8,7 @@ from pathlib import Path
 from shutil import which
 from typing import Dict, Iterable
 
-from virtool_workflow.abc.data_providers.hmms import AbstractHMMsProvider
+from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.data_model import HMM
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
@@ -40,7 +40,7 @@ class HMMs(UserList):
 
 
 @fixture
-async def hmms(hmms_provider: AbstractHMMsProvider, work_path: Path, run_subprocess: RunSubprocess):
+async def hmms(hmms_provider: HMMsProvider, work_path: Path, run_subprocess: RunSubprocess):
     """
     A fixture for accessing HMM data.
 
