@@ -1,13 +1,30 @@
 from abc import abstractmethod
 from inspect import signature
-from typing import TypeVar
-
-from virtool_workflow.abc.caches.cache import Cache, AbstractCacheWriter, CacheNotFinalized, AbstractCaches
-
-GenericCache = TypeVar("GenericCache", bound=Cache)
+from dataclasses import dataclass
+from pathlib import Path
 
 
-class GenericCacheWriter(AbstractCacheWriter):
+class CacheNotFinalized(Exception):
+    ...
+
+
+class CacheExists(Exception):
+    ...
+
+
+@dataclass
+class Cache:
+    """Base class for all caches."""
+    key: str
+    path: Path
+
+
+@dataclass
+class ReadsCache(Cache):
+    quality: dict
+
+
+class CacheWriter:
     """
     A :class:`AbstractCacheWriter` which supports attribute assignment based on a
     type argument extending :class:`Cache`.
@@ -16,13 +33,14 @@ class GenericCacheWriter(AbstractCacheWriter):
     method of the class given as a type argument.
     """
 
-    def __init_subclass__(cls, cache_class: GenericCache = None, **kwargs):
+    def __init_subclass__(cls, cache_class: Cache = None, **kwargs):
         if cache_class is not None:
             cls.cache_class = cache_class
-        super(GenericCacheWriter, cls).__init_subclass__(**kwargs)
+        super(CacheWriter, cls).__init_subclass__(**kwargs)
 
     def __init__(self, key, path):
-        self._expected_attrs = list(signature(self.cache_class.__init__).parameters)[1:]
+        self._expected_attrs = list(
+            signature(self.cache_class.__init__).parameters)[1:]
 
         for key_ in self._expected_attrs:
             setattr(self, key_, None)
@@ -33,9 +51,10 @@ class GenericCacheWriter(AbstractCacheWriter):
         self._cache = None
 
     @property
-    def cache(self) -> GenericCache:
+    def cache(self) -> Cache:
         if not self._cache:
-            missing_keys = [key for key in self._expected_attrs if getattr(self, key) is None]
+            missing_keys = [
+                key for key in self._expected_attrs if getattr(self, key) is None]
             if missing_keys:
                 raise CacheNotFinalized(
                     f"Cache has missing attributes: {missing_keys}"
@@ -44,9 +63,10 @@ class GenericCacheWriter(AbstractCacheWriter):
                 raise AttributeError("cache")
         return self._cache
 
-    async def write(self) -> GenericCache:
-        """Create an instance of the cache class using the applicable attributes of this :class:`GenericCacheWriter`."""
-        self._cache = self.cache_class(**{key: getattr(self, key) for key in self._expected_attrs})
+    async def write(self) -> Cache:
+        """Create an instance of the cache class using the applicable attributes of this :class:`CacheWriter`."""
+        self._cache = self.cache_class(
+            **{key: getattr(self, key) for key in self._expected_attrs})
         return self._cache
 
     async def open(self):
@@ -54,9 +74,21 @@ class GenericCacheWriter(AbstractCacheWriter):
         return self
 
     async def close(self):
-        """Create the cache object before closing this :class:`AbstractCacheWriter`"""
+        """Create the cache object before closing this :class:`CacheWriter`"""
         await self.write()
-        return await super(GenericCacheWriter, self).close()
+
+    async def __aenter__(self):
+        return await self.open()
+
+    async def __aexit__(self, exc_type, exc_val, traceback):
+        if exc_val:
+            return await self.delete()
+
+        try:
+            return await self.close()
+        except Exception as e:
+            await self.delete()
+            raise e
 
     def __class_getitem__(cls, item):
         """Set the cache_class."""
@@ -69,15 +101,15 @@ class GenericCacheWriter(AbstractCacheWriter):
         return _Temp
 
 
-class GenericCaches(AbstractCaches):
+class Caches:
     cache_class = Cache
 
     @abstractmethod
-    async def get(self, key: str) -> GenericCache:
+    async def get(self, key: str) -> Cache:
         pass
 
     @abstractmethod
-    def create(self, key: str) -> GenericCacheWriter[GenericCache]:
+    def create(self, key: str) -> CacheWriter:
         pass
 
     def __class_getitem__(cls, item):

@@ -10,10 +10,9 @@ from virtool_workflow.analysis.skewer import skewer
 from virtool_workflow.analysis.trimming import (trimming_cache_key,
                                                 trimming_min_length,
                                                 trimming_parameters)
+from virtool_workflow.caching.caches import Caches, ReadsCache
 from virtool_workflow.api.caches import RemoteReadCaches
 from virtool_workflow.data_model.samples import Sample
-from virtool_workflow.caching.caches import GenericCaches
-from virtool_workflow.abc.caches.analysis_caches import ReadsCache
 
 __depends_on__ = (
     trimming_min_length,
@@ -67,7 +66,8 @@ def sample_caches(
 @fixture
 async def reads(
     sample: Sample,
-    sample_caches: GenericCaches[ReadsCache],
+    sample_caches: Caches[ReadsCache],
+    trimming_min_length: int,
     trimming_parameters: dict,
     trimming_cache_key: str,
     work_path: Path,
