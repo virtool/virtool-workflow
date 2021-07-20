@@ -3,8 +3,8 @@ import asyncio
 import click
 
 from virtool_workflow.runtime import runtime
-from virtool_workflow.config.fixtures import options
 from virtool_workflow.testing.cli import test_main
+from virtool_workflow.options import apply_options
 
 
 @click.group()
@@ -16,7 +16,7 @@ async def _run(**kwargs):
     await runtime.start(**kwargs)
 
 
-@options.add_options
+@apply_options
 @cli.command()
 def run(job_id, **kwargs):
     """Run a workflow."""
