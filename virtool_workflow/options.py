@@ -58,8 +58,10 @@ options = [
 ]
 
 
-def apply_options(func, options: List[click.Option] = options):
+def apply_options(func, _options: List[click.Option] = None):
     """Apply click options from a list."""
+    if _options is None:
+        _options = options
     for option in options:
         func = option(func)
     return func
