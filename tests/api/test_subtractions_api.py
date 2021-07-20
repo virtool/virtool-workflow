@@ -11,11 +11,6 @@ from virtool_workflow.data_model.files import VirtoolFile
 
 
 @fixture
-def work_path(tmpdir):
-    return Path(tmpdir)
-
-
-@fixture
 def subtraction_api(http, jobs_api_url: str, work_path):
     subtraction_work_path = work_path / "subtractions"
     subtraction_work_path.mkdir(parents=True)
