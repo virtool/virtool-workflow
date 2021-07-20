@@ -160,3 +160,6 @@ class AnalysisProvider:
         async with self.http.delete(f"{self.api_url}/analyses/{self.id}") as response:
             async with raising_errors_by_status_code(response):
                 return
+
+    def __await__(self) -> Analysis:
+        return self.get().__await__()

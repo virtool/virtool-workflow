@@ -8,7 +8,7 @@ from typing import Awaitable, Callable, Dict, List, Optional, Tuple
 import aiofiles
 from virtool_core.utils import compress_file, decompress_file
 from virtool_workflow import data_model
-from virtool_workflow.abc.data_providers.indexes import AbstractIndexProvider
+from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.data_model.files import VirtoolFileFormat
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
@@ -208,7 +208,7 @@ class Index(data_model.Index):
 
 @fixture
 async def indexes(
-        index_provider: AbstractIndexProvider,
+        index_provider: IndexProvider,
         work_path: Path,
         proc: int,
         run_in_executor: FunctionExecutor,

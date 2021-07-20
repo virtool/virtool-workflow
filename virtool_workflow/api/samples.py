@@ -5,7 +5,6 @@ from typing import Dict, Any
 
 import aiohttp
 
-from virtool_workflow.abc.data_providers import AbstractSampleProvider
 from virtool_workflow.analysis.utils import ReadPaths, make_read_paths
 from virtool_workflow.api.errors import (raising_errors_by_status_code,
                                          AlreadyFinalized,
@@ -36,7 +35,7 @@ async def _make_sample_from_response(response) -> Sample:
         )
 
 
-class SampleProvider(AbstractSampleProvider):
+class SampleProvider:
 
     def __init__(self,
                  sample_id: str,
