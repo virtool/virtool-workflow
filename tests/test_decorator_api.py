@@ -34,6 +34,3 @@ async def test_decorator_api_workflow(runtime):
     assert result["step"]
     assert result["step2"]
     assert result["cleanup"]
-
-
-

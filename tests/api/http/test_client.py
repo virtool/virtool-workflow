@@ -1,15 +1,5 @@
-from fixtures import FixtureScope
-from virtool_workflow.api.client import authenticated_http, JobApiHttpSession
+from virtool_workflow.api.client import authenticated_http
 from tests.api.mocks.mock_job_routes import TEST_JOB
-
-
-async def test_http_client_does_close(runtime):
-    client = runtime.get_or_instantiate("client")
-    assert isinstance(client, JobApiHttpSession)
-
-    await runtime.__aexit__(None, None, None)
-
-    assert client.client.closed
 
 
 async def test_add_auth_headers_adds_auth(runtime):
