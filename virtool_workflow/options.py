@@ -46,13 +46,13 @@ options = [
     click.option(
         "--init-file",
         help="The path to the init file.",
-        type=click.Path(exists=True),
+        type=click.Path(),
         default="init.py"
     ),
     click.option(
         "--fixtures-file",
         help="The path to the fixtures file.",
-        type=click.Path(exists=True),
+        type=click.Path(),
         default="fixtures.py"
     ),
 ]
