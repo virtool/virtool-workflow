@@ -78,7 +78,8 @@ class CacheWriter:
         await self.write()
 
     async def __aenter__(self):
-        return await self.open()
+        await self.open()
+        return self
 
     async def __aexit__(self, exc_type, exc_val, traceback):
         if exc_val:
