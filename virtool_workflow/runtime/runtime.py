@@ -47,6 +47,7 @@ async def start(**config):
     import_module("virtool_workflow.builtin_fixtures")
 
     if config["is_analysis_workflow"]:
+        import_module("virtool_workflow.runtime.providers")
         import_module("virtool_workflow.analysis.fixtures")
 
     with fixtures.fixture_context():
