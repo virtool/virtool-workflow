@@ -40,6 +40,12 @@ def jobs_api_url(config: dict) -> str:
 
 
 @fixture
+def job_id(config: dict) -> str:
+    """The ID for the current job"""
+    return config["job_id"]
+
+
+@fixture
 async def _job(job_id, acquire_job, scope) -> Job:
     """The current job."""
     job = await acquire_job(job_id)
@@ -50,11 +56,12 @@ async def _job(job_id, acquire_job, scope) -> Job:
 
 
 __all__ = [
-    '_job',
-    'mem',
-    'proc',
-    'jobs_api_url',
-    'acquire_job',
-    'results',
-    'work_path',
+    "_job",
+    "acquire_job",
+    "jobs_api_url",
+    "mem",
+    "proc",
+    "results",
+    "work_path",
+    "job_id",
 ]
