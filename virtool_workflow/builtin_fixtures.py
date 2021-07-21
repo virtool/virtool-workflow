@@ -4,6 +4,7 @@ from shutil import rmtree
 from fixtures import fixture
 from virtool_workflow.data_model import Job
 from virtool_workflow.api.client import authenticated_http
+from virtool_workflow.api.jobs import acquire_job
 
 
 @fixture
@@ -46,3 +47,14 @@ async def _job(job_id, acquire_job, scope) -> Job:
     scope["http"] = await authenticated_http(job.id, job.key, scope["http"])
 
     return job
+
+
+__all__ = [
+    '_job',
+    'mem',
+    'proc',
+    'jobs_api_url',
+    'acquire_job',
+    'results',
+    'work_path',
+]
