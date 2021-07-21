@@ -5,17 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 ## [Unreleased]
 
+## [0.6.0] - 2021-07-21
 ### Changed
 
 - `virtool_workflow.fixtures` moved to `fixtures`
 - Fixture functions are stored in a context variable
-
 ### Added
+
 - `fixture_context`, a context manager which creates a new context for fixtures
 - `config` fixture, a dictionary containing all of the command line option values
 - Sphinx plugin `autofixture` to provide special rendering for fixture functions
-
 ### Removed
+
 - 'config fixtures' removed in favor of single fixture `config`
 - `FixtureGroup` removed in favor of `fixture_context`
 - The abstract classes for data provider classes `Abstract*Provider`
