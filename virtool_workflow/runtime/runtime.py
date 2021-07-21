@@ -38,10 +38,10 @@ def load_scripts(init_file: Path, fixtures_file: Path):
 async def start(**config):
     """Main entrypoint for a workflow run."""
     configure_logging(config["dev_mode"])
-    load_scripts(config["init_file"], config["fixtures_file"])
+    load_scripts(Path(config["init_file"]), Path(config["fixtures_file"]))
 
     workflow = discovery.discover_workflow(
-        config["workflow_file_path"]
+        Path(config["workflow_file_path"])
     )
 
     with fixtures.fixture_context():
