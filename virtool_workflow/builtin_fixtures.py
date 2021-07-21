@@ -1,6 +1,9 @@
-from fixtures import fixture
 from pathlib import Path
 from shutil import rmtree
+
+from fixtures import fixture
+from virtool_workflow.data_model import Job
+from virtool_workflow.api.client import authenticated_http
 
 
 @fixture
@@ -33,3 +36,13 @@ def mem(config: dict) -> int:
 def jobs_api_url(config: dict) -> str:
     """The URL of the jobs API."""
     return config["jobs_api_url"]
+
+
+@fixture
+async def _job(job_id, acquire_job, scope) -> Job:
+    """The current job."""
+    job = await acquire_job(job_id)
+
+    scope["http"] = await authenticated_http(job.id, job.key, scope["http"])
+
+    return job
