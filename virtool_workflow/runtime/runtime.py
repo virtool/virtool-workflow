@@ -44,8 +44,12 @@ async def start(**config):
         Path(config["workflow_file_path"])
     )
 
+    import_module("virtool_workflow.builtin_fixtures")
+
+    if config["is_analysis_workflow"]:
+        import_module("virtool_workflow.analysis.fixtures")
+
     with fixtures.fixture_context():
-        import_module("virtool_workflow.builtin_fixtures")
         async with fixtures.FixtureScope() as scope:
             scope["config"] = config
             return await WorkflowExecution(workflow, scope)
