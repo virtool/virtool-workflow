@@ -1,13 +1,16 @@
 import aiohttp
+from fixtures import fixture
 from functools import wraps
 
 
+@fixture
 async def http():
     """:class:`Aiohttp.ClientSession` instance to be used for workflows."""
     async with aiohttp.ClientSession(auto_decompress=False) as session:
         yield JobApiHttpSession(session)
 
 
+@fixture
 async def authenticated_http(job_id, key, http):
     """:class:`Aiohttp.ClientSession` instance which includes authentication headers for the jobs API."""
     http.auth = aiohttp.BasicAuth(login=f"job-{job_id}", password=key)
