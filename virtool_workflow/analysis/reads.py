@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from importlib import import_module
 
 from aiohttp import ClientSession
 
@@ -7,18 +8,11 @@ from fixtures import fixture
 
 from virtool_workflow.analysis.fastqc import fastqc
 from virtool_workflow.analysis.skewer import skewer
-from virtool_workflow.analysis.trimming import (trimming_cache_key,
-                                                trimming_min_length,
-                                                trimming_parameters)
 from virtool_workflow.caching.caches import Caches, ReadsCache
 from virtool_workflow.api.caches import RemoteReadCaches
 from virtool_workflow.data_model.samples import Sample
 
-__depends_on__ = (
-    trimming_min_length,
-    trimming_cache_key,
-    trimming_parameters
-)
+import_module(__package__ + ".trimming")
 
 
 @dataclass
@@ -67,12 +61,11 @@ def sample_caches(
 async def reads(
     sample: Sample,
     sample_caches: Caches[ReadsCache],
-    trimming_min_length: int,
     trimming_parameters: dict,
     trimming_cache_key: str,
     work_path: Path,
     run_subprocess,
-    run_in_executor
+    run_in_executor,
 ):
     """
     The trimmed sample reads.
