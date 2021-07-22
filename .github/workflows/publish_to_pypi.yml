@@ -17,7 +17,7 @@ on:
 jobs:
   pypi-publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != "workflow_run" || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
     container: python:3.8
 
