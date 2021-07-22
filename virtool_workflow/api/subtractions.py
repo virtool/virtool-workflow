@@ -68,13 +68,13 @@ class SubtractionProvider:
         """
         return await upload_file_via_put(self.http, f"{self.api_url}/files", path)
 
-    async def finalize(self, gc: Dict[str, Number]):
+    async def finalize(self, gc: Dict[str, Number], count: int):
         """
         Finalize the subtraction by setting the gc.
         :param gc: The nucleotide composition of the subtraction
         :return: The updated subtraction.
         """
-        async with self.http.patch(self.api_url, json={"gc": gc}) as response:
+        async with self.http.patch(self.api_url, json={"gc": gc, "count": count}) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
                 return subtraction_from_json(subtraction_json, self.path)
 

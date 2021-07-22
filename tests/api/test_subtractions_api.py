@@ -46,7 +46,7 @@ async def test_upload_file(subtraction_api, work_path):
 
 
 async def test_finalize(subtraction_api):
-    updated_subtraction = await subtraction_api.finalize({"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4})
+    updated_subtraction = await subtraction_api.finalize({"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4}, 100)
 
     assert isinstance(updated_subtraction, Subtraction)
     assert updated_subtraction.gc.a == 0.2
