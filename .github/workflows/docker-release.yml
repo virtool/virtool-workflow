@@ -18,7 +18,7 @@ jobs:
   publish_to_dockerhub:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
-    if: github.event_name != "workflow_run" || github.event.workflow_run.conclusion == 'success'
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
