@@ -6,7 +6,7 @@ on:
   
   workflow_run:
     workflows:
-      - Create Github Release
+      - "Create Github Release"
     branches:
       - master
     types:
@@ -39,7 +39,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: virtool/workflow:${{ steps.get_version.version }}
+          tags: virtool/workflow:${{ steps.get_version.outputs.version }}
 
       - name: Update README on Docker Hub
         uses: peter-evans/dockerhub-description@v2
