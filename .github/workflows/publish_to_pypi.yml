@@ -31,4 +31,4 @@ jobs:
         run: poetry build
 
       - name: Deploy To PyPi
-        run: poetry publish -r ${{ secrets.PYPI_REPOSITORY }} -u ${{ secrets.PYPI_USERNAME }} -p {{PYPI_TOKEN}}
+        run: poetry publish -r ${{ secrets.PYPI_REPOSITORY }} -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }}
