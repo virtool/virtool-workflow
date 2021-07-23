@@ -3,7 +3,6 @@ from typing import List
 import click
 
 options = [
-    click.argument("job_id"),
     click.option(
         "--work-path",
         default="temp",

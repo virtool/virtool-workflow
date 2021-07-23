@@ -3,21 +3,23 @@ services:
 
   jobs-api:
     image: virtool/virtool:nightly
-    depends_on: 
+    depends_on:
       - mongo
       - redis
       - postgres
       - pgadmin4
-    command: > 
+    command: >
       --db-connection-string="mongodb://mongo:27017"
       --postgres-connection-string="postgresql+asyncpg://virtool:virtool@postgres/virtool"
       --redis-connection-string="redis://redis:6379"
       jobsAPI
-      --fake
+      --fake-path /virtool/fake
       --host=0.0.0.0
       --port=9990
     ports:
       - "9990:9990"
+    volumes:
+        - ${PWD}/test_case.yml:/virtool/fake/test_case.yml
 
   mongo:
     image: mongo:4.4
@@ -70,4 +72,3 @@ volumes:
   vt_redis_data:
   vt_postgres_data:
   vt_pgadmin4_data:
-
