@@ -1,0 +1,10 @@
+job_id: subtractions_integration_test_job
+workflow: subtractions_integration_test
+
+subtractions:
+  - finalize: True
+  - finalize: True
+
+
+analysis:
+  ready: False
