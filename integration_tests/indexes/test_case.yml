@@ -1,0 +1,11 @@
+job_id: index_integration_test_job
+workflow: index_integration_test
+
+index:
+  finalize: False
+
+analysis:
+  ready: False
+
+include:
+  - otus
