@@ -77,6 +77,7 @@ async def finalize_subtraction(request):
 
     TEST_SUBTRACTION["ready"] = True
     TEST_SUBTRACTION["gc"] = request_json["gc"]
+    TEST_SUBTRACTION["count"] = request_json["count"]
 
     return web.json_response(TEST_SUBTRACTION)
 
