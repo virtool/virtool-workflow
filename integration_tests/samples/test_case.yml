@@ -1,0 +1,10 @@
+
+job_id: sample_integration_test_job
+workflow: sample_integration_test
+
+sample:
+  finalize: True
+  paired: True
+
+analysis:
+  ready: False
