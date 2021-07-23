@@ -1,10 +1,10 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
 import fixtures
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
-from virtool_workflow import discovery
+from virtool_workflow import discovery, Workflow
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
 from importlib import import_module
 
@@ -35,8 +35,16 @@ def load_scripts(init_file: Path, fixtures_file: Path):
         )
 
 
-async def start(**config):
-    """Main entrypoint for a workflow run."""
+async def run_workflow(workflow: Workflow, config: dict):
+    """Run a workflow."""
+    async with fixtures.FixtureScope() as scope:
+        scope["config"] = config
+        return await WorkflowExecution(workflow, scope)
+
+
+@asynccontextmanager
+async def prepare_workflow(**config):
+    """Prepare for a workflow run."""
     configure_logging(config["dev_mode"])
     load_scripts(Path(config["init_file"]), Path(config["fixtures_file"]))
 
@@ -51,6 +59,10 @@ async def start(**config):
         import_module("virtool_workflow.analysis.fixtures")
 
     with fixtures.fixture_context():
-        async with fixtures.FixtureScope() as scope:
-            scope["config"] = config
-            return await WorkflowExecution(workflow, scope)
+        yield workflow
+
+
+async def start(**config):
+    """Main entrypoint for a workflow run."""
+    async with prepare_workflow(**config) as workflow:
+        await run_workflow(workflow, config)
