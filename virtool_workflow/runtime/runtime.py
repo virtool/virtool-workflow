@@ -38,14 +38,19 @@ def load_scripts(init_file: Path, fixtures_file: Path):
 async def start(**config):
     """Main entrypoint for a workflow run."""
     configure_logging(config["dev_mode"])
-    load_scripts(config["init_file"], config["fixtures_file"])
+    load_scripts(Path(config["init_file"]), Path(config["fixtures_file"]))
 
     workflow = discovery.discover_workflow(
-        config["workflow_file_path"]
+        Path(config["workflow_file_path"])
     )
 
+    import_module("virtool_workflow.builtin_fixtures")
+
+    if config["is_analysis_workflow"]:
+        import_module("virtool_workflow.runtime.providers")
+        import_module("virtool_workflow.analysis.fixtures")
+
     with fixtures.fixture_context():
-        import_module("virtool_workflow.builtin_fixtures")
         async with fixtures.FixtureScope() as scope:
             scope["config"] = config
             return await WorkflowExecution(workflow, scope)

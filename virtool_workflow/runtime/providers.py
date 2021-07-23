@@ -12,15 +12,6 @@ from fixtures import fixture
 
 
 @fixture
-async def _job(job_id, acquire_job, scope) -> Job:
-    job = await acquire_job(job_id)
-
-    scope["http"] = await authenticated_http(job.id, job.key, scope["http"])
-
-    return job
-
-
-@fixture
 def analysis_provider(job, http, jobs_api_url) -> AnalysisProvider:
     return AnalysisProvider(job.args["analysis_id"], http, jobs_api_url)
 
