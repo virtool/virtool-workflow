@@ -29,16 +29,14 @@ def run(job_id, **kwargs):
     "--redis-url",
     default="redis://localhost:6317",
 )
+@apply_options
 @click.argument("list_name")
 @cli.command()
-@apply_options
 def run_from_redis(**kwargs):
     """Run jobs from redis for a workflow."""
     asyncio.run(run_jobs_from_redis(**kwargs))
 
 
-@apply_options
-@cli.command()
 def cli_main(**kwargs):
     """Main pip entrypoint."""
     cli.command("test")(test_main)
