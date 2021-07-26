@@ -11,12 +11,13 @@ pytest_plugins = [
 
 
 def pytest_addoption(parser):
-    parser.addoption("--db-connection-string", action="store", default="mongodb://localhost:27017")
+    parser.addoption("--redis-url", action="store",
+                     default="redis://localhost:6379")
 
 
 @pytest.fixture
-def db_connection_string(pytestconfig):
-    return pytestconfig.getoption("db_connection_string")
+def redis_url(pytestconfig):
+    return pytestconfig.getoption("redis_url")
 
 
 TEST_FILES_DIR = Path(__file__).parent / "files"
