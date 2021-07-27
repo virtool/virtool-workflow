@@ -25,7 +25,7 @@ class Job:
     """The number of processes used."""
     status: List[Status] = field(default_factory=lambda: [])
     """The status log for the job."""
-    task: str = None
+    workflow: str = None
     """The name of the workflow which should be used."""
     key: str = None
     """The auth key for the jobs API."""

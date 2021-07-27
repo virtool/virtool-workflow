@@ -41,7 +41,7 @@ async def acquire_job_by_id(
                 mem=document["mem"] if "mem" in document else mem,
                 proc=document["proc"] if "proc" in document else proc,
                 status=document["status"],
-                task=document["workflow"] if "workflow" in document else document["task"],
+                workflow=document["workflow"],
                 key=document["key"],
             )
 
