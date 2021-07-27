@@ -7,7 +7,7 @@ from aiohttp.web_response import json_response
 mock_routes = web.RouteTableDef()
 
 TEST_JOB = {
-    "task": "create_subtraction",
+    "workflow": "create_subtraction",
     "args": {
         "subtraction_id": "Thale",
         "analysis_id": "test_analysis",
