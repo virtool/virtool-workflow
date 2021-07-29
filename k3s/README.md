@@ -73,3 +73,17 @@ Create a deployment running postgres.
 Create a service so that the database can be accessed.
 
 > `kubectl apply -f postgres/service.yml`
+
+## Mongo
+
+Create a volume so that data can be persisted.
+
+> `kubectl apply -f mongo/volume.yml`
+
+Create a deployment running mongo.
+
+> `kubectl apply -f mongo/deployment.yml`
+
+Create a service so that the database can be accessed.
+
+> `kubectl apply -f mongo/service.yml`
