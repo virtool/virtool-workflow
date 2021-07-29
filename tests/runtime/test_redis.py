@@ -1,6 +1,5 @@
-import asyncio
 import pytest
-from aioredis import create_redis_pool, ConnectionClosedError, Redis
+from aioredis import create_redis_pool, Redis
 from virtool_workflow.runtime.redis import redis_jobs
 
 
@@ -24,9 +23,9 @@ async def test_redis_jobs_collected(redis: Redis):
     await redis.lpush(redis_list, *target_ids)
 
     lst = []
-    async for id in redis_jobs(redis_list, redis):
-        lst.append(id)
-        if int(id) == 0:
+    async for _id in redis_jobs(redis_list, redis):
+        lst.append(_id)
+        if int(_id) == 0:
             break
 
     assert lst == list(reversed(target_ids))
