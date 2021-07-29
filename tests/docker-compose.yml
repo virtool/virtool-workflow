@@ -1,6 +1,5 @@
 version: "3.1"
 services:
-
   redis:
     image: redis:6.0
     ports:
@@ -14,16 +13,13 @@ services:
     build:
       dockerfile: tests/Dockerfile
       context: ..
-    command: --cov --cov-report xml:/test/coverage/coverage.xml --disable-pytest-warnings
-    environment:
-      - VT_JOB_API_URL=http://jobsapi:9950
-      - VT_DB_CONNECTION_STRING=mongodb://mongo:27017
-      - VT_REDIS_CONNECTION_STRING=redis://redis:6379
+    command: >
+      --cov --cov-report xml:/test/coverage/coverage.xml
+      --disable-pytest-warnings --redis-url redis://redis:6379
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./coverage:/test/coverage
-    depends_on:
-      [ redis ]
+    depends_on: [redis]
 
 volumes:
   vt_redis_data:
