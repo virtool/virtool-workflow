@@ -87,3 +87,64 @@ Create a deployment running mongo.
 Create a service so that the database can be accessed.
 
 > `kubectl apply -f mongo/service.yml`
+
+## Jobs API
+
+Create a deployment running the jobs API.
+
+> `kubectl apply -f jobsAPI/deployment.yml`
+
+Create a service exposing the jobs API.
+
+> `kubectl apply -f jobsAPI/service.yml`
+
+### Test Connection
+
+#### NodePort
+
+The jobs API should be exposed via a NodePort.
+
+Find the port number in the output of
+
+> `kubectl get service jobs-api`
+
+Then try to make a request to the jobs API.
+
+> `curl http://{NODE_IP}:{NODE_PORT}`/api
+
+```text
+{
+    "id": "unauthorized",
+    "message": "No authorization header."
+}
+```
+
+#### In Cluster Using Curl
+
+Start a container with `curl` and `nslookup` available.
+
+> `kubectl run curl --image=radial/busyboxplus:curl`
+
+You can use `nslookup` to find the cluster URLs for services
+
+> `kubectl exec curl nslookup jobs-api`
+
+```text
+Server:    10.43.0.10
+Address 1: 10.43.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      jobs-api
+Address 1: 10.43.27.20 jobs-api.default.svc.cluster.local
+```
+
+Now we can make a request to the jobs API.
+
+> `kubectl exec curl curl http://jobs-api.default.svc.cluster.local/api`
+
+```text
+{
+    "id": "unauthorized",
+    "message": "No authorization header."
+}
+```
+
