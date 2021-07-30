@@ -1,0 +1,31 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-api
+  labels:
+    app: jobs-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobs-api
+  template:
+    metadata:
+      labels:
+        app: jobs-api
+    spec:
+      containers:
+        - name: jobs-api
+          image: virtool/virtool:nightly
+          command: 
+            - python
+            - run.py
+            - '--db-connection-string=mongodb://mongo.default.svc.cluster.local:27017'
+            - '--postgres-connection-string=postgresql+asyncpg://virtool:virtool@postgres.default.svc.cluster.local/virtool'
+            - '--redis-connection-string=redis://redis.default.svc.cluster.local:6379'
+            - jobsAPI
+            - '--port=9990'
+            - '--host=0.0.0.0'
+          ports:
+            - containerPort: 9990
