@@ -1,8 +1,8 @@
+import aioredis
 from .runtime import run_workflow, prepare_workflow
-from aioredis import create_redis, Redis
 
 
-async def redis_jobs(list_name: str, redis: Redis) -> str:
+async def redis_jobs(list_name: str, redis: aioredis.Redis) -> str:
     """An async generator yielding redis job IDs."""
     while True:
         _, _id = await redis.blpop(list_name, encoding="utf-8")
@@ -15,7 +15,7 @@ async def run_jobs_from_redis(
     **config,
 ):
     """Run jobs from a redis list."""
-    redis = await create_redis(redis_url)
+    redis = await aioredis.from_url(redis_url)
 
     async with prepare_workflow(**config) as workflow:
         async for job_id in redis_jobs(list_name, redis):
