@@ -1,0 +1,30 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virtool-server
+  labels:
+    app: virtool-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: virtool-server
+  template:
+    metadata:
+      labels:
+        app: virtool-server
+    spec:
+      containers:
+        - name: virtool-server
+          image: virtool/virtool:nightly
+          command:
+            - python
+            - run.py
+            - '--db-connection-string=mongodb://mongo.default.svc.cluster.local:27017'
+            - '--postgres-connection-string=postgresql+asyncpg://virtool:virtool@postgres.default.svc.cluster.local/virtool'
+            - '--redis-connection-string=redis://redis.default.svc.cluster.local:6379'
+            - server
+            - '--host=0.0.0.0'
+          ports:
+            - containerPort: 9950
