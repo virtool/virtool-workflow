@@ -5,8 +5,8 @@ from .runtime import run_workflow, prepare_workflow
 async def redis_jobs(list_name: str, redis: aioredis.Redis) -> str:
     """An async generator yielding redis job IDs."""
     while True:
-        _, _id = await redis.blpop(list_name, encoding="utf-8")
-        yield _id
+        _, _id = await redis.blpop(list_name)
+        yield str(_id, encoding="utf-8")
 
 
 async def run_jobs_from_redis(
