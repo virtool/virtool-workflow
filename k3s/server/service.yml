@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: virtool-server
   namespace: default
 spec:
   selector:
-    app: redis
-  type: ClusterIP
+    app: virtool-server
+  type: NodePort
   ports:
     - name: tcp-port
-      port: 6379
-      targetPort: 6379
+      port: 9950
+      targetPort: 9950
       protocol: TCP

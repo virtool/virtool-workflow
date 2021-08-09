@@ -5,7 +5,7 @@ metadata:
   labels:
     group: db
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: postgres
   ports:

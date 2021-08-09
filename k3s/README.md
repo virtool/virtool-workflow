@@ -14,6 +14,12 @@ The `K3S_TOKEN` is found on the master node under `/var/lib/rancher/k3s/server/n
 
 After installing, the new node should show up when running `kubectl get nodes` on the master.
 
+### [Optional] Use Local Docker Images
+
+> `sudo systemctl stop k3s`
+
+> `k3s server --docker`
+
 ## Apply Dev Deployment
 
 :warning: Make sure to run these commands on the k3s master node.
@@ -147,4 +153,3 @@ Now we can make a request to the jobs API.
     "message": "No authorization header."
 }
 ```
-
