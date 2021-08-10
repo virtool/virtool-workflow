@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Awaitable, Callable, Optional
+from typing import Protocol
 
 import aiohttp
 
@@ -62,7 +62,9 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
     return _job_provider
 
 
-PushStatus = Callable[[str, str, int, Optional[str]], Awaitable[Status]]
+class PushStatus(Protocol):
+    async def __call__(state: str, stage: str, progress: int, error: str = None):
+        ...
 
 
 @fixture
