@@ -2,6 +2,7 @@ import os
 import shutil
 from pathlib import Path
 
+from fixtures import fixture
 from virtool_workflow.analysis.utils import ReadPaths
 
 
@@ -143,7 +144,8 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
 
                 # Convert all fields except first to 2-decimal floats.
                 try:
-                    values = [round(int(value.split(".")[0]), 1) for value in split[1:]]
+                    values = [round(int(value.split(".")[0]), 1)
+                              for value in split[1:]]
 
                 except ValueError as err:
                     if "NaN" in str(err):
@@ -162,7 +164,8 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
                         fastqc[flag][i - 1] = values
                 else:
                     for i in pos:
-                        fastqc[flag][i - 1] = [(_1 + _2) / 2 for _1, _2 in zip(values, fastqc[flag][i - 1])]
+                        fastqc[flag][i - 1] = [(_1 + _2) / 2 for _1,
+                                               _2 in zip(values, fastqc[flag][i - 1])]
 
             elif flag == "sequences" and "#" not in line:
                 line = line.rstrip().split()
@@ -174,6 +177,7 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
     return fastqc
 
 
+@fixture
 def fastqc(work_path: Path, run_subprocess):
     """
     Returns a function that can run FastQC given a ``work_path`` and ``run_subprocess`` callable.

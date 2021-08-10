@@ -5,6 +5,7 @@ from fixtures import fixture
 from virtool_workflow.data_model import Job
 from virtool_workflow.api.client import authenticated_http
 from virtool_workflow.api.jobs import acquire_job
+from virtool_workflow.api.uploads import input_files, files_list
 
 
 @fixture
@@ -64,4 +65,6 @@ __all__ = [
     "results",
     "work_path",
     "job_id",
+    "input_files",
+    "files_list"
 ]

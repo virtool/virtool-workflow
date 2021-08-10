@@ -1,0 +1,29 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: create-sample-runner
+  labels:
+    app: create-sample-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: create-sample-runner
+  template:
+    metadata:
+      labels:
+        app: create-sample-runner
+    spec:
+      containers:
+        - name: create-sample-runner
+          image: virtool/create_sample
+          imagePullPolicy: IfNotPresent
+          command:
+            - workflow
+            - run-from-redis
+            - --dev-mode
+            - --is-analysis-workflow
+            - '--jobs-api-url=http://jobs-api.default.svc.cluster.local:9990/api'
+            - '--redis-url=redis://redis.default.svc.cluster.local:6379'
+            - jobs_create_sample

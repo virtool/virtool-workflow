@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workflow-k3s-dev
+  name: redis
 spec:
   selector:
     matchLabels:

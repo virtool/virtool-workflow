@@ -15,12 +15,17 @@ spec:
       labels:
         app: jobs-api
     spec:
+      volumes:                         # indicates which PVC are available for this Deployment
+        - name: data-path-volume
+          persistentVolumeClaim:
+            claimName: data-path-pvc
       containers:
         - name: jobs-api
           image: virtool/virtool:nightly
-          command: 
+          command:
             - python
             - run.py
+            - '--data-path=/virtool/data'
             - '--db-connection-string=mongodb://mongo.default.svc.cluster.local:27017'
             - '--postgres-connection-string=postgresql+asyncpg://virtool:virtool@postgres.default.svc.cluster.local/virtool'
             - '--redis-connection-string=redis://redis.default.svc.cluster.local:6379'
@@ -29,3 +34,6 @@ spec:
             - '--host=0.0.0.0'
           ports:
             - containerPort: 9990
+          volumeMounts:                 # indicates which Volume (from spec.template.spec.volumes) should be used
+            - name: data-path-volume
+              mountPath: /virtool/data
