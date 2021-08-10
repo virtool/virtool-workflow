@@ -5,6 +5,8 @@
 declare -a manifests=(
     "./redis/deployment.yml"
     "./redis/service.yml"
+    "./redis/dashboard.yml"
+    "./redis/dashboard-service.yml"
     "./mongo/volume.yml"
     "./mongo/deployment.yml"
     "./mongo/service.yml"
@@ -35,6 +37,9 @@ function get_port {
         cut -d'/' -f1
 }
 
+echo -e "\nServices:\n"
 echo "Virtool Server: http://localhost:$(get_port server)"
 echo "Jobs API: http://localhost:$(get_port job)/api"
+echo "Redis Insight: http://localhost:$(get_port redisinsight)"
+echo "Redis Info: $(kubectl get services | grep "redis " | tr -s ' ')"
 
