@@ -1,12 +1,12 @@
 import asyncio
 import logging
-from typing import Protocol, Literal
+from typing import Protocol
 
 import aiohttp
 
 from fixtures import fixture
 
-from ..data_model import Job, Status
+from ..data_model import Job, Status, State
 from .errors import (
     JobAlreadyAcquired,
     JobsAPIServerError,
@@ -62,9 +62,6 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
     return _job_provider
 
 
-State = Literal["complete", "cancelled", "error", "running"]
-
-
 class PushStatus(Protocol):
     async def __call__(
         state: State,
@@ -73,18 +70,23 @@ class PushStatus(Protocol):
         error: str = None
     ):
         """
-        Update the workflow status.
+        Update the job status.
 
-        :param: state
+        :param state: The current state of the workflow run.
+        :param stage: The name of the current step.
+        :param progress: The current progress percentage (0-100).
         """
         raise NotImplementedError()
 
 
-@fixture
-def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
+@fixture(protocol=PushStatus)
+def push_status(
+    job: Job,
+    http: aiohttp.ClientSession,
+    jobs_api_url: str
+):
     """Update the status of the current job."""
-
-    async def _push_status(state: str, stage: str, progress: int, error: str = None):
+    async def _push_status(state, stage, progress, error):
         async with http.post(
             f"{jobs_api_url}/jobs/{job.id}/status",
             json={
