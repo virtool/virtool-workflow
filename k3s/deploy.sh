@@ -23,14 +23,14 @@ declare -a manifests=(
 )
 
 
-for manifest in ${manifests[@]};
+for manifest in "${manifests[@]};"
 do 
-    kubectl apply -f $manifest
+    kubectl apply -f "$manifest"
 done
 
 function get_port {
     kubectl get services | 
-        grep -E $1 | 
+        grep -E "$1" | 
         tr -s ' ' | 
         cut -d' ' -f5 | 
         cut -d':' -f2 | 
