@@ -22,7 +22,6 @@ declare -a manifests=(
     "./create_sample/deployment.yml"
 )
 
-
 for manifest in "${manifests[@]};"
 do 
     kubectl apply -f "$manifest"
@@ -42,4 +41,3 @@ echo "Virtool Server: http://localhost:$(get_port server)"
 echo "Jobs API: http://localhost:$(get_port job)/api"
 echo "Redis Insight: http://localhost:$(get_port redisinsight)"
 echo "Redis Info: $(kubectl get services | grep "redis " | tr -s ' ')"
-
