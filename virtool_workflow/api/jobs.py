@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Protocol
+from typing import Protocol, Literal
 
 import aiohttp
 
@@ -62,9 +62,22 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
     return _job_provider
 
 
+State = Literal["complete", "cancelled", "error", "running"]
+
+
 class PushStatus(Protocol):
-    async def __call__(state: str, stage: str, progress: int, error: str = None):
-        ...
+    async def __call__(
+        state: State,
+        stage: str,
+        progress: int,
+        error: str = None
+    ):
+        """
+        Update the workflow status.
+
+        :param: state
+        """
+        raise NotImplementedError()
 
 
 @fixture
