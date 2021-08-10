@@ -5,4 +5,3 @@ for f in $(find . -type f -name ./*.yml);
 do 
     kubectl delete -f "$f"
 done
-
