@@ -62,7 +62,7 @@ async def input_files(
     )
 
     for f in downloads:
-        if not isinstance(f, Path):
+        if isinstance(f, Exception):
             raise f
 
     return {f["name"]: path for f, path in zip(files_list, downloads)}
