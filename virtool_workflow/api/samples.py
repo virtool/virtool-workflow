@@ -64,10 +64,7 @@ class SampleProvider:
 
     async def upload(self, path: Path, format: VirtoolFileFormat = "fastq") -> VirtoolFile:
         if path.name in ("reads_1.fq.gz", "reads_2.fq.gz"):
-            return await upload_file_via_put(self.http, f"{self.url}/reads", path, params={
-                "name": path.name,
-                "type": format
-            })
+            return await upload_file_via_put(self.http, f"{self.url}/reads/{path.name}", path, params={})
 
         return await upload_file_via_put(self.http, f"{self.url}/artifacts", path, params={
             "name": path.name,
