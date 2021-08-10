@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 from fixtures import FixtureScope, fixture, runs_in_new_fixture_context
+from virtool_workflow import Workflow
 
 
 @runs_in_new_fixture_context(copy_context=False)
@@ -162,3 +163,28 @@ async def test_recursive_bind_posargs():
         bound = await scope.bind(check_letters, b="b")
 
         assert bound() is True
+
+
+@runs_in_new_fixture_context(copy_context=False)
+async def test_mutable_fixture_semantics():
+    @fixture
+    def dictionary():
+        return {}
+
+    workflow = Workflow()
+
+    @workflow.step
+    async def step1(dictionary):
+        return dictionary
+
+    @workflow.step
+    async def step2(dictionary):
+        return dictionary
+
+    async with FixtureScope() as scope:
+        await workflow.bind_to_fixtures(scope)
+
+        d3 = await workflow.steps[0]()
+        d4 = await workflow.steps[1]()
+
+        assert d3 is d4 is scope["dictionary"] is not None
