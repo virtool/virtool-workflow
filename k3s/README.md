@@ -153,3 +153,12 @@ Now we can make a request to the jobs API.
     "message": "No authorization header."
 }
 ```
+
+
+## Teardown
+
+To quickly tear down all kubernetes objects, use `teardown.sh`.
+
+```shell script
+sudo ./teardown.sh
+```
