@@ -1,25 +1,40 @@
 #!/bin/bash
 # Deploy The Virtool Server And Jobs API in Kubernetes.
 
-# Redis
-kubectl apply -f ./redis/deployment.yml
-kubectl apply -f ./redis/service.yml
 
-# Postgres
-kubectl apply -f ./postgres/config.yml
-kubectl apply -f ./postgres/volume.yml
-kubectl apply -f ./postgres/deployment.yml
-kubectl apply -f ./postgres/service.yml
+declare -a manifests=(
+    "./redis/deployment.yml"
+    "./redis/service.yml"
+    "./mongo/volume.yml"
+    "./mongo/deployment.yml"
+    "./mongo/service.yml"
+    "./postgres/volume.yml"
+    "./postgres/config.yml"
+    "./postgres/deployment.yml"
+    "./postgres/service.yml"
+    "./server/volume.yml"
+    "./server/deployment.yml"
+    "./server/service.yml"
+    "./jobsAPI/deployment.yml"
+    "./jobsAPI/service.yml"
+    "./create_sample/deployment.yml"
+)
 
-# Mongo
-kubectl apply -f ./mongo/volume.yml
-kubectl apply -f ./mongo/deployment.yml
-kubectl apply -f ./mongo/service.yml
 
-# Jobs API
-kubectl apply -f ./jobsAPI/deployment.yml
-kubectl apply -f ./jobsAPI/service.yml
+for manifest in ${manifests[@]};
+do 
+    kubectl apply -f $manifest
+done
 
-# Virtool Server
-kubectl apply -f ./server/deployment.yml
-kubectl apply -f ./server/service.yml
+function get_port {
+    kubectl get services | 
+        grep -E $1 | 
+        tr -s ' ' | 
+        cut -d' ' -f5 | 
+        cut -d':' -f2 | 
+        cut -d'/' -f1
+}
+
+echo "Virtool Server: http://localhost:$(get_port server)"
+echo "Jobs API: http://localhost:$(get_port job)/api"
+
