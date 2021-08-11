@@ -1,12 +1,13 @@
 """Main entrypoint(s) to run virtool workflows."""
 import logging
-import fixtures
 from contextlib import asynccontextmanager, suppress
+from importlib import import_module
 from pathlib import Path
 
-from virtool_workflow import discovery, Workflow
+import fixtures
+from virtool_workflow import Workflow, discovery, hooks
 from virtool_workflow.execution.workflow_execution import WorkflowExecution
-from importlib import import_module
+from virtool_workflow.runtime import status
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,17 @@ def load_scripts(init_file: Path, fixtures_file: Path):
         )
 
 
+def setup_hooks():
+    """Add hooks for a workflow run."""
+    hooks.on_update(status.send_status, once=True)
+    hooks.on_failure(status.send_error, once=True)
+    hooks.on_cancelled(status.send_cancelled, once=True)
+    hooks.on_success(status.send_complete, once=True)
+
+
 async def run_workflow(workflow: Workflow, config: dict):
     """Run a workflow."""
+    setup_hooks()
     async with fixtures.FixtureScope() as scope:
         scope["config"] = config
         return await WorkflowExecution(workflow, scope)
