@@ -73,8 +73,7 @@ async def delete(request):
 
 
 @mock_routes.put("/api/samples/{sample_id}/artifacts")
-@mock_routes.put("/api/samples/{sample_id}/reads")
-async def upload_read_files(request):
+async def upload_artifact_files(request):
     sample_id = request.match_info["sample_id"]
 
     if sample_id != TEST_SAMPLE_ID:
@@ -84,6 +83,19 @@ async def upload_read_files(request):
     type = request.query.get("type")
 
     file = await read_file_from_request(request, name, type)
+
+    return json_response(file, status=201)
+
+
+@mock_routes.put("/api/samples/{sample_id}/reads/{name}")
+async def upload_read_files(request):
+    sample_id = request.match_info["sample_id"]
+    name = request.match_info["name"]
+
+    if sample_id != TEST_SAMPLE_ID:
+        return not_found()
+
+    file = await read_file_from_request(request, name, "fastq")
 
     return json_response(file, status=201)
 
