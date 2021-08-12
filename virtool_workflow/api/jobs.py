@@ -67,16 +67,13 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
 class PushStatus(Protocol):
     async def __call__(
         state: State,
-        stage: str,
-        progress: int,
         error: str = None
     ):
         """
         Update the job status.
 
         :param state: The current state of the workflow run.
-        :param stage: The name of the current step.
-        :param progress: The current progress percentage (0-100).
+        :param error: An error message if applicable.
         """
         raise NotImplementedError()
 
