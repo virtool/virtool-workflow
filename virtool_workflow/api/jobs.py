@@ -7,6 +7,8 @@ import aiohttp
 from fixtures import fixture
 
 from ..data_model import Job, Status, State
+from .. import Workflow
+from ..execution.workflow_execution import WorkflowExecution
 from .errors import (
     JobAlreadyAcquired,
     JobsAPIServerError,
@@ -83,21 +85,23 @@ class PushStatus(Protocol):
 def push_status(
     job: Job,
     http: aiohttp.ClientSession,
-    jobs_api_url: str
+    jobs_api_url: str,
+    workflow: Workflow,
+    execution: WorkflowExecution,
 ):
     """Update the status of the current job."""
-    async def _push_status(state, stage, progress, error):
+    async def _push_status(state, error=None):
         async with http.post(
             f"{jobs_api_url}/jobs/{job.id}/status",
             json={
                 "state": state,
-                "stage": stage,
+                "stage": workflow.steps[execution.current_step-1].__name__,
                 "error": error,
-                "progress": progress,
+                "progress": int(execution.progress * 100),
             },
         ) as response:
             async with raising_errors_by_status_code(
-                response, accept=[200]
+                response, accept=[200, 201]
             ) as status_json:
                 return Status(**status_json)
 
