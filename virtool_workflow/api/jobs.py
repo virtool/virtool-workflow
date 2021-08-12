@@ -92,7 +92,7 @@ def push_status(
             f"{jobs_api_url}/jobs/{job.id}/status",
             json={
                 "state": state,
-                "stage": workflow.steps[execution.current_step-1].__name__,
+                "stage": workflow.steps[execution.current_step - 1].__name__,
                 "error": error,
                 "progress": int(execution.progress * 100),
             },
