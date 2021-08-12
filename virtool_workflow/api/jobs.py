@@ -1,12 +1,14 @@
 import asyncio
 import logging
-from typing import Awaitable, Callable, Optional
+from typing import Protocol
 
 import aiohttp
 
 from fixtures import fixture
 
-from ..data_model import Job, Status
+from ..data_model import Job, Status, State
+from .. import Workflow
+from ..execution.workflow_execution import WorkflowExecution
 from .errors import (
     JobAlreadyAcquired,
     JobsAPIServerError,
@@ -62,25 +64,41 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
     return _job_provider
 
 
-PushStatus = Callable[[str, str, int, Optional[str]], Awaitable[Status]]
+class PushStatus(Protocol):
+    async def __call__(
+        state: State,
+        error: str = None
+    ):
+        """
+        Update the job status.
+
+        :param state: The current state of the workflow run.
+        :param error: An error message if applicable.
+        """
+        raise NotImplementedError()
 
 
-@fixture
-def push_status(job: Job, http: aiohttp.ClientSession, jobs_api_url: str) -> PushStatus:
+@fixture(protocol=PushStatus)
+def push_status(
+    job: Job,
+    http: aiohttp.ClientSession,
+    jobs_api_url: str,
+    workflow: Workflow,
+    execution: WorkflowExecution,
+):
     """Update the status of the current job."""
-
-    async def _push_status(state: str, stage: str, progress: int, error: str = None):
+    async def _push_status(state, error=None):
         async with http.post(
             f"{jobs_api_url}/jobs/{job.id}/status",
             json={
                 "state": state,
-                "stage": stage,
+                "stage": workflow.steps[execution.current_step - 1].__name__,
                 "error": error,
-                "progress": progress,
+                "progress": int(execution.progress * 100),
             },
         ) as response:
             async with raising_errors_by_status_code(
-                response, accept=[200]
+                response, accept=[200, 201]
             ) as status_json:
                 return Status(**status_json)
 

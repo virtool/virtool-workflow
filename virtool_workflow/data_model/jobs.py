@@ -1,11 +1,14 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Literal
+
+
+State = Literal["complete", "cancelled", "error", "running"]
 
 
 @dataclass(frozen=True)
 class Status:
     """The status of a Virtool Job."""
-    error: str
+    error: State
     progress: float
     stage: str
     state: str
