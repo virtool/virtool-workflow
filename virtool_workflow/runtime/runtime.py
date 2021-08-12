@@ -39,7 +39,7 @@ def load_scripts(init_file: Path, fixtures_file: Path):
 def setup_hooks():
     """Add hooks for a workflow run."""
     hooks.on_update(status.send_status, once=True)
-    hooks.on_failure(status.send_error, once=True)
+    hooks.on_failure(status.send_failed, once=True)
     hooks.on_cancelled(status.send_cancelled, once=True)
     hooks.on_success(status.send_complete, once=True)
 
