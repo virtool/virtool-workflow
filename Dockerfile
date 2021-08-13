@@ -25,8 +25,8 @@ RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2
 # FastQC
 FROM alpine:latest as fastqc
 WORKDIR /build
-RUN wget https://github.com/s-andrews/FastQC/archive/refs/tags/v0.11.9.zip && \
-    unzip v0.11.9.zip && mv FastQC-0.11.9 FastQC
+RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip && \
+    unzip fastqc_v0.11.9.zip
 
 # Pigz
 FROM debian:buster as pigz
