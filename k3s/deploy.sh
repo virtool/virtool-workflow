@@ -22,17 +22,17 @@ declare -a manifests=(
     "./create_sample/deployment.yml"
 )
 
-for manifest in "${manifests[@]};"
-do 
+for manifest in "${manifests[@]}"
+do
     kubectl apply -f "$manifest"
 done
 
 function get_port {
-    kubectl get services | 
-        grep -E "$1" | 
-        tr -s ' ' | 
-        cut -d' ' -f5 | 
-        cut -d':' -f2 | 
+    kubectl get services |
+        grep -E "$1" |
+        tr -s ' ' |
+        cut -d' ' -f5 |
+        cut -d':' -f2 |
         cut -d'/' -f1
 }
 
