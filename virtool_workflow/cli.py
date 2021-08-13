@@ -40,4 +40,4 @@ def run_from_redis(**kwargs):
 def cli_main(**kwargs):
     """Main pip entrypoint."""
     cli.command("test")(test_main)
-    cli()
+    cli(auto_envvar_prefix="VT")
