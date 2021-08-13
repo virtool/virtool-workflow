@@ -22,16 +22,18 @@ spec:
       containers:
         - name: virtool-server
           image: virtool/virtool:nightly
-          command:
-            - python
-            - run.py
-            - '--dev'
-            - '--data-path=/virtool/data'
-            - '--db-connection-string=mongodb://mongo.default.svc.cluster.local:27017'
-            - '--postgres-connection-string=postgresql+asyncpg://virtool:virtool@postgres.default.svc.cluster.local/virtool'
-            - '--redis-connection-string=redis://redis.default.svc.cluster.local:6379'
-            - server
-            - '--host=0.0.0.0'
+          command: [python, run.py, server, --host=0.0.0.0]
+          env:
+            - name: VT_DEV
+              value: 'true'
+            - name: VT_DATA_PATH
+              value: /virtool/data
+            - name: VT_DB_CONNECTION_STRING
+              value: 'mongodb://mongo.default.svc.cluster.local:27017'
+            - name: VT_POSTGRES_CONNECTION_STRING
+              value: 'postgresql+asyncpg://virtool:virtool@postgres.default.svc.cluster.local/virtool'
+            - name: VT_REDIS_CONNECTION_STRING
+              value: 'redis://redis.default.svc.cluster.local:6379'
           ports:
             - containerPort: 9950
           volumeMounts:                 # indicates which Volume (from spec.template.spec.volumes) should be used
