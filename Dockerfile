@@ -25,8 +25,8 @@ RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2
 # FastQC
 FROM alpine:latest as fastqc
 WORKDIR /build
-RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip && \
-    unzip fastqc_v0.11.5.zip
+RUN wget https://github.com/s-andrews/FastQC/archive/refs/tags/v0.11.9.zip && \
+    unzip v0.11.9.zip && mv FastQC-0.11.9 FastQC
 
 # Pigz
 FROM debian:buster as pigz
@@ -39,13 +39,13 @@ RUN wget https://zlib.net/pigz/pigz-2.6.tar.gz && \
 
 # virtool-workflow dependencies
 FROM python:3.8-slim as pip_install
-WORKDIR install
+WORKDIR /install
 RUN pip install --user poetry==1.1.6
 COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
 RUN /root/.local/bin/poetry export > requirements.txt
 RUN pip install --user -r requirements.txt
-COPY . . 
+COPY . .
 RUN pip install --user .
 
 
@@ -70,5 +70,3 @@ RUN chmod ugo+x /opt/fastqc/fastqc && \
 ENV PATH $PATH:/root/.local/bin
 
 ENTRYPOINT ["workflow", "run"]
-
-
