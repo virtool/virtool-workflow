@@ -20,10 +20,13 @@ spec:
           image: virtool/create_sample
           imagePullPolicy: IfNotPresent
           command:
-            - workflow
-            - run-from-redis
-            - --dev-mode
-            - --is-analysis-workflow
-            - '--jobs-api-url=http://jobs-api.default.svc.cluster.local:9990/api'
-            - '--redis-url=redis://redis.default.svc.cluster.local:6379'
-            - jobs_create_sample
+            [workflow, run-from-redis, jobs_create_sample]
+          env:
+            - name: VT_RUN_FROM_REDIS_DEV_MODE
+              value: 'true'
+            - name: VT_RUN_FROM_REDIS_IS_ANALYSIS_WORKFLOW
+              value: 'true'
+            - name: VT_RUN_FROM_REDIS_JOBS_API_URL
+              value: 'http://jobs-api.default.svc.cluster.local:9990/api'
+            - name: VT_RUN_FROM_REDIS_REDIS_URL
+              value: 'redis://redis.default.svc.cluster.local:6379'
