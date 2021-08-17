@@ -20,120 +20,86 @@ After installing, the new node should show up when running `kubectl get nodes` o
 
 > `k3s server --docker`
 
-## Apply Dev Deployment
+## Deploy Services
 
-:warning: Make sure to run these commands on the k3s master node.
+:warning: This must be run on the master node / control-pane
 
-> `sudo kubectl apply -f dev-deployment.yml`
-
-You should now see a running pod.
-
-> `sudo kubectl get pods`
+> `sudo ./deploy.sh`
 
 ```text
-NAME                               READY   STATUS    RESTARTS   AGE
-workflow-k3s-dev-c58b6d5bf-mtv2n   1/1     Running   0          6m
+deployment.apps/redis created
+service/redis created
+deployment.apps/redisinsight created
+service/redisinsight created
+persistentvolumeclaim/mongodb-pv-claim created
+deployment.apps/mongodb created
+service/mongo created
+persistentvolumeclaim/postgres-pvc created
+configmap/postgres-config unchanged
+deployment.apps/postgres created
+service/postgres created
+persistentvolumeclaim/data-path-pvc created
+deployment.apps/virtool-server created
+service/virtool-server created
+deployment.apps/jobs-api created
+service/jobs-api created
+deployment.apps/create-sample-runner created
+
+Services:
+
+Virtool Server: http://localhost:30908
+Jobs API: http://localhost:32579/api
+Redis Insight: http://localhost:31808
+Redis Info: redis ClusterIP 10.43.67.186 <none> 6379/TCP 6s
 ```
 
-## Redis
-
-> `sudo kubectl apply -f redis/deployment.yml`
-
-> `sudo kubectl apply -f redis/redis-service.yml`
-
-You should now see `redis-service` in the running services list.
-
-> `sudo kubectl get services`
+After a few moments the output of `sudo kubectl get pods` look like:
 
 ```text
-NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
-kubernetes      ClusterIP   10.43.0.1      <none>        443/TCP          106m
-redis-service   NodePort    10.43.71.176   <none>        6379:31132/TCP   19s
+NAME                                    READY   STATUS    RESTARTS   AGE
+redisinsight-77d974d87f-xbxbn           1/1     Running   0          100s
+redis-c58b6d5bf-8njtl                   1/1     Running   0          101s
+mongodb-5cc5c97db-dgdbw                 1/1     Running   0          99s
+create-sample-runner-67d875694d-79zz2   1/1     Running   0          96s
+postgres-769487cdf4-rbqvx               1/1     Running   0          98s
+jobs-api-6f4b445b86-8hssz               1/1     Running   0          97s
+virtool-server-88496fd96-5f4t7          1/1     Running   0          97s
 ```
 
-### Verify Connection
+Use the URLs printed by the `./deploy.sh` script to access the services.
 
-You can use NetCat to verify that the redis service is running.
+## Tearing Down The Deployment
 
-> `nc -v ${HOST_NODE} ${NODE_PORT}`
+> `sudo ./teardown.sh`
 
-The `NODE_PORT` is shown in the `kubectl get services`. The `HOST_NODE` is the
-host name of the node which is running the redis service.
-
-You can figure out which node the service is running on using `kubectl get pods -o wide`.
-
-## Postgres
-
-Apply the config map storing the required environment variables.
-
-> `kubectl apply -f postgres/config.yml`
-
-Create a volume so that data can be persisted.
-
-> `kubectl apply -f postgres/volume.yml`
-
-Create a deployment running postgres.
-
-> `kubectl apply -f postgres/deployment.yml`
-
-Create a service so that the database can be accessed.
-
-> `kubectl apply -f postgres/service.yml`
-
-## Mongo
-
-Create a volume so that data can be persisted.
-
-> `kubectl apply -f mongo/volume.yml`
-
-Create a deployment running mongo.
-
-> `kubectl apply -f mongo/deployment.yml`
-
-Create a service so that the database can be accessed.
-
-> `kubectl apply -f mongo/service.yml`
-
-## Jobs API
-
-Create a deployment running the jobs API.
-
-> `kubectl apply -f jobsAPI/deployment.yml`
-
-Create a service exposing the jobs API.
-
-> `kubectl apply -f jobsAPI/service.yml`
-
-### Test Connection
-
-#### NodePort
-
-The jobs API should be exposed via a NodePort.
-
-Find the port number in the output of
-
-> `kubectl get service jobs-api`
-
-Then try to make a request to the jobs API.
-
-> `curl http://{NODE_IP}:{NODE_PORT}`/api
+After running `sudo kubectl get pods` should give:
 
 ```text
-{
-    "id": "unauthorized",
-    "message": "No authorization header."
-}
+No resources found in default namespace.
 ```
 
-#### In Cluster Using Curl
+## Manually Restart a Deployment
 
-Start a container with `curl` and `nslookup` available.
+The `refresh.sh` script can be used to manually restart a deployment by name.
 
-> `kubectl run curl --image=radial/busyboxplus:curl`
+For example, I can restart the virtool server container using:
 
-You can use `nslookup` to find the cluster URLs for services
+> `sudo ./refresh virtool-server`
 
-> `kubectl exec curl nslookup jobs-api`
+This is useful when the docker image has been updated.
+
+## Troubleshooting Connectivity Issues
+
+Start a container with `curl` and `nslookup` available & enter a shell.
+
+> `kubectl run curl --image=radial/busyboxplus:curl -i --tty`
+
+From here you can use `curl`, `nslookup`, and other utilities to diagnose connectivity issues.
+
+For example we can lookup the URL for a service by name using `nslookup`.
+
+> [ root@curl:/ ]$ `nslookup jobs-api`
+
 
 ```text
 Server:    10.43.0.10
@@ -152,13 +118,4 @@ Now we can make a request to the jobs API.
     "id": "unauthorized",
     "message": "No authorization header."
 }
-```
-
-
-## Teardown
-
-To quickly tear down all kubernetes objects, use `teardown.sh`.
-
-```shell script
-sudo ./teardown.sh
 ```
