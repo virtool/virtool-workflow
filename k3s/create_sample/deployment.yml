@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: create-sample-runner
-          image: virtool/create_sample
+          image: virtool/create-sample
           imagePullPolicy: IfNotPresent
           command:
             [workflow, run-from-redis, jobs_create_sample]
