@@ -20,6 +20,7 @@ declare -a manifests=(
     "./jobsAPI/deployment.yml"
     "./jobsAPI/service.yml"
     "./create_sample/deployment.yml"
+    "./create_subtraction/deployment.yml"
 )
 
 for manifest in "${manifests[@]}"
