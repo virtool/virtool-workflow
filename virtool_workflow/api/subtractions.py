@@ -5,8 +5,7 @@ from typing import Dict
 import aiohttp
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import (upload_file_via_put,
-                                        read_file_from_response,
+from virtool_workflow.api.utils import (read_file_from_response,
                                         upload_file_via_put)
 from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
@@ -66,7 +65,7 @@ class SubtractionProvider:
             - subtraction.rev.1.bt2
             - subtraction.rev.2.bt2
         """
-        return await upload_file_via_put(self.http, f"{self.api_url}/files", path)
+        return await upload_file_via_put(self.http, f"{self.api_url}/files/{path.name}", path)
 
     async def finalize(self, gc: Dict[str, Number], count: int):
         """

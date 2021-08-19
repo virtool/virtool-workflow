@@ -1,0 +1,32 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: create-subtraction-runner
+  labels:
+    app: create-subtraction-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: create-subtraction-runner
+  template:
+    metadata:
+      labels:
+        app: create-subtraction-runner
+    spec:
+      containers:
+        - name: create-subtraction-runner
+          image: virtool/create-subtraction
+          imagePullPolicy: IfNotPresent
+          command:
+            [workflow, run-from-redis, jobs_create_subtraction]
+          env:
+            - name: VT_RUN_FROM_REDIS_DEV_MODE
+              value: 'true'
+            - name: VT_RUN_FROM_REDIS_IS_ANALYSIS_WORKFLOW
+              value: 'true'
+            - name: VT_RUN_FROM_REDIS_JOBS_API_URL
+              value: 'http://jobs-api.default.svc.cluster.local:9990/api'
+            - name: VT_RUN_FROM_REDIS_REDIS_URL
+              value: 'redis://redis.default.svc.cluster.local:6379'
