@@ -64,6 +64,6 @@ async def upload_file_via_put(http: aiohttp.ClientSession,
                                   else response_json["name"]),
                     size=response_json["size"],
                     uploaded_at=dateutil.parser.isoparse(
-                        response_json["uploaded_at"]),
+                        response_json["uploaded_at"]) if "uploaded_at" in response_json else None,
                     format=response_json["format"] if "format" in response_json else "fastq",
                 )
