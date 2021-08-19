@@ -46,9 +46,9 @@ def get_subtraction(request):
     return web.json_response(TEST_SUBTRACTION, status=200)
 
 
-@mock_routes.put("/api/subtractions/{subtraction_id}/files")
+@mock_routes.put("/api/subtractions/{subtraction_id}/files/{filename}")
 async def upload_subtraction_file(request):
-    name = request.query.get("name")
+    name = request.match_info["filename"]
 
     if name not in [
         "subtraction.fa.gz",
