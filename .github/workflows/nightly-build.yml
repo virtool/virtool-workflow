@@ -26,11 +26,3 @@ jobs:
           tags: virtool/workflow:nightly
       - name: Image Digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Update README on Docker Hub
-        uses: peter-evans/dockerhub-description@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: virtool/workflow
-          readme-filepath: ./docker/README.md
