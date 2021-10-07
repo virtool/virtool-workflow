@@ -110,5 +110,11 @@ class IndexProvider:
                     ready=index_document["ready"]
                 )
 
+    async def delete(self):
+        """Delete an un-finished index."""
+        async with self.http.delete(f"{self.jobs_api_url}/indexes/{self._index_id}") as response:
+            async with raising_errors_by_status_code(response, accept=[200, 204]):
+                pass
+
     def __await__(self) -> Index:
         return self.get().__await__()
