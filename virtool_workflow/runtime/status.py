@@ -12,7 +12,7 @@ async def send_complete(push_status, workflow, execution):
 async def send_failed(push_status, error, workflow, execution):
     await push_status(
         state="error",
-        error=str(error)
+        error={"message": str(error)}
     )
 
 
