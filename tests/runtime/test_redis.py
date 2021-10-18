@@ -1,12 +1,12 @@
 import pytest
-from aioredis import from_url, Redis
+from aioredis import create_pool, Redis
 from virtool_workflow.runtime.redis import redis_jobs
 
 
 @pytest.fixture
 async def redis(redis_url):
     try:
-        redis = await from_url(redis_url)
+        redis = await create_pool(redis_url)
         yield redis
         redis.close()
     except ConnectionRefusedError:
