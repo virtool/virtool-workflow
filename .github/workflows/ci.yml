@@ -12,6 +12,7 @@ on:
 jobs:
   commitlint:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v2
         with:
@@ -59,6 +60,7 @@ jobs:
 
   pypi-check:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     container: python:3.8
     steps:
       - uses: actions/checkout@v2
@@ -70,3 +72,28 @@ jobs:
         run: |
             poetry check
             poetry build
+
+  release:
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push'
+    needs: 
+      - pytest
+      - integration-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install semantic-release
+        run: npm i semantic-release@v18.0.0 conventional-changelog-conventionalcommits@4.6.1
+
+      - name: Release
+        env:
+          GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npx semantic-release
