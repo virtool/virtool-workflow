@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v4
+
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run Tests Using Docker Compose
+        run: |
+          cd tests
+          docker-compose up --build --exit-code-from pytest
+
+      - name: Upload Coverage Report As Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Coverage
+          path: ./tests/coverage/coverage.xml
+
+      - name: Run codacy-coverage-reporter
+        if: github.event_name == 'push'
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ./tests/coverage/coverage.xml
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build `virtool/workflow`
+        run: docker build -t virtool/workflow .
+
+      - name: Run Tests Using Docker Compose
+        run: |
+          pip install .
+          cd integration_tests
+          ./run.sh
+
+
+  pypi-check:
+    runs-on: ubuntu-latest
+    container: python:3.8
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Poetry
+        run: pip3 install poetry
+
+      - name: Poetry Build
+        run: |
+            poetry check
+            poetry build
