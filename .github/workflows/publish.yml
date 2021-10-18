@@ -1,0 +1,40 @@
+name: publish
+
+on:
+  release:
+    - types: [published]
+
+jobs:
+  dockerhub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push and Push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: virtool/workflow:${{ github.event.release.tag_name }}
+
+  pypi-publish:
+    runs-on: ubuntu-latest
+    container: python:3.8
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Prepare Distribution
+        run: poetry build
+
+      - name: Deploy To PyPi
+        run: poetry publish -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }}
