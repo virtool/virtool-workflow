@@ -1,4 +1,4 @@
-# Create a new release on Push to `main`
+# Create a new GitHub release on push to `main`
 name: semantic-release
 
 on:

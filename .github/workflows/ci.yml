@@ -1,3 +1,4 @@
+# Run unit tests, integration tests, and other CI checks
 name: ci
 
 on:
