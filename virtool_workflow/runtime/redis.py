@@ -15,7 +15,7 @@ async def run_jobs_from_redis(
     **config,
 ):
     """Run jobs from a redis list."""
-    redis = await aioredis.create_pool(redis_url)
+    redis = await aioredis.create_redis_pool(redis_url)
 
     async with prepare_workflow(**config) as workflow:
         async for job_id in redis_jobs(list_name, redis):
