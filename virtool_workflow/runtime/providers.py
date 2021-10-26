@@ -1,14 +1,12 @@
 from typing import List
 
+from fixtures import fixture
 from virtool_workflow.api.analysis import AnalysisProvider
-from virtool_workflow.api.client import authenticated_http
 from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.api.samples import SampleProvider
 from virtool_workflow.api.subtractions import SubtractionProvider
-from virtool_workflow.data_model import Job
 from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
-from fixtures import fixture
 
 
 @fixture
