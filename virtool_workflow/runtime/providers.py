@@ -48,7 +48,7 @@ def sample_provider(job, http, jobs_api_url) -> SampleProvider:
 def subtraction_providers(
     job, http, jobs_api_url, work_path
 ) -> List[SubtractionProvider]:
-    ids = job.args["subtraction_id"]
+    ids = job.args["subtractions"]
     if isinstance(ids, str) or isinstance(ids, bytes):
         ids = [ids]
 
