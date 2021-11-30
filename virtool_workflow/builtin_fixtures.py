@@ -17,7 +17,8 @@ def results() -> dict:
 def work_path(config: dict) -> Path:
     """A temporary working directory."""
     path = Path(config["work_path"]).absolute()
-    path.mkdir(parents=True, exist_ok=True)
+    rmtree(path, ignore_errors=True)    
+    path.mkdir(parents=True)
     yield path
     rmtree(path)
 
