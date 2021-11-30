@@ -1,0 +1,17 @@
+version = 1
+
+test_patterns = [
+  "test/**",
+  "integration_tests/**"
+]
+
+[[analyzers]]
+name = "test-coverage"
+enabled = true
+
+[[analyzers]]
+name = "python"
+enabled = true
+
+  [analyzers.meta]
+  runtime_version = "3.x.x"
