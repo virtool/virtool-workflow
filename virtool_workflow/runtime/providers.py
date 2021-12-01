@@ -46,7 +46,12 @@ def sample_provider(job, http, jobs_api_url) -> SampleProvider:
 def subtraction_providers(
     job, http, jobs_api_url, work_path
 ) -> List[SubtractionProvider]:
-    ids = job.args["subtractions"]
+    try:
+        ids = job.args["subtractions"]
+    except KeyError:
+        # Supports the create_subtraction workflow.
+        ids = [job.args["subtraction_id"]]
+
     if isinstance(ids, str) or isinstance(ids, bytes):
         ids = [ids]
 
