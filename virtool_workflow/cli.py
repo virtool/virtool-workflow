@@ -1,11 +1,12 @@
 """Command Line Interface to virtool_workflow"""
 import asyncio
+
 import click
 
-from virtool_workflow.runtime import runtime
-from virtool_workflow.testing.cli import test_main
 from virtool_workflow.options import apply_options
+from virtool_workflow.runtime import runtime
 from virtool_workflow.runtime.redis import run_jobs_from_redis
+from virtool_workflow.testing.cli import test_main
 
 
 @click.group()
@@ -22,6 +23,7 @@ async def _run(**kwargs):
 @cli.command()
 def run(job_id, **kwargs):
     """Run a workflow."""
+    runtime.configure_logging()
     asyncio.run(_run(job_id=job_id, **kwargs))
 
 
