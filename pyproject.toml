@@ -18,9 +18,9 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 click = "^7.1.2"
-aiohttp = "^3.7.3"
+aiohttp = "^3.8.1"
 aiofiles = "^0.7.0"
-virtool-core = "^0.3.0"
+virtool-core = "^0.4.0"
 PyYAML = "^5.4.1"
 aioredis = "1.3.1"
 
