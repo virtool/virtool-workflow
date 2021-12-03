@@ -12,16 +12,15 @@ from virtool_workflow.runtime import status
 logger = logging.getLogger(__name__)
 
 
-def configure_logging(dev_mode):
+def configure_logging():
     """Set up logging for a workflow run."""
-    log_level = logging.DEBUG if dev_mode else logging.INFO
+    logging.basicConfig(level=logging.DEBUG)
 
-    logging.basicConfig(level=log_level)
     # Install coloredlogs if available.
     with suppress(ModuleNotFoundError):
         import coloredlogs
         logging.debug("Installed coloredlogs")
-        coloredlogs.install(level=log_level)
+        coloredlogs.install(level=logging.DEBUG)
 
 
 def load_scripts(init_file: Path, fixtures_file: Path):
@@ -54,8 +53,7 @@ async def run_workflow(workflow: Workflow, config: dict):
 
 @asynccontextmanager
 async def prepare_workflow(**config):
-    """Prepare for a workflow run."""
-    configure_logging(config["dev_mode"])
+    """Prepare for a workflow run."""    
     load_scripts(Path(config["init_file"]), Path(config["fixtures_file"]))
 
     workflow = discovery.discover_workflow(
