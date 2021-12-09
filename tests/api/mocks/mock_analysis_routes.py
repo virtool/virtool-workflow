@@ -6,7 +6,7 @@ from tests.conftest import TEST_FILES_DIR
 mock_routes = web.RouteTableDef()
 
 
-@mock_routes.get("/api/analyses/{analysis_id}")
+@mock_routes.get("/analyses/{analysis_id}")
 async def get_analysis(request):
     id_ = request.match_info["analysis_id"]
 
@@ -41,7 +41,7 @@ async def get_analysis(request):
     )
 
 
-@mock_routes.put("/api/analyses/{analysis_id}/files")
+@mock_routes.put("/analyses/{analysis_id}/files")
 async def upload_file(request):
     name = request.query.get("name")
     format = request.query.get("format")
@@ -51,7 +51,7 @@ async def upload_file(request):
     )
 
 
-@mock_routes.get("/api/analyses/{analysis_id}/files/{file_id}")
+@mock_routes.get("/analyses/{analysis_id}/files/{file_id}")
 async def download(request):
     file_id = request.match_info["file_id"]
     analysis_id = request.match_info["analysis_id"]
@@ -66,7 +66,7 @@ async def download(request):
     return web.json_response({"message": "Not Found"}, status=404)
 
 
-@mock_routes.delete("/api/analyses/{analysis_id}")
+@mock_routes.delete("/analyses/{analysis_id}")
 async def delete(request):
     analysis_id = request.match_info["analysis_id"]
 
@@ -76,7 +76,7 @@ async def delete(request):
     return web.Response(status=204)
 
 
-@mock_routes.patch("/api/analyses/{analysis_id}")
+@mock_routes.patch("/analyses/{analysis_id}")
 async def upload_result(request):
     analysis_id = request.match_info["analysis_id"]
     if analysis_id != TEST_ANALYSIS_ID:

@@ -48,7 +48,7 @@ deployment.apps/create-sample-runner created
 Services:
 
 Virtool Server: http://localhost:30908
-Jobs API: http://localhost:32579/api
+Jobs API: http://localhost:32579
 Redis Insight: http://localhost:31808
 Redis Info: redis ClusterIP 10.43.67.186 <none> 6379/TCP 6s
 ```
@@ -111,7 +111,7 @@ Address 1: 10.43.27.20 jobs-api.default.svc.cluster.local
 
 Now we can make a request to the jobs API.
 
-> `kubectl exec curl curl http://jobs-api.default.svc.cluster.local/api`
+> `kubectl exec curl curl http://jobs-api.default.svc.cluster.local`
 
 ```text
 {

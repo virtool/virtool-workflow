@@ -74,7 +74,7 @@ class AnalysisProvider:
 
     :param analysis_id: The ID of the current analysis as found in the job args.
     :param http: A :class:`aiohttp.ClientSession` instance to be used when making requests.
-    :param jobs_api_url: The url to the Jobs API. It should include the `/api` path.
+    :param jobs_api_url: The url to the Jobs API.
 
     """
 

@@ -13,7 +13,7 @@ def loop(event_loop):
 
 @pytest.fixture
 async def jobs_api_url():
-    return "/api"
+    return ""
 
 
 @pytest.fixture

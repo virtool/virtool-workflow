@@ -28,7 +28,7 @@ class SubtractionProvider:
 
     :param subtraction_id: The ID of the subtraction.
     :param http: An class:`aiohttp.ClientSession` to use when making requests.
-    :param jobs_api_url: The url for the jobs API (including /api).
+    :param jobs_api_url: The url for the jobs API.
     :param subtraction_work_path: The working path for subtraction files.
     """
 

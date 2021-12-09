@@ -6,7 +6,7 @@ services:
         tty: true
         entrypoint: > 
             workflow run
-            --jobs-api-url=http://jobs-api:9990/api
+            --jobs-api-url=http://jobs-api:9990
             ${VT_ADD_ARGS}
         depends_on:
             - jobs-api

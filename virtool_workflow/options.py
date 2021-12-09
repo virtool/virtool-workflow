@@ -29,7 +29,7 @@ options = [
     click.option(
         "--jobs-api-url",
         help="The URL of the jobs API.",
-        default="https://localhost:9950/api",
+        default="https://localhost:9950",
     ),
     click.option(
         "--is-analysis-workflow",
