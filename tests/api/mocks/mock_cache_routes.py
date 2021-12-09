@@ -9,21 +9,21 @@ caches = {}
 mock_routes = RouteTableDef()
 
 
-@mock_routes.post("/api/caches/{key}")
+@mock_routes.post("/caches/{key}")
 def create_cache_placeholder(request):
     raise NotImplementedError()
 
 
-@mock_routes.put("/api/caches/{key}/files")
+@mock_routes.put("/caches/{key}/files")
 def upload_cache_file(request):
     raise NotImplementedError()
 
 
-@mock_routes.get("/api/caches/{key}")
+@mock_routes.get("/caches/{key}")
 def get_cache(request):
     raise NotImplementedError()
 
 
-@mock_routes.patch("/api/caches/{key}")
+@mock_routes.patch("/caches/{key}")
 def finalize(request):
     raise NotImplementedError()

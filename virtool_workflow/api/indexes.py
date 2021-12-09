@@ -30,7 +30,7 @@ class IndexProvider:
     :param ref_id: The reference ID for the current job.
     :param index_path: The file system path to store index files.
     :param http: An :obj:`aiohttp.ClientSession` to use when making HTTP requests.
-    :param jobs_api_url: The base URL for the jobs API (should include `/api`).
+    :param jobs_api_url: The base URL for the jobs API.
     """
 
     def __init__(self,

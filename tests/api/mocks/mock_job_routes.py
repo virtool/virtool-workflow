@@ -53,7 +53,7 @@ TEST_JOB = {
 }
 
 
-@mock_routes.patch("/api/jobs/{job_id}")
+@mock_routes.patch("/jobs/{job_id}")
 async def acquire_job(request):
     json = await request.json()
 
@@ -63,7 +63,7 @@ async def acquire_job(request):
     return web.json_response(TEST_JOB, status=200)
 
 
-@mock_routes.post("/api/jobs/{job_id}/status")
+@mock_routes.post("/jobs/{job_id}/status")
 async def push_status(request):
     job_id = request.match_info["job_id"]
 

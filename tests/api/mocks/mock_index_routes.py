@@ -35,7 +35,7 @@ TEST_INDEX = {
     }
 
 
-@mock_routes.get("/api/indexes/{index_id}")
+@mock_routes.get("/indexes/{index_id}")
 async def get_index(request):
     if request.match_info["index_id"] != TEST_INDEX_ID:
         return web.json_response({"message": "Not Found"}, status=404)
@@ -43,7 +43,7 @@ async def get_index(request):
     return web.json_response(TEST_INDEX, status=200)
 
 
-@mock_routes.get("/api/refs/{ref_id}")
+@mock_routes.get("/refs/{ref_id}")
 async def get_ref(request):
     ref_id = request.match_info["ref_id"]
 
@@ -76,7 +76,7 @@ async def get_ref(request):
     }, status=200)
 
 
-@mock_routes.put("/api/indexes/{index_id}/files/{name}")
+@mock_routes.put("/indexes/{index_id}/files/{name}")
 async def upload_index_file(request):
     name = request.match_info.get("name")
 
@@ -101,7 +101,7 @@ async def upload_index_file(request):
     }, status=201)
 
 
-@mock_routes.get("/api/indexes/{index_id}/files/{filename}")
+@mock_routes.get("/indexes/{index_id}/files/{filename}")
 async def download_index_files(request):
     index_id = request.match_info["index_id"]
     filename = request.match_info["filename"]
@@ -127,7 +127,7 @@ async def download_index_files(request):
     return web.FileResponse(path)
 
 
-@mock_routes.patch("/api/indexes/{index_id}")
+@mock_routes.patch("/indexes/{index_id}")
 async def finalize_index(request):
     TEST_INDEX["ready"] = True
 

@@ -31,7 +31,7 @@ TEST_CACHE = {
 }
 
 
-@mock_routes.get("/api/samples/{sample_id}")
+@mock_routes.get("/samples/{sample_id}")
 async def get_sample(request):
     sample_id = request.match_info["sample_id"]
 
@@ -41,7 +41,7 @@ async def get_sample(request):
     return json_response(TEST_SAMPLE, status=200)
 
 
-@mock_routes.patch("/api/samples/{sample_id}")
+@mock_routes.patch("/samples/{sample_id}")
 async def finalize(request):
     sample_id = request.match_info["sample_id"]
 
@@ -56,7 +56,7 @@ async def finalize(request):
     return json_response(TEST_SAMPLE)
 
 
-@mock_routes.delete("/api/samples/{sample_id}")
+@mock_routes.delete("/samples/{sample_id}")
 async def delete(request):
     sample_id = request.match_info["sample_id"]
 
@@ -72,7 +72,7 @@ async def delete(request):
     return Response(status=204)
 
 
-@mock_routes.put("/api/samples/{sample_id}/artifacts")
+@mock_routes.put("/samples/{sample_id}/artifacts")
 async def upload_artifact_files(request):
     sample_id = request.match_info["sample_id"]
 
@@ -87,7 +87,7 @@ async def upload_artifact_files(request):
     return json_response(file, status=201)
 
 
-@mock_routes.put("/api/samples/{sample_id}/reads/{name}")
+@mock_routes.put("/samples/{sample_id}/reads/{name}")
 async def upload_read_files(request):
     sample_id = request.match_info["sample_id"]
     name = request.match_info["name"]
@@ -100,7 +100,7 @@ async def upload_read_files(request):
     return json_response(file, status=201)
 
 
-@mock_routes.get("/api/samples/{sample_id}/reads/{filename}")
+@mock_routes.get("/samples/{sample_id}/reads/{filename}")
 async def download_reads_file(request):
     sample_id = request.match_info["sample_id"]
     filename = request.match_info["filename"]
@@ -113,8 +113,8 @@ async def download_reads_file(request):
     return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name)
 
 
-@mock_routes.get("/api/samples/{sample_id}/caches/{key}/artifacts/{filename}")
-@mock_routes.get("/api/samples/{sample_id}/artifacts/{filename}")
+@mock_routes.get("/samples/{sample_id}/caches/{key}/artifacts/{filename}")
+@mock_routes.get("/samples/{sample_id}/artifacts/{filename}")
 async def download_artifact(request):
     sample_id = request.match_info["sample_id"]
     filename = request.match_info["filename"]
@@ -130,7 +130,7 @@ async def download_artifact(request):
     return FileResponse(file)
 
 
-@mock_routes.post("/api/samples/{sample_id}/caches")
+@mock_routes.post("/samples/{sample_id}/caches")
 async def create_mock_cache(request):
     sample_id = request.match_info["sample_id"]
 
@@ -146,7 +146,7 @@ async def create_mock_cache(request):
         return not_found()
 
 
-@mock_routes.put("/api/samples/{sample_id}/caches/{key}/artifacts")
+@mock_routes.put("/samples/{sample_id}/caches/{key}/artifacts")
 async def upload_artifact_to_cache(request):
     sample_id = request.match_info["sample_id"]
     key = request.match_info["key"]
@@ -161,7 +161,7 @@ async def upload_artifact_to_cache(request):
     return json_response(document, status=201)
 
 
-@mock_routes.put("/api/samples/{sample_id}/caches/{key}/reads/{name}")
+@mock_routes.put("/samples/{sample_id}/caches/{key}/reads/{name}")
 async def upload_reads_to_cache(request):
     name = request.match_info["name"]
     sample_id = request.match_info["sample_id"]
@@ -177,7 +177,7 @@ async def upload_reads_to_cache(request):
     return json_response(document, status=201)
 
 
-@mock_routes.patch("/api/samples/{sample_id}/caches/{key}")
+@mock_routes.patch("/samples/{sample_id}/caches/{key}")
 async def finalize_cache(request):
     sample_id = request.match_info["sample_id"]
     key = request.match_info["key"]
@@ -194,7 +194,7 @@ async def finalize_cache(request):
     return json_response(TEST_CACHE)
 
 
-@mock_routes.get("/api/samples/{sample_id}/caches/{key}")
+@mock_routes.get("/samples/{sample_id}/caches/{key}")
 async def get_cache(request):
     sample_id = request.match_info["sample_id"]
     key = request.match_info["key"]
@@ -205,7 +205,7 @@ async def get_cache(request):
     return json_response(TEST_CACHE)
 
 
-@mock_routes.delete("/api/samples/{sample_id}/caches/{key}")
+@mock_routes.delete("/samples/{sample_id}/caches/{key}")
 async def delete_cache(request):
     sample_id = request.match_info["sample_id"]
     key = request.match_info["key"]
@@ -219,7 +219,7 @@ async def delete_cache(request):
     return Response(status=204)
 
 
-@mock_routes.get("/api/samples/{sample_id}/caches/{key}/reads/{name}")
+@mock_routes.get("/samples/{sample_id}/caches/{key}/reads/{name}")
 async def download_cached_reads(request):
     name = request.match_info["name"]
 

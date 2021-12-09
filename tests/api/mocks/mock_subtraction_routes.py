@@ -34,7 +34,7 @@ TEST_SUBTRACTION = {
 }
 
 
-@mock_routes.get("/api/subtractions/{subtraction_id}")
+@mock_routes.get("/subtractions/{subtraction_id}")
 def get_subtraction(request):
     subtraction_id = request.match_info["subtraction_id"]
 
@@ -46,7 +46,7 @@ def get_subtraction(request):
     return web.json_response(TEST_SUBTRACTION, status=200)
 
 
-@mock_routes.put("/api/subtractions/{subtraction_id}/files/{filename}")
+@mock_routes.put("/subtractions/{subtraction_id}/files/{filename}")
 async def upload_subtraction_file(request):
     name = request.match_info["filename"]
 
@@ -66,7 +66,7 @@ async def upload_subtraction_file(request):
     return web.json_response(await read_file_from_request(request, name, "bt2"), status=201)
 
 
-@mock_routes.patch("/api/subtractions/{subtraction_id}")
+@mock_routes.patch("/subtractions/{subtraction_id}")
 async def finalize_subtraction(request):
     subtraction_id = request.match_info["subtraction_id"]
 
@@ -82,7 +82,7 @@ async def finalize_subtraction(request):
     return web.json_response(TEST_SUBTRACTION)
 
 
-@mock_routes.delete("/api/subtractions/{subtraction_id}")
+@mock_routes.delete("/subtractions/{subtraction_id}")
 async def delete_subtraction(request):
     subtraction_id = request.match_info["subtraction_id"]
 
@@ -95,6 +95,6 @@ async def delete_subtraction(request):
     return web.Response(status=204)
 
 
-@mock_routes.get("/api/subtractions/{subtraction_id}/files/{filename}")
+@mock_routes.get("/subtractions/{subtraction_id}/files/{filename}")
 async def download_subtraction_data(request):
     return web.Response(status=200)

@@ -27,6 +27,6 @@ spec:
             - name: VT_RUN_FROM_REDIS_IS_ANALYSIS_WORKFLOW
               value: 'true'
             - name: VT_RUN_FROM_REDIS_JOBS_API_URL
-              value: 'http://jobs-api.default.svc.cluster.local:9990/api'
+              value: 'http://jobs-api.default.svc.cluster.local:9990'
             - name: VT_RUN_FROM_REDIS_REDIS_URL
               value: 'redis://redis.default.svc.cluster.local:6379'
