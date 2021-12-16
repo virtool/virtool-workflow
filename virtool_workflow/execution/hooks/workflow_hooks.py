@@ -15,21 +15,34 @@ such the result can be mutated within the callback and that change will be
 reflected in the final result.
 """
 
-on_update = FixtureHook("on_update")
+on_step_start = FixtureHook("on_step_start")
 """
-Triggered when an update is sent from a Workflow
+Triggered before each workflow step is executed.
 
-This occurs both when a (*str*) value is returned from a workflow step and when
-:func:`virtool_workflow.WorkflowExecution.send_update()` is invoked directly.
+The :class:`WorkflowStep` object is available via the `current_step` fixture.
 
-.. code-block:: python
-
-    @on_update
-    async def use_updates(execution: WorkflowExecution, update: str):
+.. code_block:: python
+    
+    @on_step_start
+    async def use_step(current_step):
         ...
 """
 
+
+on_step_finish = FixtureHook("on_step_end")
+"""
+Triggered after each workflow step is executed.
+
+The :class:`WorkflowStep` object is available via the `current_step` fixture.
+
+@on_step_finish
+async def use_step(current_step):
+    ...
+"""
+
+
 __all__ = [
     "on_result",
-    "on_update",
+    "on_step_finish",
+    "on_step_start",
 ]

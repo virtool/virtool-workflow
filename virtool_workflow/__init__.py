@@ -2,12 +2,15 @@
 from fixtures import fixture
 from virtool_workflow.decorator_api import step, cleanup, startup
 from virtool_workflow.workflow import Workflow
+from virtool_workflow._executor import execute
+from virtool_workflow._steps import WorkflowStep
 
 __all__ = [
     "Workflow",
-    "step",
+    "WorkflowStep",
     "cleanup",
+    "execute",
+    "fixture",
     "startup",
-    "api",
-    "fixture"
+    "step",
 ]

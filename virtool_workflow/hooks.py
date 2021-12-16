@@ -1,11 +1,8 @@
 """
 Hooks provide a way to do things when events happen during the workflow lifecycle.
-
 """
-
-from concurrent import futures
-
 import asyncio
+from concurrent import futures
 
 from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
 from virtool_workflow.execution.hooks.hooks import Hook
@@ -102,4 +99,6 @@ __all__ = [
     "on_load_config",
     "before_result_upload",
     "on_cancelled",
+    "on_step_start",
+    "on_step_finish",
 ]
