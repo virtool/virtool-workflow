@@ -17,15 +17,15 @@ def test_workflow():
         return "Cleanup complete"
 
     @_test_workflow.step
-    async def step_1(execution, results):
+    async def step_1(step_number, results):
         results["1"] = True
-        assert execution.current_step == 1
+        assert step_number == 1
         return "Step 1 complete"
 
     @_test_workflow.step
-    async def step_2(execution, results):
+    async def step_2(step_number, results):
         results["2"] = True
-        assert execution.current_step == 2
+        assert step_number == 2
         return "Step 2 complete"
 
     return _test_workflow

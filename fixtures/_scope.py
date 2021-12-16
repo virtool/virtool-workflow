@@ -260,6 +260,7 @@ class FixtureScope(UserDict):
         except FixtureHasDependency:
             value = await self.instantiate(await self.bind(fixture, follow_wrapped=True), *args, **kwargs)
 
-        self[fixture.__name__] = value
+        if fixture.__scope__ == "store":
+            self[fixture.__name__] = value
 
         return value

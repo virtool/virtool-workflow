@@ -1,8 +1,9 @@
 import inspect
-from functools import wraps
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import Any, Dict, NewType, Protocol, runtime_checkable
+from functools import wraps
+from typing import (Any, Callable, Dict, Literal, NewType, Protocol,
+                    runtime_checkable)
 
 FixtureValue = NewType('FixtureValue', Any)
 """A return value from a :class:`Fixture` callable."""
@@ -18,6 +19,7 @@ class Fixture(Protocol):
 
     """
     __name__: str
+    __scope__: Literal["function", "store"]
     __return_protocol__: Protocol
     __hide_params__: bool
     __follow_wrapped__: bool
@@ -93,7 +95,8 @@ def runs_in_new_fixture_context(*fixtures, copy_context=True):
 
 
 def fixture(
-    function: callable = None,
+    function: Callable = None,
+    scope: Literal["function", "store"] = "store",
     protocol: Protocol = None,
     hide_params: bool = True,
 ):
@@ -101,6 +104,8 @@ def fixture(
     Create a new fixture.
 
     :param func: The fixture function
+    :param scope: The scope of the fixture. A 'function' scope indicates that the fixture function should be called for each step.
+            A scope of 'store' indicates the fixture function should be called only once.
     :param protocol: An optional return protocol for the fixture, used when
                         rendering documentation for a fixture which returns a function.
     :param hide_params: Hide the arguments to the fixture when the documentation
@@ -108,11 +113,12 @@ def fixture(
     :return: A fixture function, if :obj:`func` was given, or a decorator to create one.
     """
     if function is None:
-        return lambda _func: fixture(_func, protocol, hide_params)
+        return lambda _func: fixture(_func, scope, protocol, hide_params)
 
     if function.__name__.startswith("_"):
         function.__name__ = function.__name__.lstrip("_")
 
+    function.__scope__ = scope
     function.__return_protocol__ = protocol
     function.__hide_params__ = hide_params
     function.__follow_wrapped__ = True

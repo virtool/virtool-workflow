@@ -1,14 +1,15 @@
 import asyncio
+import traceback
+import functools
 import logging
-from typing import Protocol
+from typing import Protocol, Optional
 
 import aiohttp
 
 from fixtures import fixture
 
 from ..data_model import Job, Status, State
-from .. import Workflow
-from ..execution.workflow_execution import WorkflowExecution
+from .. import Workflow, WorkflowStep
 from .errors import (
     JobAlreadyAcquired,
     JobsAPIServerError,
@@ -66,40 +67,71 @@ def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: 
 
 class PushStatus(Protocol):
     async def __call__(
+        self,
         state: State,
-        error: str = None
+        step: WorkflowStep,
+        error: str = None,
     ):
         """
         Update the job status.
 
         :param state: The current state of the workflow run.
+        :param step: The current workflow step.
         :param error: An error message if applicable.
         """
         raise NotImplementedError()
 
 
-@fixture(protocol=PushStatus)
-def push_status(
+@fixture(scope="function")
+async def push_status(
+    http, 
     job: Job,
-    http: aiohttp.ClientSession,
     jobs_api_url: str,
-    workflow: Workflow,
-    execution: WorkflowExecution,
+    error: Optional[Exception],
+    current_step: WorkflowStep,
+    progress: float
 ):
-    """Update the status of the current job."""
-    async def _push_status(state, error=None):
-        async with http.post(
-            f"{jobs_api_url}/jobs/{job.id}/status",
-            json={
-                "state": state,
-                "stage": workflow.steps[execution.current_step - 1].__name__,
-                "error": error,
-                "progress": int(execution.progress * 100),
-            },
-        ) as response:
-            async with raising_errors_by_status_code(
-                response, accept=[200, 201]
-            ) as status_json:
-                return Status(**status_json)
+    return functools.partial(
+            _push_status, 
+            http, 
+            job, 
+            jobs_api_url,
+            step_name=current_step.display_name,
+            step_description=current_step.description,
+            stage=current_step.call.__name__,
+            progress=progress,
+            error=error,
+    )
 
-    return _push_status
+
+async def _push_status(
+    http, 
+    job: Job,
+    jobs_api_url: str,
+    step_name: str,
+    step_description: str,
+    stage: str,
+    state: str, 
+    progress: float,
+    error: Exception = None, 
+    max_tb: int = 50,
+):
+    async with http.post(
+        f"{jobs_api_url}/jobs/{job.id}/status",
+        json={
+            "state": state,
+            "stage": stage, 
+            "step_name": step_name, 
+            "step_description": step_description, 
+            "error": {
+                "type": error.__class__.__name__,
+                "traceback": traceback.format_tb(error.__traceback__, max_tb),
+                "details": [str(arg) for arg in error.args]
+            } if error is not None else None,
+            "progress": int(progress * 100),
+        },
+    ) as response:
+        async with raising_errors_by_status_code(
+            response, accept=[200, 201]
+        ) as status_json:
+            return Status(**status_json)

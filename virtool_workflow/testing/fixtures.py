@@ -2,8 +2,7 @@
 from typing import Callable
 
 import pytest
-from virtool_workflow import Workflow
-from virtool_workflow.execution.workflow_execution import WorkflowExecution
+from virtool_workflow import Workflow, execute
 from importlib import import_module
 
 from fixtures import FixtureScope, fixture
@@ -25,7 +24,10 @@ class WorkflowTestRunner(FixtureScope):
         if workflow is None:
             workflow = self["workflow"]
 
-        return await WorkflowExecution(workflow, self)
+        async with FixtureScope() as scope:
+             await execute(workflow, scope)
+
+             return await scope.get_or_instantiate("results")
 
     async def execute_function(self, func: Callable, **kwargs):
         bound = await self.bind(func, **kwargs)
