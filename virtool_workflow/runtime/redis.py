@@ -1,5 +1,6 @@
 from asyncio import create_task
 
+import signal
 from aioredis import Redis
 from virtool_core.redis import connect_to_redis, periodically_ping_redis
 
@@ -19,6 +20,14 @@ async def run_jobs_from_redis(
     **config,
 ):
     """Run jobs from a redis list."""
+    sigterm_received = False
+
+    def on_sigterm(signum, frame):
+        nonlocal sigterm_received
+        sigterm_received = True
+
+    signal.signal(signal.SIGTERM, on_sigterm)
+
     redis = await connect_to_redis(redis_url)
     ping_task = create_task(periodically_ping_redis(redis))
 
@@ -26,6 +35,8 @@ async def run_jobs_from_redis(
         async for job_id in redis_jobs(list_name, redis):
             config["job_id"] = job_id
             await run_workflow(workflow, config)
+            if sigterm_received is True:
+                break
 
     ping_task.cancel()
     await ping_task
