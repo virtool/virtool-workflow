@@ -22,7 +22,7 @@ async def run_jobs_from_redis(
     """Run jobs from a redis list."""
     sigterm_received = False
 
-    def on_sigterm(signum, frame):
+    def on_sigterm(*_):
         nonlocal sigterm_received
         sigterm_received = True
 
