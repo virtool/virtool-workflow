@@ -37,7 +37,7 @@ def load_scripts(init_file: Path, fixtures_file: Path):
 
 def setup_hooks():
     """Add hooks for a workflow run."""
-    hooks.on_step_start(status.send_status, once=True)
+    hooks.on_step_start(status.send_status)
     hooks.on_failure(status.send_failed, once=True)
     hooks.on_cancelled(status.send_cancelled, once=True)
     hooks.on_success(status.send_complete, once=True)
@@ -49,7 +49,7 @@ async def run_workflow(workflow: Workflow, config: dict):
     async with fixtures.FixtureScope() as scope:
         scope["config"] = config
         await execute(workflow, scope)
-        return scope["results"]
+        return scope["results"] if "results" in scope else {}
 
 
 @asynccontextmanager

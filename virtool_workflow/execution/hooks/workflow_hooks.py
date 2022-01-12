@@ -41,8 +41,15 @@ async def use_step(current_step):
 """
 
 
+on_workflow_start = FixtureHook("on_workflow_start")
+"""
+Triggered at the start of the workflow, before any steps are executed.
+"""
+
+
 __all__ = [
     "on_result",
     "on_step_finish",
     "on_step_start",
+    "on_workflow_start",
 ]

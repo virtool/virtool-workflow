@@ -13,6 +13,8 @@ class Status:
     stage: str
     state: str
     timestamp: str
+    step_name: str
+    step_description: str
 
 
 @dataclass

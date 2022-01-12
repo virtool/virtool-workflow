@@ -1,10 +1,9 @@
 from typing import Literal
 
-State = Literal["WAITING", "STARTUP", "RUNNING", "CLEANUP", "FINISHED"]
+State = Literal["waiting", "running", "complete", "cancelled", "error"]
 
-WAITING = "WAITING"
-STARTUP = "STARTUP"
-RUNNING = "RUNNING"
-CLEANUP = "CLEANUP"
-FINISHED = "FINISHED"
-ERROR = "ERROR"
+CANCELLED = "cancelled"
+COMPLETE = "complete"
+ERROR = "error"
+RUNNING = "running"
+WAITING = "waiting"

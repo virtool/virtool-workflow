@@ -7,13 +7,15 @@ async def send_status(push_status):
 
 
 async def send_complete(push_status):
-    await push_status(state="complete")
+    await push_status(state="complete", stage="completed")
 
 
 async def send_failed(push_status, error, max_tb=50):
     await push_status(
+        stage="",
         state="error",
         error=error,
+        max_tb=max_tb,
     )
 
 
