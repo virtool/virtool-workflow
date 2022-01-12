@@ -1,14 +1,21 @@
 import logging
-from itertools import chain
 from contextlib import asynccontextmanager, contextmanager
+from itertools import chain
 
 from fixtures import FixtureScope, fixture
 from virtool_workflow import Workflow
-from virtool_workflow.hooks import (on_failure, on_finish, on_result,
-                                    on_step_finish, on_step_start, on_success)
 from virtool_workflow.execution import states
+from virtool_workflow.hooks import (on_failure, on_finish, on_result,
+                                    on_step_finish, on_step_start, on_success,
+                                    on_workflow_start)
 
 logger = logging.getLogger(__name__)
+
+@on_workflow_start
+async def initialize_scope(scope):
+    scope["step_number"] = 0
+    scope["error"] = None
+    scope["logger"] = logger
 
 
 async def execute(
@@ -21,6 +28,7 @@ async def execute(
     :param workflow: The workflow to execute
     :param scope: The :class:`FixtureScope` to use for fixture injection
     """
+    await on_workflow_start.trigger(scope)
     try:
         with workflow_state_management(scope):
             await _execute(workflow, scope)
@@ -48,7 +56,7 @@ def workflow_state_management(scope):
         scope["state"] = states.ERROR
         raise
     else:
-        scope["state"] = states.FINISHED
+        scope["state"] = states.COMPLETE
 
 
 @asynccontextmanager
@@ -63,7 +71,7 @@ async def step_setup(scope, step):
     else:
         await on_step_finish.trigger(scope)
     finally:
-        del scope["current_step"]
+        scope["current_step"] = None
 
 
 async def _execute(
@@ -76,21 +84,17 @@ async def _execute(
 
 
     for step in steps:
-        async with step_setup(scope, step):
+        run_step = await scope.bind(step.call)
+        async with step_setup(scope, step=step):
             logger.info(f"Running step '{step.display_name}'")
-            run_step = await scope.bind(step.call)
             await run_step()
 
-    scope["state"] = states.FINISHED
+    scope["state"] = states.COMPLETE
 
 
 @on_step_start
 async def update_step_number(scope):
-    if "step_number" not in scope:
-        scope["step_number"] = 0
-    else:
-        scope["step_number"] += 1
-
+    scope["step_number"] += 1
     return scope["step_number"]
 
 

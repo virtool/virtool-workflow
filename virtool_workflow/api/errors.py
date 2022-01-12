@@ -1,5 +1,8 @@
+import logging
 from contextlib import asynccontextmanager
 from typing import Dict, Type, List
+
+logger = logging.getLogger(__name__)
 
 
 class JobAlreadyAcquired(Exception):
@@ -60,6 +63,12 @@ async def raising_errors_by_status_code(
         except UnicodeDecodeError:
             pass
 
+    if response.status in accept:
+        yield response_json
+        return
+
+    logger.info(await response.text())
+
     if response.status in status_codes_to_exceptions:
         if response_json:
             response_message = (
@@ -73,9 +82,6 @@ async def raising_errors_by_status_code(
             except UnicodeDecodeError:
                 response_message = "Could not decode response message"
         raise status_codes_to_exceptions[response.status](response_message)
-
-    if response.status in accept:
-        yield response_json
     else:
         raise ValueError(
             f"Status code {response.status} not handled for response\n {response}"

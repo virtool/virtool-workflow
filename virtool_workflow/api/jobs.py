@@ -2,6 +2,7 @@ import asyncio
 import traceback
 import functools
 import logging
+import pprint
 from typing import Protocol, Optional
 
 import aiohttp
@@ -88,19 +89,23 @@ async def push_status(
     job: Job,
     jobs_api_url: str,
     error: Optional[Exception],
+    progress: float,
     current_step: WorkflowStep,
-    progress: float
+    logger,
 ):
     return functools.partial(
             _push_status, 
             http, 
             job, 
             jobs_api_url,
-            step_name=current_step.display_name,
-            step_description=current_step.description,
-            stage=current_step.call.__name__,
+            step_name=current_step.display_name if current_step is not None else None,
+            step_description=(current_step.description 
+                if current_step is not None else None),
+            stage=(current_step.call.__name__
+                if current_step is not None else None),
             progress=progress,
             error=error,
+            logger=logger
     )
 
 
@@ -113,24 +118,27 @@ async def _push_status(
     stage: str,
     state: str, 
     progress: float,
+    logger,
     error: Exception = None, 
     max_tb: int = 50,
 ):
+    payload = {
+        "state": state,
+        "stage": stage, 
+        "step_name": step_name, 
+        "step_description": step_description, 
+        "error": {
+            "type": error.__class__.__name__,
+            "traceback": traceback.format_tb(error.__traceback__, max_tb),
+            "details": [str(arg) for arg in error.args]
+        } if error is not None else None,
+        "progress": int(progress * 100),
+    }
+    
+    logger.info(f"status: {pprint.pformat(payload)}")
+
     async with http.post(
-        f"{jobs_api_url}/jobs/{job.id}/status",
-        json={
-            "state": state,
-            "stage": stage, 
-            "step_name": step_name, 
-            "step_description": step_description, 
-            "error": {
-                "type": error.__class__.__name__,
-                "traceback": traceback.format_tb(error.__traceback__, max_tb),
-                "details": [str(arg) for arg in error.args]
-            } if error is not None else None,
-            "progress": int(progress * 100),
-        },
-    ) as response:
+        f"{jobs_api_url}/jobs/{job.id}/status", json=payload) as response:
         async with raising_errors_by_status_code(
             response, accept=[200, 201]
         ) as status_json:

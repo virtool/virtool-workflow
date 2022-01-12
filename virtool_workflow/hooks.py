@@ -91,7 +91,6 @@ before_result_upload = FixtureHook("before_result_upload")
 
 __all__ = [
     "on_result",
-    "on_update",
     "on_success",
     "on_failure",
     "on_finalize",
@@ -101,4 +100,5 @@ __all__ = [
     "on_cancelled",
     "on_step_start",
     "on_step_finish",
+    "on_workflow_start",
 ]

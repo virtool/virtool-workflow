@@ -47,15 +47,18 @@ class Workflow:
 
     def startup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow startup."""
-        self.on_startup.append(WorkflowStep.from_callable(action))
+        action = WorkflowStep.from_callable(action)
+        self.on_startup.append(action)
         return action
 
     def cleanup(self, action: Callable) -> Callable:
         """Decorator for adding a step to workflow cleanup."""
-        self.on_cleanup.append(WorkflowStep.from_callable(action))
+        action = WorkflowStep.from_callable(action)
+        self.on_cleanup.append(action)
         return action
 
     def step(self, step: Callable) -> Callable:
         """Decorator for adding a step to the workflow."""
-        self.steps.append(WorkflowStep.from_callable(step))
+        step = WorkflowStep.from_callable(step)
+        self.steps.append(step)
         return step
