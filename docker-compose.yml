@@ -33,7 +33,7 @@ services:
       driver: none
 
   jobs-api:
-    image: virtool/virtool:6.6.6
+    image: virtool/virtool:6.6.10
     depends_on:
       - mongo
       - redis
