@@ -3,7 +3,7 @@ from contextlib import suppress
 from virtool_workflow import hooks, Workflow
 
 
-async def test_on_finish_triggered(runtime):
+async def test_on_finish_triggered(runtime, clear_hooks):
     success_called = False
     finish_called = False
 
@@ -23,7 +23,7 @@ async def test_on_finish_triggered(runtime):
     assert finish_called
 
 
-async def test_on_failure_triggered(runtime):
+async def test_on_failure_triggered(runtime, clear_hooks):
     failure_called = False
 
     @hooks.on_failure(once=True)
@@ -43,7 +43,8 @@ async def test_on_failure_triggered(runtime):
     assert failure_called
 
 
-async def test_on_failure_not_triggered_when_successful(runtime):
+async def test_on_failure_not_triggered_when_successful(runtime, clear_hooks):
+
     @hooks.on_success(once=True)
     def success_callback(results):
         results["SUCCESS"] = True
