@@ -6,12 +6,12 @@ from virtool_workflow.runtime.runtime import run_workflow
 
 
 @pytest.fixture
-async def base_config(job_id, jobs_api_url):
+async def base_config(job_id, jobs_api):
     return {
         "mem": 8,
         "proc": 2,
         "job_id": job_id,
-        "jobs_api_url": jobs_api_url
+        "jobs_api_url": jobs_api
     }
 
 

@@ -3,15 +3,6 @@ from pathlib import Path
 
 import pytest
 
-pytest_plugins = (
-    "_fixtures.containers", 
-    "_fixtures.db", 
-    "_fixtures.jobs", 
-    "_fixtures.workflows",
-    "docker_compose",
-)
-
-
 @pytest.fixture()
 async def loop(event_loop):
     """

@@ -3,9 +3,14 @@ from pathlib import Path
 import pytest
 
 pytest_plugins = [
-    "tests.fixtures.workflow",
-    "tests.fixtures.execution",
+    "docker_compose",
     "tests.api.fixtures",
+    "tests.fixtures.execution",
+    "tests.fixtures.workflow",
+    "tests.integration._fixtures.containers", 
+    "tests.integration._fixtures.db", 
+    "tests.integration._fixtures.jobs", 
+    "tests.integration._fixtures.workflows",
     "virtool_workflow.testing.fixtures",
 ]
 

@@ -22,7 +22,7 @@ def jobs_api_service(module_scoped_container_getter):
 
 
 @pytest.fixture
-def jobs_api_url(jobs_api_service):
+def jobs_api(jobs_api_service):
     network_info = jobs_api_service.network_info[0]
 
     return f"http://{network_info.hostname}:{network_info.host_port}"

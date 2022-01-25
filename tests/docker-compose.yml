@@ -1,24 +1,17 @@
 version: "3.1"
 services:
-  redis:
-    image: redis:6.0
-    ports:
-      - "6379"
-    volumes:
-      - vt_redis_data:/data
-    logging:
-      driver: none
-
   pytest:
     build:
-      dockerfile: tests/Dockerfile
       context: ..
+      dockerfile: tests/Dockerfile
     command: >
+      --log-cli-level=debug
       --cov --cov-report xml:/test/coverage/coverage.xml
-      --disable-pytest-warnings --redis-url redis://redis:6379
+      --use-running-containers
+      --disable-pytest-warnings 
+      ${TEST_PATH}
     volumes:
       - ./coverage:/test/coverage
-    depends_on: [redis]
+      - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: "host"
 
-volumes:
-  vt_redis_data:

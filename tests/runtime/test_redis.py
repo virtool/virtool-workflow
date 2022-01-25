@@ -10,6 +10,7 @@ async def redis(redis_url):
         _redis = await connect_to_redis(redis_url)
         yield _redis
         _redis.close()
+        await _redis.wait_closed()
     except ConnectionRefusedError:
         pytest.skip("Redis is not available.")
 
