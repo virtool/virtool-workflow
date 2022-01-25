@@ -5,7 +5,6 @@ services:
       context: ..
       dockerfile: tests/Dockerfile
     command: >
-      --log-cli-level=debug
       --cov --cov-report xml:/test/coverage/coverage.xml
       --use-running-containers
       --disable-pytest-warnings 
