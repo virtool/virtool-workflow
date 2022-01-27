@@ -7,8 +7,7 @@ def get_defaults(argspec: inspect.FullArgSpec) -> dict:
         return {}
 
     args_with_default = argspec.args[-len(argspec.defaults):]
-    return {key: value for key, value in zip(
-        args_with_default, argspec.defaults)}
+    return dict(zip(args_with_default, argspec.defaults))
 
 
 def get_arg_spec(function, follow_wrapped=False) -> inspect.FullArgSpec:

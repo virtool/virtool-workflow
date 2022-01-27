@@ -67,8 +67,10 @@ Triggered when a job is cancelled.
 
 @on_failure
 async def _trigger_on_cancelled(error: Exception, scope):
-    if (isinstance(error, asyncio.CancelledError)
-            or isinstance(error, futures.CancelledError)):
+    if isinstance(
+        error, 
+        (asyncio.CancelledError, futures.CancelledError)
+    ):
         await on_cancelled.trigger(scope, error)
 
 

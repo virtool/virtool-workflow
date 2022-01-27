@@ -60,4 +60,4 @@ def test_main(job_id, **kwargs):
 
     proc.communicate()
 
-    exit(proc.returncode)
+    sys.exit(proc.returncode)
