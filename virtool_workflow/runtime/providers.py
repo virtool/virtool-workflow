@@ -52,7 +52,7 @@ def subtraction_providers(
         # Supports the create_subtraction workflow.
         ids = [job.args["subtraction_id"]]
 
-    if isinstance(ids, str) or isinstance(ids, bytes):
+    if isinstance(ids, (str, bytes)):
         ids = [ids]
 
     subtraction_work_path = work_path / "subtractions"

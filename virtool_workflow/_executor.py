@@ -62,13 +62,10 @@ def workflow_state_management(scope):
 @asynccontextmanager
 async def step_setup(scope, step):
     scope["current_step"] = step
-    await on_step_start.trigger(scope)
 
     try:
+        await on_step_start.trigger(scope)
         yield 
-    except:
-        raise
-    else:
         await on_step_finish.trigger(scope)
     finally:
         scope["current_step"] = None
