@@ -52,7 +52,8 @@ class Hook:
         else:
             cb = self._callback
 
-        logger.debug(f"Registered callback {callback_} onto hook {self.name}")
+        if callback_ is not None:
+            logger.debug(f"Registered callback {callback_.__name__}() onto hook {self.name}")
         return cb
 
     __call__ = callback

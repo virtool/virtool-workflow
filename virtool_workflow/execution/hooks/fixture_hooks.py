@@ -14,7 +14,6 @@ class FixtureHook(Hook):
 
     def _callback(self, callback_: Callable):
         """Register a callback function, skipping parameter validation"""
-        logger.debug(f"Registered callback {callback_} onto hook {self.name}")
         callback_ = utils.coerce_to_coroutine_function(callback_)
         self.callbacks.append(callback_)
         return callback_

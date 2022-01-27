@@ -1,12 +1,12 @@
 """Utility functions for sending status updates."""
-from virtool_workflow.api.jobs import push_status
+from virtool_workflow.api.jobs import push_status as _
 
 
 async def send_status(push_status):
     await push_status(state="running")
 
 
-async def send_complete(push_status):
+async def send_complete(push_status, error):
     await push_status(state="complete", stage="completed")
 
 
