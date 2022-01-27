@@ -45,7 +45,7 @@ async def test_status_updates_without_error(db, create_job, exec_workflow, job_i
 
     on_success_called = False
 
-    @hooks.on_success
+    @hooks.on_success(once=True)
     async def check_success_status():
         nonlocal on_success_called
         on_success_called = True 
@@ -77,7 +77,7 @@ async def test_status_updates_with_error(db, create_job, exec_workflow, job_id):
 
     hook_called = False
 
-    @hooks.on_failure
+    @hooks.on_failure(once=True)
     async def check_error_update_sent():
         nonlocal hook_called
 
@@ -87,7 +87,6 @@ async def test_status_updates_with_error(db, create_job, exec_workflow, job_id):
         jobs = db.get_collection("jobs")
 
         job = await jobs.find_one({"_id": job_id})
-        print(job["status"])
         status = job["status"][-1]
 
         assert status["state"] == "error"
