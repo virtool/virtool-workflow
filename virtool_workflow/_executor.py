@@ -79,7 +79,6 @@ async def _execute(
 
     steps = chain(workflow.on_startup, workflow.steps, workflow.on_cleanup)
 
-
     for step in steps:
         run_step = await scope.bind(step.call)
         async with step_setup(scope, step=step):

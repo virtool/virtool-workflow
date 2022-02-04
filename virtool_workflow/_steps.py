@@ -22,11 +22,8 @@ def get_display_name(call: Callable[..., Any]):
 
 def get_description(call: Callable[..., Any]) -> str:
     """
-    Extract the description for a step function from the docstring.
+    Extract the first line of the docstring as a description for a step function.
     
-    Lines starting with sphinx tags such as :param: are removed and 
-    trailing whitespace is stripped.
-
     :param call: The step function
     :return str: The step description
     :raise ValueError: When `call` does not have a docstring
@@ -34,14 +31,7 @@ def get_description(call: Callable[..., Any]) -> str:
     if call.__doc__ is None:
         raise ValueError(f"{call} does not have a docstring")
 
-    description = re.sub(
-        pattern=r"^\s*:.*$", 
-        repl="", 
-        string=call.__doc__, 
-        flags=re.MULTILINE,
-    )
-    
-    return "\n".join(line.strip(" ") for line in description.split("\n") if line)
+    return call.__doc__.strip().split("\n")[0]
     
 
 @dataclass(frozen=True)
