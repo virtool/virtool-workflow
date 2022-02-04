@@ -17,11 +17,7 @@ async def this_is_a_test_step():
     ...
     
 
-CORRECT_DESCRIPTION = (
-    "This is a docstring\n"
-    "\n"
-    "This is the second line of a docstring\n"
-)
+CORRECT_DESCRIPTION = "This is a docstring"
 
 
 async def test_workflow_step_from_callable():
@@ -31,7 +27,6 @@ async def test_workflow_step_from_callable():
     assert step.display_name == "This Is A Test Step"
     assert step.description == CORRECT_DESCRIPTION
     assert step.call is this_is_a_test_step
-    
     
     assert await step() is None
 
@@ -47,6 +42,5 @@ def workflow():
     @wf.step
     def step_2():
         """Description for step 2"""
-
 
     return wf

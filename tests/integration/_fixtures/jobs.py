@@ -8,7 +8,6 @@ def job_id(request):
     return f"vt_integration_{request.node.originalname}"
 
 
-
 @pytest.fixture
 async def test_user(db: AsyncIOMotorDatabase):
     users = db.get_collection("users")
@@ -53,5 +52,3 @@ def create_job(db: AsyncIOMotorDatabase, job_id: str, test_user, request):
         return job
 
     return _create_job
-
-
