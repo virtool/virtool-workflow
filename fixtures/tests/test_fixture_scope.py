@@ -182,8 +182,8 @@ async def test_mutable_fixture_semantics():
         return dictionary
 
     async with FixtureScope() as scope:
-        step1_ = await scope.bind(workflow.steps[0].call)
-        step2_ = await scope.bind(workflow.steps[1].call)
+        step1_ = await scope.bind(workflow.steps[0].function)
+        step2_ = await scope.bind(workflow.steps[1].function)
 
         d3 = await step1_()
         d4 = await step2_()

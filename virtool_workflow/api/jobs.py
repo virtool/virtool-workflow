@@ -101,7 +101,7 @@ async def push_status(
             step_name=current_step.display_name if current_step is not None else None,
             step_description=(current_step.description 
                 if current_step is not None else None),
-            stage=(current_step.call.__name__
+            stage=(current_step.function.__name__
                 if current_step is not None else None),
             progress=progress,
             error=error,
