@@ -26,7 +26,7 @@ async def test_workflow_step_from_callable():
     
     assert step.display_name == "This Is A Test Step"
     assert step.description == CORRECT_DESCRIPTION
-    assert step.call is this_is_a_test_step
+    assert step.function is this_is_a_test_step
     
     assert await step() is None
 

@@ -8,7 +8,7 @@ from textwrap import dedent
 from virtool_workflow.utils import coerce_to_coroutine_function
 
 
-def get_display_name(call: Callable[..., Any]):
+def get_display_name(function: Callable[..., Any]):
     """
     Get the display name for a step function based on the function name.
 
@@ -17,10 +17,10 @@ def get_display_name(call: Callable[..., Any]):
     :param call: The calable for the step function
     :return: The presentation name as a string
     """
-    name = call.__name__
+    name = function.__name__
     return name.replace("_", " ").title()
 
-def get_description(call: Callable[..., Any]) -> str:
+def get_description(function: Callable[..., Any]) -> str:
     """
     Extract the first line of the docstring as a description for a step function.
     
@@ -28,10 +28,10 @@ def get_description(call: Callable[..., Any]) -> str:
     :return str: The step description
     :raise ValueError: When `call` does not have a docstring
     """
-    if call.__doc__ is None:
-        raise ValueError(f"{call} does not have a docstring")
+    if function.__doc__ is None:
+        raise ValueError(f"{function} does not have a docstring")
 
-    return call.__doc__.strip().split("\n")[0]
+    return function.__doc__.strip().split("\n")[0]
     
 
 @dataclass(frozen=True)
@@ -45,12 +45,12 @@ class WorkflowStep:
     """
     display_name: str
     description: str
-    call: Callable[..., Awaitable[Any]]
+    function: Callable[..., Awaitable[Any]]
     
 
     @classmethod
     def from_callable(cls, 
-        call: Callable[..., Any],
+        function: Callable[..., Any],
         *, 
         display_name: str = None, 
         description: str = None
@@ -64,18 +64,18 @@ class WorkflowStep:
         :param description: A text description of the step. If None then the docstring
             `call` will be used.
         """
-        call = coerce_to_coroutine_function(call)
-        display_name = display_name or get_display_name(call)
+        function = coerce_to_coroutine_function(function)
+        display_name = display_name or get_display_name(function)
         try:
-            description = description or get_description(call)
+            description = description or get_description(function)
         except ValueError:
             description = ""
 
         return cls(
             display_name=display_name,
             description=description,
-            call=call,
+            function=function,
         )
         
     async def __call__(self, *args, **kwargs):
-        return await self.call(*args, **kwargs)
+        return await self.function(*args, **kwargs)
