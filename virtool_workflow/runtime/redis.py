@@ -64,7 +64,6 @@ async def _run_job_from_redis(
         await redis.wait_closed()
 
 
-
 async def run_job_from_redis(
     list_name: str,
     redis_url: str,
@@ -73,4 +72,3 @@ async def run_job_from_redis(
     """Run a single job from a redis list."""
     async with prepare_workflow(**config) as workflow:
         return await _run_job_from_redis(list_name, redis_url, workflow, **config)
-

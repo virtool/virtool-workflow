@@ -19,7 +19,7 @@ def cli():
 @click.argument("job_id")
 @cli.command()
 def run(job_id, **kwargs):
-    """Run a workflow."""    
+    """Run a workflow."""
     asyncio.run(runtime.start(job_id=job_id, **kwargs))
 
 
