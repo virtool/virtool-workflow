@@ -1,5 +1,5 @@
 from virtool_workflow import Workflow
-from virtool_workflow.runtime.redis import _run_job_from_redis, get_job_id_from_redis
+from virtool_workflow.runtime.redis import _run_job_from_redis
 
 
 async def test_run_once_from_redis(create_job, redis, redis_service, base_config):
