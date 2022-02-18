@@ -16,6 +16,15 @@ def pg_url(module_scoped_container_getter):
 
     return f"postgresql+asyncpg://virtool:virtool@{network_info.hostname}/virtool"
 
+
+@pytest.fixture(scope="module")
+def redis_url(module_scoped_container_getter):
+    service = module_scoped_container_getter.get("redis")
+    network_info = service.network_info[0]
+
+    return f"redis://redis{network_info.hostname}:{network_info.host_port}"
+
+
 @pytest.fixture(scope="module")
 def jobs_api_service(module_scoped_container_getter):
     return module_scoped_container_getter.get("jobs-api")
