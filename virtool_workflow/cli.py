@@ -5,7 +5,7 @@ import click
 
 from virtool_workflow.options import apply_options
 from virtool_workflow.runtime import runtime
-from virtool_workflow.runtime.redis import run_jobs_from_redis
+from virtool_workflow.runtime.redis import run_jobs_from_redis, run_job_from_redis
 from virtool_workflow.testing.cli import test_main
 
 
@@ -24,15 +24,23 @@ def run(job_id, **kwargs):
 
 
 @click.option(
+    "--exit-after-one",
+    flag=True
+)
+@click.option(
     "--redis-url",
     default="redis://localhost:6317",
 )
 @apply_options
 @click.argument("list_name")
 @cli.command()
-def run_from_redis(**kwargs):
+def run_from_redis(exit_after_one, **kwargs):
     """Run jobs from redis for a workflow."""
-    asyncio.run(run_jobs_from_redis(**kwargs))
+    asyncio.run(
+        run_job_from_redis(**kwargs)
+        if exit_after_one is True
+        else run_jobs_from_redis(**kwargs)
+    )
 
 
 def cli_main(**kwargs):
