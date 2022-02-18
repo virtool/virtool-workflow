@@ -1,8 +1,10 @@
+import signal
 from asyncio import create_task
 
-import signal
 from aioredis import Redis
 from virtool_core.redis import connect_to_redis, periodically_ping_redis
+
+from virtool_workflow import Workflow
 
 from .runtime import prepare_workflow, run_workflow
 
@@ -46,14 +48,29 @@ async def run_jobs_from_redis(
     await ping_task
 
 
+async def _run_job_from_redis(
+    list_name: str,
+    redis_url: str,
+    workflow: Workflow,
+    **config,
+):
+    redis = await connect_to_redis(redis_url)
+    config["job_id"] = await get_job_id_from_redis(list_name, redis)
+
+    try:
+        return await run_workflow(workflow, config)
+    finally:
+        redis.close()
+        await redis.wait_closed()
+
+
+
 async def run_job_from_redis(
     list_name: str,
     redis_url: str,
     **config,
 ):
     """Run a single job from a redis list."""
-    redis = await connect_to_redis(redis_url)
-
     async with prepare_workflow(**config) as workflow:
-        config["job_id"] = await get_job_id_from_redis(list_name, redis)
-        await run_workflow(workflow, config)
+        return await _run_job_from_redis(list_name, redis_url, workflow, **config)
+

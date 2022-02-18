@@ -11,6 +11,7 @@ pytest_plugins = [
     "tests.integration._fixtures.db", 
     "tests.integration._fixtures.jobs", 
     "tests.integration._fixtures.workflows",
+    "tests.integration._fixtures.redis",
     "virtool_workflow.testing.fixtures",
 ]
 
