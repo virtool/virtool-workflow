@@ -25,7 +25,8 @@ def run(job_id, **kwargs):
 
 @click.option(
     "--exit-after-one",
-    flag=True
+    is_flag=True,
+    help="Exit after running a single job from redis.",
 )
 @click.option(
     "--redis-url",
