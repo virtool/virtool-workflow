@@ -62,7 +62,10 @@ async def get(request):
 
 @mock_routes.get('/hmms/files/profiles.hmm')
 async def download_hmm_profiles(request):
-    return FileResponse(HMM_PROFILES)
+    return FileResponse(HMM_PROFILES, headers={
+        "Content-Disposition": "attachment; filename='profiles.hmm'",
+        "Content-Type": "application/octet-stream"
+    })
 
 
 @mock_routes.get('/hmms/files/annotations.json.gz')
@@ -76,4 +79,7 @@ async def download_annotations(request):
 
         virtool_core.utils.compress_file(annotations_path, compressed_annotations_path)
 
-    return FileResponse(annotations_path)
+    return FileResponse(annotations_path, headers={
+        "Content-Disposition": "attachment; filename=annotations.json.gz",
+        "Content-Type": "application/octet-stream"
+    })

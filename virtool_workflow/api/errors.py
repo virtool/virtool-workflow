@@ -57,6 +57,7 @@ async def raising_errors_by_status_code(
         accept = list(range(200, 299))
 
     response_json = None
+
     if response.content_type == "application/json":
         try:
             response_json = await response.json()
