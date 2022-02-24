@@ -124,7 +124,10 @@ async def download_index_files(request):
             "message": "Not Found"
         }, status=404)
 
-    return web.FileResponse(path)
+    return web.FileResponse(path, headers={
+        "Content-Disposition": f'attachment; filename="{filename}"',
+        "Content-Type": "application/octet-stream"
+    })
 
 
 @mock_routes.patch("/indexes/{index_id}")

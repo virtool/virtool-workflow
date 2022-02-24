@@ -110,7 +110,10 @@ async def download_reads_file(request):
 
     file_name = "paired_small_1.fq.gz" if filename == "reads_1.fq.gz" else "paired_small_2.fq.gz"
 
-    return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name)
+    return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name, headers={
+        "Content-Disposition": f"attachment; filename={file_name}",
+        "Content-Type": "application/octet-stream"
+    })
 
 
 @mock_routes.get("/samples/{sample_id}/caches/{key}/artifacts/{filename}")
@@ -228,4 +231,7 @@ async def download_cached_reads(request):
     file = (tmpdir / name)
     file.touch()
 
-    return FileResponse(file)
+    return FileResponse(file, headers={
+        "Content-Disposition": f"attachment; filename={name}",
+        "Content-Type": "application/octet-stream"
+    })
