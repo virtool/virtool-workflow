@@ -8,11 +8,13 @@ import dateutil.parser
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
 
+CHUNK_SIZE = 1024 * 1024 * 20
+
 
 async def read_file_from_response(response, target_path: Path):
     async with raising_errors_by_status_code(response):
         async with aiofiles.open(target_path, "wb") as f:
-            async for chunk in response.content.iter_chunked(4096):
+            async for chunk in response.content.iter_chunked(CHUNK_SIZE):
                 await f.write(chunk)
 
     return target_path
