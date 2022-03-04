@@ -71,22 +71,13 @@ async def reads(
     The trimmed sample reads.
 
     If a cache exists it will be used, otherwise a new cache will be created.
+
+    TODO: Reintroduce caching support here.
     """
+    result = await skewer(
+        **trimming_parameters
+    )(sample.read_paths, run_subprocess, run_in_executor)
 
-    try:
-        cache = await sample_caches.get(trimming_cache_key)
-        return Reads(sample, quality=cache.quality, path=cache.path)
-    except KeyError:
-        result = await skewer(
-            **trimming_parameters
-        )(sample.read_paths, run_subprocess, run_in_executor)
+    quality = await fastqc(work_path, run_subprocess)(sample.read_paths)
 
-        quality = await fastqc(work_path, run_subprocess)(sample.read_paths)
-
-        async with sample_caches.create(trimming_cache_key) as cache:
-            for path in result.read_paths:
-                await cache.upload(path)
-
-                cache.quality = quality
-
-        return Reads(sample=sample, quality=quality, path=result.left.parent)
+    return Reads(sample=sample, quality=quality, path=result.left.parent)
