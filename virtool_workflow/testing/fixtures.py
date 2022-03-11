@@ -9,6 +9,7 @@ from fixtures import FixtureScope, fixture
 
 
 import_module("virtool_workflow.builtin_fixtures")
+import_module("virtool_workflow.analysis.fixtures")
 
 
 @fixture
@@ -25,9 +26,9 @@ class WorkflowTestRunner(FixtureScope):
             workflow = self["workflow"]
 
         async with FixtureScope() as scope:
-             await execute(workflow, scope)
+            await execute(workflow, scope)
 
-             return await scope.get_or_instantiate("results")
+            return await scope.get_or_instantiate("results")
 
     async def execute_function(self, func: Callable, **kwargs):
         bound = await self.bind(func, **kwargs)
@@ -50,8 +51,8 @@ async def runtime(http, jobs_api_url):
 
 def install_as_pytest_fixtures(_globals, *fixtures):
     """Create pytest fixtures for each fixture in a given :class:`FixtureGroup`."""
-    for fixture in fixtures:
-        _globals[fixture.__name__] = pytest.fixture(fixture)
+    for _fixture in fixtures:
+        _globals[fixture.__name__] = pytest.fixture(_fixture)
 
 
 __all__ = [
