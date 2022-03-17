@@ -34,11 +34,12 @@ class Reads:
 
 @fixture
 async def reads(
+    proc: int,
+    run_in_executor,
+    run_subprocess,
     sample: Sample,
     trimming_parameters: dict,
     work_path: Path,
-    run_subprocess,
-    run_in_executor,
 ):
     """
     The trimmed sample reads.
@@ -46,6 +47,7 @@ async def reads(
     If a cache exists it will be used, otherwise a new cache will be created.
     """
     result = await skewer(
+        number_of_processes=proc,
         **trimming_parameters
     )(sample.read_paths, run_subprocess, run_in_executor)
 
