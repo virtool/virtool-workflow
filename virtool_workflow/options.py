@@ -54,6 +54,11 @@ options = [
         type=click.Path(),
         default="fixtures.py"
     ),
+    click.option(
+        "--sentry-dsn",
+        help="The DSN URL for Sentry.",
+        default=None,
+    ),
 ]
 
 
