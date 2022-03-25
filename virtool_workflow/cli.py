@@ -3,48 +3,77 @@ import asyncio
 
 import click
 
-from virtool_workflow.options import apply_options
-from virtool_workflow.runtime import runtime
-from virtool_workflow.runtime.redis import run_jobs_from_redis, run_job_from_redis
-from virtool_workflow.testing.cli import test_main
-
-
-@click.group()
-def cli():
-    runtime.configure_logging()
-    ...
-
-
-@apply_options
-@click.argument("job_id")
-@cli.command()
-def run(job_id, **kwargs):
-    """Run a workflow."""
-    asyncio.run(runtime.start(job_id=job_id, **kwargs))
+from virtool_workflow._runtime import start_runtime
 
 
 @click.option(
-    "--exit-after-one",
-    is_flag=True,
-    help="Exit after running a single job from redis.",
+    "--sentry-dsn",
+    help="DSN URL for sentry.",
+    default=None,
 )
 @click.option(
-    "--redis-url",
+    "--jobs-api-connection-string",
+    help="The URL of the jobs API.",
+    default="https://localhost:9950",
+)
+@click.option(
+    "--redis-connection-string",
+    help="The URL for connecting to Redis.",
     default="redis://localhost:6317",
 )
-@apply_options
-@click.argument("list_name")
-@cli.command()
-def run_from_redis(exit_after_one, **kwargs):
-    """Run jobs from redis for a workflow."""
-    asyncio.run(
-        run_job_from_redis(**kwargs)
-        if exit_after_one is True
-        else run_jobs_from_redis(**kwargs)
-    )
+@click.option(
+    "--redis-list-name",
+    help="The name of the redis list to watch for incoming jobs.",
+    required=True,
+)
+@click.option(
+    "--dev",
+    help="Run in development mode.",
+    is_flag=True,
+)
+@click.option(
+    "--work-path",
+    default="temp",
+    help="The path where temporary files will be stored.",
+    type=click.Path()
+)
+@click.option(
+    "--proc",
+    help="The number of processes to use.",
+    type=int,
+    default=2,
+)
+@click.option(
+    "--mem",
+    help="The amount of memory to use in GB.",
+    type=int,
+    default=8,
+)
+@click.option(
+    "--workflow-file",
+    "-f",
+    type=click.Path(exists=True),
+    default="workflow.py",
+    help="The path to the workflow file.",
+)
+@click.option(
+    "--init-file",
+    help="The path to the init file.",
+    type=click.Path(),
+    default="init.py"
+)
+@click.option(
+    "--fixtures-file",
+    help="The path to the fixtures file.",
+    type=click.Path(),
+    default="fixtures.py"
+)
+@click.command()
+def run_workflow(**kwargs):
+    """Run a workflow."""
+    asyncio.run(start_runtime(**kwargs))
 
 
-def cli_main(**kwargs):
+def cli_main():
     """Main pip entrypoint."""
-    cli.command("test")(test_main)
-    cli(auto_envvar_prefix="VT")
+    run_workflow(auto_envvar_prefix="VT")

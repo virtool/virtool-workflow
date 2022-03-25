@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import pkg_resources
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -7,17 +8,20 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 logger = logging.getLogger(__name__)
 
 
-def sentry_init(dsn: str, dev: bool):
+def configure_sentry(dsn: Optional[str], log_level: int, event_level: int = logging.ERROR):
     """
     Initialize Sentry for log aggregation.
     """
+    if dsn is None:
+        return
+
     logger.info(f"Initializing Sentry with DSN {dsn[:20]}...")
     sentry_sdk.init(
         dsn=dsn,
         integrations=[
             LoggingIntegration(
-                level=logging.DEBUG if dev else logging.INFO,
-                event_level=logging.ERROR,
+                level=log_level,
+                event_level= event_level,
             )
         ],
         release=pkg_resources.get_distribution('virtool-workflow').version,

@@ -27,6 +27,10 @@ options = [
         is_flag=True,
     ),
     click.option(
+        "--redis-url",
+        default="redis://localhost:6317",
+    ),
+    click.option(
         "--jobs-api-url",
         help="The URL of the jobs API.",
         default="https://localhost:9950",

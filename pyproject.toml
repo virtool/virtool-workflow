@@ -45,7 +45,7 @@ motor = "^2.5.1"
 pytest-docker-compose = "^3.2.1"
 
 [tool.poetry.scripts]
-workflow = "virtool_workflow.cli:cli_main"
+run-workflow = "virtool_workflow.cli:cli_main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
