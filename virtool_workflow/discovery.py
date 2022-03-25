@@ -30,6 +30,8 @@ def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     module_parent = str(path.parent)
     sys.path.append(module_parent)
     spec = spec_from_file_location(module_name, path)
+    if spec is None:
+        raise ImportError(f"could not import {path}")
     module = spec.loader.load_module(module_from_spec(spec).__name__)
     sys.path.remove(module_parent)
     return module
@@ -63,7 +65,7 @@ def discover_workflow(path: Path) -> Workflow:
     :returns: The first instance of :class:`virtool_workflow.Workflow`
               occurring in `dir(module)`
 
-    :raises StopIteration:
+    :raises ValueError:
         When no instance of virtool_workflow.Workflow can be found.
     """
     module = import_module_from_file(path.name.rstrip(path.suffix), path)
