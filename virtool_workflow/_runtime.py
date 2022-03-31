@@ -80,6 +80,7 @@ async def start_runtime(
     proc: int,
     redis_connection_string: str,
     redis_list_name: str,
+    timeout: int,
     sentry_dsn: str,
     work_path: os.PathLike,
     workflow_file: os.PathLike,
@@ -101,6 +102,10 @@ async def start_runtime(
     )
 
     async with configure_redis(redis_connection_string) as redis:
-        job_id = await get_next_job(redis_list_name, redis)
+        job_id = await get_next_job(redis_list_name, redis, timeout=timeout)
 
-    workflow_run = asyncio.create_task(run_workflow(config, job_id, workflow))
+    workflow_run = asyncio.create_task(
+            run_workflow(config, job_id, workflow)
+    )
+
+    await workflow_run
