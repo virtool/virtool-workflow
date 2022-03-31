@@ -27,6 +27,11 @@ from virtool_workflow._runtime import start_runtime
     required=True,
 )
 @click.option(
+    "--timeout",
+    help="Maximum time to wait for an incoming job",
+    default=1000,
+)
+@click.option(
     "--dev",
     help="Run in development mode.",
     is_flag=True,
