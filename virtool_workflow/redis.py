@@ -40,7 +40,7 @@ async def get_next_job(list_name: str, redis: Redis, timeout: int = None) -> str
     try:
         return await asyncio.wait_for(_get_next_job(list_name, redis), timeout)
     except asyncio.TimeoutError:
-        await shutdown(exit_code=124, message=f"failed to find a job within timeout")
+        await shutdown(exit_code=124, message="failed to find a job within timeout")
 
 
 async def _get_next_job(list_name: str, redis: Redis) -> str:

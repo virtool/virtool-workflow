@@ -1,9 +1,0 @@
-job_id: analysis_integration_test_job
-workflow: analysis_integration_test
-
-sample:
-  paired: True
-  finalize: True
-
-analysis:
-  ready: False

@@ -11,6 +11,6 @@ logger = logging.getLogger(__name__)
 def configure_signal_handling():
     loop = asyncio.get_event_loop()
     loop.add_signal_handler(
-        signal.SIGTERM, 
+        signal.SIGTERM,
         lambda *_: asyncio.create_task(shutdown(signal.SIGTERM))
     )
