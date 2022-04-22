@@ -18,14 +18,14 @@ async def configure_redis(url: str, timeout=1) -> AsyncGenerator[Redis, None]:
     ping_task = None
 
     try:
-        logger.info(f"attempting Redis connection at {url}")
+        logger.info(f"Attempting Redis connection at {url}")
         redis = await aioredis.create_redis_pool(url, timeout=timeout)
         ping_task = asyncio.create_task(periodically_ping_redis(redis))
-        logger.info(f"connected to Redis at {url}")
+        logger.info(f"Connected to Redis at {url}")
         yield redis
     finally:
         if ping_task is not None and redis is not None:
-            logger.info("disconnecting from Redis")
+            logger.info("Disconnecting from Redis")
             ping_task.cancel()
 
             with suppress(asyncio.CancelledError):
@@ -36,7 +36,7 @@ async def configure_redis(url: str, timeout=1) -> AsyncGenerator[Redis, None]:
 
 
 async def get_next_job(list_name: str, redis: Redis, timeout: int = None) -> str:
-    logger.info(f"waiting for a job; {timeout=}")
+    logger.info(f"Waiting for a job; {timeout=}")
     try:
         return await asyncio.wait_for(_get_next_job(list_name, redis), timeout)
     except asyncio.TimeoutError:
