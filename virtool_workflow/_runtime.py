@@ -4,7 +4,7 @@ import asyncio
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
 from fixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_workflow import discovery, execute, hooks
@@ -36,23 +36,23 @@ def configure_workflow(
     logger.info("Importing workflow")
     workflow = discovery.discover_workflow(Path(workflow_file))
 
-    logger.info(f"Importing additional files")
+    logger.info("Importing additional files")
     for f in (Path(f) for f in (init_file, fixtures_file)):
         try:
             module = discovery.import_module_from_file(f.name.rstrip(".py"), f)
             logger.info(f"Imported {module}")
         except FileNotFoundError:
-            if init_file != "init.py":
-                raise
-            elif fixtures_file != "fixtures.py":
+            if init_file != "init.py" or fixtures_file != "fixtures.py":
                 raise
 
-    for name in ("virtool_workflow.builtin_fixtures", "virtool_workflow.analysis.fixtures"):
+    for name in (
+        "virtool_workflow.builtin_fixtures",
+        "virtool_workflow.analysis.fixtures"
+    ):
         module = import_module(name)
         logger.debug(f"Imported {module}")
 
     return workflow
-
 
 
 def configure_hooks():
@@ -62,7 +62,11 @@ def configure_hooks():
     hooks.on_success(status.send_complete, once=True)
 
 
-async def run_workflow(config: Dict[str, Any], job_id: str, workflow: Workflow) -> Dict[str, Any]:
+async def run_workflow(
+    config: Dict[str, Any],
+    job_id: str,
+    workflow: Workflow
+) -> Dict[str, Any]:
     async with FixtureScope() as scope:
         scope["config"] = config
         scope["job_id"] = job_id
@@ -90,7 +94,7 @@ async def start_runtime(
     configure_sentry(sentry_dsn, log_level)
     configure_hooks()
     configure_signal_handling()
-    
+
     workflow = configure_workflow(fixtures_file, init_file, workflow_file)
 
     config = dict(
@@ -105,7 +109,7 @@ async def start_runtime(
         job_id = await get_next_job(redis_list_name, redis, timeout=timeout)
 
     workflow_run = asyncio.create_task(
-            run_workflow(config, job_id, workflow)
+        run_workflow(config, job_id, workflow)
     )
 
     await workflow_run
