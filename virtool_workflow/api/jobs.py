@@ -135,7 +135,7 @@ async def _push_status(
         "progress": int(progress * 100),
     }
     
-    logger.info(f"status: {pprint.pformat(payload)}")
+    logger.info(f"Status: {pprint.pformat(payload)}")
 
     async with http.post(
         f"{jobs_api_url}/jobs/{job.id}/status", json=payload) as response:
