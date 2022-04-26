@@ -11,7 +11,6 @@ async def test_run_once_from_redis(create_job, redis, redis_service, base_config
     redis.close()
     await redis.wait_closed()
 
-
     workflow = Workflow()
 
     workflow_did_run = False

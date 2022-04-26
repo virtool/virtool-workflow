@@ -10,6 +10,3 @@ async def redis(redis_service):
     finally:
         _redis.close()
         await _redis.wait_closed()
-
-    
-

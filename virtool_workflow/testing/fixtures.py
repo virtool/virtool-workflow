@@ -55,7 +55,4 @@ def install_as_pytest_fixtures(_globals, *fixtures):
         _globals[fixture.__name__] = pytest.fixture(_fixture)
 
 
-__all__ = [
-    "runtime",
-    "install_as_pytest_fixtures"
-]
+__all__ = ["runtime", "install_as_pytest_fixtures"]

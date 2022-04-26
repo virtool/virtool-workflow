@@ -16,22 +16,18 @@ TRIM_PARAMETERS = {
     "max_indel_rate": "0.03",
     "max_length": None,
     "mean_quality": "25",
-    "min_length": "20"
+    "min_length": "20",
 }
 
 
 @fixture
 def trimming_min_length(sample: Sample):
-    return calculate_trimming_min_length(
-        sample.library_type,
-        sample.max_length
-    )
+    return calculate_trimming_min_length(sample.library_type, sample.max_length)
 
 
 @fixture
 def trimming_parameters(
-        sample: Sample,
-        trimming_min_length: int
+    sample: Sample, trimming_min_length: int
 ) -> Dict[str, Union[str, int]]:
     """
     Calculates trimming parameters based on the library type, and minimum allowed trim length.
@@ -45,7 +41,7 @@ def trimming_parameters(
             **TRIM_PARAMETERS,
             "end_quality": 0,
             "mean_quality": 0,
-            "min_length": trimming_min_length
+            "min_length": trimming_min_length,
         }
 
     if sample.library_type == LibraryType.srna:
@@ -55,20 +51,20 @@ def trimming_parameters(
             "max_length": 22,
         }
 
-    return {
-        **TRIM_PARAMETERS,
-        "min_length": trimming_min_length
-    }
+    return {**TRIM_PARAMETERS, "min_length": trimming_min_length}
 
 
 @fixture
 def trimming_cache_key(sample: Sample, trimming_parameters: dict):
     """Compute a unique cache key based on the trimming parameters"""
-    trim_param_json = json.dumps({
-        "id": sample.id,
-        "min_length": sample.min_length,
-        **trimming_parameters,
-    }, sort_keys=True)
+    trim_param_json = json.dumps(
+        {
+            "id": sample.id,
+            "min_length": sample.min_length,
+            **trimming_parameters,
+        },
+        sort_keys=True,
+    )
 
     raw_key = "reads-" + trim_param_json
 

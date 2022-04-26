@@ -3,12 +3,13 @@ from pathlib import Path
 
 import pytest
 
+
 @pytest.fixture()
 async def loop(event_loop):
     """
     Ensure the correct event loop is used.
 
-    pytest-asyncio alters the asyncio event loop policy which can lead 
+    pytest-asyncio alters the asyncio event loop policy which can lead
     to :func:`asyncio.get_event_loop()` returning a different event loop
     than an async test will run in. Using this fixture will ensure that
     the same event loop is used by the test and any async fixtures requested.
@@ -22,4 +23,4 @@ async def loop(event_loop):
 
 @pytest.fixture()
 def docker_compose_file():
-    Path(__file__).parent/"docker-compose.yml"
+    Path(__file__).parent / "docker-compose.yml"

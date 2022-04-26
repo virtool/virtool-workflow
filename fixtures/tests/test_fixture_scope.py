@@ -96,7 +96,6 @@ async def test_does_not_wrap_noarg_function():
 
 @runs_in_new_fixture_context(copy_context=False)
 async def test_non_recursive_bind_posargs():
-
     @fixture
     def a():
         return "a"

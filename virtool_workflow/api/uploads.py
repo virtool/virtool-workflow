@@ -25,6 +25,7 @@ class FileDownloader(Protocol):
 @fixture(protocol=FileDownloader)
 def download_input_file(http, jobs_api_url: str) -> FileDownloader:
     """Download files from Virtool's uploads API."""
+
     async def download(file_id, target):
         target_url = f"{jobs_api_url}/uploads/{file_id}"
         async with http.get(target_url) as response:
@@ -41,24 +42,19 @@ def files_list(job: Job) -> List[dict]:
 
 @fixture
 async def input_files(
-    files_list: List[dict],
-    download_input_file: FileDownloader,
-    work_path: Path
+    files_list: List[dict], download_input_file: FileDownloader, work_path: Path
 ) -> Dict[str, Path]:
     """
     The downloaded input files for the current workflow run.
 
     :returns: A dictionary mapping file names to their locations on disk.
     """
-    target_dir = work_path/"files"
+    target_dir = work_path / "files"
     target_dir.mkdir()
 
     downloads = await asyncio.gather(
-        *[
-            download_input_file(f["id"], target_dir/f["name"])
-            for f in files_list
-        ],
-        return_exceptions=True
+        *[download_input_file(f["id"], target_dir / f["name"]) for f in files_list],
+        return_exceptions=True,
     )
 
     for f in downloads:

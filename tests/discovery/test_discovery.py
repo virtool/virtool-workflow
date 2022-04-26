@@ -22,8 +22,7 @@ def test_discover_fixtures():
 
     fixtures = get_fixtures()
 
-    assert all(
-        f"fixture_{letter}" in fixtures for letter in ("a", "b", "c"))
+    assert all(f"fixture_{letter}" in fixtures for letter in ("a", "b", "c"))
 
 
 async def test_run_discovery(runtime):

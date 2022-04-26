@@ -13,6 +13,7 @@ class Analysis:
     A data model for Virtool analyses.
 
     """
+
     #: The analysis' unique database ID.
     id: str
     #: A list of files associated with the analysis

@@ -19,6 +19,7 @@ def configure_logging():
     # Install coloredlogs if available.
     with suppress(ModuleNotFoundError):
         import coloredlogs
+
         logging.debug("Installed coloredlogs")
         coloredlogs.install(level=logging.DEBUG)
 
@@ -54,16 +55,15 @@ async def run_workflow(workflow: Workflow, config: dict):
 
 @asynccontextmanager
 async def prepare_workflow(**config):
-    """Prepare for a workflow run."""    
+    """Prepare for a workflow run."""
     if config["sentry_dsn"] is not None:
         import virtool_workflow.sentry
+
         virtool_workflow.sentry.sentry_init(config["sentry_dsn"], config["dev_mode"])
 
     load_scripts(Path(config["init_file"]), Path(config["fixtures_file"]))
 
-    workflow = discovery.discover_workflow(
-        Path(config["workflow_file_path"])
-    )
+    workflow = discovery.discover_workflow(Path(config["workflow_file_path"]))
 
     import_module("virtool_workflow.builtin_fixtures")
 

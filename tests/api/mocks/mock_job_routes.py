@@ -11,45 +11,43 @@ TEST_JOB = {
     "args": {
         "subtraction_id": "Thale",
         "analysis_id": "test_analysis",
-        "file_id": "vlekszor-ATgenomeTAIR9.171"
+        "file_id": "vlekszor-ATgenomeTAIR9.171",
     },
     "proc": 2,
     "mem": 4,
-    "user": {
-        "id": "igboyes"
-    },
+    "user": {"id": "igboyes"},
     "status": [
         {
             "state": "waiting",
             "stage": None,
             "error": None,
             "progress": 0,
-            "timestamp": "2018-02-06T22:15:52.664000Z"
+            "timestamp": "2018-02-06T22:15:52.664000Z",
         },
         {
             "state": "running",
             "stage": "mk_subtraction_dir",
             "error": None,
             "progress": 0.2,
-            "timestamp": "2018-02-06T22:16:11.166000Z"
+            "timestamp": "2018-02-06T22:16:11.166000Z",
         },
         {
             "state": "running",
             "stage": "set_stats",
             "error": None,
             "progress": 0.4,
-            "timestamp": "2018-02-06T22:16:11.169000Z"
+            "timestamp": "2018-02-06T22:16:11.169000Z",
         },
         {
             "state": "running",
             "stage": "bowtie_build",
             "error": None,
             "progress": 0.6,
-            "timestamp": "2018-02-06T22:16:15.637000Z"
-        }
+            "timestamp": "2018-02-06T22:16:15.637000Z",
+        },
     ],
     "id": "zzpugkyt",
-    "key": b64encode(b"test_key").decode("utf-8")
+    "key": b64encode(b"test_key").decode("utf-8"),
 }
 
 
@@ -68,15 +66,17 @@ async def push_status(request):
     job_id = request.match_info["job_id"]
 
     if job_id != TEST_JOB["id"]:
-        return json_response({
-            "message": "Not Found",
-        }, status=404)
+        return json_response(
+            {
+                "message": "Not Found",
+            },
+            status=404,
+        )
 
     status = await request.json()
 
     TEST_JOB["status"].append(status)
 
-    return web.json_response({
-        **status,
-        "timestamp": datetime.now().isoformat()},
+    return web.json_response(
+        {**status, "timestamp": datetime.now().isoformat()},
     )

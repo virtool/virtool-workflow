@@ -18,10 +18,8 @@ async def test_status_updates_without_error(db, create_job, exec_workflow, job_i
     def second(job):
         """Description of Second."""
 
-
     jobs = db.get_collection("jobs")
     steps_finished = 0
-
 
     @hooks.on_step_finish
     async def check_current_status(current_step):
@@ -42,13 +40,12 @@ async def test_status_updates_without_error(db, create_job, exec_workflow, job_i
         else:
             raise RuntimeError(f"Current step {current_step} is an illegal value")
 
-
     on_success_called = False
 
     @hooks.on_success(once=True)
     async def check_success_status():
         nonlocal on_success_called
-        on_success_called = True 
+        on_success_called = True
 
         # Wait for status to be received at virtool server
         await sleep(0.1)
@@ -57,7 +54,6 @@ async def test_status_updates_without_error(db, create_job, exec_workflow, job_i
         status = job["status"][-1]
 
         assert status["state"] == "complete"
-
 
     await exec_workflow(wf)
 
@@ -93,7 +89,6 @@ async def test_status_updates_with_error(db, create_job, exec_workflow, job_id):
         assert status["error"]["type"] == "ValueError"
 
         hook_called = True
-
 
     with pytest.raises(ValueError):
         await exec_workflow(wf)

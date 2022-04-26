@@ -27,7 +27,8 @@ class FixtureHook(Hook):
         :param suppress: If true, errors raised within the callback functions will be suppressed and logged.
         """
         logger.debug(
-            f"Triggering {self.name} hook with callback functions: \n{pprint.pformat(self.callbacks, indent=4)}")
+            f"Triggering {self.name} hook with callback functions: \n{pprint.pformat(self.callbacks, indent=4)}"
+        )
         if "scope" not in scope:
             scope["scope"] = scope
 

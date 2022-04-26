@@ -19,6 +19,7 @@ class Reads:
     :param quality: The fastqc results for the trimmed reads.
     :param path: The path to the directory containing the trimmed read files.
     """
+
     sample: Sample
     quality: dict
     path: Path
@@ -46,10 +47,9 @@ async def reads(
 
     If a cache exists it will be used, otherwise a new cache will be created.
     """
-    result = await skewer(
-        number_of_processes=proc,
-        **trimming_parameters
-    )(sample.read_paths, run_subprocess, run_in_executor)
+    result = await skewer(number_of_processes=proc, **trimming_parameters)(
+        sample.read_paths, run_subprocess, run_in_executor
+    )
 
     quality = await fastqc(work_path, run_subprocess)(sample.read_paths)
 

@@ -11,6 +11,7 @@ class NucleotideComposition:
     https://en.wikipedia.org/wiki/Nucleic_acid_notation
 
     """
+
     #: The proportion of adenine (A) bases in the sequence.
     a: float = 0.0
     #: The proportion of cytosine (C) bases in the sequence.

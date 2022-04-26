@@ -5,11 +5,4 @@ from virtool_workflow.analysis.analysis import analysis
 from virtool_workflow.analysis.indexes import indexes
 from virtool_workflow.analysis.fastqc import fastqc
 
-__all__ = [
-    "sample",
-    "subtractions",
-    "hmms",
-    "analysis",
-    "indexes",
-    "fastqc"
-]
+__all__ = ["sample", "subtractions", "hmms", "analysis", "indexes", "fastqc"]

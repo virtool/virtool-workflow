@@ -11,10 +11,7 @@ from tests.conftest import ANALYSIS_TEST_FILES_DIR
 mock_routes = RouteTableDef()
 
 MOCK_HMM = {
-    "families": {
-        "None": 1,
-        "Geminiviridae": 203
-    },
+    "families": {"None": 1, "Geminiviridae": 203},
     "total_entropy": 72.08,
     "length": 136,
     "cluster": 3,
@@ -23,26 +20,21 @@ MOCK_HMM = {
             "accession": "NP_040323.1",
             "gi": "9626084",
             "organism": "Pepper huasteco yellow vein virus",
-            "name": "AL2 protein"
+            "name": "AL2 protein",
         },
         {
             "accession": "NP_044924.1",
             "gi": "9629639",
             "organism": "Tomato mottle Taino virus",
-            "name": "transactivator protein"
-        }
+            "name": "transactivator protein",
+        },
     ],
-    "genera": {
-        "Begomovirus": 197,
-        "Topocuvirus": 1,
-        "None": 2,
-        "Curtovirus": 4
-    },
+    "genera": {"Begomovirus": 197, "Topocuvirus": 1, "None": 2, "Curtovirus": 4},
     "mean_entropy": 0.53,
     "count": 216,
     "names": ["AC2 protein", "C2 protein", "AC2"],
     "hidden": False,
-    "id": "zltnktou"
+    "id": "zltnktou",
 }
 
 HMM_PROFILES = ANALYSIS_TEST_FILES_DIR / "profiles.hmm"
@@ -53,24 +45,25 @@ async def get(request):
     hmm_id = request.match_info["hmm_id"]
 
     if hmm_id != MOCK_HMM["id"]:
-        return json_response({
-            "message": "Not Found"
-        }, status=404)
+        return json_response({"message": "Not Found"}, status=404)
 
     return json_response(MOCK_HMM)
 
 
-@mock_routes.get('/hmms/files/profiles.hmm')
+@mock_routes.get("/hmms/files/profiles.hmm")
 async def download_hmm_profiles(request):
-    return FileResponse(HMM_PROFILES, headers={
-        "Content-Disposition": "attachment; filename='profiles.hmm'",
-        "Content-Type": "application/octet-stream"
-    })
+    return FileResponse(
+        HMM_PROFILES,
+        headers={
+            "Content-Disposition": "attachment; filename='profiles.hmm'",
+            "Content-Type": "application/octet-stream",
+        },
+    )
 
 
-@mock_routes.get('/hmms/files/annotations.json.gz')
+@mock_routes.get("/hmms/files/annotations.json.gz")
 async def download_annotations(request):
-    annotations_path = ANALYSIS_TEST_FILES_DIR/"annotations.json"
+    annotations_path = ANALYSIS_TEST_FILES_DIR / "annotations.json"
     compressed_annotations_path = annotations_path.with_suffix(".json.gz")
 
     if not compressed_annotations_path.exists():
@@ -79,7 +72,10 @@ async def download_annotations(request):
 
         virtool_core.utils.compress_file(annotations_path, compressed_annotations_path)
 
-    return FileResponse(annotations_path, headers={
-        "Content-Disposition": "attachment; filename=annotations.json.gz",
-        "Content-Type": "application/octet-stream"
-    })
+    return FileResponse(
+        annotations_path,
+        headers={
+            "Content-Disposition": "attachment; filename=annotations.json.gz",
+            "Content-Type": "application/octet-stream",
+        },
+    )

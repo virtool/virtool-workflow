@@ -5,11 +5,18 @@ from itertools import chain
 from fixtures import FixtureScope, fixture
 from virtool_workflow import Workflow
 from virtool_workflow.execution import states
-from virtool_workflow.hooks import (on_failure, on_finish, on_result,
-                                    on_step_finish, on_step_start, on_success,
-                                    on_workflow_start)
+from virtool_workflow.hooks import (
+    on_failure,
+    on_finish,
+    on_result,
+    on_step_finish,
+    on_step_start,
+    on_success,
+    on_workflow_start,
+)
 
 logger = logging.getLogger(__name__)
+
 
 @on_workflow_start
 async def initialize_scope(scope):
@@ -65,7 +72,7 @@ async def step_setup(scope, step):
 
     try:
         await on_step_start.trigger(scope)
-        yield 
+        yield
         await on_step_finish.trigger(scope)
     finally:
         scope["current_step"] = None
@@ -97,6 +104,3 @@ async def update_step_number(scope):
 @fixture(scope="function")
 def progress(step_number, workflow):
     return float(step_number) / float(len(workflow.steps))
-
-    
-    

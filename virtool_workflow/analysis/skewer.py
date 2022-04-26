@@ -12,6 +12,7 @@ from virtool_workflow.analysis.utils import ReadPaths
 @dataclass
 class SkewerResult:
     """Represents the result of running Skewer to trim a paired or unpaired FASTQ dataset."""
+
     #: The paths to the trimmed reads.
     read_paths: ReadPaths
     #: The process running Skewer.
@@ -48,16 +49,16 @@ class SkewerResult:
 
 
 def skewer(
-        min_length: int,
-        mode: str = "pe",
-        max_error_rate: float = 0.1,
-        max_indel_rate: float = 0.03,
-        end_quality: int = 0,
-        mean_quality: int = 0,
-        number_of_processes: int = 1,
-        quiet: bool = True,
-        other_options: Iterable[str] = ("-n", "-z"),
-        **kwargs
+    min_length: int,
+    mode: str = "pe",
+    max_error_rate: float = 0.1,
+    max_indel_rate: float = 0.03,
+    end_quality: int = 0,
+    mean_quality: int = 0,
+    number_of_processes: int = 1,
+    quiet: bool = True,
+    other_options: Iterable[str] = ("-n", "-z"),
+    **kwargs
 ):
     """Create a coroutine function that will run skewer with the given parameters."""
     if shutil.which("skewer") is None:
@@ -65,14 +66,21 @@ def skewer(
 
     command = [
         "skewer",
-        "-r", str(max_error_rate),
-        "-d", str(max_indel_rate),
-        "-m", str(mode),
-        "-l", str(min_length),
-        "-q", str(end_quality),
-        "-Q", str(mean_quality),
-        "-t", str(number_of_processes),
-        *other_options
+        "-r",
+        str(max_error_rate),
+        "-d",
+        str(max_indel_rate),
+        "-m",
+        str(mode),
+        "-l",
+        str(min_length),
+        "-q",
+        str(end_quality),
+        "-Q",
+        str(mean_quality),
+        "-t",
+        str(number_of_processes),
+        *other_options,
     ]
 
     if quiet:
@@ -108,10 +116,12 @@ def rename_trimming_results(path: Path):
     )
 
     try:
-        return (shutil.move(
-            path / "reads-trimmed.fastq.gz",
-            path / "reads_1.fq.gz",
-        ),)
+        return (
+            shutil.move(
+                path / "reads-trimmed.fastq.gz",
+                path / "reads_1.fq.gz",
+            ),
+        )
     except FileNotFoundError:
         return (
             shutil.move(
@@ -121,11 +131,13 @@ def rename_trimming_results(path: Path):
             shutil.move(
                 path / "reads-trimmed-pair2.fastq.gz",
                 path / "reads_2.fq.gz",
-            )
+            ),
         )
 
 
-def calculate_trimming_min_length(library_type: LibraryType, sample_read_length: int) -> int:
+def calculate_trimming_min_length(
+    library_type: LibraryType, sample_read_length: int
+) -> int:
     """
     The minimum length of a read.
 

@@ -38,11 +38,11 @@ class Index(data_model.Index):
            - :meth:`.get_sequence_length`
 
     """
+
     path: Path
     _run_in_executor: FunctionExecutor
     _run_subprocess: RunSubprocess
-    upload: Callable[[Path, VirtoolFileFormat],
-                     Awaitable[None]] = not_implemented
+    upload: Callable[[Path, VirtoolFileFormat], Awaitable[None]] = not_implemented
     finalize: Callable[[], Awaitable[None]] = not_implemented
     _sequence_lengths: Optional[Dict[str, int]] = None
     _sequence_otu_map: Optional[Dict[str, str]] = None
@@ -90,8 +90,7 @@ class Index(data_model.Index):
 
         """
         if self.json_path.is_file():
-            raise FileExistsError(
-                "Index JSON file has already been decompressed")
+            raise FileExistsError("Index JSON file has already been decompressed")
 
         try:
             await self._run_in_executor(
@@ -146,7 +145,10 @@ class Index(data_model.Index):
             raise ValueError("The sequence_id does not exist in the index")
 
     async def write_isolate_fasta(
-            self, otu_ids: List[str], path: Path, processes: int = 1,
+        self,
+        otu_ids: List[str],
+        path: Path,
+        processes: int = 1,
     ) -> Dict[str, int]:
         """
         Generate a FASTA file for all of the isolates of the OTUs specified by ``otu_ids``.
@@ -172,12 +174,14 @@ class Index(data_model.Index):
                         await f.write(f">{sequence['_id']}\n{sequence['sequence']}\n")
                         lengths[sequence["_id"]] = len(sequence["sequence"])
 
-        await self._run_in_executor(compress_file, path, path.with_suffix(".fa.gz"), processes)
+        await self._run_in_executor(
+            compress_file, path, path.with_suffix(".fa.gz"), processes
+        )
 
         return lengths
 
     async def build_isolate_index(
-            self, otu_ids: List[str], path: Path, processes: int
+        self, otu_ids: List[str], path: Path, processes: int
     ) -> Tuple[Path, Dict[str, int]]:
         """
         Generate a FASTA file and Bowtie2 index for all of the isolates of the OTUs specified by ``otu_ids``.
@@ -208,11 +212,11 @@ class Index(data_model.Index):
 
 @fixture
 async def indexes(
-        index_provider: IndexProvider,
-        work_path: Path,
-        proc: int,
-        run_in_executor: FunctionExecutor,
-        run_subprocess: RunSubprocess,
+    index_provider: IndexProvider,
+    work_path: Path,
+    proc: int,
+    run_in_executor: FunctionExecutor,
+    run_subprocess: RunSubprocess,
 ) -> List[Index]:
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
     index_ = await index_provider
@@ -229,7 +233,7 @@ async def indexes(
             path=index_work_path,
             ready=index_.ready,
             _run_in_executor=run_in_executor,
-            _run_subprocess=run_subprocess
+            _run_subprocess=run_subprocess,
         )
     else:
         await index_provider.download(index_work_path, "otus.json.gz")
@@ -242,7 +246,7 @@ async def indexes(
             upload=index_provider.upload,
             finalize=index_provider.finalize,
             _run_in_executor=run_in_executor,
-            _run_subprocess=run_subprocess
+            _run_subprocess=run_subprocess,
         )
 
     await index.decompress_json(proc)

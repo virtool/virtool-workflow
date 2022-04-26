@@ -7,10 +7,7 @@ from virtool_workflow.api.samples import SampleProvider
 
 
 @fixture
-async def sample(
-        sample_provider: SampleProvider,
-        work_path: Path
-) -> Sample:
+async def sample(sample_provider: SampleProvider, work_path: Path) -> Sample:
     """
     The sample associated with the current job.
 

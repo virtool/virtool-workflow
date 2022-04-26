@@ -2,10 +2,9 @@ import inspect
 from contextlib import contextmanager
 from contextvars import ContextVar
 from functools import wraps
-from typing import (Any, Callable, Dict, Literal, NewType, Protocol,
-                    runtime_checkable)
+from typing import Any, Callable, Dict, Literal, NewType, Protocol, runtime_checkable
 
-FixtureValue = NewType('FixtureValue', Any)
+FixtureValue = NewType("FixtureValue", Any)
 """A return value from a :class:`Fixture` callable."""
 
 
@@ -18,6 +17,7 @@ class Fixture(Protocol):
     Enables `isinstance(function, Fixture)` checks to be made.
 
     """
+
     __name__: str
     __scope__: Literal["function", "store"]
     __return_protocol__: Protocol
@@ -78,19 +78,24 @@ def fixture_context(*fixtures: Fixture, copy_context=True) -> Dict[str, Fixture]
 
 def runs_in_new_fixture_context(*fixtures, copy_context=True):
     """Decorator which causes the function to be executed in a new fixture context."""
+
     def _deco(function: callable):
         if inspect.iscoroutinefunction(function):
+
             @wraps(function)
             async def _in_new_context(*args, **kwargs):
                 with fixture_context(*fixtures, copy_context=copy_context):
                     return await function(*args, **kwargs)
+
         else:
+
             @wraps(function)
             def _in_new_context(*args, **kwargs):
                 with fixture_context(*fixtures, copy_context=copy_context):
                     return function(*args, **kwargs)
 
         return _in_new_context
+
     return _deco
 
 

@@ -23,7 +23,7 @@ def bash(tmpdir):
 
 @pytest.fixture
 def bash_sleep(tmpdir):
-    txt_path = tmpdir / 'test.txt'
+    txt_path = tmpdir / "test.txt"
 
     sh = f"""
     sleep 100

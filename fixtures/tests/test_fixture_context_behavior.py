@@ -108,7 +108,6 @@ async def test_fixture_context_no_copy_behavior(fixtures):
 
 
 async def test_context_decorator(fixtures):
-
     def baz():
         return "baz"
 

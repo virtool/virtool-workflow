@@ -22,8 +22,17 @@ async def test_get(sample_api):
     assert isinstance(sample, Sample)
     assert sample.id == sample_api.id
 
-    for key in ["name", "id", "host", "isolate", "locale",
-                "paired", "quality", "nuvs", "pathoscope"]:
+    for key in [
+        "name",
+        "id",
+        "host",
+        "isolate",
+        "locale",
+        "paired",
+        "quality",
+        "nuvs",
+        "pathoscope",
+    ]:
         assert getattr(sample, key) == TEST_SAMPLE[key]
 
     for actual, expected in zip(sample.files, TEST_SAMPLE["files"]):
@@ -71,7 +80,9 @@ async def test_download(sample_api, tmpdir, file_regression):
         with gzip.open(read_file) as f:
             file_regression.check(f.read(), basename=read_file.name, binary=True)
 
-    assert read_files == read_files == (tmpdir / "reads_1.fq.gz", tmpdir / "reads_2.fq.gz")
+    assert (
+        read_files == read_files == (tmpdir / "reads_1.fq.gz", tmpdir / "reads_2.fq.gz")
+    )
 
     await sample_api.download_artifact("artifact.json", tmpdir)
 

@@ -3,7 +3,10 @@ from pathlib import Path
 import pytest
 from pytest import fixture
 
-from tests.api.mocks.mock_subtraction_routes import TEST_SUBTRACTION_ID, TEST_SUBTRACTION
+from tests.api.mocks.mock_subtraction_routes import (
+    TEST_SUBTRACTION_ID,
+    TEST_SUBTRACTION,
+)
 from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.data_model import Subtraction
@@ -18,10 +21,7 @@ def subtraction_api(http, jobs_api_url: str, work_path):
     TEST_SUBTRACTION["ready"] = False
 
     return SubtractionProvider(
-        TEST_SUBTRACTION_ID,
-        http,
-        jobs_api_url,
-        subtraction_work_path
+        TEST_SUBTRACTION_ID, http, jobs_api_url, subtraction_work_path
     )
 
 
@@ -46,7 +46,9 @@ async def test_upload_file(subtraction_api, work_path):
 
 
 async def test_finalize(subtraction_api):
-    updated_subtraction = await subtraction_api.finalize({"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4}, 100)
+    updated_subtraction = await subtraction_api.finalize(
+        {"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4}, 100
+    )
 
     assert isinstance(updated_subtraction, Subtraction)
     assert updated_subtraction.gc.a == 0.2

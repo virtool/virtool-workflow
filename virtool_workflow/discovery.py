@@ -46,13 +46,9 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
     """
 
     if isinstance(module, Path):
-        module = import_module_from_file(
-            module.name.rstrip(module.suffix), module)
+        module = import_module_from_file(module.name.rstrip(module.suffix), module)
 
-    return [
-        attr for attr in module.__dict__.values()
-        if isinstance(attr, Callable)
-    ]
+    return [attr for attr in module.__dict__.values() if isinstance(attr, Callable)]
 
 
 def discover_workflow(path: Path) -> Workflow:
@@ -72,16 +68,14 @@ def discover_workflow(path: Path) -> Workflow:
 
     try:
         return next(
-            attr for attr in module.__dict__.values()
-            if isinstance(attr, Workflow)
+            attr for attr in module.__dict__.values() if isinstance(attr, Workflow)
         )
     except StopIteration:
         return collect(module)
 
 
 def run_discovery(
-        path: Path,
-        fixture_path: Optional[Path] = None
+    path: Path, fixture_path: Optional[Path] = None
 ) -> Tuple[Workflow, List[Callable]]:
     """
     Discover a workflow and fixtures from the given path(s).

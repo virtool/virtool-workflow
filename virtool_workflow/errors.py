@@ -1,4 +1,3 @@
-
 class IllegalJobArguments(ValueError):
     ...
 
