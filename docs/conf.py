@@ -13,18 +13,18 @@
 import os
 import sys
 
-from virtool_workflow.execution.hooks.fixture_hooks import FixtureHook
+from virtool_workflow.execution.hooks import Hook
 
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = 'virtool_workflow'
-author = 'Ian Boyes, Blake Smith'
+project = "virtool_workflow"
+author = "Ian Boyes, Blake Smith"
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = "0.0.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -34,31 +34,28 @@ release = '0.0.1'
 # ones.
 sys.path.append(os.path.abspath("./_ext"))
 
-extensions = ["autofixture", "sphinx.ext.autodoc", "sphinx.ext.autosectionlabel", "sphinx.ext.intersphinx"]
+extensions = [
+    "autofixture",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.intersphinx",
+]
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3.9", None)}
 
-html_theme_options = {
-    "page_width": "1200px",
-    "sidebar_width": "20%"
-}
+html_theme_options = {"page_width": "1200px", "sidebar_width": "20%"}
 
 html_sidebars = {
-    '**': [
-        'globaltoc.html',
-        'relations.html',
-        'sourcelink.html',
-        'searchbox.html'
-    ]
+    "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -66,13 +63,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_favicon = './favicon.ico'
+html_favicon = "./favicon.ico"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
-    if isinstance(obj, FixtureHook):
+    if isinstance(obj, Hook):
         return None, None
 
     return signature, return_annotation

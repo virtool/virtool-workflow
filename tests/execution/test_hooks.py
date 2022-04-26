@@ -1,34 +1,47 @@
+import asyncio
 from contextlib import suppress
 
-import asyncio
+import pytest
 
-from virtool_workflow import hooks
-from virtool_workflow.execution.hooks.hooks import Hook
+from fixtures import FixtureScope
+from virtool_workflow.execution.hooks import Hook
 
 example_hook = Hook("example_hook")
 
 
-async def test_hook():
-    @example_hook.callback
+@pytest.mark.parametrize("once", [False, True])
+async def test_hook(once):
+    call_count = 0
+
+    @example_hook(once=once)
     async def callback():
-        callback.called = True
+        nonlocal call_count
+        call_count += 1
 
-    await example_hook.trigger()
+    async with FixtureScope() as scope:
+        await example_hook.trigger(scope)
+        await example_hook.trigger(scope)
+        await example_hook.trigger(scope)
 
-    assert callback.called
+    assert call_count == 1 if once else 3
 
 
-async def test_temporary_callback(runtime):
-    @example_hook(until=hooks.on_result)
-    def temporary_callback():
-        pass
+async def test_hook_with_fixtures():
+    hook_triggered = False
 
-    assert temporary_callback in example_hook.callbacks
+    @example_hook(once=True)
+    async def callback(item_1, item_2, some_fixture):
+        nonlocal hook_triggered
+        hook_triggered = True
+        assert item_1 == "item1"
+        assert item_2 == "item2"
+        assert some_fixture == "some_fixture"
 
-    await hooks.on_result.trigger(runtime)
+    async with FixtureScope() as scope:
+        scope["some_fixture"] = "some_fixture"
+        await example_hook.trigger(scope, item_1="item1", item_2="item2")
 
-    assert "remove_callback" not in [f.__name__ for f in example_hook.callbacks]
-    assert temporary_callback not in example_hook.callbacks
+    assert hook_triggered
 
 
 async def test_failure_behaviour(runtime):
@@ -42,7 +55,7 @@ async def test_failure_behaviour(runtime):
     @example_hook
     async def fine():
         await asyncio.sleep(1)
-        print("fine")
 
-    with suppress(SpecificError):
-        await example_hook.trigger()
+    async with FixtureScope() as scope:
+        with suppress(SpecificError):
+            await example_hook.trigger(scope)

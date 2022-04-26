@@ -8,8 +8,7 @@ from typing import Any, Dict
 
 from fixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_workflow import discovery, execute
-from virtool_workflow.execution.hooks.workflow_hooks import on_step_start
-from virtool_workflow.hooks import on_failure, on_cancelled, on_success
+from virtool_workflow.hooks import on_failure, on_cancelled, on_success, on_step_start
 from virtool_workflow.redis import configure_redis, get_next_job
 from virtool_workflow.sentry import configure_sentry
 from virtool_workflow.signals import configure_signal_handling
