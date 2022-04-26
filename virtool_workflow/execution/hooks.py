@@ -1,22 +1,23 @@
-"""Create hooks for triggering and responding to events."""
-
-import asyncio
 import logging
 import pprint
+from asyncio import gather
 from typing import List, Any, Callable
 
+from fixtures import FixtureScope
 from virtool_workflow.utils import coerce_to_coroutine_function
 
 logger = logging.getLogger(__name__)
 
 
 class Hook:
-    def __init__(self, hook_name):
+    """Used to hook into ."""
+
+    def __init__(self, hook_name: str):
         """
         A set of functions to be called as a group upon a particular event.
 
-        The signature of any functions added (via :func:`Hook.callback` or :func:`Hook.__call__`)
-        are validated to match the types provided.
+        The signature of any functions added via :func:`Hook.callback` or
+        :func:`Hook.__call__` are validated to match the types provided.
 
         :param hook_name: The name of this hook.
         """
@@ -26,19 +27,15 @@ class Hook:
 
         self.clear = self.callbacks.clear
 
-    def callback(self, callback_: Callable = None, until=None, once=False):
+    def __call__(self, callback_: Callable = None, until=None, once=False):
         """
-        Add a callback function to this Hook, to be invoked on :func:`.trigger()`
+        Add a callback function to this Hook that will be called when the hook is
+        triggered.
 
         :param callback_: The callback function to register.
-
-        :param until: Another :class:`Hook` which signals that the registered callback
-            function should no longer be called by this hook. When the other hook is
-            triggered, the callback function `callback_` will be removed from the set of callbacks.
-
-        :param once: Only execute the callback the next time this Hook is triggered.
-        :return: The original value of `callback_` if it was a coroutine function, else a coroutine
-            wrapping :func:`callback_`.
+        :param until: Don't call the callback after the passed hook has been triggered.
+        :param once: Only execute the callback the next time this hook is triggered.
+        :return: The passed callback function as a coroutine.
         """
         if once:
             until = self
@@ -57,16 +54,14 @@ class Hook:
             )
         return cb
 
-    __call__ = callback
-
-    def _callback(self, callback_: Callable) -> Callable:
-        """Validate and add a callback to this Hook."""
+    def _callback(self, callback_: Callable):
+        """Register a callback function, skipping parameter validation"""
         callback_ = coerce_to_coroutine_function(callback_)
         self.callbacks.append(callback_)
         return callback_
 
     def _callback_until(self, hook_: "Hook"):
-        """Add a callback to this hook and have it removed once :func:`hook_` is triggered."""
+        """Add a callback to this hook and remove it when :func:`hook_` is triggered."""
 
         def _temporary_callback(callback_):
             callback_ = self._callback(callback_)
@@ -80,6 +75,39 @@ class Hook:
 
         return _temporary_callback
 
+    async def trigger(self, scope: FixtureScope, suppress=False, **kwargs) -> List[Any]:
+        """
+        Trigger the hook.
+
+        Bind fixtures from `scope` to each callback function and invoke them.
+
+        Each callback function registered by :func:`Hook.callback` or
+        :func:`Hook.__call__` will be called using the arguments supplied to this
+        function.
+
+        :param scope: the :class:`FixtureScope` to use to bind fixtures
+        :param suppress: suppress and log exceptions raised in callbacks
+        """
+        logger.debug(f"Triggering {self.name} hook with callbacks: {self.callbacks}")
+
+        if "scope" not in scope:
+            scope["scope"] = scope
+
+        async def _bind(callback_: Callable):
+            logger.debug(f"Binding fixtures to callback {callback_}")
+            try:
+                return await scope.bind(callback_, **kwargs)
+            except KeyError as error:
+                if suppress:
+                    logger.exception(error)
+                    return lambda: None
+
+                raise error
+
+        _callbacks = [await _bind(callback) for callback in self.callbacks]
+
+        return await self._trigger(_callbacks, suppress_errors=suppress)
+
     @staticmethod
     async def _trigger(callbacks, *args, suppress_errors=False, **kwargs):
         async def call_callback(callback):
@@ -92,7 +120,7 @@ class Hook:
             else:
                 return await callback(*args, **kwargs)
 
-        results = await asyncio.gather(
+        results = await gather(
             *[call_callback(callback) for callback in callbacks], return_exceptions=True
         )
 
@@ -101,22 +129,3 @@ class Hook:
                 raise error
 
         return results
-
-    async def trigger(self, *args, suppress=False, **kwargs) -> List[Any]:
-        """
-        Trigger this Hook.
-
-        Each callback function registered by :func:`Hook.callback` or :func:`Hook.__call__`
-        will be called using the arguments supplied to this function.
-
-        :param args: Positional Arguments for this Hook.
-        :param suppress: If True, any exceptions raised from callback functions will be suppressed and logged.
-        :param kwargs: Keyword arguments for this Hook.
-        :return List[Any]: The results of each callback function.
-        """
-        logger.debug(
-            f"Triggering {self.name} hook with callback functions:\n {pprint.pformat(self.callbacks, indent=4)}"
-        )
-        return await self._trigger(
-            self.callbacks, *args, suppress_errors=suppress, **kwargs
-        )

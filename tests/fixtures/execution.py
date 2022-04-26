@@ -1,11 +1,11 @@
 from concurrent.futures.thread import ThreadPoolExecutor
-from contextlib import suppress
 
 import pytest
 
-from virtool_workflow import hooks
-import virtool_workflow.execution.run_subprocess
 import virtool_workflow.execution.run_in_executor
+import virtool_workflow.execution.run_subprocess
+from virtool_workflow import hooks
+from virtool_workflow.execution.hooks import Hook
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def clear_hooks():
     backups = {}
     try:
         for hook in vars(hooks).values():
-            if isinstance(hook, hooks.Hook):
+            if isinstance(hook, Hook):
                 backups[hook] = hook.callbacks
                 hook.callbacks = []
         yield
