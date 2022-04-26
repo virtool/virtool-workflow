@@ -8,11 +8,16 @@ import pytest
 from tests.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
 from virtool_workflow.analysis.indexes import indexes as indexes_fixture, Index
 from virtool_workflow.api.indexes import IndexProvider
-from virtool_workflow.execution.run_in_executor import run_in_executor, thread_pool_executor
+from virtool_workflow.execution.run_in_executor import (
+    run_in_executor,
+    thread_pool_executor,
+)
 from virtool_workflow.execution.run_subprocess import run_subprocess
 from virtool_workflow.testing.fixtures import install_as_pytest_fixtures
 
-install_as_pytest_fixtures(globals(), run_in_executor, run_subprocess, thread_pool_executor)
+install_as_pytest_fixtures(
+    globals(), run_in_executor, run_subprocess, thread_pool_executor
+)
 
 
 @pytest.fixture
@@ -29,16 +34,21 @@ async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path:
 
 
 @pytest.fixture
-async def indexes(indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess):
-    return await indexes_fixture(indexes_api, work_path, 3, run_in_executor, run_subprocess)
+async def indexes(
+    indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess
+):
+    return await indexes_fixture(
+        indexes_api, work_path, 3, run_in_executor, run_subprocess
+    )
 
 
 async def test_indexes(indexes: Sequence[Index], work_path):
     index_dir_path = work_path / f"indexes/{TEST_INDEX_ID}"
 
     # Check that single index directory was created
-    assert set((work_path / "indexes").iterdir()
-               ) == {work_path / f"indexes/{TEST_INDEX_ID}"}
+    assert set((work_path / "indexes").iterdir()) == {
+        work_path / f"indexes/{TEST_INDEX_ID}"
+    }
 
     assert set(index_dir_path.iterdir()) >= {
         index_dir_path / "otus.json",
@@ -53,22 +63,29 @@ async def test_indexes(indexes: Sequence[Index], work_path):
 
 
 class TestGetBySequenceID:
-
-    @pytest.mark.parametrize("method_name,result",
-                             [("get_sequence_length", 1074), ("get_otu_id_by_sequence_id", "pffj4lst")])
+    @pytest.mark.parametrize(
+        "method_name,result",
+        [("get_sequence_length", 1074), ("get_otu_id_by_sequence_id", "pffj4lst")],
+    )
     async def test_success(self, method_name, result, indexes):
         assert getattr(indexes[0], method_name)("7h6yaube") == result
 
-    @pytest.mark.parametrize("method_name,message",
-                             [("get_sequence_length", "The sequence_id does not exist in the index"),
-                              ("get_otu_id_by_sequence_id", "fart")])
+    @pytest.mark.parametrize(
+        "method_name,message",
+        [
+            ("get_sequence_length", "The sequence_id does not exist in the index"),
+            ("get_otu_id_by_sequence_id", "fart"),
+        ],
+    )
     async def testS_error(self, method_name, message, indexes):
         with pytest.raises(ValueError) as exc:
             getattr(indexes[0], method_name)("foo")
             assert message in str(exc)
 
 
-async def test_write_isolate_fasta(work_path, indexes, otu_ids, analysis_files, file_regression):
+async def test_write_isolate_fasta(
+    work_path, indexes, otu_ids, analysis_files, file_regression
+):
     index = indexes[0]
 
     path = work_path / "isolates_1.fa"
@@ -79,7 +96,9 @@ async def test_write_isolate_fasta(work_path, indexes, otu_ids, analysis_files, 
         file_regression.check(await f.read())
 
 
-async def test_build_index(work_path, indexes, otu_ids, analysis_files, file_regression):
+async def test_build_index(
+    work_path, indexes, otu_ids, analysis_files, file_regression
+):
     index = indexes[0]
 
     path = work_path / "isolates_1"

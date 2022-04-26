@@ -5,8 +5,7 @@ from typing import Dict
 import aiohttp
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.api.utils import (read_file_from_response,
-                                        upload_file_via_put)
+from virtool_workflow.api.utils import read_file_from_response, upload_file_via_put
 from virtool_workflow.data_model import Subtraction, NucleotideComposition
 
 
@@ -16,8 +15,9 @@ def subtraction_from_json(subtraction_json: dict, path: Path) -> Subtraction:
         subtraction_json["name"],
         subtraction_json["nickname"],
         subtraction_json["count"] if "count" in subtraction_json else None,
-        NucleotideComposition(
-            **subtraction_json["gc"]) if "gc" in subtraction_json else {},
+        NucleotideComposition(**subtraction_json["gc"])
+        if "gc" in subtraction_json
+        else {},
         path,
     )
 
@@ -33,11 +33,11 @@ class SubtractionProvider:
     """
 
     def __init__(
-            self,
-            subtraction_id: str,
-            http: aiohttp.ClientSession,
-            jobs_api_url: str,
-            subtraction_work_path: Path,
+        self,
+        subtraction_id: str,
+        http: aiohttp.ClientSession,
+        jobs_api_url: str,
+        subtraction_work_path: Path,
     ):
         self.subtraction_id = subtraction_id
         self.http = http
@@ -65,7 +65,9 @@ class SubtractionProvider:
             - subtraction.rev.1.bt2
             - subtraction.rev.2.bt2
         """
-        return await upload_file_via_put(self.http, f"{self.api_url}/files/{path.name}", path)
+        return await upload_file_via_put(
+            self.http, f"{self.api_url}/files/{path.name}", path
+        )
 
     async def finalize(self, gc: Dict[str, Number], count: int):
         """
@@ -73,7 +75,9 @@ class SubtractionProvider:
         :param gc: The nucleotide composition of the subtraction
         :return: The updated subtraction.
         """
-        async with self.http.patch(self.api_url, json={"gc": gc, "count": count}) as response:
+        async with self.http.patch(
+            self.api_url, json={"gc": gc, "count": count}
+        ) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
                 return subtraction_from_json(subtraction_json, self.path)
 

@@ -50,15 +50,13 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
             suffix = name.split("_")[1]
             shutil.move(
                 os.path.join(fastqc_path, name, "fastqc_data.txt"),
-                os.path.join(sample_path, f"{prefix}{suffix}.txt")
+                os.path.join(sample_path, f"{prefix}{suffix}.txt"),
             )
 
     # Dispose of the rest of the data files.
     shutil.rmtree(fastqc_path)
 
-    fastqc = {
-        "count": 0
-    }
+    fastqc = {"count": 0}
 
     # Parse data file(s)
     for suffix in [1, 2]:
@@ -89,7 +87,7 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
 
             # Length
             elif "Sequence length" in line:
-                split_length = [int(s) for s in line.split("\t")[1].split('-')]
+                split_length = [int(s) for s in line.split("\t")[1].split("-")]
 
                 if suffix == 1:
                     if len(split_length) == 2:
@@ -102,12 +100,12 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
                     if len(split_length) == 2:
                         fastqc["length"] = [
                             min(fastqc_min_length, split_length[0]),
-                            max(fastqc_max_length, split_length[1])
+                            max(fastqc_max_length, split_length[1]),
                         ]
                     else:
                         fastqc["length"] = [
                             min(fastqc_min_length, split_length[0]),
-                            max(fastqc_max_length, split_length[0])
+                            max(fastqc_max_length, split_length[0]),
                         ]
 
             # GC-content
@@ -144,15 +142,14 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
 
                 # Convert all fields except first to 2-decimal floats.
                 try:
-                    values = [round(int(value.split(".")[0]), 1)
-                              for value in split[1:]]
+                    values = [round(int(value.split(".")[0]), 1) for value in split[1:]]
 
                 except ValueError as err:
                     if "NaN" in str(err):
                         values = handle_base_quality_nan(split)
 
                 # Convert to position field to a one- or two-member tuple.
-                pos = [int(x) for x in split[0].split('-')]
+                pos = [int(x) for x in split[0].split("-")]
 
                 if len(pos) > 1:
                     pos = range(pos[0], pos[1] + 1)
@@ -164,8 +161,9 @@ def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict
                         fastqc[flag][i - 1] = values
                 else:
                     for i in pos:
-                        fastqc[flag][i - 1] = [(_1 + _2) / 2 for _1,
-                                               _2 in zip(values, fastqc[flag][i - 1])]
+                        fastqc[flag][i - 1] = [
+                            (_1 + _2) / 2 for _1, _2 in zip(values, fastqc[flag][i - 1])
+                        ]
 
             elif flag == "sequences" and "#" not in line:
                 line = line.rstrip().split()
@@ -196,10 +194,12 @@ def fastqc(work_path: Path, run_subprocess):
         """Run fastqc on the input path and return the parsed result."""
         command = [
             "fastqc",
-            "-f", "fastq",
-            "-o", str(fastqc_path),
+            "-f",
+            "fastq",
+            "-o",
+            str(fastqc_path),
             "--extract",
-            *[str(path) for path in input_paths]
+            *[str(path) for path in input_paths],
         ]
 
         await run_subprocess(command)

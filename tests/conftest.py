@@ -7,9 +7,9 @@ pytest_plugins = [
     "tests.api.fixtures",
     "tests.fixtures.execution",
     "tests.fixtures.workflow",
-    "tests.integration._fixtures.containers", 
-    "tests.integration._fixtures.db", 
-    "tests.integration._fixtures.jobs", 
+    "tests.integration._fixtures.containers",
+    "tests.integration._fixtures.db",
+    "tests.integration._fixtures.jobs",
     "tests.integration._fixtures.workflows",
     "tests.integration._fixtures.redis",
     "virtool_workflow.testing.fixtures",
@@ -17,8 +17,7 @@ pytest_plugins = [
 
 
 def pytest_addoption(parser):
-    parser.addoption("--redis-url", action="store",
-                     default="redis://localhost:6379")
+    parser.addoption("--redis-url", action="store", default="redis://localhost:6379")
 
 
 @pytest.fixture

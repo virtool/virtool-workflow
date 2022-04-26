@@ -8,6 +8,7 @@ State = Literal["complete", "cancelled", "error", "running"]
 @dataclass(frozen=True)
 class Status:
     """The status of a Virtool Job."""
+
     error: State
     progress: float
     stage: str
@@ -20,6 +21,7 @@ class Status:
 @dataclass
 class Job:
     """A Virtool Job."""
+
     id: str
     """Unique ID for the job."""
     args: dict

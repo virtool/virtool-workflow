@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class Hook:
-
     def __init__(self, hook_name):
         """
         A set of functions to be called as a group upon a particular event.
@@ -53,7 +52,9 @@ class Hook:
             cb = self._callback
 
         if callback_ is not None:
-            logger.debug(f"Registered callback {callback_.__name__}() onto hook {self.name}")
+            logger.debug(
+                f"Registered callback {callback_.__name__}() onto hook {self.name}"
+            )
         return cb
 
     __call__ = callback
@@ -65,7 +66,7 @@ class Hook:
         return callback_
 
     def _callback_until(self, hook_: "Hook"):
-        """Add a callback to this hook and have it removed once :func:`hook_` is triggered. """
+        """Add a callback to this hook and have it removed once :func:`hook_` is triggered."""
 
         def _temporary_callback(callback_):
             callback_ = self._callback(callback_)
@@ -81,7 +82,6 @@ class Hook:
 
     @staticmethod
     async def _trigger(callbacks, *args, suppress_errors=False, **kwargs):
-
         async def call_callback(callback):
             logger.debug(f"Calling {callback}.")
             if suppress_errors:
@@ -92,7 +92,9 @@ class Hook:
             else:
                 return await callback(*args, **kwargs)
 
-        results = await asyncio.gather(*[call_callback(callback) for callback in callbacks], return_exceptions=True)
+        results = await asyncio.gather(
+            *[call_callback(callback) for callback in callbacks], return_exceptions=True
+        )
 
         for error in results:
             if isinstance(error, Exception):
@@ -113,5 +115,8 @@ class Hook:
         :return List[Any]: The results of each callback function.
         """
         logger.debug(
-            f"Triggering {self.name} hook with callback functions:\n {pprint.pformat(self.callbacks, indent=4)}")
-        return await self._trigger(self.callbacks, *args, suppress_errors=suppress, **kwargs)
+            f"Triggering {self.name} hook with callback functions:\n {pprint.pformat(self.callbacks, indent=4)}"
+        )
+        return await self._trigger(
+            self.callbacks, *args, suppress_errors=suppress, **kwargs
+        )

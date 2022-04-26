@@ -51,6 +51,7 @@ async def analysis(analysis_provider: AnalysisProvider) -> Analysis:
     :return: the analysis object
 
     """
+
     async def upload_files(files):
         for path, format in files:
             await analysis_provider.upload(path, format)

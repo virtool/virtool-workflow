@@ -5,11 +5,13 @@ from virtool_workflow.fixtures.scoping import workflow_scope
 
 
 @asynccontextmanager
-def trigger(on_enter: FixtureHook,
-            on_exit: FixtureHook,
-            scope: FixtureScope = workflow_scope,
-            enter_args: dict = None,
-            exit_args: dict = None):
+def trigger(
+    on_enter: FixtureHook,
+    on_exit: FixtureHook,
+    scope: FixtureScope = workflow_scope,
+    enter_args: dict = None,
+    exit_args: dict = None,
+):
     enter_args = enter_args or {}
     exit_args = exit_args or {}
 
@@ -18,7 +20,3 @@ def trigger(on_enter: FixtureHook,
         yield
     finally:
         await on_exit.trigger(scope=scope, **exit_args)
-
-
-
-

@@ -1,5 +1,10 @@
-from fixtures import (Fixture, fixture, fixture_context, get_fixtures,
-                      runs_in_new_fixture_context)
+from fixtures import (
+    Fixture,
+    fixture,
+    fixture_context,
+    get_fixtures,
+    runs_in_new_fixture_context,
+)
 
 
 @fixture
@@ -42,7 +47,6 @@ async def test_fixture_definition_semantics():
 
 @runs_in_new_fixture_context(copy_context=False)
 async def test_fixture_isinstance_check():
-
     @fixture
     def c():
         ...

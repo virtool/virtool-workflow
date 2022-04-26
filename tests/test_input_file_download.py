@@ -3,7 +3,6 @@ from pathlib import Path
 
 
 async def test_input_files_fixture(tmpdir):
-
     async def mock_download(_, target):
         return target
 
@@ -16,12 +15,11 @@ async def test_input_files_fixture(tmpdir):
             {
                 "id": "2",
                 "name": "file2.txt",
-            }
+            },
         ],
         download_input_file=mock_download,
         work_path=tmpdir,
     )
 
-
-    assert files["file1.txt"] == Path(tmpdir/"files/file1.txt")
-    assert files["file2.txt"] == Path(tmpdir/"files/file2.txt")
+    assert files["file1.txt"] == Path(tmpdir / "files/file1.txt")
+    assert files["file2.txt"] == Path(tmpdir / "files/file2.txt")

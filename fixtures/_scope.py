@@ -1,8 +1,6 @@
-
 import inspect
 from collections import UserDict
-from contextlib import (AsyncExitStack, asynccontextmanager, contextmanager,
-                        suppress)
+from contextlib import AsyncExitStack, asynccontextmanager, contextmanager, suppress
 from functools import wraps
 from typing import Any, Dict, Union
 
@@ -19,6 +17,7 @@ class FixtureScope(UserDict):
     It also acts as an async context manager handling generator
     and async generator fixtures.
     """
+
     async def __aenter__(self):
         """
         Creates a :class:`AsyncExitStack` where context managers
@@ -103,6 +102,7 @@ class FixtureScope(UserDict):
 
         :return: The bound function.
         """
+
         def prep_args(args, kwargs):
             if args or kwargs:
                 # Since `values` is stored in the closure
@@ -117,30 +117,37 @@ class FixtureScope(UserDict):
             # Support using positional arguments when calling `_bound`
             if args:
                 # Remove supplied args from the `values`
-                arg_names = argspec.args[:len(args)]
+                arg_names = argspec.args[: len(args)]
                 for name in arg_names:
                     del _values[name]
 
             return args, _values
 
         if inspect.isgeneratorfunction(function):
+
             @wraps(function)
             def _bound(*args, **kwargs):
                 _args, _kwargs = prep_args(args, kwargs)
                 yield from function(*_args, **_kwargs)
+
         elif inspect.isasyncgenfunction(function):
+
             @wraps(function)
             async def _bound(*args, **kwargs):
                 _args, _kwargs = prep_args(args, kwargs)
                 asyncgen = await function(*_args, **_kwargs)
                 async for item in asyncgen:
                     yield item
+
         elif inspect.iscoroutinefunction(function):
+
             @wraps(function)
             async def _bound(*args, **kwargs):
                 _args, _kwargs = prep_args(args, kwargs)
                 return await function(*_args, **_kwargs)
+
         else:
+
             @wraps(function)
             def _bound(*args, **kwargs):
                 _args, _kwargs = prep_args(args, kwargs)
@@ -191,8 +198,9 @@ class FixtureScope(UserDict):
 
         if argspec.varargs is not None or argspec.varkw is not None:
             raise FixtureBindingError(
-                function, argspec.varargs,
-                reason="Binding fixtures to `*args` or `**kwargs` is not supported."
+                function,
+                argspec.varargs,
+                reason="Binding fixtures to `*args` or `**kwargs` is not supported.",
             )
 
         if len(argspec.args) == 0:
@@ -212,8 +220,9 @@ class FixtureScope(UserDict):
                     continue
 
                 raise FixtureBindingError(
-                    function, key,
-                    reason=f"Could not instantiate `{key}` due to {e.__class__.__name__}"
+                    function,
+                    key,
+                    reason=f"Could not instantiate `{key}` due to {e.__class__.__name__}",
                 ) from e
 
         return self._bind(function, argspec, kwargs)
@@ -258,7 +267,9 @@ class FixtureScope(UserDict):
         try:
             value = await self._instantiate(fixture, *args, **kwargs)
         except FixtureHasDependency:
-            value = await self.instantiate(await self.bind(fixture, follow_wrapped=True), *args, **kwargs)
+            value = await self.instantiate(
+                await self.bind(fixture, follow_wrapped=True), *args, **kwargs
+            )
 
         if fixture.__scope__ == "store":
             self[fixture.__name__] = value

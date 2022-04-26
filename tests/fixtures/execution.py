@@ -33,6 +33,3 @@ def clear_hooks():
     finally:
         for hook, callbacks in backups.items():
             hook.callbacks = callbacks
-        
-
-

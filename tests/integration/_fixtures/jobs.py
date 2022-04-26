@@ -39,13 +39,12 @@ def create_job(db: AsyncIOMotorDatabase, job_id: str, test_user, request):
                     "stage": None,
                     "error": None,
                     "progress": 0,
-                    "timestamp": None
+                    "timestamp": None,
                 }
-
             ],
             "user": test_user,
             "acquired": False,
-            "workflow": request.node.originalname
+            "workflow": request.node.originalname,
         }
         await jobs.insert_one(job)
 

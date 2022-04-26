@@ -40,7 +40,9 @@ class HMMs(UserList):
 
 
 @fixture
-async def hmms(hmms_provider: HMMsProvider, work_path: Path, run_subprocess: RunSubprocess):
+async def hmms(
+    hmms_provider: HMMsProvider, work_path: Path, run_subprocess: RunSubprocess
+):
     """
     A fixture for accessing HMM data.
 
@@ -58,7 +60,9 @@ async def hmms(hmms_provider: HMMsProvider, work_path: Path, run_subprocess: Run
     if which("hmmpress") is None:
         raise RuntimeError("hmmpress is not installed.")
 
-    process = await run_subprocess(["hmmpress", str(hmms_provider.path/"profiles.hmm")])
+    process = await run_subprocess(
+        ["hmmpress", str(hmms_provider.path / "profiles.hmm")]
+    )
 
     if process.returncode != 0:
         raise RuntimeError("hmmpress command failed")

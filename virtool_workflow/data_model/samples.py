@@ -7,6 +7,7 @@ from virtool_workflow.analysis.library_types import LibraryType
 @dataclass
 class Sample:
     """A Virtool Sample."""
+
     #: The sample's unique database ID.
     id: str
     #: A user-selected name.

@@ -13,7 +13,9 @@ def thread_pool_executor() -> ThreadPoolExecutor:
 
 @runtime_checkable
 class FunctionExecutor(Protocol):
-    def __call__(self, func: Callable[[Any], Any], *args: Any, **kwargs: Any) -> Coroutine:
+    def __call__(
+        self, func: Callable[[Any], Any], *args: Any, **kwargs: Any
+    ) -> Coroutine:
         ...
 
 
@@ -24,6 +26,7 @@ def run_in_executor(thread_pool_executor: ThreadPoolExecutor) -> FunctionExecuto
 
     Wraps :func:`concurrent.futures.ThreadPoolExecutor.submit()` as an async function.
     """
+
     async def _run_in_executor(func: Callable, *args, **kwargs):
         future = thread_pool_executor.submit(func, *args, **kwargs)
         return future.result()

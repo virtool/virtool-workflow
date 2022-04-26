@@ -26,6 +26,4 @@ async def read_file_from_request(request, name, format) -> dict:
 
 
 def not_found(message=None) -> Response:
-    return json_response({
-        "message": message or "Not found"
-    }, status=404)
+    return json_response({"message": message or "Not found"}, status=404)

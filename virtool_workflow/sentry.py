@@ -9,9 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def configure_sentry(
-    dsn: Optional[str],
-    log_level: int,
-    event_level: int = logging.ERROR
+    dsn: Optional[str], log_level: int, event_level: int = logging.ERROR
 ):
     """
     Initialize Sentry for log aggregation.
@@ -28,6 +26,6 @@ def configure_sentry(
                 event_level=event_level,
             )
         ],
-        release=pkg_resources.get_distribution('virtool-workflow').version,
+        release=pkg_resources.get_distribution("virtool-workflow").version,
         traces_sample_rate=0.2,
     )

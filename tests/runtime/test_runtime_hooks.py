@@ -44,7 +44,6 @@ async def test_on_failure_triggered(runtime, clear_hooks):
 
 
 async def test_on_failure_not_triggered_when_successful(runtime, clear_hooks):
-
     @hooks.on_success(once=True)
     def success_callback(results):
         results["SUCCESS"] = True

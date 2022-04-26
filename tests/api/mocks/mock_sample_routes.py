@@ -12,7 +12,7 @@ from tests.api.mocks.utils import not_found, read_file_from_request
 mock_routes = RouteTableDef()
 
 TEST_SAMPLE_PATH = Path(__file__).parent / "mock_sample.json"
-with TEST_SAMPLE_PATH.open('r') as f:
+with TEST_SAMPLE_PATH.open("r") as f:
     TEST_SAMPLE = json.load(f)
 TEST_SAMPLE_ID = TEST_SAMPLE["id"]
 
@@ -91,15 +91,25 @@ async def download_reads_file(request):
     sample_id = request.match_info["sample_id"]
     filename = request.match_info["filename"]
 
-    if sample_id != TEST_SAMPLE_ID or filename not in ("reads_1.fq.gz", "reads_2.fq.gz"):
+    if sample_id != TEST_SAMPLE_ID or filename not in (
+        "reads_1.fq.gz",
+        "reads_2.fq.gz",
+    ):
         return not_found()
 
-    file_name = "paired_small_1.fq.gz" if filename == "reads_1.fq.gz" else "paired_small_2.fq.gz"
+    file_name = (
+        "paired_small_1.fq.gz"
+        if filename == "reads_1.fq.gz"
+        else "paired_small_2.fq.gz"
+    )
 
-    return FileResponse(ANALYSIS_TEST_FILES_DIR / file_name, headers={
-        "Content-Disposition": f"attachment; filename={file_name}",
-        "Content-Type": "application/octet-stream"
-    })
+    return FileResponse(
+        ANALYSIS_TEST_FILES_DIR / file_name,
+        headers={
+            "Content-Disposition": f"attachment; filename={file_name}",
+            "Content-Type": "application/octet-stream",
+        },
+    )
 
 
 @mock_routes.get("/samples/{sample_id}/artifacts/{filename}")
@@ -116,5 +126,3 @@ async def download_artifact(request):
     file.touch()
 
     return FileResponse(file)
-
-

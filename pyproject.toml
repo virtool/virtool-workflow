@@ -43,6 +43,8 @@ sphinx = "^4.0.2"
 coloredlogs = "^15.0"
 motor = "^2.5.1"
 pytest-docker-compose = "^3.2.1"
+black = "22.3.0"
+pre-commit = "^2.18.1"
 
 [tool.poetry.scripts]
 run-workflow = "virtool_workflow.cli:cli_main"

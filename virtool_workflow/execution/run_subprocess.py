@@ -23,12 +23,12 @@ class LineOutputHandler(Protocol):
 
 class RunSubprocess(Protocol):
     async def __call__(
-            self,
-            command: List[str],
-            stdout_handler: LineOutputHandler = None,
-            stderr_handler: LineOutputHandler = None,
-            env: dict = None,
-            cwd: str = None,
+        self,
+        command: List[str],
+        stdout_handler: LineOutputHandler = None,
+        stderr_handler: LineOutputHandler = None,
+        env: dict = None,
+        cwd: str = None,
     ) -> asyncio.subprocess.Process:
         """
         Run a shell command in a subprocess.
@@ -50,7 +50,9 @@ class RunSubprocess(Protocol):
         raise NotImplementedError()
 
 
-async def watch_pipe(stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]):
+async def watch_pipe(
+    stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]
+):
     """
     Watch the stdout or stderr stream and pass lines to the `handler` callback function.
 
@@ -76,9 +78,7 @@ async def watch_subprocess(process, stdout_handler, stderr_handler):
     :param stdout_handler: a handler function to call with each line received from stderr
 
     """
-    coros = [
-        watch_pipe(process.stderr, stderr_handler)
-    ]
+    coros = [watch_pipe(process.stderr, stderr_handler)]
 
     if stdout_handler:
         coros.append(watch_pipe(process.stdout, stdout_handler))
@@ -87,11 +87,11 @@ async def watch_subprocess(process, stdout_handler, stderr_handler):
 
 
 async def _run_subprocess(
-        command: List[str],
-        stdout_handler: Optional[LineOutputHandler] = None,
-        stderr_handler: Optional[Callable[[str], Coroutine]] = None,
-        env: Optional[dict] = None,
-        cwd: Optional[str] = None,
+    command: List[str],
+    stdout_handler: Optional[LineOutputHandler] = None,
+    stderr_handler: Optional[Callable[[str], Coroutine]] = None,
+    env: Optional[dict] = None,
+    cwd: Optional[str] = None,
 ) -> asyncio.subprocess.Process:
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
     logger.info(f"Running command in subprocess: {' '.join(command)}")
@@ -102,10 +102,13 @@ async def _run_subprocess(
     stdout = asyncio.subprocess.PIPE if stdout_handler else asyncio.subprocess.DEVNULL
 
     if stderr_handler:
+
         async def _stderr_handler(line):
             await stderr_handler(line)
             logger.info(f"STDERR: {line.rstrip()}")
+
     else:
+
         async def _stderr_handler(line):
             logger.info(f"STDERR: {line.rstrip()}")
 
@@ -114,11 +117,12 @@ async def _run_subprocess(
         stdout=stdout,
         stderr=asyncio.subprocess.PIPE,
         env=env,
-        cwd=cwd
+        cwd=cwd,
     )
 
     _watch_subprocess = asyncio.create_task(
-        watch_subprocess(process, stdout_handler, _stderr_handler))
+        watch_subprocess(process, stdout_handler, _stderr_handler)
+    )
 
     @hooks.on_failure
     def _terminate_process():

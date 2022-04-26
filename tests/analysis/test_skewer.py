@@ -5,8 +5,7 @@ from pathlib import Path
 import pytest
 
 from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
-from virtool_workflow.analysis.skewer import (calculate_trimming_min_length,
-                                              skewer)
+from virtool_workflow.analysis.skewer import calculate_trimming_min_length, skewer
 from virtool_workflow.data_model import Job
 from virtool_workflow.runtime.providers import sample_provider
 
@@ -32,16 +31,19 @@ async def test_skewer(
 
     run_skewer = skewer(
         min_length=calculate_trimming_min_length(
-            sample.library_type, sample.max_length),
+            sample.library_type, sample.max_length
+        ),
         quiet=True,
     )
 
     TEST_READ_1 = analysis_files / "paired_small_1.fq.gz"
     TEST_READ_2 = analysis_files / "paired_small_2.fq.gz"
-    read_1 = await run_in_executor(shutil.copyfile, TEST_READ_1,
-                                   tmpdir / TEST_READ_1.name)
-    read_2 = await run_in_executor(shutil.copyfile, TEST_READ_2,
-                                   tmpdir / TEST_READ_2.name)
+    read_1 = await run_in_executor(
+        shutil.copyfile, TEST_READ_1, tmpdir / TEST_READ_1.name
+    )
+    read_2 = await run_in_executor(
+        shutil.copyfile, TEST_READ_2, tmpdir / TEST_READ_2.name
+    )
 
     reads = (read_1, read_2)
 

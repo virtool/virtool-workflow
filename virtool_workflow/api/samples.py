@@ -6,11 +6,12 @@ from typing import Dict, Any
 import aiohttp
 
 from virtool_workflow.analysis.utils import ReadPaths, make_read_paths
-from virtool_workflow.api.errors import (raising_errors_by_status_code,
-                                         AlreadyFinalized,
-                                         JobsAPIServerError)
-from virtool_workflow.api.utils import (upload_file_via_put,
-                                        read_file_from_response)
+from virtool_workflow.api.errors import (
+    raising_errors_by_status_code,
+    AlreadyFinalized,
+    JobsAPIServerError,
+)
+from virtool_workflow.api.utils import upload_file_via_put, read_file_from_response
 from virtool_workflow.data_model import Sample
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
 
@@ -36,11 +37,7 @@ async def _make_sample_from_response(response) -> Sample:
 
 
 class SampleProvider:
-
-    def __init__(self,
-                 sample_id: str,
-                 http: aiohttp.ClientSession,
-                 jobs_api_url: str):
+    def __init__(self, sample_id: str, http: aiohttp.ClientSession, jobs_api_url: str):
         self.id = sample_id
         self.http = http
         self.url = f"{jobs_api_url}/samples/{sample_id}"
@@ -56,20 +53,30 @@ class SampleProvider:
 
     async def delete(self):
         async with self.http.delete(self.url) as response:
-            async with raising_errors_by_status_code(response, accept=[204], status_codes_to_exceptions={
-                400: AlreadyFinalized,
-                500: JobsAPIServerError
-            }):
+            async with raising_errors_by_status_code(
+                response,
+                accept=[204],
+                status_codes_to_exceptions={
+                    400: AlreadyFinalized,
+                    500: JobsAPIServerError,
+                },
+            ):
                 pass
 
-    async def upload(self, path: Path, format: VirtoolFileFormat = "fastq") -> VirtoolFile:
+    async def upload(
+        self, path: Path, format: VirtoolFileFormat = "fastq"
+    ) -> VirtoolFile:
         if path.name in ("reads_1.fq.gz", "reads_2.fq.gz"):
-            return await upload_file_via_put(self.http, f"{self.url}/reads/{path.name}", path, params={})
+            return await upload_file_via_put(
+                self.http, f"{self.url}/reads/{path.name}", path, params={}
+            )
 
-        return await upload_file_via_put(self.http, f"{self.url}/artifacts", path, params={
-            "name": path.name,
-            "type": format
-        })
+        return await upload_file_via_put(
+            self.http,
+            f"{self.url}/artifacts",
+            path,
+            params={"name": path.name, "type": format},
+        )
 
     async def download_reads(self, target_path: Path, paired: bool = None) -> ReadPaths:
         if paired is None:

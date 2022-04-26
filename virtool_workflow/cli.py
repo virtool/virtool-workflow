@@ -40,7 +40,7 @@ from virtool_workflow._runtime import start_runtime
     "--work-path",
     default="temp",
     help="The path where temporary files will be stored.",
-    type=click.Path()
+    type=click.Path(),
 )
 @click.option(
     "--proc",
@@ -65,13 +65,13 @@ from virtool_workflow._runtime import start_runtime
     "--init-file",
     help="The path to the init file.",
     type=click.Path(),
-    default="init.py"
+    default="init.py",
 )
 @click.option(
     "--fixtures-file",
     help="The path to the fixtures file.",
     type=click.Path(),
-    default="fixtures.py"
+    default="fixtures.py",
 )
 @click.command()
 def run_workflow(**kwargs):

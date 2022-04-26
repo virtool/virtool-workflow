@@ -13,7 +13,7 @@ async def test_correct_progress(test_workflow, runtime):
         7: 0.7,
         8: 0.8,
         9: 0.9,
-        10: 1.0
+        10: 1.0,
     }
 
     async def check_progress(progress, step_number):

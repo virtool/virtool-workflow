@@ -35,4 +35,3 @@ def jobs_api(jobs_api_service):
     network_info = jobs_api_service.network_info[0]
 
     return f"http://{network_info.hostname}:{network_info.host_port}"
-

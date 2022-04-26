@@ -34,7 +34,7 @@ def get_analysis_files_from_response_json(json) -> List[VirtoolFile]:
                 name_on_disk=f["name_on_disk"],
                 size=f["size"],
                 uploaded_at=dateutil.parser.isoparse(f["uploaded_at"]),
-                format=f["format"]
+                format=f["format"],
             )
             for f in json["files"]
         ]
@@ -44,7 +44,9 @@ def get_analysis_files_from_response_json(json) -> List[VirtoolFile]:
         raise
 
 
-async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs_api_url: str) -> Analysis:
+async def get_analysis_by_id(
+    analysis_id: str, http: aiohttp.ClientSession, jobs_api_url: str
+) -> Analysis:
     """
     Get the analysis by id via the jobs API.
 
@@ -64,7 +66,7 @@ async def get_analysis_by_id(analysis_id: str, http: aiohttp.ClientSession, jobs
             return Analysis(
                 id=response_json["id"],
                 files=get_analysis_files_from_response_json(response_json),
-                ready=response_json["ready"] if "ready" in response_json else False
+                ready=response_json["ready"] if "ready" in response_json else False,
             )
 
 
@@ -78,10 +80,9 @@ class AnalysisProvider:
 
     """
 
-    def __init__(self,
-                 analysis_id: str,
-                 http: aiohttp.ClientSession,
-                 jobs_api_url: str):
+    def __init__(
+        self, analysis_id: str, http: aiohttp.ClientSession, jobs_api_url: str
+    ):
         self.id = analysis_id
         self.http = http
         self.api_url = jobs_api_url
@@ -102,10 +103,7 @@ class AnalysisProvider:
 
         """
         return await upload_file_via_put(
-            self.http,
-            f"{self.api_url}/analyses/{self.id}/files",
-            path,
-            format
+            self.http, f"{self.api_url}/analyses/{self.id}/files", path, format
         )
 
     async def download(self, file_id: str, target_path: Path) -> Path:
@@ -120,7 +118,9 @@ class AnalysisProvider:
         :raise NotFound: When either the file or the analysis does not exist (404 status code).
 
         """
-        async with self.http.get(f"{self.api_url}/analyses/{self.id}/files/{file_id}") as response:
+        async with self.http.get(
+            f"{self.api_url}/analyses/{self.id}/files/{file_id}"
+        ) as response:
             async with raising_errors_by_status_code(response):
                 async with aiofiles.open(target_path, "wb") as f:
                     await f.write(await response.read())
@@ -138,14 +138,17 @@ class AnalysisProvider:
         :raise AlreadyFinalized: When there is already a result for the analysis.
 
         """
-        async with self.http.patch(f"{self.api_url}/analyses/{self.id}", json={
-            "results": result
-        }) as response:
+        async with self.http.patch(
+            f"{self.api_url}/analyses/{self.id}", json={"results": result}
+        ) as response:
             async with raising_errors_by_status_code(response) as analysis_json:
-                return Analysis(
-                    analysis_json["id"],
-                    get_analysis_files_from_response_json(analysis_json)
-                ), analysis_json["results"]
+                return (
+                    Analysis(
+                        analysis_json["id"],
+                        get_analysis_files_from_response_json(analysis_json),
+                    ),
+                    analysis_json["results"],
+                )
 
     async def delete(self):
         """

@@ -44,8 +44,8 @@ def collect(module: ModuleType) -> Workflow:
     workflow = Workflow()
 
     markers = [
-        value for value
-        in module.__dict__.values()
+        value
+        for value in module.__dict__.values()
         if hasattr(value, "__workflow_marker__")
     ]
 
@@ -57,11 +57,7 @@ def collect(module: ModuleType) -> Workflow:
         elif marked.__workflow_marker__ == "cleanup":
             workflow.cleanup(marked)
 
-    if (
-        len(workflow.steps)
-        + len(workflow.on_startup)
-        + len(workflow.on_cleanup)
-    ) == 0:
+    if (len(workflow.steps) + len(workflow.on_startup) + len(workflow.on_cleanup)) == 0:
         raise ValueError(f"No workflow steps could be found in {module}")
 
     return workflow

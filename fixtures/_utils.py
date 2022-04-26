@@ -6,7 +6,7 @@ def get_defaults(argspec: inspect.FullArgSpec) -> dict:
     if not argspec.defaults:
         return {}
 
-    args_with_default = argspec.args[-len(argspec.defaults):]
+    args_with_default = argspec.args[-len(argspec.defaults) :]
     return dict(zip(args_with_default, argspec.defaults))
 
 

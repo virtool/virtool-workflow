@@ -27,8 +27,7 @@ async def test_temporary_callback(runtime):
 
     await hooks.on_result.trigger(runtime)
 
-    assert "remove_callback" not in [
-        f.__name__ for f in example_hook.callbacks]
+    assert "remove_callback" not in [f.__name__ for f in example_hook.callbacks]
     assert temporary_callback not in example_hook.callbacks
 
 

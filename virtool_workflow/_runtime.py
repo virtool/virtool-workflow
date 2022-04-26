@@ -48,7 +48,7 @@ def configure_workflow(
 
     for name in (
         "virtool_workflow.builtin_fixtures",
-        "virtool_workflow.analysis.fixtures"
+        "virtool_workflow.analysis.fixtures",
     ):
         module = import_module(name)
         logger.debug(f"Imported {module}")
@@ -63,6 +63,7 @@ def configure_builtin_status_hooks():
     Push status updates to API when various lifecycle hooks are triggered.
 
     """
+
     @on_step_start
     async def send_status(push_status):
         await push_status(state="running")
@@ -102,9 +103,7 @@ def cleanup_builtin_status_hooks():
 
 
 async def run_workflow(
-    config: Dict[str, Any],
-    job_id: str,
-    workflow: Workflow
+    config: Dict[str, Any], job_id: str, workflow: Workflow
 ) -> Dict[str, Any]:
     # Configure hooks here so that they can be tested when using `run_workflow`.
     configure_builtin_status_hooks()
@@ -152,8 +151,6 @@ async def start_runtime(
     async with configure_redis(redis_connection_string) as redis:
         job_id = await get_next_job(redis_list_name, redis, timeout=timeout)
 
-    workflow_run = asyncio.create_task(
-        run_workflow(config, job_id, workflow)
-    )
+    workflow_run = asyncio.create_task(run_workflow(config, job_id, workflow))
 
     await workflow_run

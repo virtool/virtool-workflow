@@ -22,7 +22,9 @@ def hmms_provider(http, jobs_api_url, work_path) -> HMMsProvider:
 @fixture
 def index_provider(job, http, jobs_api_url) -> IndexProvider:
     try:
-        return IndexProvider(job.args["index_id"], job.args["ref_id"], http, jobs_api_url)
+        return IndexProvider(
+            job.args["index_id"], job.args["ref_id"], http, jobs_api_url
+        )
     except KeyError as e:
         key = e.args[0]
 

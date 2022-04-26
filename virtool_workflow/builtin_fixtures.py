@@ -17,7 +17,7 @@ def results() -> dict:
 def work_path(config: dict) -> Path:
     """A temporary working directory."""
     path = Path(config["work_path"]).absolute()
-    rmtree(path, ignore_errors=True)    
+    rmtree(path, ignore_errors=True)
     path.mkdir(parents=True)
     yield path
     rmtree(path)
@@ -25,7 +25,7 @@ def work_path(config: dict) -> Path:
 
 @fixture
 def proc(config: dict) -> int:
-    """"The number of processes to use for multiprocess operations."""
+    """ "The number of processes to use for multiprocess operations."""
     return config["proc"]
 
 
@@ -67,5 +67,5 @@ __all__ = [
     "work_path",
     "job_id",
     "input_files",
-    "files_list"
+    "files_list",
 ]
