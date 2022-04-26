@@ -85,6 +85,22 @@ def configure_builtin_status_hooks():
         await push_status(state="complete", stage="completed")
 
 
+def cleanup_builtin_status_hooks():
+    """
+    Clear callbacks for built-in status hooks.
+
+    This prevents carryover of hooks between tests. Carryover won't be encountered in
+    production because workflow processes exit after one run.
+
+    TODO: Find a better way to isolate hooks to workflow runs.
+
+    """
+    on_step_start.clear()
+    on_failure.clear()
+    on_cancelled.clear()
+    on_success.clear()
+
+
 async def run_workflow(
     config: Dict[str, Any],
     job_id: str,
@@ -97,6 +113,9 @@ async def run_workflow(
         scope["config"] = config
         scope["job_id"] = job_id
         await execute(workflow, scope)
+
+        cleanup_builtin_status_hooks()
+
         return scope.get("results", {})
 
 
