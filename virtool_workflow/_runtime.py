@@ -1,15 +1,16 @@
+import asyncio
 import logging
 import os
-import asyncio
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
 from typing import Any, Dict
 
 from fixtures import FixtureScope, runs_in_new_fixture_context
-from virtool_workflow import discovery, execute, hooks
+from virtool_workflow import discovery, execute
+from virtool_workflow.execution.hooks.workflow_hooks import on_step_start
+from virtool_workflow.hooks import on_failure, on_cancelled, on_success
 from virtool_workflow.redis import configure_redis, get_next_job
-from virtool_workflow.runtime import status
 from virtool_workflow.sentry import configure_sentry
 from virtool_workflow.signals import configure_signal_handling
 from virtool_workflow.workflow import Workflow
@@ -55,11 +56,33 @@ def configure_workflow(
     return workflow
 
 
-def configure_hooks():
-    hooks.on_step_start(status.send_status)
-    hooks.on_failure(status.send_failed, once=True)
-    hooks.on_cancelled(status.send_cancelled, once=True)
-    hooks.on_success(status.send_complete, once=True)
+def configure_builtin_status_hooks():
+    """
+    Configure built-in job status hooks.
+
+    Push status updates to API when various lifecycle hooks are triggered.
+
+    """
+    @on_step_start
+    async def send_status(push_status):
+        await push_status(state="running")
+
+    @on_failure(once=True)
+    async def send_failed(error, push_status):
+        await push_status(
+            stage="",
+            state="error",
+            error=error,
+            max_tb=50,
+        )
+
+    @on_cancelled(once=True)
+    async def send_cancelled(push_status):
+        await push_status(state="cancelled")
+
+    @on_success(once=True)
+    async def send_complete(push_status):
+        await push_status(state="complete", stage="completed")
 
 
 async def run_workflow(
@@ -67,6 +90,9 @@ async def run_workflow(
     job_id: str,
     workflow: Workflow
 ) -> Dict[str, Any]:
+    # Configure hooks here so that they can be tested when using `run_workflow`.
+    configure_builtin_status_hooks()
+
     async with FixtureScope() as scope:
         scope["config"] = config
         scope["job_id"] = job_id
@@ -92,7 +118,6 @@ async def start_runtime(
     log_level = logging.DEBUG if dev else logging.INFO
     configure_logging(log_level)
     configure_sentry(sentry_dsn, log_level)
-    configure_hooks()
     configure_signal_handling()
 
     workflow = configure_workflow(fixtures_file, init_file, workflow_file)
