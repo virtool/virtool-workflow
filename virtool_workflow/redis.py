@@ -1,12 +1,11 @@
 import asyncio
 import logging
-import aioredis
+from contextlib import asynccontextmanager, suppress
 from typing import AsyncGenerator
+
+import aioredis
 from aioredis import Redis
 from virtool_core.redis import periodically_ping_redis
-from contextlib import asynccontextmanager, suppress
-from virtool_workflow._graceful_exit import shutdown
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +34,31 @@ async def configure_redis(url: str, timeout=1) -> AsyncGenerator[Redis, None]:
             await redis.wait_closed()
 
 
-async def get_next_job(list_name: str, redis: Redis, timeout: int = None) -> str:
-    logger.info(f"Waiting for a job; {timeout=}")
-    try:
-        return await asyncio.wait_for(_get_next_job(list_name, redis), timeout)
-    except asyncio.TimeoutError:
-        await shutdown(exit_code=124, message="failed to find a job within timeout")
+async def get_next_job_with_timeout(
+    list_name: str, redis: Redis, timeout: int = None
+) -> str:
+    """
+    Get the next job ID from a Redis list and raise a  :class:``Timeout`` error if one
+    is not found in ``timeout`` seconds.
+
+    :param list_name: the name of the list to pop from
+    :param redis: the Redis client
+    :param timeout: seconds to wait before raising :class:``Timeout``
+    :return: the next job ID
+
+    """
+    logger.info(f"Waiting for a job for {timeout if timeout else 'infinity'} seconds")
+    return await asyncio.wait_for(get_next_job(list_name, redis), timeout)
 
 
-async def _get_next_job(list_name: str, redis: Redis) -> str:
-    result = await redis.blpop(list_name)
+async def get_next_job(list_name: str, redis: Redis) -> str:
+    """
+    Get the next job ID from a Redis list.
 
-    if result is not None:
+    :param list_name: the name of the list to pop from
+    :param redis: the Redis client
+    :return: the next job ID
+
+    """
+    if result := await redis.blpop(list_name) is not None:
         return str(result[1], encoding="utf-8")
