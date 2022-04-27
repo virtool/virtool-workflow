@@ -4,6 +4,7 @@ from itertools import chain
 
 from fixtures import FixtureScope, fixture
 from virtool_workflow import Workflow
+from virtool_workflow._steps import WorkflowStep
 from virtool_workflow.execution import states
 from virtool_workflow.hooks import (
     on_failure,
@@ -18,13 +19,6 @@ from virtool_workflow.hooks import (
 logger = logging.getLogger(__name__)
 
 
-@on_workflow_start
-async def initialize_scope(scope):
-    scope["step_number"] = 0
-    scope["error"] = None
-    scope["logger"] = logger
-
-
 async def execute(
     workflow: Workflow,
     scope: FixtureScope,
@@ -35,10 +29,21 @@ async def execute(
     :param workflow: The workflow to execute
     :param scope: The :class:`FixtureScope` to use for fixture injection
     """
+    scope["step_number"] = 0
+    scope["error"] = None
+    scope["logger"] = logger
+    scope["workflow"] = workflow
+
     await on_workflow_start.trigger(scope)
+
     try:
-        with workflow_state_management(scope):
-            await _execute(workflow, scope)
+        with update_state_in_scope(scope):
+            for step in chain(workflow.on_startup, workflow.steps, workflow.on_cleanup):
+                bound_step = await scope.bind(step.function)
+
+                async with run_step_with_hooks(scope, step):
+                    logger.info(f"Running step '{step.display_name}'")
+                    await bound_step()
     except Exception as error:
         scope["error"] = error
         await on_failure.trigger(scope)
@@ -55,11 +60,17 @@ async def execute(
 
 
 @contextmanager
-def workflow_state_management(scope):
+def update_state_in_scope(scope: FixtureScope):
+    """
+    Update the scope state value as the enclosed workflow execution proceeds.
+
+    :param scope: the workflow fixture scope
+    """
     scope["state"] = states.RUNNING
+
     try:
         yield
-    except:
+    except Exception:
         scope["state"] = states.ERROR
         raise
     else:
@@ -67,8 +78,15 @@ def workflow_state_management(scope):
 
 
 @asynccontextmanager
-async def step_setup(scope, step):
+async def run_step_with_hooks(scope: FixtureScope, step: WorkflowStep):
+    """
+    Run the passed ``step`` while updating the ``scope`` and triggering hooks.
+
+    :param scope: the scope to update and use for triggering hooks
+    :param step: the workflow step
+    """
     scope["current_step"] = step
+    scope["step_number"] += 1
 
     try:
         await on_step_start.trigger(scope)
@@ -76,29 +94,6 @@ async def step_setup(scope, step):
         await on_step_finish.trigger(scope)
     finally:
         scope["current_step"] = None
-
-
-async def _execute(
-    workflow: Workflow,
-    scope: FixtureScope,
-):
-    scope["workflow"] = workflow
-
-    steps = chain(workflow.on_startup, workflow.steps, workflow.on_cleanup)
-
-    for step in steps:
-        run_step = await scope.bind(step.function)
-        async with step_setup(scope, step=step):
-            logger.info(f"Running step '{step.display_name}'")
-            await run_step()
-
-    scope["state"] = states.COMPLETE
-
-
-@on_step_start
-async def update_step_number(scope):
-    scope["step_number"] += 1
-    return scope["step_number"]
 
 
 @fixture(scope="function")
