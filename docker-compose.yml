@@ -2,13 +2,11 @@ version: "3.1"
 services:
 
   mongo:
-    image: mongo:4.4
+    image: bitnami/mongodb:4.4
+    environment:
+      MONGODB_REPLICATE_SET_MODE: primary
     ports:
       - "27017:27017"
-    volumes:
-      - vt_mongo_data:/data/db
-    logging:
-      driver: none
 
   redis:
     image: redis:6.0
@@ -16,8 +14,6 @@ services:
       - "6379:6379"
     volumes:
       - vt_redis_data:/data
-    logging:
-      driver: none
 
   postgres:
     image: postgres:13.1
@@ -29,11 +25,9 @@ services:
       POSTGRES_PASSWORD: virtool
     volumes:
       - vt_postgres_data:/var/lib/postgresql/data
-    logging:
-      driver: none
 
   jobs-api:
-    image: virtool/virtool:6.6.10
+    image: virtool/virtool:7.2.2
     depends_on:
       - mongo
       - redis
