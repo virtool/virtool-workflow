@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import os
+import signal
+import sys
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
@@ -8,10 +10,21 @@ from typing import Any, Dict
 
 from fixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_workflow import discovery, execute
-from virtool_workflow.hooks import on_failure, on_cancelled, on_success, on_step_start
-from virtool_workflow.redis import configure_redis, get_next_job
+from virtool_workflow.events import Events
+from virtool_workflow.hooks import (
+    on_failure,
+    on_cancelled,
+    on_success,
+    on_step_start,
+    on_terminated,
+    on_error,
+)
+from virtool_workflow.redis import (
+    configure_redis,
+    get_next_job_with_timeout,
+    wait_for_cancellation,
+)
 from virtool_workflow.sentry import configure_sentry
-from virtool_workflow.signals import configure_signal_handling
 from virtool_workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
@@ -103,10 +116,15 @@ def cleanup_builtin_status_hooks():
     on_failure.clear()
     on_cancelled.clear()
     on_success.clear()
+    on_error.clear()
+    on_terminated.clear()
 
 
 async def run_workflow(
-    config: Dict[str, Any], job_id: str, workflow: Workflow
+    config: Dict[str, Any],
+    job_id: str,
+    workflow: Workflow,
+    events: Events,
 ) -> Dict[str, Any]:
     # Configure hooks here so that they can be tested when using `run_workflow`.
     configure_builtin_status_hooks()
@@ -114,7 +132,15 @@ async def run_workflow(
     async with FixtureScope() as scope:
         scope["config"] = config
         scope["job_id"] = job_id
-        await execute(workflow, scope)
+
+        execute_task = asyncio.create_task(execute(workflow, scope, events))
+
+        try:
+            await execute_task
+        except asyncio.CancelledError:
+            execute_task.cancel()
+
+        await execute_task
 
         cleanup_builtin_status_hooks()
 
@@ -139,7 +165,6 @@ async def start_runtime(
     log_level = logging.DEBUG if dev else logging.INFO
     configure_logging(log_level)
     configure_sentry(sentry_dsn, log_level)
-    configure_signal_handling()
 
     workflow = configure_workflow(fixtures_file, init_file, workflow_file)
 
@@ -152,8 +177,39 @@ async def start_runtime(
     )
 
     async with configure_redis(redis_connection_string) as redis:
-        job_id = await get_next_job(redis_list_name, redis, timeout=timeout)
+        try:
+            job_id = await get_next_job_with_timeout(
+                redis_list_name, redis, timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            # This happens due to Kubernetes scheduling issues or job cancellations. It
+            # is not an error.
+            logging.warning("Timed out while waiting for job")
+            sys.exit(0)
 
-    workflow_run = asyncio.create_task(run_workflow(config, job_id, workflow))
+    events = Events()
 
-    await workflow_run
+    workflow_run = asyncio.create_task(run_workflow(config, job_id, workflow, events))
+
+    def terminate_workflow(*_):
+        events.terminated.set()
+        workflow_run.cancel()
+
+    signal.signal(signal.SIGTERM, terminate_workflow)
+
+    def cancel_workflow(*_):
+        events.cancelled.set()
+        workflow_run.cancel()
+
+    async with configure_redis(redis_connection_string) as redis:
+        cancellation_task = asyncio.create_task(
+            wait_for_cancellation(redis, job_id, cancel_workflow)
+        )
+
+        await workflow_run
+
+        cancellation_task.cancel()
+        await cancellation_task
+
+    if events.terminated.is_set():
+        sys.exit(124)

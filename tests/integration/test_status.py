@@ -1,9 +1,9 @@
-import pytest
 from asyncio import sleep
+
 from virtool_workflow import Workflow, hooks
 
 
-async def test_status_updates_without_error(db, create_job, exec_workflow, job_id):
+async def test_status_updates(db, create_job, exec_workflow, job_id):
     await create_job(args={})
 
     wf = Workflow()
@@ -11,12 +11,12 @@ async def test_status_updates_without_error(db, create_job, exec_workflow, job_i
     @wf.step
     def first(job):
         """Description of First."""
-        assert job.status[-1]["state"] == "waiting"
-        ...
+        assert job.status[-1]["state"] == "preparing"
 
     @wf.step
     def second(job):
         """Description of Second."""
+        ...
 
     jobs = db.get_collection("jobs")
     steps_finished = 0
@@ -71,26 +71,32 @@ async def test_status_updates_with_error(db, create_job, exec_workflow, job_id):
     def raise_error():
         raise error
 
-    hook_called = False
+    error_hook_called = False
 
-    @hooks.on_failure(once=True)
+    @hooks.on_error(once=True)
     async def check_error_update_sent():
-        nonlocal hook_called
+        nonlocal error_hook_called
 
         # Wait for status to be received at virtool server
         await sleep(0.1)
 
-        jobs = db.get_collection("jobs")
+        job = await db.get_collection("jobs").find_one({"_id": job_id})
 
-        job = await jobs.find_one({"_id": job_id})
         status = job["status"][-1]
 
         assert status["state"] == "error"
         assert status["error"]["type"] == "ValueError"
 
-        hook_called = True
+        error_hook_called = True
 
-    with pytest.raises(ValueError):
-        await exec_workflow(wf)
+    failure_hook_called = False
 
-    assert hook_called is True
+    @hooks.on_failure(once=True)
+    async def check_failure_hook_called():
+        nonlocal failure_hook_called
+        failure_hook_called = True
+
+    await exec_workflow(wf)
+
+    assert error_hook_called is True
+    assert failure_hook_called is True

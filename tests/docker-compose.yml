@@ -13,4 +13,3 @@ services:
       - ./coverage:/test/coverage
       - /var/run/docker.sock:/var/run/docker.sock
     network_mode: "host"
-
