@@ -1,8 +1,6 @@
 """
 Hooks provide a way to do things when events happen during the workflow lifecycle.
 """
-import asyncio
-from concurrent import futures
 
 from virtool_workflow.execution.hooks import Hook
 
@@ -40,7 +38,7 @@ Triggered after each workflow step is executed.
 The :class:`WorkflowStep` object is available via the `current_step` fixture.
 
 @on_step_finish
-async def use_step(current_step):
+async def handle_step_finish(current_step):
     ...
 """
 
@@ -62,38 +60,6 @@ Parameters supplied are the `Workflow` instance and the results dict.
         ...
 """
 
-on_failure = Hook("on_failure")
-"""
-Triggered when a job fails to complete.
-
-The exception which caused the failure will be found in the `error` fixture.
-
-.. code-block:: python
-
-    @on_failure
-    async def perform_on_failure(error: Exception):
-        ...
-"""
-
-on_finish = Hook("on_finish")
-"""
-Triggered when a job finishes, regardless of success or failure.
-
-.. code-block:: python
-
-    @on_finish
-    async def perform_on_finish(workflow: Workflow):
-        ...
-"""
-
-
-on_finalize = Hook("on_finalize")
-"""
-Triggered after job finishes, regardless of end state.
-
-Intended for finalization actions such as closing the fixture scope.
-"""
-
 
 on_cancelled = Hook("on_cancelled")
 """
@@ -106,11 +72,63 @@ Triggered when a job is cancelled.
         ...
 """
 
+on_error = Hook("on_error")
+"""
+Triggered when a job encounters an exception while running.
 
-@on_failure
-async def _trigger_on_cancelled(error: Exception, scope):
-    if isinstance(error, (asyncio.CancelledError, futures.CancelledError)):
-        await on_cancelled.trigger(scope, error)
+The exception can be found in the ``error`` fixture.
+
+.. code-block:: python
+
+    @on_error
+    async def handle_error(error: Exception):
+        ...
+"""
+
+on_terminated = Hook("on_terminated")
+"""
+Triggered when the workflow process receives a SIGTERM.
+
+.. code-block:: python
+
+    @on_terminated
+    def handle_termination():
+        ...
+"""
+
+
+on_failure = Hook("on_failure")
+"""
+Triggered when a job fails to complete.
+
+Failure to complete can be caused by: user cancellation, termination by the host, or 
+an error during workflow execution.
+
+.. code-block:: python
+
+    @on_failure
+    async def handle_failure(error: Exception):
+        ...
+"""
+
+on_finish = Hook("on_finish")
+"""
+Triggered when a job succeeds or fails.
+
+.. code-block:: python
+
+    @on_finish
+    async def do_something_on_finish(workflow: Workflow):
+        ...
+"""
+
+
+on_finalize = Hook("on_finalize")
+"""
+Triggered after job finishes, regardless of end state.
+
+Intended for finalization actions such as closing the fixture scope.
+"""
 
 
 on_load_config = Hook("on_load_config")
@@ -129,16 +147,6 @@ A SimpleNamespace object is provided which has an attribute
             ...
 """
 
-on_terminated = Hook("on_terminated")
-"""
-Triggered when the workflow process receives a SIGTERM.
-
-.. code-block:: python
-
-    @on_terminated
-    def handle_termination():
-        ...
-"""
 
 before_result_upload = Hook("before_result_upload")
 """Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
@@ -156,4 +164,5 @@ __all__ = [
     "on_step_finish",
     "on_workflow_start",
     "on_terminated",
+    "on_error",
 ]

@@ -64,11 +64,11 @@ def configure_builtin_status_hooks():
     """
 
     @on_step_start
-    async def send_status(push_status):
+    async def handle_step_start(push_status):
         await push_status(state="running")
 
-    @on_failure(once=True)
-    async def send_failed(error, push_status):
+    @on_error(once=True)
+    async def handle_error(error, push_status):
         await push_status(
             stage="",
             state="error",
@@ -77,12 +77,16 @@ def configure_builtin_status_hooks():
         )
 
     @on_cancelled(once=True)
-    async def send_cancelled(push_status):
-        await push_status(state="cancelled")
+    async def handle_cancelled(push_status):
+        await push_status(stage="", state="cancelled")
+
+    @on_terminated
+    async def handle_terminated(push_status):
+        await push_status(stage="", state="terminated")
 
     @on_success(once=True)
-    async def send_complete(push_status):
-        await push_status(state="complete", stage="completed")
+    async def handle_success(push_status):
+        await push_status(stage="", state="complete")
 
 
 def cleanup_builtin_status_hooks():
