@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class Hook:
-    """Used to hook into ."""
+    """Used to hook into the workflow lifecycle."""
 
     def __init__(self, hook_name: str):
         """
