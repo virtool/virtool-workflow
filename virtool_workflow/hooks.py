@@ -16,9 +16,8 @@ Triggered when a workflow has completed and a result is available.
     async def use_result(workflow: Workflow, results: Dict[str, Any]):
         ...
 
-This Hook is triggered before the result of the workflow is stored. As
-such the result can be mutated within the callback and that change will be
-reflected in the final result.
+Modifying the ``results`` in this hook modifies the data committed to Virtool when the
+workflow completes.
 """
 
 on_step_start = Hook("on_step_start")
@@ -65,8 +64,9 @@ Parameters supplied are the `Workflow` instance and the results dict.
 
 on_failure = Hook("on_failure")
 """
-Triggered when a job fails to complete. The exception
-which caused the failure will be found in the `error` fixture.
+Triggered when a job fails to complete.
+
+The exception which caused the failure will be found in the `error` fixture.
 
 .. code-block:: python
 
@@ -89,7 +89,7 @@ Triggered when a job finishes, regardless of success or failure.
 
 on_finalize = Hook("on_finalize")
 """
-Triggered after job finishes, regardless of success or failure.
+Triggered after job finishes, regardless of end state.
 
 Intended for finalization actions such as closing the fixture scope.
 """
@@ -102,7 +102,7 @@ Triggered when a job is cancelled.
 .. code-block:: python
 
     @on_cancelled
-    async def on_cancelled(error: asyncio.CancelledError):
+    async def handle_cancellation(error: asyncio.CancelledError):
         ...
 """
 
@@ -115,8 +115,10 @@ async def _trigger_on_cancelled(error: Exception, scope):
 
 on_load_config = Hook("on_load_config")
 """
-Triggered after the config is loaded from the CLI arguments and environment variables. A SimpleNamespace object
-is provided which has an attribute (sharing the same name as the fixture) for each configuration fixture in
+Triggered after the config is loaded from the CLI arguments and environment variables.
+
+A SimpleNamespace object is provided which has an attribute
+(sharing the same name as the fixture) for each configuration fixture in
 :mod:`virtool_workflow_runtime.config.configuration`. 
 
 .. code-block:: python
@@ -125,6 +127,17 @@ is provided which has an attribute (sharing the same name as the fixture) for ea
     def use_config(dev_mode):
         if dev_mode:
             ...
+"""
+
+on_terminated = Hook("on_terminated")
+"""
+Triggered when the workflow process receives a SIGTERM.
+
+.. code-block:: python
+
+    @on_terminated
+    def handle_termination():
+        ...
 """
 
 before_result_upload = Hook("before_result_upload")
@@ -142,4 +155,5 @@ __all__ = [
     "on_step_start",
     "on_step_finish",
     "on_workflow_start",
+    "on_terminated",
 ]

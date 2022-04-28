@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import signal
 from contextlib import asynccontextmanager, contextmanager
 from itertools import chain
 
@@ -14,6 +16,7 @@ from virtool_workflow.hooks import (
     on_step_start,
     on_success,
     on_workflow_start,
+    on_terminated,
 )
 
 logger = logging.getLogger(__name__)
@@ -33,6 +36,10 @@ async def execute(
     scope["error"] = None
     scope["logger"] = logger
     scope["workflow"] = workflow
+
+    asyncio.get_event_loop().add_signal_handler(
+        signal.SIGTERM, lambda *_: asyncio.create_task(on_terminated.trigger(scope))
+    )
 
     await on_workflow_start.trigger(scope)
 
