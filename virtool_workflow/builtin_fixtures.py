@@ -38,7 +38,10 @@ def mem(config: dict) -> int:
 @fixture
 def jobs_api_url(config: dict) -> str:
     """The URL of the jobs API."""
-    return config["jobs_api_url"]
+    try:
+        return config["jobs_api_url"]
+    except KeyError:
+        return config["jobs_api_connection_string"]
 
 
 @fixture
