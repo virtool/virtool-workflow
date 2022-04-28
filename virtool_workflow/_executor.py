@@ -1,12 +1,13 @@
 import asyncio
 import logging
-import signal
+from asyncio import CancelledError
 from contextlib import asynccontextmanager, contextmanager
 from itertools import chain
 
 from fixtures import FixtureScope, fixture
 from virtool_workflow import Workflow
 from virtool_workflow._steps import WorkflowStep
+from virtool_workflow.events import Events
 from virtool_workflow.execution import states
 from virtool_workflow.hooks import (
     on_failure,
@@ -17,14 +18,15 @@ from virtool_workflow.hooks import (
     on_success,
     on_workflow_start,
     on_terminated,
+    on_cancelled,
+    on_error,
 )
 
 logger = logging.getLogger(__name__)
 
 
 async def execute(
-    workflow: Workflow,
-    scope: FixtureScope,
+    workflow: Workflow, scope: FixtureScope, events: Events
 ) -> FixtureScope:
     """
     Execute a workflow.
@@ -37,10 +39,6 @@ async def execute(
     scope["logger"] = logger
     scope["workflow"] = workflow
 
-    asyncio.get_event_loop().add_signal_handler(
-        signal.SIGTERM, lambda *_: asyncio.create_task(on_terminated.trigger(scope))
-    )
-
     await on_workflow_start.trigger(scope)
 
     try:
@@ -51,10 +49,23 @@ async def execute(
                 async with run_step_with_hooks(scope, step):
                     logger.info(f"Running step '{step.display_name}'")
                     await bound_step()
+    except CancelledError:
+        if events.cancelled.is_set():
+            await asyncio.gather(
+                on_cancelled.trigger(scope),
+                on_failure.trigger(scope),
+            )
+        else:
+            if not events.terminated.is_set():
+                logger.warning("Workflow cancelled for unknown reason")
+
+            await asyncio.gather(
+                on_terminated.trigger(scope),
+                on_failure.trigger(scope),
+            )
     except Exception as error:
         scope["error"] = error
-        await on_failure.trigger(scope)
-        raise error
+        await asyncio.gather(on_error.trigger(scope), on_failure.trigger(scope))
     else:
         if "results" in scope:
             await on_result.trigger(scope)

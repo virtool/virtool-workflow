@@ -1,12 +1,12 @@
 """Test utilities for Virtool Workflows."""
+from importlib import import_module
 from typing import Callable
 
 import pytest
-from virtool_workflow import Workflow, execute
-from importlib import import_module
 
 from fixtures import FixtureScope, fixture
-
+from virtool_workflow import Workflow, execute
+from virtool_workflow.events import Events
 
 import_module("virtool_workflow.builtin_fixtures")
 import_module("virtool_workflow.analysis.fixtures")
@@ -26,7 +26,7 @@ class WorkflowTestRunner(FixtureScope):
             workflow = self["workflow"]
 
         async with FixtureScope() as scope:
-            await execute(workflow, scope)
+            await execute(workflow, scope, Events())
 
             return await scope.get_or_instantiate("results")
 

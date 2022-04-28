@@ -4,6 +4,7 @@ from typing import Dict, Any
 import pytest
 
 from virtool_workflow._runtime import run_workflow
+from virtool_workflow.events import Events
 
 
 @pytest.fixture
@@ -19,6 +20,6 @@ async def exec_workflow(base_config: Dict[str, Any], job_id):
 
     async def _exec_workflow(workflow, **kwargs):
         base_config.update(kwargs)
-        await run_workflow(base_config, job_id, workflow)
+        await run_workflow(base_config, job_id, workflow, Events())
 
     return _exec_workflow

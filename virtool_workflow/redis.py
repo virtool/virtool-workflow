@@ -1,13 +1,16 @@
 import asyncio
 import logging
+from asyncio import CancelledError
 from contextlib import asynccontextmanager, suppress
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Callable
 
 import aioredis
 from aioredis import Redis
 from virtool_core.redis import periodically_ping_redis
 
 logger = logging.getLogger(__name__)
+
+CANCELLATION_CHANNEL = "channel:cancel"
 
 
 @asynccontextmanager
@@ -60,5 +63,18 @@ async def get_next_job(list_name: str, redis: Redis) -> str:
     :return: the next job ID
 
     """
-    if result := await redis.blpop(list_name) is not None:
+    result = await redis.blpop(list_name)
+
+    if result is not None:
         return str(result[1], encoding="utf-8")
+
+
+async def wait_for_cancellation(redis, job_id: str, func: Callable):
+    (channel,) = await redis.subscribe(CANCELLATION_CHANNEL)
+
+    try:
+        async for cancelled_job_id in channel.iter():
+            if cancelled_job_id.decode() == job_id:
+                return func()
+    except CancelledError:
+        ...

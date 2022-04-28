@@ -60,7 +60,6 @@ Parameters supplied are the `Workflow` instance and the results dict.
         ...
 """
 
-
 on_cancelled = Hook("on_cancelled")
 """
 Triggered when a job is cancelled.
@@ -96,12 +95,11 @@ Triggered when the workflow process receives a SIGTERM.
         ...
 """
 
-
 on_failure = Hook("on_failure")
 """
 Triggered when a job fails to complete.
 
-Failure to complete can be caused by: user cancellation, termination by the host, or 
+Failure to complete can be caused by: user cancellation, termination by the host, or
 an error during workflow execution.
 
 .. code-block:: python
@@ -122,14 +120,12 @@ Triggered when a job succeeds or fails.
         ...
 """
 
-
 on_finalize = Hook("on_finalize")
 """
 Triggered after job finishes, regardless of end state.
 
 Intended for finalization actions such as closing the fixture scope.
 """
-
 
 on_load_config = Hook("on_load_config")
 """
@@ -146,7 +142,6 @@ A SimpleNamespace object is provided which has an attribute
         if dev_mode:
             ...
 """
-
 
 before_result_upload = Hook("before_result_upload")
 """Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
