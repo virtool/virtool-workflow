@@ -48,3 +48,71 @@ Additional Requirements
    or _"oops. fixed my code smell"_.
 
 From Tim Pope: [A Note About Git Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
+
+### Poetry
+
+Dependencies & virtual environments are managed with [Poetry](https://python-poetry.org/ "Poetry")
+
+To install `poetry`:
+
+```sh
+sudo pip install poetry
+```
+
+To install dependencies, and the `virtool-workflow` package, into a virtual environment:
+
+```sh
+git clone https://github.com/virtool/virtool-workflow
+cd virtool-workflow
+
+poetry install
+```
+
+To run commands in the virtual environment:
+
+```sh
+poetry run <<command>>
+```
+
+### Tests
+
+[Pytest](https://docs.pytest.org/en/7.1.x/ "Pytest") is used to implement unit
+and integration tests.
+
+A pytest plugin,
+[pytest-docker-compose](https://github.com/pytest-docker-compose/pytest-docker-compose)
+handles starting and stopping any required external services for integration
+tests. [docker-compose](https://docs.docker.com/compose/) will need to be
+installed on your system for this to work. It might also be necessary to setup a
+`docker` user group on your system, so you can [use docker without
+sudo](https://linoxide.com/use-docker-without-sudo-ubuntu/).
+
+`virtool-workflow` depends on some external bioinformatics tools such as [Bowtie
+2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml),
+[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), and
+[Skewer](https://github.com/relipmoc/skewer). Installation of these tools can be
+somewhat involved, so it's best to run the test suite using `docker`. The
+[virtool/workflow-tools](https://github.com/virtool/workflow-tools) image
+provides a base with all of the external dependencies pre-installed.
+
+[./tests/docker-compose.yml](./tests/docker-compose.yml) will run the test suite
+inside a container based on
+[virtool/workflow-tools](https://github.com/virtool/workflow-tools) and mount
+the local docker socket so that `pytest`, running inside the container, can
+manage the other services required by the integration tests.
+
+To run the entire test suite:
+
+```sh
+cd tests
+docker-compose up --exit-code-from pytest
+```
+
+To run a subset of the tests, `tests/integration` only for example:
+
+```sh
+cd tests
+TEST_PATH=tests/integration docker-compose up --exit-code-from pytest
+```
+
+:warning: The `TEST_PATH` is a relative path from the repository root, not the `tests` directory.
