@@ -10,10 +10,11 @@ from virtool_workflow.data_model import Sample
 
 
 @pytest.fixture
-def sample_api(http, jobs_api_url: str):
+def sample_api(http, jobs_api_connection_string: str):
     if "ready" in TEST_SAMPLE:
         del TEST_SAMPLE["ready"]
-    return SampleProvider(TEST_SAMPLE_ID, http, jobs_api_url)
+
+    return SampleProvider(TEST_SAMPLE_ID, http, jobs_api_connection_string)
 
 
 async def test_get(sample_api):

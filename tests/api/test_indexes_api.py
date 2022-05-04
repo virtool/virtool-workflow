@@ -14,8 +14,8 @@ from virtool_workflow.data_model.indexes import Index
 
 
 @pytest.fixture
-async def indexes_api(http, jobs_api_url: str):
-    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_url)
+async def indexes_api(http, jobs_api_connection_string: str):
+    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_connection_string)
 
 
 async def test_get(indexes_api):

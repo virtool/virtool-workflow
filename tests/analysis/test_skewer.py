@@ -14,7 +14,7 @@ from virtool_workflow.runtime.providers import sample_provider
 @pytest.mark.skipif(shutil.which("skewer") is None, reason="Skewer is not installed.")
 async def test_skewer(
     http,
-    jobs_api_url,
+    jobs_api_connection_string,
     tmpdir,
     run_subprocess,
     run_in_executor,
@@ -27,7 +27,7 @@ async def test_skewer(
         "test_job",
         {"sample_id": TEST_SAMPLE_ID},
     )
-    sample = await sample_provider(job, http, jobs_api_url).get()
+    sample = await sample_provider(job, http, jobs_api_connection_string).get()
 
     run_skewer = skewer(
         min_length=calculate_trimming_min_length(

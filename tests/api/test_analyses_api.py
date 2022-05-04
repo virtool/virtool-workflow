@@ -11,16 +11,18 @@ from virtool_workflow.data_model.files import VirtoolFile
 
 
 @pytest.fixture
-def analysis_api(http, jobs_api_url: str):
-    return AnalysisProvider("test_analysis", http, jobs_api_url)
+def analysis_api(http, jobs_api_connection_string: str):
+    return AnalysisProvider("test_analysis", http, jobs_api_connection_string)
 
 
-async def test_get_analysis(http, jobs_api_url: str):
-    analysis = await get_analysis_by_id("test_analysis", http, jobs_api_url)
+async def test_get_analysis(http, jobs_api_connection_string: str):
+    analysis = await get_analysis_by_id(
+        "test_analysis", http, jobs_api_connection_string
+    )
     assert isinstance(analysis, Analysis)
 
     with pytest.raises(virtool_workflow.api.errors.NotFound):
-        await get_analysis_by_id("not_an_id", http, jobs_api_url)
+        await get_analysis_by_id("not_an_id", http, jobs_api_connection_string)
 
 
 async def test_analysis_provider_get(analysis_api):

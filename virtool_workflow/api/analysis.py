@@ -45,14 +45,14 @@ def get_analysis_files_from_response_json(json) -> List[VirtoolFile]:
 
 
 async def get_analysis_by_id(
-    analysis_id: str, http: aiohttp.ClientSession, jobs_api_url: str
+    analysis_id: str, http: aiohttp.ClientSession, jobs_api_connection_string: str
 ) -> Analysis:
     """
     Get the analysis by id via the jobs API.
 
     :param analysis_id: The id of the analysis.
     :param http: A :class:`aiohttp.ClientSession` instance.
-    :param jobs_api_url: The url for the jobs API server.
+    :param jobs_api_connection_string: The connection string for the jobs API server.
 
     :return: A :class:`virtool_workflow.data_model.analysis.Analysis` instance.
 
@@ -61,7 +61,9 @@ async def get_analysis_by_id(
     :raise KeyError: When the analysis data received from the API is missing a required key.
 
     """
-    async with http.get(f"{jobs_api_url}/analyses/{analysis_id}") as response:
+    async with http.get(
+        f"{jobs_api_connection_string}/analyses/{analysis_id}"
+    ) as response:
         async with raising_errors_by_status_code(response) as response_json:
             return Analysis(
                 id=response_json["id"],
@@ -76,16 +78,19 @@ class AnalysisProvider:
 
     :param analysis_id: The ID of the current analysis as found in the job args.
     :param http: A :class:`aiohttp.ClientSession` instance to be used when making requests.
-    :param jobs_api_url: The url to the Jobs API.
+    :param jobs_api_connection_string: The url to the Jobs API.
 
     """
 
     def __init__(
-        self, analysis_id: str, http: aiohttp.ClientSession, jobs_api_url: str
+        self,
+        analysis_id: str,
+        http: aiohttp.ClientSession,
+        jobs_api_connection_string: str,
     ):
         self.id = analysis_id
         self.http = http
-        self.api_url = jobs_api_url
+        self.api_url = jobs_api_connection_string
 
     async def get(self) -> Analysis:
         """

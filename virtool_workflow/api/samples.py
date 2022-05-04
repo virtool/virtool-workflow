@@ -37,10 +37,15 @@ async def _make_sample_from_response(response) -> Sample:
 
 
 class SampleProvider:
-    def __init__(self, sample_id: str, http: aiohttp.ClientSession, jobs_api_url: str):
+    def __init__(
+        self,
+        sample_id: str,
+        http: aiohttp.ClientSession,
+        jobs_api_connection_string: str,
+    ):
         self.id = sample_id
         self.http = http
-        self.url = f"{jobs_api_url}/samples/{sample_id}"
+        self.url = f"{jobs_api_connection_string}/samples/{sample_id}"
 
     async def get(self) -> Sample:
         async with self.http.get(self.url) as response:

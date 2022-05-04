@@ -15,10 +15,12 @@ async def test_add_auth_headers_adds_auth(runtime):
     assert client.auth.password == job_key
 
 
-async def test_auth_headers_applied_once_job_is_ready(runtime, http, jobs_api_url):
+async def test_auth_headers_applied_once_job_is_ready(
+    runtime, http, jobs_api_connection_string
+):
     runtime["http"] = http
     runtime["job_id"] = TEST_JOB["id"]
-    runtime["jobs_api_url"] = jobs_api_url
+    runtime["jobs_api_connection_string"] = jobs_api_connection_string
     job = await runtime.get_or_instantiate("job")
 
     assert http.auth.login == f"job-{job.id}"
