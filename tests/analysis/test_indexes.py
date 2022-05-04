@@ -29,8 +29,10 @@ def otu_ids():
 
 
 @pytest.fixture
-async def indexes_api(http: aiohttp.ClientSession, jobs_api_url: str, work_path: Path):
-    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_url)
+async def indexes_api(
+    http: aiohttp.ClientSession, jobs_api_connection_string: str, work_path: Path
+):
+    return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_connection_string)
 
 
 @pytest.fixture

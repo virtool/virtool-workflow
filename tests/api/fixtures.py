@@ -12,7 +12,7 @@ def loop(event_loop):
 
 
 @pytest.fixture
-async def jobs_api_url():
+async def jobs_api_connection_string():
     return ""
 
 

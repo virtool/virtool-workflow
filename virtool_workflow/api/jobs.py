@@ -21,19 +21,23 @@ logger = logging.getLogger(__name__)
 
 
 async def acquire_job_by_id(
-    job_id: str, http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: int
+    job_id: str,
+    http: aiohttp.ClientSession,
+    jobs_api_connection_string: str,
+    mem: int,
+    proc: int,
 ):
     """
     Acquire the job with a given ID using the jobs API.
 
     :param job_id: The id of the job to acquire
     :param http: An aiohttp.ClientSession to use to make the request.
-    :param jobs_api_url: The url for the jobs API.
+    :param jobs_api_connection_string: The url for the jobs API.
 
     :return: a :class:`virtool_workflow.data_model.Job` instance with an api key (.key attribute)
     """
     async with http.patch(
-        f"{jobs_api_url}/jobs/{job_id}", json={"acquired": True}
+        f"{jobs_api_connection_string}/jobs/{job_id}", json={"acquired": True}
     ) as response:
         async with raising_errors_by_status_code(
             response, status_codes_to_exceptions={"400": JobAlreadyAcquired}
@@ -51,11 +55,15 @@ async def acquire_job_by_id(
 
 
 @fixture
-def acquire_job(http: aiohttp.ClientSession, jobs_api_url: str, mem: int, proc: int):
+def acquire_job(
+    http: aiohttp.ClientSession, jobs_api_connection_string: str, mem: int, proc: int
+):
     async def _job_provider(job_id: str, retry=3, timeout=3):
         try:
             logger.debug(f"Acquiring {job_id}")
-            return await acquire_job_by_id(job_id, http, jobs_api_url, mem, proc)
+            return await acquire_job_by_id(
+                job_id, http, jobs_api_connection_string, mem, proc
+            )
         except aiohttp.client_exceptions.ClientConnectionError as error:
             if retry > 0:
                 await asyncio.sleep(timeout)
@@ -87,7 +95,7 @@ class PushStatus(Protocol):
 async def push_status(
     http,
     job: Job,
-    jobs_api_url: str,
+    jobs_api_connection_string: str,
     error: Optional[Exception],
     progress: float,
     current_step: WorkflowStep,
@@ -97,7 +105,7 @@ async def push_status(
         _push_status,
         http,
         job,
-        jobs_api_url,
+        jobs_api_connection_string,
         step_name=current_step.display_name if current_step is not None else None,
         step_description=(
             current_step.description if current_step is not None else None
@@ -112,7 +120,7 @@ async def push_status(
 async def _push_status(
     http,
     job: Job,
-    jobs_api_url: str,
+    jobs_api_connection_string: str,
     step_name: str,
     step_description: str,
     stage: str,
@@ -140,7 +148,7 @@ async def _push_status(
     logger.info(f"Status: {pprint.pformat(payload)}")
 
     async with http.post(
-        f"{jobs_api_url}/jobs/{job.id}/status", json=payload
+        f"{jobs_api_connection_string}/jobs/{job.id}/status", json=payload
     ) as response:
         async with raising_errors_by_status_code(
             response, accept=[200, 201]

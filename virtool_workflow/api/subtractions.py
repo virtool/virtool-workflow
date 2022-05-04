@@ -28,7 +28,7 @@ class SubtractionProvider:
 
     :param subtraction_id: The ID of the subtraction.
     :param http: An class:`aiohttp.ClientSession` to use when making requests.
-    :param jobs_api_url: The url for the jobs API.
+    :param jobs_api_connection_string: The url for the jobs API.
     :param subtraction_work_path: The working path for subtraction files.
     """
 
@@ -36,12 +36,12 @@ class SubtractionProvider:
         self,
         subtraction_id: str,
         http: aiohttp.ClientSession,
-        jobs_api_url: str,
+        jobs_api_connection_string: str,
         subtraction_work_path: Path,
     ):
         self.subtraction_id = subtraction_id
         self.http = http
-        self.api_url = f"{jobs_api_url}/subtractions/{subtraction_id}"
+        self.api_url = f"{jobs_api_connection_string}/subtractions/{subtraction_id}"
         self.path = subtraction_work_path / subtraction_id
         if not self.path.exists():
             self.path.mkdir()

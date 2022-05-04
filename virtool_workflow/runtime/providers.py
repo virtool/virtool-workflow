@@ -10,20 +10,20 @@ from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
 
 
 @fixture
-def analysis_provider(job, http, jobs_api_url) -> AnalysisProvider:
-    return AnalysisProvider(job.args["analysis_id"], http, jobs_api_url)
+def analysis_provider(job, http, jobs_api_connection_string) -> AnalysisProvider:
+    return AnalysisProvider(job.args["analysis_id"], http, jobs_api_connection_string)
 
 
 @fixture
-def hmms_provider(http, jobs_api_url, work_path) -> HMMsProvider:
-    return HMMsProvider(http, jobs_api_url, work_path)
+def hmms_provider(http, jobs_api_connection_string, work_path) -> HMMsProvider:
+    return HMMsProvider(http, jobs_api_connection_string, work_path)
 
 
 @fixture
-def index_provider(job, http, jobs_api_url) -> IndexProvider:
+def index_provider(job, http, jobs_api_connection_string) -> IndexProvider:
     try:
         return IndexProvider(
-            job.args["index_id"], job.args["ref_id"], http, jobs_api_url
+            job.args["index_id"], job.args["ref_id"], http, jobs_api_connection_string
         )
     except KeyError as e:
         key = e.args[0]
@@ -40,13 +40,13 @@ def index_provider(job, http, jobs_api_url) -> IndexProvider:
 
 
 @fixture
-def sample_provider(job, http, jobs_api_url) -> SampleProvider:
-    return SampleProvider(job.args["sample_id"], http, jobs_api_url)
+def sample_provider(job, http, jobs_api_connection_string: str) -> SampleProvider:
+    return SampleProvider(job.args["sample_id"], http, jobs_api_connection_string)
 
 
 @fixture
 def subtraction_providers(
-    job, http, jobs_api_url, work_path
+    job, http, jobs_api_connection_string, work_path
 ) -> List[SubtractionProvider]:
     try:
         ids = job.args["subtractions"]
@@ -61,6 +61,8 @@ def subtraction_providers(
     subtraction_work_path.mkdir()
 
     return [
-        SubtractionProvider(id_, http, jobs_api_url, subtraction_work_path)
+        SubtractionProvider(
+            id_, http, jobs_api_connection_string, subtraction_work_path
+        )
         for id_ in ids
     ]

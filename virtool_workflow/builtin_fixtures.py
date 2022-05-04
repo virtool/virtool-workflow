@@ -36,12 +36,9 @@ def mem(config: dict) -> int:
 
 
 @fixture
-def jobs_api_url(config: dict) -> str:
+def jobs_api_connection_string(config: dict) -> str:
     """The URL of the jobs API."""
-    try:
-        return config["jobs_api_url"]
-    except KeyError:
-        return config["jobs_api_connection_string"]
+    return config["jobs_api_connection_string"]
 
 
 @fixture
@@ -63,7 +60,7 @@ async def _job(job_id, acquire_job, scope) -> Job:
 __all__ = [
     "_job",
     "acquire_job",
-    "jobs_api_url",
+    "jobs_api_connection_string",
     "mem",
     "proc",
     "results",

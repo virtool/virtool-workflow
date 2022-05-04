@@ -33,12 +33,12 @@ class HMMsProvider:
     def __init__(
         self,
         http: aiohttp.ClientSession,
-        jobs_api_url: str,
+        jobs_api_connection_string: str,
         work_path: Path,
         number_of_processes: int = 3,
     ):
         self.http = http
-        self.url = f"{jobs_api_url}/hmms"
+        self.url = f"{jobs_api_connection_string}/hmms"
         self.path = work_path / "hmms"
         self.number_of_processes = number_of_processes
 

@@ -23,11 +23,11 @@ class FileDownloader(Protocol):
 
 
 @fixture(protocol=FileDownloader)
-def download_input_file(http, jobs_api_url: str) -> FileDownloader:
+def download_input_file(http, jobs_api_connection_string: str) -> FileDownloader:
     """Download files from Virtool's uploads API."""
 
     async def download(file_id, target):
-        target_url = f"{jobs_api_url}/uploads/{file_id}"
+        target_url = f"{jobs_api_connection_string}/uploads/{file_id}"
         async with http.get(target_url) as response:
             return await read_file_from_response(response, target)
 

@@ -9,8 +9,8 @@ from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 from virtool_workflow.data_model.indexes import Index
 
 
-async def _fetch_reference(ref_id, http, jobs_api_url):
-    async with http.get(f"{jobs_api_url}/refs/{ref_id}") as response:
+async def _fetch_reference(ref_id, http, jobs_api_connection_string):
+    async with http.get(f"{jobs_api_connection_string}/refs/{ref_id}") as response:
         async with raising_errors_by_status_code(response) as reference_json:
             return Reference(
                 reference_json["id"],
@@ -29,27 +29,33 @@ class IndexProvider:
     :param ref_id: The reference ID for the current job.
     :param index_path: The file system path to store index files.
     :param http: An :obj:`aiohttp.ClientSession` to use when making HTTP requests.
-    :param jobs_api_url: The base URL for the jobs API.
+    :param jobs_api_connection_string: The base URL for the jobs API.
     """
 
     def __init__(
-        self, index_id: str, ref_id: str, http: aiohttp.ClientSession, jobs_api_url: str
+        self,
+        index_id: str,
+        ref_id: str,
+        http: aiohttp.ClientSession,
+        jobs_api_connection_string: str,
     ):
         self._index_id = index_id
         self._ref_id = ref_id
         self.http = http
-        self.jobs_api_url = jobs_api_url
+        self.jobs_api_connection_string = jobs_api_connection_string
 
     async def get(self) -> Index:
         """Get the index for the current job."""
         async with self.http.get(
-            f"{self.jobs_api_url}/indexes/{self._index_id}"
+            f"{self.jobs_api_connection_string}/indexes/{self._index_id}"
         ) as response:
             async with raising_errors_by_status_code(response) as index_document:
                 return Index(
                     index_document["id"],
                     index_document["manifest"],
-                    await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
+                    await _fetch_reference(
+                        self._ref_id, self.http, self.jobs_api_connection_string
+                    ),
                     ready="ready" in index_document and index_document["ready"],
                 )
 
@@ -76,7 +82,7 @@ class IndexProvider:
         """
         return await upload_file_via_put(
             self.http,
-            f"{self.jobs_api_url}/indexes/{self._index_id}/files/{path.name}",
+            f"{self.jobs_api_connection_string}/indexes/{self._index_id}/files/{path.name}",
             path,
             format_,
         )
@@ -97,7 +103,7 @@ class IndexProvider:
 
         for name in names:
             async with self.http.get(
-                f"{self.jobs_api_url}/indexes/{self._index_id}/files/{name}"
+                f"{self.jobs_api_connection_string}/indexes/{self._index_id}/files/{name}"
             ) as response:
                 await read_file_from_response(response, target_path / name)
 
@@ -106,20 +112,22 @@ class IndexProvider:
     async def finalize(self):
         """Finalize the current index."""
         async with self.http.patch(
-            f"{self.jobs_api_url}/indexes/{self._index_id}"
+            f"{self.jobs_api_connection_string}/indexes/{self._index_id}"
         ) as response:
             async with raising_errors_by_status_code(response) as index_document:
                 return Index(
                     index_document["id"],
                     index_document["manifest"],
-                    await _fetch_reference(self._ref_id, self.http, self.jobs_api_url),
+                    await _fetch_reference(
+                        self._ref_id, self.http, self.jobs_api_connection_string
+                    ),
                     ready=index_document["ready"],
                 )
 
     async def delete(self):
         """Delete an un-finished index."""
         async with self.http.delete(
-            f"{self.jobs_api_url}/indexes/{self._index_id}"
+            f"{self.jobs_api_connection_string}/indexes/{self._index_id}"
         ) as response:
             async with raising_errors_by_status_code(response, accept=[200, 204]):
                 pass

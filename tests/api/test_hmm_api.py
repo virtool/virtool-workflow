@@ -8,10 +8,10 @@ from virtool_workflow.data_model import HMM
 
 
 @fixture
-def hmms_api(http, jobs_api_url: str, tmpdir):
+def hmms_api(http, jobs_api_connection_string: str, tmpdir):
     return HMMsProvider(
         http=http,
-        jobs_api_url=jobs_api_url,
+        jobs_api_connection_string=jobs_api_connection_string,
         work_path=Path(tmpdir),
     )
 

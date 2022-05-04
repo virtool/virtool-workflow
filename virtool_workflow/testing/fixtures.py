@@ -36,7 +36,7 @@ class WorkflowTestRunner(FixtureScope):
 
 
 @pytest.fixture
-async def runtime(http, jobs_api_url):
+async def runtime(http, jobs_api_connection_string):
     async with WorkflowTestRunner() as _runtime:
         _runtime["config"] = {
             "work_path": "temp",
@@ -45,7 +45,7 @@ async def runtime(http, jobs_api_url):
         }
         _runtime["job_id"] = "test_job"
         _runtime["http"] = http
-        _runtime["jobs_api_url"] = jobs_api_url
+        _runtime["jobs_api_connection_string"] = jobs_api_connection_string
         yield _runtime
 
 
