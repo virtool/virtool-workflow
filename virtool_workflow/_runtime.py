@@ -61,6 +61,7 @@ def configure_workflow(
     for name in (
         "virtool_workflow.builtin_fixtures",
         "virtool_workflow.analysis.fixtures",
+        "virtool_workflow.runtime.providers",
     ):
         module = import_module(name)
         logger.debug(f"Imported {module}")
