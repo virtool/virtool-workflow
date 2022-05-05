@@ -38,6 +38,7 @@ async def execute(
     scope["error"] = None
     scope["logger"] = logger
     scope["workflow"] = workflow
+    scope["current_step"] = None
 
     await on_workflow_start.trigger(scope)
 
