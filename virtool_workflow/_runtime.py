@@ -177,11 +177,9 @@ async def start_runtime(
         work_path=work_path,
     )
 
-    async with configure_redis(redis_connection_string) as redis:
+    async with configure_redis(redis_connection_string, timeout=15) as redis:
         try:
-            job_id = await get_next_job_with_timeout(
-                redis_list_name, redis, timeout=timeout
-            )
+            job_id = await get_next_job_with_timeout(redis_list_name, redis, timeout)
         except asyncio.TimeoutError:
             # This happens due to Kubernetes scheduling issues or job cancellations. It
             # is not an error.
@@ -202,7 +200,7 @@ async def start_runtime(
         events.cancelled.set()
         workflow_run.cancel()
 
-    async with configure_redis(redis_connection_string) as redis:
+    async with configure_redis(redis_connection_string, timeout=15) as redis:
         cancellation_task = asyncio.create_task(
             wait_for_cancellation(redis, job_id, cancel_workflow)
         )
