@@ -1,6 +1,14 @@
 import pytest
 from virtool_workflow import workflow
 
+from fixtures import FixtureScope
+
+
+@pytest.fixture
+async def empty_scope():
+    async with FixtureScope() as scope:
+        yield scope
+
 
 @pytest.fixture
 def test_workflow():
