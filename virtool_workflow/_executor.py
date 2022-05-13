@@ -25,6 +25,42 @@ from virtool_workflow.hooks import (
 logger = logging.getLogger(__name__)
 
 
+async def _handle_cancel(scope: FixtureScope, events: Events):
+    if events.cancelled.is_set():
+        await asyncio.gather(
+            on_cancelled.trigger(scope),
+            on_failure.trigger(scope),
+        )
+
+        return
+
+    if not events.terminated.is_set():
+        logger.warning("Workflow cancelled for unknown reason")
+
+    await asyncio.gather(
+        on_terminated.trigger(scope),
+        on_failure.trigger(scope),
+    )
+
+
+@asynccontextmanager
+async def workflow_lifecyle(scope: FixtureScope, events: Events):
+    try:
+        yield
+    except CancelledError:
+        await _handle_cancel(scope, events)
+    except Exception as error:
+        scope["error"] = error
+        await asyncio.gather(on_error.trigger(scope), on_failure.trigger(scope))
+    else:
+        if "results" in scope:
+            await on_result.trigger(scope)
+
+        await on_success.trigger(scope)
+    finally:
+        await on_finish.trigger(scope)
+
+
 async def execute(
     workflow: Workflow, scope: FixtureScope, events: Events
 ) -> FixtureScope:
@@ -42,7 +78,7 @@ async def execute(
 
     await on_workflow_start.trigger(scope)
 
-    try:
+    async with workflow_lifecyle(scope, events):
         with update_state_in_scope(scope):
             for step in chain(workflow.on_startup, workflow.steps, workflow.on_cleanup):
                 bound_step = await scope.bind(step.function)
@@ -50,30 +86,6 @@ async def execute(
                 async with run_step_with_hooks(scope, step):
                     logger.info(f"Running step '{step.display_name}'")
                     await bound_step()
-    except CancelledError:
-        if events.cancelled.is_set():
-            await asyncio.gather(
-                on_cancelled.trigger(scope),
-                on_failure.trigger(scope),
-            )
-        else:
-            if not events.terminated.is_set():
-                logger.warning("Workflow cancelled for unknown reason")
-
-            await asyncio.gather(
-                on_terminated.trigger(scope),
-                on_failure.trigger(scope),
-            )
-    except Exception as error:
-        scope["error"] = error
-        await asyncio.gather(on_error.trigger(scope), on_failure.trigger(scope))
-    else:
-        if "results" in scope:
-            await on_result.trigger(scope)
-
-        await on_success.trigger(scope)
-    finally:
-        await on_finish.trigger(scope)
 
     return scope
 
