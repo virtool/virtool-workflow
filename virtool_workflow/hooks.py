@@ -108,7 +108,7 @@ an error during workflow execution.
 
 on_finish = Hook("on_finish")
 """
-Triggered when a job succeeds or fails.
+Triggered when a job completes, success or failure.
 
 .. code-block:: python
 
@@ -117,44 +117,15 @@ Triggered when a job succeeds or fails.
         ...
 """
 
-on_finalize = Hook("on_finalize")
-"""
-Triggered after job finishes, regardless of end state.
-
-Intended for finalization actions such as closing the fixture scope.
-"""
-
-on_load_config = Hook("on_load_config")
-"""
-Triggered after the config is loaded from the CLI arguments and environment variables.
-
-A SimpleNamespace object is provided which has an attribute
-(sharing the same name as the fixture) for each configuration fixture in
-:mod:`virtool_workflow_runtime.config.configuration`. 
-
-.. code-block:: python
-
-    @on_load_config
-    def use_config(dev_mode):
-        if dev_mode:
-            ...
-"""
-
-before_result_upload = Hook("before_result_upload")
-"""Triggered after the result is ready to be uploaded, but before it is actually uploaded."""
-
 __all__ = [
-    "on_result",
-    "on_success",
-    "on_failure",
-    "on_finalize",
-    "on_finish",
-    "on_load_config",
-    "before_result_upload",
     "on_cancelled",
-    "on_step_start",
-    "on_step_finish",
-    "on_workflow_start",
-    "on_terminated",
     "on_error",
+    "on_failure",
+    "on_finish",
+    "on_result",
+    "on_step_finish",
+    "on_step_start",
+    "on_success",
+    "on_terminated",
+    "on_workflow_start",
 ]
