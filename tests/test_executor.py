@@ -1,11 +1,11 @@
-from asyncio import CancelledError, create_task, sleep
+from asyncio import CancelledError
 
 import pytest
 from pytest_mock import MockerFixture
 from virtool_workflow import Workflow, hooks
 from virtool_workflow._executor import execute
 from virtool_workflow.events import Events
-from virtool_workflow.execution.states import WAITING, RUNNING, COMPLETE, ERROR
+from virtool_workflow.execution.states import COMPLETE, ERROR, RUNNING, WAITING
 
 from fixtures import FixtureScope
 
