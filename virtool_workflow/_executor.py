@@ -115,6 +115,13 @@ async def run_step_with_hooks(scope: FixtureScope, step: WorkflowStep):
         scope["current_step"] = None
 
 
+@fixture
+def state(scope):
+    if "state" not in scope:
+        scope["state"] = states.WAITING
+    return scope["state"]
+
+
 @fixture(scope="function")
 def progress(step_number, workflow):
     return float(step_number) / float(len(workflow.steps))
