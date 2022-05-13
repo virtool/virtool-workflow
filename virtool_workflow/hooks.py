@@ -13,9 +13,6 @@ Triggered when a workflow has completed and a result is available.
     @on_result
     async def use_result(workflow: Workflow, results: Dict[str, Any]):
         ...
-
-Modifying the ``results`` in this hook modifies the data committed to Virtool when the
-workflow completes.
 """
 
 on_step_start = Hook("on_step_start")
