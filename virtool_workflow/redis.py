@@ -20,10 +20,10 @@ async def configure_redis(url: str, timeout=1) -> AsyncGenerator[Redis, None]:
     ping_task = None
 
     try:
-        logger.info(f"Attempting Redis connection at {url}")
+        logger.info("Connecting to Redis")
         redis = await aioredis.create_redis_pool(url, timeout=timeout)
         ping_task = asyncio.create_task(periodically_ping_redis(redis))
-        logger.info(f"Connected to Redis at {url}")
+        logger.info("Connected to Redis")
         yield redis
     finally:
         if ping_task is not None and redis is not None:
