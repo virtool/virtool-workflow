@@ -20,8 +20,6 @@ async def test_correct_progress(test_workflow, runtime):
         assert progress == correct_progress[step_number]
 
     test_workflow.steps = [WorkflowStep.from_callable(check_progress)] * 10
-    test_workflow.on_startup = []
-    test_workflow.on_cleanup = []
 
     results = await runtime.execute(test_workflow)
 

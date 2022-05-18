@@ -14,16 +14,6 @@ async def empty_scope():
 def test_workflow():
     _test_workflow = workflow.Workflow()
 
-    @_test_workflow.startup
-    async def startup(results):
-        results["start"] = True
-        return "Startup complete"
-
-    @_test_workflow.cleanup
-    async def cleanup(results):
-        results["clean"] = True
-        return "Cleanup complete"
-
     @_test_workflow.step
     async def step_1(step_number, results):
         results["1"] = True

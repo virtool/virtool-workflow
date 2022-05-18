@@ -7,11 +7,7 @@ Virtool Workflow uses decorators to define steps in the workflow.
 
 .. code-block:: python
 
-   from virtool_workflow import startup, step, cleanup
-
-   @startup
-   def startup_function():
-       ...
+   from virtool_workflow import step
 
    @step
    def step_1():
@@ -20,11 +16,6 @@ Virtool Workflow uses decorators to define steps in the workflow.
    @step
    def step_2():
        ...
-
-   @cleanup
-   def cleanup_function():
-       ...
-
 
 .. toctree::
     :hidden:
