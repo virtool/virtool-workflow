@@ -1,30 +1,19 @@
 """Create Workflows by decorating module scope functions."""
 from types import ModuleType
+from typing import Callable
 
 from virtool_workflow.workflow import Workflow
 
 
-def workflow_marker(marker_name: str):
-    """Create a decorator to mark a function for use within a workflow."""
-
-    def _marker(func):
-        func.__workflow_marker__ = marker_name
-        return func
-
-    return _marker
-
-
-startup = workflow_marker("startup")
-"""Mark a function as a workflow startup function."""
-cleanup = workflow_marker("cleanup")
-"""Mark a function as a workflow cleanup function."""
-step = workflow_marker("step")
-"""Mark a function as a workflow step function."""
+def step(func: Callable):
+    """Mark a function as a workflow step function."""
+    func.__workflow_marker__ = "step"
+    return func
 
 
 def collect(module: ModuleType) -> Workflow:
     """
-    Build a Workflow using marked functions from a module.
+    Build a Workflow object from a workflow module.
 
     .. warning::
         Since Python 3.7, dictionaries maintain insertion order.
@@ -36,9 +25,8 @@ def collect(module: ModuleType) -> Workflow:
         This function may not work as intended in older versions of python.
 
 
-    :param module: A module containing functions tagged by
-                   `workflow_marker` decorators.
-    :return Workflow: A workflow build using the tagged functions.
+    :param module: A workflow module
+    :return Workflow: A workflow object
     """
 
     workflow = Workflow()
@@ -50,14 +38,10 @@ def collect(module: ModuleType) -> Workflow:
     ]
 
     for marked in markers:
-        if marked.__workflow_marker__ == "startup":
-            workflow.startup(marked)
-        elif marked.__workflow_marker__ == "step":
+        if marked.__workflow_marker__ == "step":
             workflow.step(marked)
-        elif marked.__workflow_marker__ == "cleanup":
-            workflow.cleanup(marked)
 
-    if (len(workflow.steps) + len(workflow.on_startup) + len(workflow.on_cleanup)) == 0:
+    if len(workflow.steps) == 0:
         raise ValueError(f"No workflow steps could be found in {module}")
 
     return workflow

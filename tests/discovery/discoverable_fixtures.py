@@ -20,7 +20,7 @@ async def fixture_c() -> str:
 wf = Workflow()
 
 
-@wf.startup
+@wf.step
 def start(fixture_a, fixture_b, fixture_c, results):
     results["fixture_a"] = fixture_a
     results["fixture_b"] = fixture_b

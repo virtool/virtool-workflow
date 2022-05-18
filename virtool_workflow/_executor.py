@@ -2,24 +2,24 @@ import asyncio
 import logging
 from asyncio import CancelledError
 from contextlib import asynccontextmanager, contextmanager
-from itertools import chain
 
 from fixtures import FixtureScope, fixture
+
 from virtool_workflow import Workflow
 from virtool_workflow._steps import WorkflowStep
 from virtool_workflow.events import Events
 from virtool_workflow.execution import states
 from virtool_workflow.hooks import (
+    on_cancelled,
+    on_error,
     on_failure,
     on_finish,
     on_result,
     on_step_finish,
     on_step_start,
     on_success,
-    on_workflow_start,
     on_terminated,
-    on_cancelled,
-    on_error,
+    on_workflow_start,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ async def execute(
 
     try:
         with update_state_in_scope(scope):
-            for step in chain(workflow.on_startup, workflow.steps, workflow.on_cleanup):
+            for step in workflow.steps:
                 bound_step = await scope.bind(step.function)
 
                 async with run_step_with_hooks(scope, step):
