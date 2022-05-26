@@ -4,6 +4,7 @@ import pytest
 
 from virtool_workflow import hooks
 from virtool_workflow.execution.run_subprocess import run_subprocess as _run_subprocess
+from virtool_workflow.execution.run_subprocess import SubprocessFailed
 
 run_subprocess = _run_subprocess()
 
@@ -62,7 +63,8 @@ async def test_stderr_is_handled(bash):
     async def stderr_handler(line):
         lines.append(line)
 
-    await run_subprocess(["bash", "/foo/bar"], stderr_handler=stderr_handler)
+    with pytest.raises(SubprocessFailed):
+        await run_subprocess(["bash", "/foo/bar"], stderr_handler=stderr_handler)
 
     assert lines == [b"bash: /foo/bar: No such file or directory\n"]
 
@@ -85,3 +87,10 @@ async def test_command_can_be_terminated(bash_sleep, test_workflow, runtime):
     await asyncio.gather(t1, t2)
 
     assert not txt_path.isfile()
+
+
+async def test_run_subprocess_does_raise_subprocess_failed():
+    with pytest.raises(SubprocessFailed):
+        await run_subprocess(["ls", "-doesnotexist"])
+
+    await run_subprocess(["ls"])
