@@ -1,7 +1,6 @@
 import logging
-import pprint
 from asyncio import gather
-from typing import List, Any, Callable
+from typing import Any, Callable, List
 
 from fixtures import FixtureScope
 from virtool_workflow.utils import coerce_to_coroutine_function

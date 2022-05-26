@@ -1,16 +1,14 @@
 import asyncio
-import traceback
 import functools
 import logging
-import pprint
-from typing import Protocol, Optional
+import traceback
+from typing import Optional, Protocol
 
 import aiohttp
-
 from fixtures import fixture
 
-from ..data_model import Job, Status, State
-from .. import Workflow, WorkflowStep
+from .. import WorkflowStep
+from ..data_model import Job, State, Status
 from .errors import (
     JobAlreadyAcquired,
     JobsAPIServerError,
@@ -145,7 +143,7 @@ async def _push_status(
         "progress": int(progress * 100),
     }
 
-    logger.info(f"Status: {pprint.pformat(payload)}")
+    logger.info(f"Status: {step_name}, {state}")
 
     async with http.post(
         f"{jobs_api_connection_string}/jobs/{job.id}/status", json=payload
