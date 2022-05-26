@@ -10,6 +10,10 @@ from virtool_workflow import hooks
 logger = getLogger(__name__)
 
 
+class SubprocessFailed(asyncio.subprocess.subprocess.SubprocessError):
+    """Subprocess exited with non-zero status during a workflow."""
+
+
 class LineOutputHandler(Protocol):
     async def __Call__(self, line: str):
         """
@@ -43,6 +47,8 @@ class RunSubprocess(Protocol):
         :type env: Optional[dict], optional
         :param cwd: The current working directory for the subprocess
         :type cwd: Optional[str], optional
+
+        :raise SubprocessFailed: The subprocess has exited with a non-zero exit code
 
         :return: An :class:`asyncio.subprocess.Process` instance
         :rtype: asyncio.subprocess.Process
@@ -133,7 +139,15 @@ async def _run_subprocess(
     with suppress(asyncio.CancelledError):
         await _watch_subprocess
 
-    await process.wait()
+    exit_code = await process.wait()
+
+    # Exit code 15 indicates that the process was terminated. This is expected
+    # when the workflow fails for some other reason, hence not an exception
+    if exit_code not in [0, 15, -15]:
+        raise SubprocessFailed(
+            f"{command[0]} failed with exit code {exit_code}\n"
+            f"Arguments: {command}\n"
+        )
 
     return process
 
