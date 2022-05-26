@@ -1,4 +1,4 @@
-from virtool_workflow import hooks, WorkflowStep
+from virtool_workflow import hooks, WorkflowStep, Workflow
 
 
 async def test_correct_progress(test_workflow, runtime):
@@ -25,3 +25,20 @@ async def test_correct_progress(test_workflow, runtime):
 
     for result, progress in zip(results, range(1, 11)):
         assert int(result) == progress
+
+
+async def test_explicit_step_naming():
+    wf = Workflow()
+
+    display_name = "Foo Bar"
+
+    @wf.step(name=display_name)
+    def step1():
+        ...
+
+    @wf.step
+    def step2():
+        ...
+
+    assert wf.steps[0].display_name == display_name
+    assert wf.steps[1].display_name == "Step2"
