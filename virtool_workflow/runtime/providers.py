@@ -11,7 +11,12 @@ from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
 
 @fixture
 def analysis_provider(job, http, jobs_api_connection_string) -> AnalysisProvider:
-    return AnalysisProvider(job.args["analysis_id"], http, jobs_api_connection_string)
+    try:
+        return AnalysisProvider(
+            job.args["analysis_id"], http, jobs_api_connection_string
+        )
+    except KeyError:
+        raise MissingJobArgument("Missing key `analysis_id`")
 
 
 @fixture
@@ -41,7 +46,10 @@ def index_provider(job, http, jobs_api_connection_string) -> IndexProvider:
 
 @fixture
 def sample_provider(job, http, jobs_api_connection_string: str) -> SampleProvider:
-    return SampleProvider(job.args["sample_id"], http, jobs_api_connection_string)
+    try:
+        return SampleProvider(job.args["sample_id"], http, jobs_api_connection_string)
+    except KeyError:
+        raise MissingJobArgument("Missing key `sample_id`")
 
 
 @fixture
@@ -52,7 +60,10 @@ def subtraction_providers(
         ids = job.args["subtractions"]
     except KeyError:
         # Supports the create_subtraction workflow.
-        ids = [job.args["subtraction_id"]]
+        try:
+            ids = [job.args["subtraction_id"]]
+        except KeyError:
+            raise MissingJobArgument("Missing key `subtractions`, or `subtraction_id`")
 
     if isinstance(ids, (str, bytes)):
         ids = [ids]
