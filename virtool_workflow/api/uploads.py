@@ -2,7 +2,7 @@ import asyncio
 from pathlib import Path
 from typing import Dict, List, Protocol
 
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_workflow.api.utils import read_file_from_response
 from virtool_workflow.data_model.jobs import Job
 

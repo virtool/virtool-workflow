@@ -1,7 +1,7 @@
 from pathlib import Path
 from shutil import rmtree
 
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_workflow.data_model import Job
 from virtool_workflow.api.client import authenticated_http
 from virtool_workflow.api.jobs import acquire_job

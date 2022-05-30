@@ -9,7 +9,7 @@ from virtool_workflow import data_model, hooks
 from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
-from fixtures import fixture
+from pyfixtures import fixture
 
 
 class Analysis(data_model.Analysis):

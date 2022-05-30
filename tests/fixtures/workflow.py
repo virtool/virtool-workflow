@@ -1,7 +1,7 @@
 import pytest
 from virtool_workflow import workflow
 
-from fixtures import FixtureScope
+from pyfixtures import FixtureScope
 
 
 @pytest.fixture

@@ -8,7 +8,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any, Dict
 
-from fixtures import FixtureScope, runs_in_new_fixture_context
+from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_workflow import discovery, execute
 from virtool_workflow.events import Events
 from virtool_workflow.hooks import (

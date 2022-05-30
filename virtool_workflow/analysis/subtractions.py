@@ -3,7 +3,7 @@ from typing import List
 from virtool_workflow.data_model import Subtraction
 from virtool_workflow.api.subtractions import SubtractionProvider
 
-from fixtures import fixture
+from pyfixtures import fixture
 
 
 @fixture
