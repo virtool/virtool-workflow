@@ -1,4 +1,4 @@
-from fixtures import runs_in_new_fixture_context, FixtureScope
+from pyfixtures import runs_in_new_fixture_context, FixtureScope
 from virtool_workflow.builtin_fixtures import work_path
 from pathlib import Path
 

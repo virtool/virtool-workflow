@@ -13,7 +13,7 @@ from virtool_workflow.data_model.files import VirtoolFileFormat
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
-from fixtures import fixture
+from pyfixtures import fixture
 
 
 async def not_implemented(*args):

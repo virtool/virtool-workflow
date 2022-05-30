@@ -5,7 +5,7 @@ import traceback
 from typing import Optional, Protocol
 
 import aiohttp
-from fixtures import fixture
+from pyfixtures import fixture
 
 from .. import WorkflowStep
 from ..data_model import Job, State, Status

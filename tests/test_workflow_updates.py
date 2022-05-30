@@ -3,7 +3,7 @@ import asyncio
 from virtool_workflow._steps import WorkflowStep
 from virtool_workflow import execute, Workflow
 from virtool_workflow.execution import states
-from fixtures import FixtureScope, fixture, runs_in_new_fixture_context
+from pyfixtures import FixtureScope, fixture, runs_in_new_fixture_context
 
 
 async def this_is_a_test_step():

@@ -2,7 +2,7 @@
 import hashlib
 import json
 from typing import Dict, Union
-from fixtures import fixture
+from pyfixtures import fixture
 
 from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.sample import Sample

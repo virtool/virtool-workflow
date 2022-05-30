@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fixtures import get_fixtures
+from pyfixtures import get_fixtures
 from virtool_workflow import Workflow, discovery
 
 cwd = Path(__file__).parent

@@ -1,5 +1,5 @@
 import aiohttp
-from fixtures import fixture
+from pyfixtures import fixture
 from functools import wraps
 
 

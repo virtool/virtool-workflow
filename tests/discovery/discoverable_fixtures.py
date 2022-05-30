@@ -1,4 +1,4 @@
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_workflow import Workflow
 
 

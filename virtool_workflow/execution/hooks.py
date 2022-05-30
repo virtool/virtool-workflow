@@ -2,7 +2,7 @@ import logging
 from asyncio import gather
 from typing import Any, Callable, List
 
-from fixtures import FixtureScope
+from pyfixtures import FixtureScope
 from virtool_workflow.utils import coerce_to_coroutine_function
 
 logger = logging.getLogger(__name__)

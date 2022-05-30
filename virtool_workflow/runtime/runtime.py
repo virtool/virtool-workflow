@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager, suppress
 from importlib import import_module
 from pathlib import Path
 
-import fixtures
+import pyfixtures
 from virtool_workflow import Workflow, discovery, hooks
 from virtool_workflow.runtime import status
 from virtool_workflow._executor import execute
@@ -47,7 +47,7 @@ def setup_hooks():
 async def run_workflow(workflow: Workflow, config: dict):
     """Run a workflow."""
     setup_hooks()
-    async with fixtures.FixtureScope() as scope:
+    async with pyfixtures.FixtureScope() as scope:
         scope["config"] = config
         await execute(workflow, scope)
         return scope["results"] if "results" in scope else {}
@@ -71,7 +71,7 @@ async def prepare_workflow(**config):
         import_module("virtool_workflow.runtime.providers")
         import_module("virtool_workflow.analysis.fixtures")
 
-    with fixtures.fixture_context():
+    with pyfixtures.fixture_context():
         yield workflow
 
 

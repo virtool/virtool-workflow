@@ -7,7 +7,7 @@ from virtool_workflow._executor import execute
 from virtool_workflow.events import Events
 from virtool_workflow.execution.states import COMPLETE, ERROR, RUNNING, WAITING
 
-from fixtures import FixtureScope
+from pyfixtures import FixtureScope
 
 
 @pytest.fixture

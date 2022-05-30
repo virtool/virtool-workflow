@@ -1,5 +1,5 @@
 """An SDK for defining Virtool workflows."""
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_workflow.decorator_api import step
 from virtool_workflow.workflow import Workflow
 from virtool_workflow._executor import execute

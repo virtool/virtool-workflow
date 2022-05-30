@@ -4,7 +4,7 @@ from typing import Callable
 
 import pytest
 
-from fixtures import FixtureScope, fixture
+from pyfixtures import FixtureScope, fixture
 from virtool_workflow import Workflow, execute
 from virtool_workflow.events import Events
 

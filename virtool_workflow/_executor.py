@@ -3,7 +3,7 @@ import logging
 from asyncio import CancelledError
 from contextlib import asynccontextmanager, contextmanager
 
-from fixtures import FixtureScope, fixture
+from pyfixtures import FixtureScope, fixture
 
 from virtool_workflow import Workflow
 from virtool_workflow._steps import WorkflowStep

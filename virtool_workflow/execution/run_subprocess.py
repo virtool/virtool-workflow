@@ -4,7 +4,7 @@ from contextlib import suppress
 from logging import getLogger
 from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
 
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_workflow import hooks
 
 logger = getLogger(__name__)

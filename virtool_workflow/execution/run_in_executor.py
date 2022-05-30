@@ -2,7 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Coroutine, Protocol, runtime_checkable
 
-from fixtures import fixture
+from pyfixtures import fixture
 
 
 @fixture

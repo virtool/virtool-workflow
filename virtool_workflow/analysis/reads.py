@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
 
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_workflow.analysis.fastqc import fastqc
 from virtool_workflow.analysis.skewer import skewer
 from virtool_workflow.data_model.samples import Sample
