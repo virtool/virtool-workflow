@@ -5,10 +5,20 @@ from typing import Callable
 from virtool_workflow.workflow import Workflow
 
 
-def step(func: Callable):
-    """Mark a function as a workflow step function."""
-    func.__workflow_marker__ = "step"
-    return func
+def step(f: Callable = None, *, name: str = None):
+    """
+    Mark a function as a workflow step function.
+
+    :param f: the workflow step function
+    :param name: the display name of the workflow step. A name
+        will be generated based on the function name if not provided.
+    """
+    if f is None:
+        return lambda _f: step(_f, name=name)
+
+    f.__workflow_marker__ = "step"
+    f.__workflow_step_props__ = dict(name=name)
+    return f
 
 
 def collect(module: ModuleType) -> Workflow:
@@ -39,7 +49,7 @@ def collect(module: ModuleType) -> Workflow:
 
     for marked in markers:
         if marked.__workflow_marker__ == "step":
-            workflow.step(marked)
+            workflow.step(marked, **marked.__workflow_step_props__)
 
     if len(workflow.steps) == 0:
         raise ValueError(f"No workflow steps could be found in {module}")

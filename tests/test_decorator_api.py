@@ -9,7 +9,7 @@ def step_z(results: dict):
     results["step"] = True
 
 
-@step
+@step(name="Foobar")
 def step_a(results: dict):
     results["step2"] = True
     assert results["step"]
@@ -22,3 +22,9 @@ async def test_decorator_api_workflow(runtime):
 
     assert result["step"]
     assert result["step2"]
+
+
+def test_step_decorator_does_set_display_name():
+    workflow = collect(sys.modules[__name__])
+
+    assert workflow.steps[1].display_name == "Foobar"
