@@ -19,11 +19,9 @@ from virtool_workflow.hooks import (
     on_terminated,
     on_error,
 )
-from virtool_workflow.redis import (
-    configure_redis,
-    get_next_job_with_timeout,
-    wait_for_cancellation,
-)
+from virtool_core.redis import configure_redis
+from virtool_workflow.redis import get_next_job_with_timeout, wait_for_cancellation
+
 from virtool_workflow.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 
