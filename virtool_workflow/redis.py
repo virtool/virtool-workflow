@@ -1,40 +1,13 @@
 import asyncio
 import logging
 from asyncio import CancelledError
-from contextlib import asynccontextmanager, suppress
-from typing import AsyncGenerator, Callable
+from typing import Callable
 
-import aioredis
 from aioredis import Redis
-from virtool_core.redis import periodically_ping_redis
 
 logger = logging.getLogger(__name__)
 
 CANCELLATION_CHANNEL = "channel:cancel"
-
-
-@asynccontextmanager
-async def configure_redis(url: str, timeout=1) -> AsyncGenerator[Redis, None]:
-    """Prepare a redis connection."""
-    redis = None
-    ping_task = None
-
-    try:
-        logger.info("Connecting to Redis")
-        redis = await aioredis.create_redis_pool(url, timeout=timeout)
-        ping_task = asyncio.create_task(periodically_ping_redis(redis))
-        logger.info("Connected to Redis")
-        yield redis
-    finally:
-        if ping_task is not None and redis is not None:
-            logger.info("Disconnecting from Redis")
-            ping_task.cancel()
-
-            with suppress(asyncio.CancelledError):
-                await ping_task
-
-            redis.close()
-            await redis.wait_closed()
 
 
 async def get_next_job_with_timeout(

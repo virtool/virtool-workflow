@@ -1,13 +1,13 @@
 import pytest
 from aioredis import Redis
-from virtool_core.redis import connect_to_redis
+from virtool_core.redis import connect
 from virtool_workflow.runtime.redis import redis_jobs
 
 
 @pytest.fixture
 async def redis(redis_url):
     try:
-        _redis = await connect_to_redis(redis_url)
+        _redis = await connect(redis_url)
         yield _redis
         _redis.close()
         await _redis.wait_closed()
