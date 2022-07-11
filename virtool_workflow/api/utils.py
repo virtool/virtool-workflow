@@ -1,11 +1,11 @@
 import asyncio
 import functools
-import logging
 from pathlib import Path
 
 import aiofiles
 import aiohttp
 import dateutil.parser
+from aiohttp import ServerDisconnectedError, ClientConnectorError
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
@@ -87,7 +87,12 @@ async def upload_file_via_put(
 
 def retry(func):
     """
-    Retry an API call five times when encountering a ``ClientConnectorError``.
+    Retry an API call five times when encountering the following exceptions:
+      * ``ConnectionRefusedError``.
+      * ``ClientConnectorError``.
+      * ``ServerDisconnectedError``.
+
+    These are probably due to transient issues in the cluster network.
 
     """
 
@@ -97,12 +102,16 @@ def retry(func):
 
         try:
             return await func(*args, **kwargs)
-        except ConnectionRefusedError:
+        except (
+            ConnectionRefusedError,
+            ClientConnectorError,
+            ServerDisconnectedError,
+        ) as err:
             if attempts == 5:
                 raise
 
             attempts += 1
-            logger.info("Encountered ConnectionRefusedError. Retrying in 5 seconds.")
+            logger.info(f"Encountered {type(err).__name__}. Retrying in 5 seconds.")
             await asyncio.sleep(5)
 
             return await func(*args, **kwargs)

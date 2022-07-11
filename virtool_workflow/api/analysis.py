@@ -2,7 +2,6 @@
 A data provider for Virtool analysis based on HTTP communication with the Virtool job API.
 
 """
-import asyncio
 import logging
 from pathlib import Path
 from typing import Dict, Any, Tuple, List
@@ -10,7 +9,6 @@ from typing import Dict, Any, Tuple, List
 import aiofiles
 import aiohttp
 import dateutil.parser
-from aiohttp import ClientConnectorError
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import upload_file_via_put, retry
