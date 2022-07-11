@@ -1,6 +1,9 @@
-from typing import Callable
-from inspect import iscoroutinefunction
 from functools import wraps
+from inspect import iscoroutinefunction
+from logging import getLogger
+from typing import Callable
+
+logger = getLogger(__name__)
 
 
 def coerce_to_coroutine_function(func: Callable):

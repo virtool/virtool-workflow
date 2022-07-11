@@ -1,3 +1,5 @@
+import asyncio
+import functools
 import logging
 from pathlib import Path
 
@@ -7,6 +9,7 @@ import dateutil.parser
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
+from virtool_workflow.utils import logger
 
 CHUNK_SIZE = 1024 * 1024 * 20
 
@@ -80,3 +83,28 @@ async def upload_file_via_put(
                     if "format" in response_json
                     else "fastq",
                 )
+
+
+def retry(func):
+    """
+    Retry an API call five times when encountering a ``ClientConnectorError``.
+
+    """
+
+    @functools.wraps(func)
+    async def wrapped(*args, **kwargs):
+        attempts = 0
+
+        try:
+            return await func(*args, **kwargs)
+        except ConnectionRefusedError:
+            if attempts == 5:
+                raise
+
+            attempts += 1
+            logger.info("Encountered ConnectionRefusedError. Retrying in 5 seconds.")
+            await asyncio.sleep(5)
+
+            return await func(*args, **kwargs)
+
+    return wrapped
