@@ -1,3 +1,4 @@
+import arrow
 from aiohttp import web
 
 from tests.api.mocks.utils import read_file_from_request
@@ -8,19 +9,21 @@ TEST_SUBTRACTION_ID = "Apis mellifera"
 
 TEST_SUBTRACTION = {
     "id": TEST_SUBTRACTION_ID,
-    "nickname": "honey bee",
-    "ready": True,
-    "is_host": True,
+    "created_at": arrow.utcnow().isoformat(),
+    "deleted": False,
     "file": {
-        "id": "ii23chjh-GCF_003254395.2_Amel_HAv3.1_genomic.fa",
-        "name": "GCF_003254395.2_Amel_HAv3.1_genomic.fa",
+        "id": 642,
+        "name": "Apis_mellifera.Amel_HAv3.1.dna.toplevel.fa.gz",
     },
-    "user": {"id": "james"},
+    "files": [],
+    "linked_samples": [],
+    "nickname": "Honey Bee",
+    "ready": True,
+    "user": {"id": "abc12345", "handle": "james", "administrator": False},
     "job": {"id": "98b12fh9"},
-    "count": 177,
+    "count": 33,
     "gc": {"a": 0.336, "t": 0.335, "g": 0.162, "c": 0.162, "n": 0.006},
     "name": "Apis mellifera",
-    "deleted": True,
 }
 
 

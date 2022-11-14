@@ -4,17 +4,18 @@ from .indexes import Index
 from .jobs import Job, Status, State
 from .references import Reference
 from .samples import Sample
-from .subtractions import Subtraction, NucleotideComposition
+from .subtractions import WFSubtraction
 
 __all__ = [
     "Analysis",
     "HMM",
     "Index",
     "Job",
-    "NucleotideComposition",
     "Reference",
     "Sample",
     "State",
     "Status",
-    "Subtraction",
+    "WFSubtraction",
 ]
+
+

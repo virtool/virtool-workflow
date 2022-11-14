@@ -101,7 +101,8 @@ class AnalysisProvider:
 
     async def upload(self, path: Path, format: VirtoolFileFormat):
         """
-        Upload a file in the workflow environment that should be associated with the current analysis.
+        Upload a file in the workflow environment that should be associated with the
+        current analysis.
 
         :param path: the path to the file to upload
         :param format: the format of the file

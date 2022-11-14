@@ -1,6 +1,6 @@
 from typing import List
 
-from virtool_workflow.data_model import Subtraction
+from virtool_workflow.data_model import WFSubtraction
 from virtool_workflow.api.subtractions import SubtractionProvider
 
 from pyfixtures import fixture
@@ -9,7 +9,7 @@ from pyfixtures import fixture
 @fixture
 async def subtractions(
     subtraction_providers: List[SubtractionProvider],
-) -> List[Subtraction]:
+) -> List[WFSubtraction]:
     """The subtractions to be used for the current job."""
     _subtractions = [await provider for provider in subtraction_providers]
 

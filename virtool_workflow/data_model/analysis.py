@@ -4,7 +4,7 @@ from typing import List
 from virtool_workflow.data_model.files import VirtoolFile
 from virtool_workflow.data_model.indexes import Index
 from virtool_workflow.data_model.samples import Sample
-from virtool_workflow.data_model.subtractions import Subtraction
+from virtool_workflow.data_model.subtractions import WFSubtraction
 
 
 @dataclass
@@ -23,6 +23,6 @@ class Analysis:
     #: The reference index being used in the analysis.
     index: Index = None
     #: The subtractions being used in the analysis.
-    subtractions: List[Subtraction] = None
+    subtractions: List[WFSubtraction] = None
     #: Flag indicating if the analysis has been finalized.
     ready: bool = False
