@@ -18,6 +18,7 @@ def step(f: Callable = None, *, name: str = None):
 
     f.__workflow_marker__ = "step"
     f.__workflow_step_props__ = dict(name=name)
+
     return f
 
 

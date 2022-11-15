@@ -35,6 +35,7 @@ class JobApiHttpSession:
         def _method_with_auth(*args, noauth=False, **kwargs):
             if "auth" not in kwargs and self.auth is not None and not noauth:
                 kwargs["auth"] = self.auth
+
             return method(*args, **kwargs)
 
         return _method_with_auth

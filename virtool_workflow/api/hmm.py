@@ -55,8 +55,8 @@ class HMMsProvider:
 
         try:
             decompress_file(
-                str(self.path / "annotations.json.gz"),
-                str(self.path / "annotations.json"),
+                self.path / "annotations.json.gz",
+                self.path / "annotations.json",
                 self.number_of_processes,
             )
         except gzip.BadGzipFile:
