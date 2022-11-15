@@ -1,103 +1,76 @@
 import asyncio
 import functools
-import logging
 import traceback
-from typing import Optional, Protocol
+from logging import getLogger
+from typing import Optional
 
-import aiohttp
+from aiohttp import ClientConnectionError, ClientSession
 from pyfixtures import fixture
+from virtool_core.models.job import JobStatus
 
-from .. import WorkflowStep
-from ..data_model import Job, State, Status
-from .errors import (
+from virtool_workflow import WorkflowStep
+from virtool_workflow.api.errors import (
+    raising_errors_by_status_code,
     JobAlreadyAcquired,
     JobsAPIServerError,
-    raising_errors_by_status_code,
 )
+from virtool_workflow.data_model.jobs import WFJob
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 async def acquire_job_by_id(
-    job_id: str,
-    http: aiohttp.ClientSession,
+    http: ClientSession,
     jobs_api_connection_string: str,
-    mem: int,
-    proc: int,
+    job_id: str,
 ):
     """
     Acquire the job with a given ID using the jobs API.
 
-    :param job_id: The id of the job to acquire
     :param http: An aiohttp.ClientSession to use to make the request.
     :param jobs_api_connection_string: The url for the jobs API.
-
-    :return: a :class:`virtool_workflow.data_model.Job` instance with an api key (.key attribute)
+    :param job_id: The id of the job to acquire
+    :return: a job including its API key
     """
     async with http.patch(
         f"{jobs_api_connection_string}/jobs/{job_id}", json={"acquired": True}
     ) as response:
         async with raising_errors_by_status_code(
-            response, status_codes_to_exceptions={"400": JobAlreadyAcquired}
-        ) as document:
-            logger.info(document)
-            return Job(
-                id=document["id"],
-                args=document["args"],
-                mem=document["mem"] if "mem" in document else mem,
-                proc=document["proc"] if "proc" in document else proc,
-                status=document["status"],
-                workflow=document["workflow"],
-                key=document["key"],
-            )
+            response, status_codes_to_exceptions={400: JobAlreadyAcquired}
+        ) as resp_json:
+            return WFJob(**resp_json)
 
 
 @fixture
-def acquire_job(
-    http: aiohttp.ClientSession, jobs_api_connection_string: str, mem: int, proc: int
-):
+def acquire_job(http: ClientSession, jobs_api_connection_string: str):
     async def _job_provider(job_id: str, retry=3, timeout=3):
-        try:
-            logger.debug(f"Acquiring {job_id}")
-            return await acquire_job_by_id(
-                job_id, http, jobs_api_connection_string, mem, proc
-            )
-        except aiohttp.client_exceptions.ClientConnectionError as error:
-            if retry > 0:
+        attempt = 0
+
+        while attempt < 4:
+            logger.info(f"Acquiring job: id={job_id} retries={retry}")
+
+            try:
+                job = await acquire_job_by_id(http, jobs_api_connection_string, job_id)
+                logger.info(f"Acquired job: id={job_id}")
+                return job
+            except ClientConnectionError:
                 await asyncio.sleep(timeout)
-                return await _job_provider(job_id, retry=retry - 1)
+
+            attempt += 1
 
         raise JobsAPIServerError("Unable to connect to server.")
 
     return _job_provider
 
 
-class PushStatus(Protocol):
-    async def __call__(
-        self,
-        state: State,
-        step: WorkflowStep,
-        error: str = None,
-    ):
-        """
-        Update the job status.
-
-        :param state: The current state of the workflow run.
-        :param step: The current workflow step.
-        :param error: An error message if applicable.
-        """
-        raise NotImplementedError()
-
-
 @fixture(scope="function")
 async def push_status(
     http,
-    job: Job,
+    job: WFJob,
     jobs_api_connection_string: str,
     error: Optional[Exception],
     progress: float,
     current_step: WorkflowStep,
-    logger,
 ):
     return functools.partial(
         _push_status,
@@ -117,17 +90,17 @@ async def push_status(
 
 async def _push_status(
     http,
-    job: Job,
+    job: WFJob,
     jobs_api_connection_string: str,
     step_name: str,
     step_description: str,
     stage: str,
     state: str,
     progress: float,
-    logger,
-    error: Exception = None,
+    error: Optional[Exception] = None,
     max_tb: int = 50,
 ):
+
     payload = {
         "state": state,
         "stage": stage,
@@ -143,7 +116,7 @@ async def _push_status(
         "progress": int(progress * 100),
     }
 
-    logger.info(f"Status: {step_name}, {state}")
+    logger.info(f"Reported status: step={step_name} state={state}")
 
     async with http.post(
         f"{jobs_api_connection_string}/jobs/{job.id}/status", json=payload
@@ -151,4 +124,4 @@ async def _push_status(
         async with raising_errors_by_status_code(
             response, accept=[200, 201]
         ) as status_json:
-            return Status(**status_json)
+            return JobStatus(**status_json)

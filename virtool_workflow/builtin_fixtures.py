@@ -2,7 +2,8 @@ from pathlib import Path
 from shutil import rmtree
 
 from pyfixtures import fixture
-from virtool_workflow.data_model import Job
+from virtool_core.models.job import Job
+
 from virtool_workflow.api.client import authenticated_http
 from virtool_workflow.api.jobs import acquire_job
 from virtool_workflow.api.uploads import input_files, files_list
@@ -25,7 +26,7 @@ def work_path(config: dict) -> Path:
 
 @fixture
 def proc(config: dict) -> int:
-    """ "The number of processes to use for multiprocess operations."""
+    """The number of processes to use for multiprocess operations."""
     return config["proc"]
 
 
