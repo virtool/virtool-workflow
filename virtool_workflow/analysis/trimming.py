@@ -3,8 +3,8 @@ import hashlib
 import json
 from typing import Dict, Union
 from pyfixtures import fixture
+from virtool_core.models.enums import LibraryType
 
-from virtool_workflow.analysis.library_types import LibraryType
 from virtool_workflow.analysis.sample import Sample
 from virtool_workflow.analysis.skewer import calculate_trimming_min_length
 
