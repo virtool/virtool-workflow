@@ -17,7 +17,6 @@ async def get_analysis(request):
         {
             "id": "test_analysis",
             "created_at": "2017-10-03T21:35:54.813000Z",
-            "job": {"id": "test_job"},
             "files": [
                 {
                     "analysis": "test_analysis",
@@ -30,12 +29,14 @@ async def get_analysis(request):
                     "uploaded_at": "2017-10-03T21:35:54.813000Z",
                 }
             ],
-            "workflow": "pathoscope_bowtie",
-            "sample": {"id": "kigvhuql", "name": "Test 1"},
             "index": {"id": "qldihken", "version": 0},
-            "user": {"id": "igboyes"},
-            "subtractions": [{"id": "yhxoynb0", "name": "Arabidopsis Thaliana"}],
+            "job": {"id": "test_job"},
             "ready": False,
+            "reference": {"id": "foo", "name": "Foo"},
+            "sample": {"id": "kigvhuql", "name": "Test 1"},
+            "subtractions": [{"id": "yhxoynb0", "name": "Arabidopsis Thaliana"}],
+            "user": {"id": "abc12345", "handle": "igboyes", "administrator": False},
+            "workflow": "pathoscope_bowtie",
         },
         status=200,
     )
@@ -43,11 +44,11 @@ async def get_analysis(request):
 
 @mock_routes.put("/analyses/{analysis_id}/files")
 async def upload_file(request):
-    name = request.query.get("name")
-    format = request.query.get("format")
-
     return web.json_response(
-        await read_file_from_request(request, name, format), status=201
+        await read_file_from_request(
+            request, request.query.get("name"), request.query.get("format")
+        ),
+        status=201,
     )
 
 
@@ -79,6 +80,7 @@ async def delete(request):
 @mock_routes.patch("/analyses/{analysis_id}")
 async def upload_result(request):
     analysis_id = request.match_info["analysis_id"]
+
     if analysis_id != TEST_ANALYSIS_ID:
         return web.json_response({"message": "Not Found"}, status=404)
 
@@ -88,9 +90,7 @@ async def upload_result(request):
     except (ContentTypeError, KeyError):
         return web.json_response({"message": "Invalid JSON body."}, status=422)
 
-    TEST_ANALYSIS.update({"results": results})
-
-    return web.json_response(TEST_ANALYSIS, status=200)
+    return web.json_response({**TEST_ANALYSIS, "results": results}, status=200)
 
 
 TEST_ANALYSIS_ID = "test_analysis"
@@ -113,7 +113,8 @@ TEST_ANALYSIS = {
     "workflow": "pathoscope_bowtie",
     "sample": {"id": "kigvhuql", "name": "Test 1"},
     "index": {"id": "qldihken", "version": 0},
-    "user": {"id": "igboyes"},
+    "user": {"id": "abc12345", "handle": "igboyes", "administrator": False},
     "subtractions": [{"id": "yhxoynb0", "name": "Arabidopsis Thaliana"}],
     "ready": False,
+    "reference": {"id": "foo", "name": "Foo"},
 }

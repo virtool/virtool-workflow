@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 import pytest
+from virtool_core.models.analysis import Analysis
 
 import virtool_workflow.api.errors
 from virtool_workflow import api
-from virtool_workflow.api.analysis import get_analysis_by_id, AnalysisProvider
-from virtool_workflow.data_model.analysis import Analysis
+from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.data_model.files import VirtoolFile
 
 
@@ -15,20 +15,16 @@ def analysis_api(http, jobs_api_connection_string: str):
     return AnalysisProvider("test_analysis", http, jobs_api_connection_string)
 
 
-async def test_get_analysis(http, jobs_api_connection_string: str):
-    analysis = await get_analysis_by_id(
-        "test_analysis", http, jobs_api_connection_string
-    )
+async def test_analysis_provider_get(analysis_api):
+    analysis = await analysis_api.get()
     assert isinstance(analysis, Analysis)
+
+
+async def test_analysis_provider_get_not_found(analysis_api):
+    analysis_api.id = "not_an_id"
 
     with pytest.raises(virtool_workflow.api.errors.NotFound):
-        await get_analysis_by_id("not_an_id", http, jobs_api_connection_string)
-
-
-async def test_analysis_provider_get(analysis_api):
-    analysis = await analysis_api
-
-    assert isinstance(analysis, Analysis)
+        await analysis_api.get()
 
 
 async def test_analysis_provider_upload(analysis_api):
@@ -37,7 +33,7 @@ async def test_analysis_provider_upload(analysis_api):
     with test_upload.open("w") as fp:
         json.dump({"foo": "bar"}, fp)
 
-    upload = await analysis_api.upload(test_upload, format="json")
+    upload = await analysis_api.upload(test_upload, fmt="json")
 
     assert isinstance(upload, VirtoolFile)
     assert upload.name == test_upload.name

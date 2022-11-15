@@ -1,4 +1,3 @@
-from .analysis import Analysis
 from .hmms import HMM
 from .indexes import Index
 from .jobs import Job, Status, State
@@ -7,7 +6,6 @@ from .samples import Sample
 from .subtractions import WFSubtraction
 
 __all__ = [
-    "Analysis",
     "HMM",
     "Index",
     "Job",
@@ -17,5 +15,3 @@ __all__ = [
     "Status",
     "WFSubtraction",
 ]
-
-
