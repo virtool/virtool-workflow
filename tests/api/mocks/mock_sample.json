@@ -1,12 +1,13 @@
 {
   "id": "hl5v0i0y",
-  "name": "20PRT_3_A2_10Mil",
-  "isolate": "",
+  "artifacts": [],
+  "caches": [],
+  "created_at": "2021-01-11T18:24:33.149Z",
   "host": "",
+  "is_legacy": false,
+  "isolate": "",
+  "labels": [],
   "locale": "",
-  "subtraction": {
-    "id": "Vitis vinifera + plastids"
-  },
   "files": [
     {
       "name": "reads_1.fq.gz",
@@ -20,18 +21,19 @@
       "raw": true
     }
   ],
-  "library_type": "normal",
-  "group": "none",
-  "nuvs": false,
-  "pathoscope": true,
-  "created_at": {
-    "$date": "2021-01-11T18:24:33.149Z"
-  },
   "format": "fastq",
-  "ready": true,
+  "group": "none",
+
+  "hold": true,
+  "library_type": "normal",
+  "name": "20PRT_3_A2_10Mil",
+  "notes": "",
+  "nuvs": false,
+  "paired": false,
+  "pathoscope": true,
   "quality": {
     "count": 10000000,
-    "encoding": "Sanger / Illumina 1.9\n",
+    "encoding": "Sanger / Illumina 1.9",
     "length": [
       35,
       76
@@ -140,13 +142,28 @@
       ]
     ]
   },
-  "hold": true,
-  "group_read": true,
-  "group_write": true,
+  "reads": [    {
+      "download_url": "/samples/hl5v0i0y/reads/reads_1.fq.gz",
+      "id": 1129,
+      "name": "reads_1.fq.gz",
+      "name_on_disk": "reads_1.fq.gz",
+      "sample": "hl5v0i0y",
+      "size": 30696061,
+      "upload": null,
+      "uploaded_at": "2022-09-21T15:43:58.423000Z"
+    }],
+  "ready": true,
+  "subtractions": [{
+    "id": "123",
+    "name": "Vitis vinifera + plastids"
+  }],
   "all_read": true,
   "all_write": true,
+  "group_read": true,
+  "group_write": true,
   "user": {
-    "id": "james"
-  },
-  "paired": false
+    "administrator": false,
+    "id": "abc12345",
+    "handle": "james"
+  }
 }

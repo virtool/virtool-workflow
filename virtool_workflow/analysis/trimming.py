@@ -5,7 +5,7 @@ from typing import Dict, Union
 from pyfixtures import fixture
 from virtool_core.models.enums import LibraryType
 
-from virtool_workflow.analysis.sample import Sample
+from virtool_workflow.analysis.sample import WFSample
 from virtool_workflow.analysis.skewer import calculate_trimming_min_length
 
 
@@ -21,13 +21,13 @@ TRIM_PARAMETERS = {
 
 
 @fixture
-def trimming_min_length(sample: Sample):
+def trimming_min_length(sample: WFSample):
     return calculate_trimming_min_length(sample.library_type, sample.max_length)
 
 
 @fixture
 def trimming_parameters(
-    sample: Sample, trimming_min_length: int
+    sample: WFSample, trimming_min_length: int
 ) -> Dict[str, Union[str, int]]:
     """
     Calculates trimming parameters based on the library type, and minimum allowed trim length.
@@ -55,7 +55,7 @@ def trimming_parameters(
 
 
 @fixture
-def trimming_cache_key(sample: Sample, trimming_parameters: dict):
+def trimming_cache_key(sample: WFSample, trimming_parameters: dict):
     """Compute a unique cache key based on the trimming parameters"""
     trim_param_json = json.dumps(
         {
