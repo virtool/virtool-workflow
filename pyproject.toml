@@ -49,6 +49,9 @@ pytest-mock = "^3.7.0"
 [tool.poetry.scripts]
 run-workflow = "virtool_workflow.cli:cli_main"
 
+[tool.poetry.group.dev.dependencies]
+syrupy = "^3.0.5"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
