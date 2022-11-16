@@ -3,6 +3,8 @@ from pathlib import Path
 import pytest
 import shutil
 
+from aiohttp import ClientSession
+
 from virtool_workflow.analysis.hmms import hmms
 from virtool_workflow.api.hmm import HMMsProvider
 
@@ -16,7 +18,11 @@ def profiles_path(analysis_files):
     shutil.which("hmmpress") is None, reason="hmmpress is not installed."
 )
 async def test_hmms(
-    http, jobs_api_connection_string, run_in_executor, run_subprocess, tmpdir
+    http: ClientSession,
+    jobs_api_connection_string: str,
+    run_in_executor,
+    run_subprocess,
+    tmpdir,
 ):
     work_path = Path(tmpdir) / "work"
     work_path.mkdir()
