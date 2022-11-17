@@ -1,18 +1,21 @@
-# virtool-workflow dependencies
-FROM python:3.8-slim as pip_install
+FROM python:3.10-slim as pip
 WORKDIR /install
-RUN pip install --user poetry==1.1.6
+RUN apt-get update && apt-get install -y build-essential curl python-dev
+RUN curl -sSL https://install.python-poetry.org | python -
 COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
 RUN /root/.local/bin/poetry export > requirements.txt
 RUN pip install --user -r requirements.txt
 
 
-FROM virtool/workflow-tools:1.0.0
-COPY --from=pip_install /root/.local /root/.local
-
+FROM ghcr.io/virtool/workflow-tools:2.0.1
+COPY --from=pip /root/.local /root/.local
 WORKDIR /workflow
-COPY . .
+COPY virtool_workflow ./virtool_workflow
+COPY pyproject.toml .
+COPY poetry.lock .
+COPY README.md .
+RUN ls .
 RUN pip install --user .
 
 ENTRYPOINT ["workflow", "run"]
