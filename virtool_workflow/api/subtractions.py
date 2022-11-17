@@ -1,3 +1,5 @@
+import asyncio
+from logging import getLogger
 from numbers import Number
 from pathlib import Path
 from typing import Dict
@@ -7,6 +9,8 @@ from aiohttp import ClientSession
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import read_file_from_response, upload_file_via_put
 from virtool_workflow.data_model.subtractions import WFSubtraction
+
+logger = getLogger("api")
 
 
 class SubtractionProvider:
@@ -34,14 +38,14 @@ class SubtractionProvider:
     async def get(self) -> WFSubtraction:
         async with self.http.get(self.api_url) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
+                logger.info(f"Fetched subtraction json id='{self.subtraction_id}'")
                 return WFSubtraction(**subtraction_json, path=self.path)
 
     async def upload(self, path: Path):
         """
         Upload a file relating to this subtraction.
 
-        :param path: The path to the file. The filename must be one of:
-
+        Filenames must be one of:
             - subtraction.fa.gz
             - subtraction.1.bt2
             - subtraction.2.bt2
@@ -49,10 +53,25 @@ class SubtractionProvider:
             - subtraction.4.bt2
             - subtraction.rev.1.bt2
             - subtraction.rev.2.bt2
+
+        :param path: The path to the file
+
         """
-        return await upload_file_via_put(
+        filename = path.name
+
+        logger.info(
+            f"Uploading subtraction file id='{self.subtraction_id}' name='{filename}'"
+        )
+
+        file = await upload_file_via_put(
             self.http, f"{self.api_url}/files/{path.name}", path
         )
+
+        logger.info(
+            f"Completed subtraction file upload id='{self.subtraction_id}' name='{filename}'"
+        )
+
+        return file
 
     async def finalize(self, gc: Dict[str, Number], count: int):
         """
@@ -66,11 +85,11 @@ class SubtractionProvider:
             self.api_url, json={"gc": {"n": 0.0, **gc}, "count": count}
         ) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
+                logger.info(f"Finalized subtraction id='{self.subtraction_id}'")
                 return WFSubtraction(**subtraction_json, path=self.path)
 
     async def download(self):
-        if not self.path.exists():
-            self.path.mkdir()
+        await asyncio.to_thread(self.path.mkdir, parents=True, exist_ok=True)
 
         names = [
             "subtraction.fa.gz",
@@ -82,9 +101,13 @@ class SubtractionProvider:
             "subtraction.rev.2.bt2",
         ]
 
+        logger.info(f"Downloading subtraction files id='{self.subtraction_id}'")
+
         for name in names:
             async with self.http.get(f"{self.api_url}/files/{name}") as response:
                 await read_file_from_response(response, self.path / name)
+
+        logger.info(f"Completed subtraction file download id='{self.subtraction_id}'")
 
         return self.path
 
@@ -93,6 +116,3 @@ class SubtractionProvider:
         async with self.http.delete(self.api_url) as response:
             async with raising_errors_by_status_code(response, accept=[204]):
                 ...
-
-    def __await__(self) -> WFSubtraction:
-        return self.get().__await__()

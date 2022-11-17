@@ -1,5 +1,8 @@
+import asyncio
+import logging
 from typing import List
 
+from aiohttp import ClientSession
 from pyfixtures import fixture
 from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.api.hmm import HMMsProvider
@@ -53,8 +56,8 @@ def sample_provider(job, http, jobs_api_connection_string: str) -> SampleProvide
 
 
 @fixture
-def subtraction_providers(
-    job, http, jobs_api_connection_string, work_path
+async def subtraction_providers(
+    job, http: ClientSession, jobs_api_connection_string: str, work_path
 ) -> List[SubtractionProvider]:
     try:
         ids = job.args["subtractions"]
@@ -69,7 +72,8 @@ def subtraction_providers(
         ids = [ids]
 
     subtraction_work_path = work_path / "subtractions"
-    subtraction_work_path.mkdir()
+
+    await asyncio.to_thread(subtraction_work_path.mkdir)
 
     return [
         SubtractionProvider(
