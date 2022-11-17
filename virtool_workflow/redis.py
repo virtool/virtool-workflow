@@ -39,7 +39,9 @@ async def get_next_job(list_name: str, redis: Redis) -> str:
     result = await redis.blpop(list_name)
 
     if result is not None:
-        return str(result[1], encoding="utf-8")
+        job_id = str(result[1], encoding="utf-8")
+        logger.info(f"Pulled job from Redis id={job_id}")
+        return job_id
 
 
 async def wait_for_cancellation(redis, job_id: str, func: Callable):

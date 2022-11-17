@@ -35,6 +35,7 @@ async def acquire_job_by_id(
     async with http.patch(
         f"{jobs_api_connection_string}/jobs/{job_id}", json={"acquired": True}
     ) as response:
+
         async with raising_errors_by_status_code(
             response, status_codes_to_exceptions={400: JobAlreadyAcquired}
         ) as resp_json:
@@ -43,11 +44,11 @@ async def acquire_job_by_id(
 
 @fixture
 def acquire_job(http: ClientSession, jobs_api_connection_string: str):
-    async def _job_provider(job_id: str, retry=3, timeout=3):
-        attempt = 0
+    async def _job_provider(job_id: str, timeout=3):
+        attempt = 1
 
         while attempt < 4:
-            logger.info(f"Acquiring job: id={job_id} retries={retry}")
+            logger.info(f"Acquiring job: id={job_id} attempt={attempt}")
 
             try:
                 job = await acquire_job_by_id(http, jobs_api_connection_string, job_id)
@@ -84,7 +85,6 @@ async def push_status(
         stage=(current_step.function.__name__ if current_step is not None else None),
         progress=progress,
         error=error,
-        logger=logger,
     )
 
 

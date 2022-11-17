@@ -49,7 +49,7 @@ def job_id(config: dict) -> str:
 
 
 @fixture
-async def _job(job_id, acquire_job, scope) -> Job:
+async def _job(job_id, acquire_job, scope) -> WFJob:
     """The current job."""
     job = await acquire_job(job_id)
 
