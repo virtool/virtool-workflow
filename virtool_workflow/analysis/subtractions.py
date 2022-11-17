@@ -1,9 +1,9 @@
 from typing import List
 
-from virtool_workflow.data_model import WFSubtraction
-from virtool_workflow.api.subtractions import SubtractionProvider
-
 from pyfixtures import fixture
+
+from virtool_workflow.api.subtractions import SubtractionProvider
+from virtool_workflow.data_model.subtractions import WFSubtraction
 
 
 @fixture

@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from pytest import fixture
+from virtool_core.models.hmm import HMM
 
 from tests.api.mocks.mock_hmm_routes import MOCK_HMM
 from virtool_workflow.api.hmm import HMMsProvider
-from virtool_workflow.data_model import HMM
 
 
 @fixture
@@ -26,6 +26,7 @@ async def test_hmm_list(hmms_api):
     hmm_list = await hmms_api.hmm_list()
 
     assert hmm_list
+
     for hmm in hmm_list:
         assert isinstance(hmm, HMM)
 

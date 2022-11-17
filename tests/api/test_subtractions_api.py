@@ -9,8 +9,8 @@ from tests.api.mocks.mock_subtraction_routes import (
 )
 from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.subtractions import SubtractionProvider
-from virtool_workflow.data_model import WFSubtraction
 from virtool_workflow.data_model.files import VirtoolFile
+from virtool_workflow.data_model.subtractions import WFSubtraction
 
 
 @fixture

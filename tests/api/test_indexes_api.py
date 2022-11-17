@@ -1,6 +1,8 @@
+from datetime import datetime
 from pathlib import Path
 
 import pytest
+from syrupy.matchers import path_type
 
 from tests.api.mocks.mock_index_routes import (
     TEST_INDEX_ID,
@@ -8,9 +10,7 @@ from tests.api.mocks.mock_index_routes import (
     TEST_REF_ID,
 )
 from virtool_workflow.api.indexes import IndexProvider
-from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFile
-from virtool_workflow.data_model.indexes import Index
 
 
 @pytest.fixture
@@ -18,17 +18,14 @@ async def indexes_api(http, jobs_api_connection_string: str):
     return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_connection_string)
 
 
-async def test_get(indexes_api):
-    index = await indexes_api
-
-    assert isinstance(index, Index)
-    assert "c93ec9a9" in index.manifest
-    assert index.id == TEST_INDEX_ID
-    assert isinstance(index.reference, Reference)
-    assert index.reference.id == TEST_REF_ID
+async def test_get(indexes_api: IndexProvider, snapshot):
+    assert await indexes_api.get() == snapshot
 
 
-async def test_upload(indexes_api: IndexProvider, tmpdir):
+async def test_upload(
+    indexes_api: IndexProvider,
+    tmpdir,
+):
     test_file = Path(tmpdir) / "reference.fa.gz"
     test_file.write_text("ACTGACG", encoding="utf-8")
 
@@ -57,7 +54,5 @@ async def test_download(indexes_api: IndexProvider, tmpdir):
     }
 
 
-async def test_finalize(indexes_api: IndexProvider):
-    await indexes_api.finalize()
-
-    assert TEST_INDEX["ready"] is True
+async def test_finalize(indexes_api: IndexProvider, snapshot):
+    assert await indexes_api.finalize() == snapshot

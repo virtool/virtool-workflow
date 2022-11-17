@@ -2,7 +2,7 @@ from functools import wraps
 from pathlib import Path
 
 from virtool_workflow import hooks
-from virtool_workflow.analysis.analysis import WFAnalysis
+from virtool_workflow.data_model.analysis import WFAnalysis
 from virtool_workflow.api.analysis import AnalysisProvider
 
 

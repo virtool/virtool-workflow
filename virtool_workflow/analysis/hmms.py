@@ -10,9 +10,9 @@ from shutil import which
 from typing import Dict, Iterable
 
 from pyfixtures import fixture
+from virtool_core.models.hmm import HMM
 
 from virtool_workflow.api.hmm import HMMsProvider
-from virtool_workflow.data_model import HMM
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 

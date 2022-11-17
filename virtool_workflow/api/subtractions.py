@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import read_file_from_response, upload_file_via_put
-from virtool_workflow.data_model import WFSubtraction
+from virtool_workflow.data_model.subtractions import WFSubtraction
 
 
 class SubtractionProvider:
