@@ -2,7 +2,7 @@
 Hooks provide a way to do things when events happen during the workflow lifecycle.
 """
 
-from virtool_workflow.execution.hooks import Hook
+from virtool_workflow.runtime.hook import Hook
 
 on_result = Hook("on_result")
 """

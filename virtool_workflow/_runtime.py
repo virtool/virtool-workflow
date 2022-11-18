@@ -5,14 +5,14 @@ import sys
 from importlib import import_module
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_core.logging import configure_logs
 from virtool_core.redis import configure_redis
 
 from virtool_workflow import discovery, execute
-from virtool_workflow.events import Events
+from virtool_workflow.runtime.events import Events
 from virtool_workflow.hooks import (
     on_failure,
     on_cancelled,
@@ -22,28 +22,36 @@ from virtool_workflow.hooks import (
     on_error,
 )
 from virtool_workflow.redis import get_next_job_with_timeout, wait_for_cancellation
-from virtool_workflow.sentry import configure_sentry
+from virtool_workflow.runtime.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 
 logger = getLogger("runtime")
 
 
 def configure_workflow(
-    fixtures_file: os.PathLike,
-    init_file: os.PathLike,
-    workflow_file: os.PathLike,
+    fixtures_path: Optional[Path],
+    workflow_path: Path,
 ):
     logger.info("Importing workflow")
-    workflow = discovery.discover_workflow(Path(workflow_file))
+    workflow = discovery.discover_workflow(workflow_path)
 
-    logger.info("Importing additional files")
-    for f in (Path(f) for f in (init_file, fixtures_file)):
-        try:
-            module = discovery.import_module_from_file(f.name.rstrip(".py"), f)
-            logger.info(f"Imported {module}")
-        except FileNotFoundError:
-            if init_file != "init.py" or fixtures_file != "fixtures.py":
-                raise
+    logger.info(f"Looking for fixtures at '{fixtures_path}'")
+
+    using_custom_fixtures_path = bool(fixtures_path)
+
+    if not fixtures_path:
+        fixtures_path = Path("./fixtures.py")
+
+    try:
+        discovery.import_module_from_file(
+            fixtures_path.name.rstrip(".py"), fixtures_path
+        )
+    except FileNotFoundError:
+        if using_custom_fixtures_path:
+            logger.fatal(f"No fixtures file found at '{fixtures_path}'")
+            sys.exit(1)
+        else:
+            logger.info(f"No fixtures.py found")
 
     for name in (
         "virtool_workflow.builtin_fixtures",
@@ -138,8 +146,7 @@ async def run_workflow(
 @runs_in_new_fixture_context()
 async def start_runtime(
     dev: bool,
-    fixtures_file: os.PathLike,
-    init_file: os.PathLike,
+    fixtures_file: Path,
     jobs_api_connection_string: str,
     mem: int,
     proc: int,
@@ -147,13 +154,13 @@ async def start_runtime(
     redis_list_name: str,
     timeout: int,
     sentry_dsn: str,
-    work_path: os.PathLike,
-    workflow_file: os.PathLike,
+    work_path: Path,
+    workflow_file: Path,
 ):
     configure_logs(dev)
     configure_sentry(sentry_dsn)
 
-    workflow = configure_workflow(fixtures_file, init_file, workflow_file)
+    workflow = configure_workflow(fixtures_file, workflow_file)
 
     config = dict(
         dev=dev,

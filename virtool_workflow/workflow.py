@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from typing import Callable, Sequence, Optional
 
-from virtool_workflow._steps import WorkflowStep
+from virtool_workflow.runtime.step import WorkflowStep
 
 
 @dataclass

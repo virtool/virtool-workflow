@@ -6,7 +6,7 @@ import pytest
 
 from pyfixtures import FixtureScope, fixture
 from virtool_workflow import Workflow, execute
-from virtool_workflow.events import Events
+from virtool_workflow.runtime.events import Events
 
 import_module("virtool_workflow.builtin_fixtures")
 import_module("virtool_workflow.analysis.fixtures")

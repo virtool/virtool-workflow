@@ -1,5 +1,6 @@
 """Command Line Interface to virtool_workflow"""
 import asyncio
+from pathlib import Path
 
 import click
 
@@ -57,21 +58,14 @@ from virtool_workflow._runtime import start_runtime
 @click.option(
     "--workflow-file",
     "-f",
-    type=click.Path(exists=True),
+    type=click.Path(exists=True, path_type=Path),
     default="workflow.py",
     help="The path to the workflow file.",
 )
 @click.option(
-    "--init-file",
-    help="The path to the init file.",
-    type=click.Path(),
-    default="init.py",
-)
-@click.option(
     "--fixtures-file",
     help="The path to the fixtures file.",
-    type=click.Path(),
-    default="fixtures.py",
+    type=click.Path(path_type=Path),
 )
 @click.command()
 def run_workflow(**kwargs):

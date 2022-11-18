@@ -9,7 +9,7 @@ import aiofiles
 from virtool_core.models.index import Index
 from virtool_core.utils import decompress_file, compress_file
 
-from virtool_workflow.execution.run_subprocess import RunSubprocess
+from virtool_workflow.runtime.run_subprocess import RunSubprocess
 
 
 async def not_implemented(*_):

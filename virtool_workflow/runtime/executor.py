@@ -6,9 +6,9 @@ from logging import getLogger
 from pyfixtures import FixtureScope, fixture
 
 from virtool_workflow import Workflow
-from virtool_workflow._steps import WorkflowStep
-from virtool_workflow.events import Events
-from virtool_workflow.execution import states
+from virtool_workflow.runtime.step import WorkflowStep
+from virtool_workflow.runtime.events import Events
+from virtool_workflow.runtime import states
 from virtool_workflow.hooks import (
     on_cancelled,
     on_error,

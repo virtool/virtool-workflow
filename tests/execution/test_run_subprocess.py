@@ -3,8 +3,8 @@ import asyncio
 import pytest
 
 from virtool_workflow import hooks
-from virtool_workflow.execution.run_subprocess import run_subprocess as _run_subprocess
-from virtool_workflow.execution.run_subprocess import SubprocessFailed
+from virtool_workflow.runtime.run_subprocess import run_subprocess as _run_subprocess
+from virtool_workflow.runtime.run_subprocess import SubprocessFailed
 
 run_subprocess = _run_subprocess()
 

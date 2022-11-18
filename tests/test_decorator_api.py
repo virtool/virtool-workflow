@@ -1,7 +1,7 @@
 import sys
 
 from virtool_workflow import step
-from virtool_workflow.decorator_api import collect
+from virtool_workflow.decorators import collect
 
 
 @step

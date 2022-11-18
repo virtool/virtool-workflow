@@ -1,13 +1,13 @@
 import pytest
 
-import virtool_workflow.execution.run_subprocess
+import virtool_workflow.runtime.run_subprocess
 from virtool_workflow import hooks
-from virtool_workflow.execution.hooks import Hook
+from virtool_workflow.runtime.hook import Hook
 
 
 @pytest.fixture
 def run_subprocess():
-    return virtool_workflow.execution.run_subprocess.run_subprocess()
+    return virtool_workflow.runtime.run_subprocess.run_subprocess()
 
 
 @pytest.fixture
