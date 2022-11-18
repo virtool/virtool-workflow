@@ -5,11 +5,9 @@ services:
       context: ..
       dockerfile: tests/Dockerfile
     command: >
-      --cov --cov-report xml:/test/coverage/coverage.xml
       --use-running-containers
       --disable-pytest-warnings 
       ${TEST_PATH}
     volumes:
-      - ./coverage:/test/coverage
       - /var/run/docker.sock:/var/run/docker.sock
     network_mode: "host"
