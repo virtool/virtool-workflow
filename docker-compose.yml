@@ -27,7 +27,7 @@ services:
       - vt_postgres_data:/var/lib/postgresql/data
 
   jobs-api:
-    image: virtool/virtool:10.7.1
+    image: virtool/virtool:12.0.1
     depends_on:
       - mongo
       - redis
