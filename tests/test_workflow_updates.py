@@ -1,9 +1,6 @@
 import pytest
-import asyncio
-from virtool_workflow._steps import WorkflowStep
-from virtool_workflow import execute, Workflow
-from virtool_workflow.execution import states
-from pyfixtures import FixtureScope, fixture, runs_in_new_fixture_context
+from virtool_workflow.runtime.step import WorkflowStep
+from virtool_workflow import Workflow
 
 
 async def this_is_a_test_step():

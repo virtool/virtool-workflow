@@ -7,7 +7,7 @@ from types import ModuleType
 from typing import Callable
 from typing import List, Union, Tuple, Optional
 
-from virtool_workflow.decorator_api import collect
+from virtool_workflow.decorators import collect
 from virtool_workflow.workflow import Workflow
 
 logger = getLogger("runtime")
@@ -51,16 +51,12 @@ def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
 
 def discover_workflow(path: Path) -> Workflow:
     """
-    Find a instance of virtool_workflow.Workflow in the
-    python module located at the given path.
+    Find an instance of :class:`.Workflow` in the python module located at the given
+    path.
 
-    :param path: The :class:`pathlib.Path` to the python file
-                 containing the module.
-    :returns: The first instance of :class:`virtool_workflow.Workflow`
-              occurring in `dir(module)`
-
-    :raises ValueError:
-        When no instance of virtool_workflow.Workflow can be found.
+    :param path: The path to a Python module.
+    :return: The first :class:`.Workflow` class in the module.
+    :raises ValueError: No workflow definition found.
     """
     module = import_module_from_file(path.name.rstrip(path.suffix), path)
 
@@ -82,16 +78,15 @@ def run_discovery(
     :param fixture_path: A Path to a module conaining addtional fitures.
     :return: A :class:`Workflow` instance and a list of fixtures.
     """
-    logger.info("Beginning workflow discovery.")
+    logger.info("Discovering workflow")
 
     fixtures = []
     if fixture_path and fixture_path.exists():
         fixtures.extend(discover_fixtures(fixture_path))
-
-        logger.info(f"Loaded {fixture_path}")
+        logger.info(f"Loaded fixture file path={fixture_path}")
 
     workflow = discover_workflow(path)
 
-    logger.info(f"Discovered Workflow {workflow}")
+    logger.info(f"Workflow discovery complete")
 
     return workflow, fixtures

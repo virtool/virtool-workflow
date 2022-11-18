@@ -1,7 +1,7 @@
 import asyncio
-import asyncio.subprocess
 from contextlib import suppress
 from logging import getLogger
+from subprocess import SubprocessError
 from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
 
 from pyfixtures import fixture
@@ -10,12 +10,12 @@ from virtool_workflow import hooks
 logger = getLogger("subprocess")
 
 
-class SubprocessFailed(asyncio.subprocess.subprocess.SubprocessError):
+class SubprocessFailed(SubprocessError):
     """Subprocess exited with non-zero status during a workflow."""
 
 
 class LineOutputHandler(Protocol):
-    async def __Call__(self, line: str):
+    async def __call__(self, line: str):
         """
         Handle input from stdin, or stderr, line by line.
 

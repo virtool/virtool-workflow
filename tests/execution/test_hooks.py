@@ -4,7 +4,7 @@ from contextlib import suppress
 import pytest
 
 from pyfixtures import FixtureScope
-from virtool_workflow.execution.hooks import Hook
+from virtool_workflow.runtime.hook import Hook
 
 example_hook = Hook("example_hook")
 

@@ -13,7 +13,7 @@
 import os
 import sys
 
-from virtool_workflow.execution.hooks import Hook
+from virtool_workflow.runtime.hook import Hook
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(".."))

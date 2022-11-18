@@ -9,7 +9,7 @@ from tests.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
 from virtool_workflow.analysis.indexes import indexes as indexes_fixture
 from virtool_workflow.data_model.indexes import WFIndex
 from virtool_workflow.api.indexes import IndexProvider
-from virtool_workflow.execution.run_subprocess import run_subprocess
+from virtool_workflow.runtime.run_subprocess import run_subprocess
 from virtool_workflow.testing.fixtures import install_as_pytest_fixtures
 
 install_as_pytest_fixtures(globals(), run_subprocess)
