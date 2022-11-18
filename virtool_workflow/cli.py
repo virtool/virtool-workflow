@@ -56,16 +56,11 @@ from virtool_workflow._runtime import start_runtime
     default=8,
 )
 @click.option(
-    "--workflow-file",
+    "--workflow-path",
     "-f",
     type=click.Path(exists=True, path_type=Path),
     default="workflow.py",
     help="The path to the workflow file.",
-)
-@click.option(
-    "--fixtures-file",
-    help="The path to the fixtures file.",
-    type=click.Path(path_type=Path),
 )
 @click.command()
 def run_workflow(**kwargs):

@@ -1,5 +1,4 @@
 import asyncio
-import os
 import signal
 import sys
 from importlib import import_module
@@ -12,7 +11,6 @@ from virtool_core.logging import configure_logs
 from virtool_core.redis import configure_redis
 
 from virtool_workflow import discovery, execute
-from virtool_workflow.runtime.events import Events
 from virtool_workflow.hooks import (
     on_failure,
     on_cancelled,
@@ -22,36 +20,26 @@ from virtool_workflow.hooks import (
     on_error,
 )
 from virtool_workflow.redis import get_next_job_with_timeout, wait_for_cancellation
+from virtool_workflow.runtime.events import Events
 from virtool_workflow.runtime.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 
 logger = getLogger("runtime")
 
 
-def configure_workflow(
-    fixtures_path: Optional[Path],
-    workflow_path: Path,
-):
-    logger.info("Importing workflow")
+def configure_workflow(workflow_path: Path):
+    logger.info("Importing workflow.py")
     workflow = discovery.discover_workflow(workflow_path)
 
-    logger.info(f"Looking for fixtures at '{fixtures_path}'")
-
-    using_custom_fixtures_path = bool(fixtures_path)
-
-    if not fixtures_path:
-        fixtures_path = Path("./fixtures.py")
+    logger.info("Importing fixtures.py")
+    fixtures_path = Path("./fixtures.py")
 
     try:
         discovery.import_module_from_file(
             fixtures_path.name.rstrip(".py"), fixtures_path
         )
     except FileNotFoundError:
-        if using_custom_fixtures_path:
-            logger.fatal(f"No fixtures file found at '{fixtures_path}'")
-            sys.exit(1)
-        else:
-            logger.info(f"No fixtures.py found")
+        logger.info(f"No fixtures.py found")
 
     for name in (
         "virtool_workflow.builtin_fixtures",
@@ -146,21 +134,20 @@ async def run_workflow(
 @runs_in_new_fixture_context()
 async def start_runtime(
     dev: bool,
-    fixtures_file: Path,
     jobs_api_connection_string: str,
     mem: int,
     proc: int,
     redis_connection_string: str,
     redis_list_name: str,
-    timeout: int,
     sentry_dsn: str,
+    timeout: int,
     work_path: Path,
-    workflow_file: Path,
+    workflow_path: Path,
 ):
     configure_logs(dev)
     configure_sentry(sentry_dsn)
 
-    workflow = configure_workflow(fixtures_file, workflow_file)
+    workflow = configure_workflow(workflow_path)
 
     config = dict(
         dev=dev,
