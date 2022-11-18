@@ -17,13 +17,13 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v4
-  pytest:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Test
         run: cd tests && docker-compose up --build --exit-code-from pytest
-  pypi-check:
+  build:
     runs-on: ubuntu-22.04
     if: github.event_name == 'pull_request'
     container: python:3.10
@@ -37,8 +37,10 @@ jobs:
   release:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push'
-    needs: 
-      - pytest
+    needs:
+      - commitlint
+      - build
+      - test
     steps:
       - name: Checkout
         uses: actions/checkout@v2
