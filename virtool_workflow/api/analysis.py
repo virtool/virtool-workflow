@@ -2,7 +2,7 @@
 A data provider for Virtool analysis based on HTTP communication with the Virtool API.
 
 """
-import logging
+from logging import getLogger
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
@@ -14,7 +14,7 @@ from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import upload_file_via_put, retry
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
-logger = logging.getLogger(__name__)
+logger = getLogger("api")
 
 
 class AnalysisProvider:

@@ -1,8 +1,8 @@
-import logging
 from contextlib import asynccontextmanager
+from logging import getLogger
 from typing import Dict, Type, List
 
-logger = logging.getLogger(__name__)
+logger = getLogger("api")
 
 
 class JobAlreadyAcquired(Exception):

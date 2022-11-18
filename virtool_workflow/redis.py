@@ -1,11 +1,11 @@
 import asyncio
-import logging
 from asyncio import CancelledError
+from logging import getLogger
 from typing import Callable
 
 from aioredis import Redis
 
-logger = logging.getLogger(__name__)
+logger = getLogger("redis")
 
 CANCELLATION_CHANNEL = "channel:cancel"
 

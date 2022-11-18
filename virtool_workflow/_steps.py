@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
-from textwrap import dedent
 
 from virtool_workflow.utils import coerce_to_coroutine_function
 

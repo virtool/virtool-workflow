@@ -1,9 +1,9 @@
 import asyncio
-import logging
 import os
 import signal
 import sys
 from importlib import import_module
+from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict
 
@@ -25,7 +25,7 @@ from virtool_workflow.redis import get_next_job_with_timeout, wait_for_cancellat
 from virtool_workflow.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 
-logger = logging.getLogger(__name__)
+logger = getLogger("runtime")
 
 
 def configure_workflow(
@@ -169,7 +169,7 @@ async def start_runtime(
         except asyncio.TimeoutError:
             # This happens due to Kubernetes scheduling issues or job cancellations. It
             # is not an error.
-            logging.warning("Timed out while waiting for job")
+            logger.warning("Timed out while waiting for job")
             sys.exit(0)
 
     events = Events()

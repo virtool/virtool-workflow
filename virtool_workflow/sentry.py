@@ -1,11 +1,12 @@
 import logging
+from logging import getLogger
 from typing import Optional
+
 import pkg_resources
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-
-logger = logging.getLogger(__name__)
+logger = getLogger("runtime")
 
 
 def configure_sentry(dsn: Optional[str], event_level: int = logging.ERROR):
@@ -15,7 +16,8 @@ def configure_sentry(dsn: Optional[str], event_level: int = logging.ERROR):
     if dsn is None:
         return
 
-    logger.info(f"Initializing Sentry with DSN {dsn[:20]}...")
+    logger.info(f"Initializing Sentry dsn='{dsn[:15]}...'")
+
     sentry_sdk.init(
         dsn=dsn,
         integrations=[

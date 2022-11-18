@@ -16,7 +16,7 @@ from virtool_workflow.api.errors import (
 )
 from virtool_workflow.data_model.jobs import WFJob
 
-logger = getLogger(__name__)
+logger = getLogger("api")
 
 
 async def acquire_job_by_id(
