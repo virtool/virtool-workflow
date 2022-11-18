@@ -1,7 +1,9 @@
 from pathlib import Path
 
 from pyfixtures import get_fixtures
-from virtool_workflow import Workflow, discovery
+
+from virtool_workflow import Workflow
+from virtool_workflow.runtime.discovery import discover_workflow, discover_fixtures
 
 cwd = Path(__file__).parent
 TEST_FILE = cwd / "discoverable_workflow.py"
@@ -13,12 +15,12 @@ IMPORT_TEST_FILE = cwd / "discoverable_workflow_with_imports/__main__.py"
 
 
 def test_discover_workflow():
-    workflow = discovery.discover_workflow(TEST_FILE)
+    workflow = discover_workflow(TEST_FILE)
     assert isinstance(workflow, Workflow)
 
 
 def test_discover_fixtures():
-    discovery.discover_fixtures(FIXTURE_TEST_FILE)
+    discover_fixtures(FIXTURE_TEST_FILE)
 
     fixtures = get_fixtures()
 
@@ -26,7 +28,7 @@ def test_discover_fixtures():
 
 
 async def test_run_discovery(runtime):
-    wf = discovery.discover_workflow(FIXTURE_TEST_FILE)
+    wf = discover_workflow(FIXTURE_TEST_FILE)
     result = await runtime.execute(wf)
 
     assert result["fixture_a"] == "a"
@@ -35,7 +37,7 @@ async def test_run_discovery(runtime):
 
 
 async def test_import_workflow_with_other_imports():
-    workflow = discovery.discover_workflow(IMPORT_TEST_FILE)
+    workflow = discover_workflow(IMPORT_TEST_FILE)
 
     results = {}
     await workflow.steps[0](results)

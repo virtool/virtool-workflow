@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-from virtool_workflow._runtime import start_runtime
+from virtool_workflow.runtime.run import start_runtime
 
 
 @click.option(

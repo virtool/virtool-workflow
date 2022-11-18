@@ -9,7 +9,7 @@ from aiohttp import ServerDisconnectedError, ClientConnectorError
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
-from virtool_workflow.utils import logger
+from virtool_workflow.runtime.utils import logger
 
 CHUNK_SIZE = 1024 * 1024 * 20
 

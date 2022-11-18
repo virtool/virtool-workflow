@@ -1,16 +1,15 @@
 import asyncio
 import signal
 import sys
-from importlib import import_module
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_core.logging import configure_logs
 from virtool_core.redis import configure_redis
 
-from virtool_workflow import discovery, execute
+from virtool_workflow import execute
 from virtool_workflow.hooks import (
     on_failure,
     on_cancelled,
@@ -19,37 +18,16 @@ from virtool_workflow.hooks import (
     on_terminated,
     on_error,
 )
-from virtool_workflow.redis import get_next_job_with_timeout, wait_for_cancellation
+from virtool_workflow.runtime.redis import (
+    get_next_job_with_timeout,
+    wait_for_cancellation,
+)
+from virtool_workflow.runtime.discovery import load_workflow_and_fixtures
 from virtool_workflow.runtime.events import Events
 from virtool_workflow.runtime.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 
 logger = getLogger("runtime")
-
-
-def configure_workflow(workflow_path: Path):
-    logger.info("Importing workflow.py")
-    workflow = discovery.discover_workflow(workflow_path)
-
-    logger.info("Importing fixtures.py")
-    fixtures_path = Path("./fixtures.py")
-
-    try:
-        discovery.import_module_from_file(
-            fixtures_path.name.rstrip(".py"), fixtures_path
-        )
-    except FileNotFoundError:
-        logger.info(f"No fixtures.py found")
-
-    for name in (
-        "virtool_workflow.builtin_fixtures",
-        "virtool_workflow.analysis.fixtures",
-        "virtool_workflow.runtime.providers",
-    ):
-        module = import_module(name)
-        logger.debug(f"Imported {module}")
-
-    return workflow
 
 
 def configure_builtin_status_hooks():
@@ -147,7 +125,7 @@ async def start_runtime(
     configure_logs(dev)
     configure_sentry(sentry_dsn)
 
-    workflow = configure_workflow(workflow_path)
+    workflow = load_workflow_and_fixtures(workflow_path)
 
     config = dict(
         dev=dev,

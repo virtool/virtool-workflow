@@ -4,7 +4,7 @@ from typing import Any, Callable, List
 
 from pyfixtures import FixtureScope
 
-from virtool_workflow.utils import coerce_to_coroutine_function
+from virtool_workflow.runtime.utils import coerce_to_coroutine_function
 
 logger = getLogger("hooks")
 
