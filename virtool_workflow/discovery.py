@@ -1,8 +1,7 @@
 """Find workflows and fixtures from python modules."""
 import sys
-
-import logging
 from importlib.util import spec_from_file_location, module_from_spec
+from logging import getLogger
 from pathlib import Path
 from types import ModuleType
 from typing import Callable
@@ -11,8 +10,7 @@ from typing import List, Union, Tuple, Optional
 from virtool_workflow.decorator_api import collect
 from virtool_workflow.workflow import Workflow
 
-
-logger = logging.getLogger(__name__)
+logger = getLogger("runtime")
 
 
 def import_module_from_file(module_name: str, path: Path) -> ModuleType:

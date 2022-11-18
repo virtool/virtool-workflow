@@ -3,7 +3,7 @@ from inspect import iscoroutinefunction
 from logging import getLogger
 from typing import Callable
 
-logger = getLogger(__name__)
+logger = getLogger("runtime")
 
 
 def coerce_to_coroutine_function(func: Callable):

@@ -7,7 +7,7 @@ from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
 from pyfixtures import fixture
 from virtool_workflow import hooks
 
-logger = getLogger(__name__)
+logger = getLogger("subprocess")
 
 
 class SubprocessFailed(asyncio.subprocess.subprocess.SubprocessError):

@@ -1,7 +1,7 @@
 import asyncio
-import logging
 from asyncio import CancelledError
 from contextlib import asynccontextmanager, contextmanager
+from logging import getLogger
 
 from pyfixtures import FixtureScope, fixture
 
@@ -22,7 +22,7 @@ from virtool_workflow.hooks import (
     on_workflow_start,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger("runtime")
 
 
 async def _handle_cancel(scope: FixtureScope, events: Events):
