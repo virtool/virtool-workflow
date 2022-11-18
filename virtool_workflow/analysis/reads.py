@@ -36,7 +36,6 @@ class Reads:
 @fixture
 async def reads(
     proc: int,
-    run_in_executor,
     run_subprocess,
     sample: WFSample,
     trimming_parameters: dict,
@@ -48,7 +47,7 @@ async def reads(
     If a cache exists it will be used, otherwise a new cache will be created.
     """
     result = await skewer(number_of_processes=proc, **trimming_parameters)(
-        sample.read_paths, run_subprocess, run_in_executor
+        sample.read_paths, run_subprocess
     )
 
     quality = await fastqc(work_path, run_subprocess)(sample.read_paths)

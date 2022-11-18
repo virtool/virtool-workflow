@@ -6,7 +6,6 @@ from pyfixtures import fixture
 
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.data_model.indexes import WFIndex
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
@@ -14,7 +13,6 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 async def indexes(
     index_provider: IndexProvider,
     work_path: Path,
-    run_in_executor: FunctionExecutor,
     run_subprocess: RunSubprocess,
 ) -> List[WFIndex]:
     """A workflow fixture that lists all reference indexes required for the workflow as :class:`.Index` objects."""
@@ -34,7 +32,6 @@ async def indexes(
         index_work_path,
         index_provider.finalize,
         index_provider.upload,
-        run_in_executor,
         run_subprocess,
     )
 

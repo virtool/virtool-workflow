@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 from asyncio.subprocess import Process
@@ -87,7 +88,7 @@ def skewer(
     if quiet:
         command.append("--quiet")
 
-    async def run_skewer(read_paths, run_subprocess, run_in_executor):
+    async def run_skewer(read_paths, run_subprocess):
         nonlocal command
         command += [str(read_path) for read_path in read_paths]
         command += ["-o", "reads"]
@@ -98,7 +99,7 @@ def skewer(
 
         process = await run_subprocess(command, env=env, cwd=reads_path)
 
-        read_paths = await run_in_executor(rename_trimming_results, reads_path)
+        read_paths = await asyncio.to_thread(rename_trimming_results, reads_path)
 
         return SkewerResult(read_paths, process, command)
 
