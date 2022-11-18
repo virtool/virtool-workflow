@@ -1,3 +1,4 @@
+import asyncio
 import gzip
 import json
 import shutil
@@ -8,7 +9,6 @@ import aiofiles
 from virtool_core.models.index import Index
 from virtool_core.utils import decompress_file, compress_file
 
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
@@ -40,14 +40,12 @@ class WFIndex:
         path: Path,
         finalize: Callable,
         upload: Callable,
-        run_in_executor: FunctionExecutor,
         run_subprocess: RunSubprocess,
     ):
         self.index = index
         self.path = path
         self.finalize = finalize
         self.upload = upload
-        self._run_in_executor = run_in_executor
         self._run_subprocess = run_subprocess
 
         self._sequence_lengths: Dict[str, int] = {}
@@ -100,11 +98,11 @@ class WFIndex:
             raise FileExistsError("Index JSON file has already been decompressed")
 
         try:
-            await self._run_in_executor(
+            await asyncio.to_thread(
                 decompress_file, self.compressed_json_path, self.json_path
             )
         except gzip.BadGzipFile:
-            await self._run_in_executor(
+            await asyncio.to_thread(
                 shutil.copyfile, self.compressed_json_path, self.json_path
             )
 
@@ -183,9 +181,7 @@ class WFIndex:
                         await f.write(f">{sequence['_id']}\n{sequence['sequence']}\n")
                         lengths[sequence["_id"]] = len(sequence["sequence"])
 
-        await self._run_in_executor(
-            compress_file, path, path.with_suffix(".fa.gz"), proc
-        )
+        await asyncio.to_thread(compress_file, path, path.with_suffix(".fa.gz"), proc)
 
         return lengths
 

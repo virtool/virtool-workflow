@@ -20,7 +20,6 @@ def profiles_path(analysis_files):
 async def test_hmms(
     http: ClientSession,
     jobs_api_connection_string: str,
-    run_in_executor,
     run_subprocess,
     tmpdir,
 ):

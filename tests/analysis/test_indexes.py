@@ -9,16 +9,10 @@ from tests.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
 from virtool_workflow.analysis.indexes import indexes as indexes_fixture
 from virtool_workflow.data_model.indexes import WFIndex
 from virtool_workflow.api.indexes import IndexProvider
-from virtool_workflow.execution.run_in_executor import (
-    run_in_executor,
-    thread_pool_executor,
-)
 from virtool_workflow.execution.run_subprocess import run_subprocess
 from virtool_workflow.testing.fixtures import install_as_pytest_fixtures
 
-install_as_pytest_fixtures(
-    globals(), run_in_executor, run_subprocess, thread_pool_executor
-)
+install_as_pytest_fixtures(globals(), run_subprocess)
 
 
 @pytest.fixture
@@ -37,12 +31,8 @@ async def indexes_api(
 
 
 @pytest.fixture
-async def indexes(
-    indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess
-):
-    return await indexes_fixture(
-        indexes_api, work_path, run_in_executor, run_subprocess
-    )
+async def indexes(indexes_api: IndexProvider, work_path, run_subprocess):
+    return await indexes_fixture(indexes_api, work_path, run_subprocess)
 
 
 async def test_indexes(indexes: Sequence[WFIndex], work_path):

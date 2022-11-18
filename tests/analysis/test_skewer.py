@@ -19,7 +19,6 @@ async def test_skewer(
     jobs_api_connection_string: str,
     tmpdir,
     run_subprocess,
-    run_in_executor,
     analysis_files,
     file_regression,
 ):
@@ -61,17 +60,12 @@ async def test_skewer(
     test_read_1 = analysis_files / "paired_small_1.fq.gz"
     test_read_2 = analysis_files / "paired_small_2.fq.gz"
 
-    read_1 = await run_in_executor(
-        shutil.copyfile, test_read_1, tmpdir / test_read_1.name
+    reads = (
+        shutil.copyfile(test_read_1, tmpdir / test_read_1.name),
+        shutil.copyfile(test_read_2, tmpdir / test_read_2.name),
     )
 
-    read_2 = await run_in_executor(
-        shutil.copyfile, test_read_2, tmpdir / test_read_2.name
-    )
-
-    reads = (read_1, read_2)
-
-    result = await run_skewer(reads, run_subprocess, run_in_executor)
+    result = await run_skewer(reads, run_subprocess)
 
     assert result.left.name == "reads_1.fq.gz"
     assert result.right.name == "reads_2.fq.gz"
