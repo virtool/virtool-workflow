@@ -2,11 +2,12 @@ from pathlib import Path
 from typing import Sequence
 
 import aiofiles
-import aiohttp
 import pytest
+from aiohttp import ClientSession
 
 from tests.api.mocks.mock_index_routes import TEST_INDEX_ID, TEST_REF_ID
-from virtool_workflow.analysis.indexes import indexes as indexes_fixture, Index
+from virtool_workflow.analysis.indexes import indexes as indexes_fixture
+from virtool_workflow.data_model.indexes import WFIndex
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.execution.run_in_executor import (
     run_in_executor,
@@ -30,7 +31,7 @@ def otu_ids():
 
 @pytest.fixture
 async def indexes_api(
-    http: aiohttp.ClientSession, jobs_api_connection_string: str, work_path: Path
+    http: ClientSession, jobs_api_connection_string: str, work_path: Path
 ):
     return IndexProvider(TEST_INDEX_ID, TEST_REF_ID, http, jobs_api_connection_string)
 
@@ -40,11 +41,11 @@ async def indexes(
     indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess
 ):
     return await indexes_fixture(
-        indexes_api, work_path, 3, run_in_executor, run_subprocess
+        indexes_api, work_path, run_in_executor, run_subprocess
     )
 
 
-async def test_indexes(indexes: Sequence[Index], work_path):
+async def test_indexes(indexes: Sequence[WFIndex], work_path):
     index_dir_path = work_path / f"indexes/{TEST_INDEX_ID}"
 
     # Check that single index directory was created
@@ -79,7 +80,7 @@ class TestGetBySequenceID:
             ("get_otu_id_by_sequence_id", "fart"),
         ],
     )
-    async def testS_error(self, method_name, message, indexes):
+    async def test_error(self, method_name, message, indexes):
         with pytest.raises(ValueError) as exc:
             getattr(indexes[0], method_name)("foo")
             assert message in str(exc)

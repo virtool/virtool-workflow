@@ -3,49 +3,52 @@ from pathlib import Path
 
 import pytest
 
-from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID, TEST_SAMPLE
+from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.samples import SampleProvider
-from virtool_workflow.data_model import Sample
+
+QUALITY = {
+    "bases": [
+        [30, 31, 31, 31, 31, 31],
+        [30, 31, 31, 31, 31, 32],
+    ],
+    "composition": [
+        [32, 14, 4, 40],
+        [22, 12, 34, 25],
+    ],
+    "count": 998822,
+    "encoding": "Sanger / Illumina 1.8",
+    "gc": 43,
+    "length": [0, 52],
+    "sequences": [
+        0,
+        0,
+        3512,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ],
+}
 
 
 @pytest.fixture
 def sample_api(http, jobs_api_connection_string: str):
-    if "ready" in TEST_SAMPLE:
-        del TEST_SAMPLE["ready"]
-
     return SampleProvider(TEST_SAMPLE_ID, http, jobs_api_connection_string)
 
 
-async def test_get(sample_api):
-    sample = await sample_api.get()
-
-    assert isinstance(sample, Sample)
-    assert sample.id == sample_api.id
-
-    for key in [
-        "name",
-        "id",
-        "host",
-        "isolate",
-        "locale",
-        "paired",
-        "quality",
-        "nuvs",
-        "pathoscope",
-    ]:
-        assert getattr(sample, key) == TEST_SAMPLE[key]
-
-    for actual, expected in zip(sample.files, TEST_SAMPLE["files"]):
-        assert actual == expected
+async def test_get(sample_api, snapshot):
+    assert await sample_api.get() == snapshot
 
 
-async def test_finalize(sample_api):
-    mock_quality = {"length": [0, 100]}
-    sample = await sample_api.finalize(mock_quality)
+async def test_finalize(sample_api, snapshot):
+    sample = await sample_api.finalize(QUALITY)
 
-    assert isinstance(sample, Sample)
-    assert sample.quality == mock_quality
+    assert sample.quality == QUALITY
+    assert sample == snapshot
 
 
 async def test_delete(sample_api):
@@ -53,7 +56,7 @@ async def test_delete(sample_api):
 
 
 async def test_delete_after_finalize(sample_api):
-    await sample_api.finalize({"length": [0, 100]})
+    sample_api.id = "finalized"
 
     with pytest.raises(AlreadyFinalized):
         await sample_api.delete()

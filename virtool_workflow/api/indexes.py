@@ -1,24 +1,11 @@
 from pathlib import Path
 
 import aiohttp
+from virtool_core.models.index import Index
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import read_file_from_response, upload_file_via_put
-from virtool_workflow.data_model import Reference
 from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
-from virtool_workflow.data_model.indexes import Index
-
-
-async def _fetch_reference(ref_id, http, jobs_api_connection_string):
-    async with http.get(f"{jobs_api_connection_string}/refs/{ref_id}") as response:
-        async with raising_errors_by_status_code(response) as reference_json:
-            return Reference(
-                reference_json["id"],
-                reference_json["data_type"],
-                reference_json["description"],
-                reference_json["name"],
-                reference_json["organism"],
-            )
 
 
 class IndexProvider:
@@ -49,15 +36,8 @@ class IndexProvider:
         async with self.http.get(
             f"{self.jobs_api_connection_string}/indexes/{self._index_id}"
         ) as response:
-            async with raising_errors_by_status_code(response) as index_document:
-                return Index(
-                    index_document["id"],
-                    index_document["manifest"],
-                    await _fetch_reference(
-                        self._ref_id, self.http, self.jobs_api_connection_string
-                    ),
-                    ready="ready" in index_document and index_document["ready"],
-                )
+            async with raising_errors_by_status_code(response) as resp_json:
+                return Index(**resp_json)
 
     async def upload(
         self, path: Path, format_: VirtoolFileFormat = "fasta"
@@ -114,15 +94,8 @@ class IndexProvider:
         async with self.http.patch(
             f"{self.jobs_api_connection_string}/indexes/{self._index_id}"
         ) as response:
-            async with raising_errors_by_status_code(response) as index_document:
-                return Index(
-                    index_document["id"],
-                    index_document["manifest"],
-                    await _fetch_reference(
-                        self._ref_id, self.http, self.jobs_api_connection_string
-                    ),
-                    ready=index_document["ready"],
-                )
+            async with raising_errors_by_status_code(response) as resp_json:
+                return Index(**resp_json)
 
     async def delete(self):
         """Delete an un-finished index."""
@@ -131,6 +104,3 @@ class IndexProvider:
         ) as response:
             async with raising_errors_by_status_code(response, accept=[200, 204]):
                 pass
-
-    def __await__(self) -> Index:
-        return self.get().__await__()

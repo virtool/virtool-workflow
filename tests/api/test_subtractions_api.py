@@ -9,8 +9,8 @@ from tests.api.mocks.mock_subtraction_routes import (
 )
 from virtool_workflow.api.errors import AlreadyFinalized
 from virtool_workflow.api.subtractions import SubtractionProvider
-from virtool_workflow.data_model import Subtraction
 from virtool_workflow.data_model.files import VirtoolFile
+from virtool_workflow.data_model.subtractions import WFSubtraction
 
 
 @fixture
@@ -28,7 +28,7 @@ def subtraction_api(http, jobs_api_connection_string: str, work_path):
 async def test_get(subtraction_api):
     subtraction = await subtraction_api.get()
 
-    assert isinstance(subtraction, Subtraction)
+    assert isinstance(subtraction, WFSubtraction)
 
     assert subtraction.id == TEST_SUBTRACTION_ID
 
@@ -50,7 +50,7 @@ async def test_finalize(subtraction_api):
         {"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4}, 100
     )
 
-    assert isinstance(updated_subtraction, Subtraction)
+    assert isinstance(updated_subtraction, WFSubtraction)
     assert updated_subtraction.gc.a == 0.2
     assert updated_subtraction.gc.t == 0.2
     assert updated_subtraction.gc.c == 0.2

@@ -2,7 +2,7 @@ from functools import wraps
 from pathlib import Path
 
 from virtool_workflow import hooks
-from virtool_workflow.analysis.analysis import Analysis
+from virtool_workflow.data_model.analysis import WFAnalysis
 from virtool_workflow.api.analysis import AnalysisProvider
 
 
@@ -27,7 +27,7 @@ async def test_analysis_fixture(runtime, http, jobs_api_connection_string: str):
 
     analysis = await runtime.get_or_instantiate("analysis")
 
-    assert isinstance(analysis, Analysis)
+    assert isinstance(analysis, WFAnalysis)
 
     test_file = Path("test.json")
 

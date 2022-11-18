@@ -11,7 +11,7 @@ async def test_status_updates(db, create_job, exec_workflow, job_id):
     @wf.step
     def first(job):
         """Description of First."""
-        assert job.status[-1]["state"] == "preparing"
+        assert job.status[-1].state == "preparing"
 
     @wf.step
     def second(job):

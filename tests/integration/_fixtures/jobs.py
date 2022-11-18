@@ -1,3 +1,4 @@
+import arrow
 import pytest
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -14,7 +15,6 @@ async def test_user(db: AsyncIOMotorDatabase):
 
     user = {
         "_id": "test_admin",
-        "id": "test_admin",
         "administrator": True,
         "handle": False,
     }
@@ -32,20 +32,28 @@ def create_job(db: AsyncIOMotorDatabase, job_id: str, test_user, request):
     async def _create_job(args: dict):
         job = {
             "_id": job_id,
+            "acquired": False,
+            "archived": False,
             "args": args,
+            "created_at": arrow.utcnow().naive,
             "status": [
                 {
                     "state": "waiting",
                     "stage": None,
+                    "step_description": None,
+                    "step_name": None,
                     "error": None,
                     "progress": 0,
-                    "timestamp": None,
+                    "timestamp": arrow.utcnow().naive,
                 }
             ],
-            "user": test_user,
-            "acquired": False,
+            "user": {"id": test_user["_id"]},
+            "key": "abc123",
             "workflow": request.node.originalname,
+            "rights": {},
+            "ping": None,
         }
+
         await jobs.insert_one(job)
 
         return job

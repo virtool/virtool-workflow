@@ -2,12 +2,12 @@ from pathlib import Path
 
 from pyfixtures import fixture
 from virtool_workflow.analysis.utils import make_read_paths
-from virtool_workflow.data_model.samples import Sample
+from virtool_workflow.data_model.samples import WFSample
 from virtool_workflow.api.samples import SampleProvider
 
 
 @fixture
-async def sample(sample_provider: SampleProvider, work_path: Path) -> Sample:
+async def sample(sample_provider: SampleProvider, work_path: Path) -> WFSample:
     """
     The sample associated with the current job.
 

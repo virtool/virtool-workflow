@@ -4,7 +4,7 @@ from typing import Dict, List, Protocol
 
 from pyfixtures import fixture
 from virtool_workflow.api.utils import read_file_from_response
-from virtool_workflow.data_model.jobs import Job
+from virtool_workflow.data_model.jobs import WFJob
 
 
 class FileDownloader(Protocol):
@@ -35,7 +35,7 @@ def download_input_file(http, jobs_api_connection_string: str) -> FileDownloader
 
 
 @fixture
-def files_list(job: Job) -> List[dict]:
+def files_list(job: WFJob) -> List[dict]:
     """The files dictionary for the current job."""
     return job.args["files"]
 

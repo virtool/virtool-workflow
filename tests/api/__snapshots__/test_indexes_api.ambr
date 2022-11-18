@@ -1,0 +1,116 @@
+# name: test_finalize
+  dict({
+    'change_count': 1419,
+    'contributors': list([
+      dict({
+        'administrator': False,
+        'count': 478,
+        'handle': 'jasper',
+        'id': '1kg24j7t',
+      }),
+      dict({
+        'administrator': True,
+        'count': 162,
+        'handle': 'mrott',
+        'id': 'ihvze2u9',
+      }),
+    ]),
+    'created_at': datetime.datetime(2018, 2, 1, 0, 28, 49, 798000, tzinfo=datetime.timezone.utc),
+    'files': list([
+    ]),
+    'has_files': False,
+    'id': 'jiwncaqr',
+    'job': dict({
+      'id': 'wwssuhhy',
+    }),
+    'manifest': dict({
+      'c93ec9a9': 0,
+    }),
+    'modified_otu_count': 4,
+    'otus': list([
+      dict({
+        'change_count': 4,
+        'id': 'd1efjvxk',
+        'name': 'Agaricus bisporus virus 1',
+      }),
+      dict({
+        'change_count': 6,
+        'id': 'u9vbhtg1',
+        'name': 'Alternaria solani chrysovirus 1',
+      }),
+      dict({
+        'change_count': 5,
+        'id': 'af3xznax',
+        'name': 'Alternaria tenuissima partitivirus 1',
+      }),
+    ]),
+    'ready': True,
+    'reference': dict({
+      'id': '21n3j5v6',
+    }),
+    'user': dict({
+      'administrator': False,
+      'handle': 'igboyes',
+      'id': 'abc12345',
+    }),
+    'version': 0,
+  })
+# ---
+# name: test_get
+  dict({
+    'change_count': 1419,
+    'contributors': list([
+      dict({
+        'administrator': False,
+        'count': 478,
+        'handle': 'jasper',
+        'id': '1kg24j7t',
+      }),
+      dict({
+        'administrator': True,
+        'count': 162,
+        'handle': 'mrott',
+        'id': 'ihvze2u9',
+      }),
+    ]),
+    'created_at': datetime.datetime(2018, 2, 1, 0, 28, 49, 798000, tzinfo=datetime.timezone.utc),
+    'files': list([
+    ]),
+    'has_files': False,
+    'id': 'jiwncaqr',
+    'job': dict({
+      'id': 'wwssuhhy',
+    }),
+    'manifest': dict({
+      'c93ec9a9': 0,
+    }),
+    'modified_otu_count': 4,
+    'otus': list([
+      dict({
+        'change_count': 4,
+        'id': 'd1efjvxk',
+        'name': 'Agaricus bisporus virus 1',
+      }),
+      dict({
+        'change_count': 6,
+        'id': 'u9vbhtg1',
+        'name': 'Alternaria solani chrysovirus 1',
+      }),
+      dict({
+        'change_count': 5,
+        'id': 'af3xznax',
+        'name': 'Alternaria tenuissima partitivirus 1',
+      }),
+    ]),
+    'ready': False,
+    'reference': dict({
+      'id': '21n3j5v6',
+    }),
+    'user': dict({
+      'administrator': False,
+      'handle': 'igboyes',
+      'id': 'abc12345',
+    }),
+    'version': 0,
+  })
+# ---

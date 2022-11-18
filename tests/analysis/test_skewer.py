@@ -1,12 +1,14 @@
 import gzip
 import shutil
+from base64 import b64encode
 from pathlib import Path
 
+import arrow
 import pytest
 
 from tests.api.mocks.mock_sample_routes import TEST_SAMPLE_ID
 from virtool_workflow.analysis.skewer import calculate_trimming_min_length, skewer
-from virtool_workflow.data_model import Job
+from virtool_workflow.data_model.jobs import WFJob
 from virtool_workflow.runtime.providers import sample_provider
 
 
@@ -14,7 +16,7 @@ from virtool_workflow.runtime.providers import sample_provider
 @pytest.mark.skipif(shutil.which("skewer") is None, reason="Skewer is not installed.")
 async def test_skewer(
     http,
-    jobs_api_connection_string,
+    jobs_api_connection_string: str,
     tmpdir,
     run_subprocess,
     run_in_executor,
@@ -23,10 +25,30 @@ async def test_skewer(
 ):
     tmpdir = Path(tmpdir)
 
-    job = Job(
-        "test_job",
-        {"sample_id": TEST_SAMPLE_ID},
+    job = WFJob(
+        **{
+            "id": "zzpugkyt",
+            "archived": False,
+            "args": {"sample_id": TEST_SAMPLE_ID},
+            "created_at": arrow.utcnow().isoformat(),
+            "key": b64encode(b"test_key").decode("utf-8"),
+            "user": {"id": "abc12345", "handle": "igboyes", "administrator": True},
+            "rights": {},
+            "progress": 60,
+            "state": "running",
+            "status": [
+                {
+                    "state": "waiting",
+                    "stage": None,
+                    "error": None,
+                    "progress": 0,
+                    "timestamp": "2018-02-06T22:15:52.664000Z",
+                },
+            ],
+            "workflow": "nuvs",
+        }
     )
+
     sample = await sample_provider(job, http, jobs_api_connection_string).get()
 
     run_skewer = skewer(
@@ -36,13 +58,15 @@ async def test_skewer(
         quiet=True,
     )
 
-    TEST_READ_1 = analysis_files / "paired_small_1.fq.gz"
-    TEST_READ_2 = analysis_files / "paired_small_2.fq.gz"
+    test_read_1 = analysis_files / "paired_small_1.fq.gz"
+    test_read_2 = analysis_files / "paired_small_2.fq.gz"
+
     read_1 = await run_in_executor(
-        shutil.copyfile, TEST_READ_1, tmpdir / TEST_READ_1.name
+        shutil.copyfile, test_read_1, tmpdir / test_read_1.name
     )
+
     read_2 = await run_in_executor(
-        shutil.copyfile, TEST_READ_2, tmpdir / TEST_READ_2.name
+        shutil.copyfile, test_read_2, tmpdir / test_read_2.name
     )
 
     reads = (read_1, read_2)

@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-from virtool_workflow.analysis.library_types import LibraryType
+from virtool_core.models.enums import LibraryType
+
 from virtool_workflow.analysis.utils import ReadPaths
 
 

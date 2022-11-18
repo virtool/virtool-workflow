@@ -31,22 +31,20 @@ services:
       - vt_postgres_data:/var/lib/postgresql/data
     logging:
       driver: none
+      driver: none
 
   jobs-api:
-    image: virtool/virtool:6.6.6
+    image: virtool/virtool:12.0.1
+    command: jobsAPI --host=0.0.0.0 --port=9990
     depends_on:
       - mongo
       - redis
       - postgres
-    command: >
-      --db-connection-string="mongodb://mongo:27017"
-      --db-name="test"
-      --postgres-connection-string="postgresql+asyncpg://virtool:virtool@postgres/virtool"
-      --redis-connection-string="redis://redis:6379"
-      --dev
-      jobsAPI
-      --host=0.0.0.0
-      --port=9990
+    environment:
+      VT_DB_CONNECTION_STRING: mongodb://mongo:27017
+      VT_DB_NAME: test
+      VT_REDIS_CONNECTION_STRING: redis://redis:6379
+      VT_POSTGRES_CONNECTION_STRING: postgresql+asyncpg://virtool:virtool@postgres/virtool
     ports:
       - "9990:9990"
 

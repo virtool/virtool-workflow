@@ -1,38 +1,13 @@
-from dataclasses import dataclass, field
-from typing import List, Literal
+from typing import Optional
+
+from virtool_core.models.job import Job
 
 
-State = Literal["complete", "cancelled", "error", "running"]
+class WFJob(Job):
+    """
+    A Virtool Job.
 
+    Inherits from the core Job model, but includes the workflow authentication key.
+    """
 
-@dataclass(frozen=True)
-class Status:
-    """The status of a Virtool Job."""
-
-    error: State
-    progress: float
-    stage: str
-    state: str
-    timestamp: str
-    step_name: str
-    step_description: str
-
-
-@dataclass
-class Job:
-    """A Virtool Job."""
-
-    id: str
-    """Unique ID for the job."""
-    args: dict
-    """Workflow specific arguments."""
-    mem: int = 8
-    """The maximum amount of memory used in GB."""
-    proc: int = 4
-    """The number of processes used."""
-    status: List[Status] = field(default_factory=lambda: [])
-    """The status log for the job."""
-    workflow: str = None
-    """The name of the workflow which should be used."""
-    key: str = None
-    """The auth key for the jobs API."""
+    key: Optional[str] = None

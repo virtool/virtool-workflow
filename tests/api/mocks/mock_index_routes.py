@@ -11,18 +11,56 @@ mock_routes = web.RouteTableDef()
 TEST_INDEX_ID = "jiwncaqr"
 TEST_REF_ID = "21n3j5v6"
 
+TEST_REF = {
+    "id": "21n3j5v6",
+    "created_at": "2019-10-04T17:17:48.935Z",
+    "data_type": "genome",
+    "description": "",
+    "name": "Clone of Banana Viruses",
+    "organism": "virus",
+    "internal_control": None,
+    "restrict_source_types": False,
+    "source_types": ["isolate", "strain"],
+    "groups": [],
+    "cloned_from": {"id": "9mciizg6", "name": "Banana Viruses"},
+    "process": {"id": "zhio57ug"},
+    "otu_count": 42,
+    "unbuilt_change_count": 12,
+    "user": {"id": "test", "handle": "test", "administrator": False},
+}
+
 TEST_INDEX = {
-    "version": 0,
+    "id": TEST_INDEX_ID,
+    "change_count": 1419,
+    "contributors": [
+        {"administrator": False, "count": 478, "handle": "jasper", "id": "1kg24j7t"},
+        {"administrator": True, "count": 162, "handle": "mrott", "id": "ihvze2u9"},
+    ],
     "created_at": "2018-02-01T00:28:49.798000Z",
+    "files": [],
+    "has_files": False,
+    "job": {"id": "wwssuhhy"},
     "manifest": {
         "c93ec9a9": 0,
     },
+    "modified_otu_count": 4,
     "ready": False,
-    "user": {"id": "igboyes"},
-    "job": {"id": "wwssuhhy"},
-    "id": TEST_INDEX_ID,
-    "contributors": [{"id": "igboyes", "count": 1419}],
-    "change_count": 1419,
+    "reference": TEST_REF,
+    "user": {"id": "abc12345", "handle": "igboyes", "administrator": False},
+    "otus": [
+        {"change_count": 4, "id": "d1efjvxk", "name": "Agaricus bisporus virus 1"},
+        {
+            "change_count": 6,
+            "id": "u9vbhtg1",
+            "name": "Alternaria solani chrysovirus 1",
+        },
+        {
+            "change_count": 5,
+            "id": "af3xznax",
+            "name": "Alternaria tenuissima partitivirus 1",
+        },
+    ],
+    "version": 0,
 }
 
 
@@ -41,23 +79,7 @@ async def get_ref(request):
     if ref_id != TEST_REF_ID:
         return web.json_response({"message": "Not Found"}, status=404)
 
-    return web.json_response(
-        {
-            "id": "21n3j5v6",
-            "created_at": "2019-10-04T17:17:48.935Z",
-            "data_type": "genome",
-            "description": "",
-            "name": "Clone of Banana Viruses",
-            "organism": "virus",
-            "internal_control": None,
-            "restrict_source_types": False,
-            "source_types": ["isolate", "strain"],
-            "groups": [],
-            "cloned_from": {"id": "9mciizg6", "name": "Banana Viruses"},
-            "process": {"id": "zhio57ug"},
-        },
-        status=200,
-    )
+    return web.json_response(TEST_REF, status=200)
 
 
 @mock_routes.put("/indexes/{index_id}/files/{name}")

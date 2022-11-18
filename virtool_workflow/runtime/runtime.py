@@ -1,27 +1,16 @@
 """Main entrypoint(s) to run virtool workflows."""
-import logging
-from contextlib import asynccontextmanager, suppress
+from contextlib import asynccontextmanager
 from importlib import import_module
+from logging import getLogger
 from pathlib import Path
 
 import pyfixtures
+
 from virtool_workflow import Workflow, discovery, hooks
-from virtool_workflow.runtime import status
 from virtool_workflow._executor import execute
+from virtool_workflow.runtime import status
 
-logger = logging.getLogger(__name__)
-
-
-def configure_logging():
-    """Set up logging for a workflow run."""
-    logging.basicConfig(level=logging.DEBUG)
-
-    # Install coloredlogs if available.
-    with suppress(ModuleNotFoundError):
-        import coloredlogs
-
-        logging.debug("Installed coloredlogs")
-        coloredlogs.install(level=logging.DEBUG)
+logger = getLogger(__name__)
 
 
 def load_scripts(init_file: Path, fixtures_file: Path):

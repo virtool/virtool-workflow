@@ -2,17 +2,18 @@
 A class and fixture for accessing Virtool HMM data for use in analysis workflows.
 
 """
+import asyncio
 from collections import UserList
 from functools import cached_property
 from pathlib import Path
 from shutil import which
 from typing import Dict, Iterable
 
-from virtool_workflow.api.hmm import HMMsProvider
-from virtool_workflow.data_model import HMM
-from virtool_workflow.execution.run_subprocess import RunSubprocess
-
 from pyfixtures import fixture
+from virtool_core.models.hmm import HMM
+
+from virtool_workflow.api.hmm import HMMsProvider
+from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
 class HMMs(UserList):
@@ -57,7 +58,7 @@ async def hmms(
     """
     await hmms_provider.get_profiles()
 
-    if which("hmmpress") is None:
+    if await asyncio.to_thread(which, "hmmpress") is None:
         raise RuntimeError("hmmpress is not installed.")
 
     process = await run_subprocess(

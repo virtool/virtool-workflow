@@ -1,21 +1,26 @@
 from base64 import b64encode
 from datetime import datetime
 
+import arrow
 from aiohttp import web
 from aiohttp.web_response import json_response
 
 mock_routes = web.RouteTableDef()
 
 TEST_JOB = {
-    "workflow": "create_subtraction",
+    "id": "zzpugkyt",
+    "archived": False,
     "args": {
         "subtraction_id": "Thale",
         "analysis_id": "test_analysis",
         "file_id": "vlekszor-ATgenomeTAIR9.171",
     },
-    "proc": 2,
-    "mem": 4,
-    "user": {"id": "igboyes"},
+    "created_at": arrow.utcnow().isoformat(),
+    "key": b64encode(b"test_key").decode("utf-8"),
+    "user": {"id": "abc12345", "handle": "igboyes", "administrator": True},
+    "rights": {},
+    "progress": 60,
+    "state": "running",
     "status": [
         {
             "state": "waiting",
@@ -28,26 +33,25 @@ TEST_JOB = {
             "state": "running",
             "stage": "mk_subtraction_dir",
             "error": None,
-            "progress": 0.2,
+            "progress": 20,
             "timestamp": "2018-02-06T22:16:11.166000Z",
         },
         {
             "state": "running",
             "stage": "set_stats",
             "error": None,
-            "progress": 0.4,
+            "progress": 40,
             "timestamp": "2018-02-06T22:16:11.169000Z",
         },
         {
             "state": "running",
             "stage": "bowtie_build",
             "error": None,
-            "progress": 0.6,
+            "progress": 60,
             "timestamp": "2018-02-06T22:16:15.637000Z",
         },
     ],
-    "id": "zzpugkyt",
-    "key": b64encode(b"test_key").decode("utf-8"),
+    "workflow": "create_subtraction",
 }
 
 

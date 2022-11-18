@@ -1,6 +1,7 @@
 import json
 import tempfile
 from pathlib import Path
+from pprint import pprint
 
 from aiohttp.web import RouteTableDef
 from aiohttp.web_fileresponse import FileResponse
@@ -12,8 +13,10 @@ from tests.api.mocks.utils import not_found, read_file_from_request
 mock_routes = RouteTableDef()
 
 TEST_SAMPLE_PATH = Path(__file__).parent / "mock_sample.json"
+
 with TEST_SAMPLE_PATH.open("r") as f:
     TEST_SAMPLE = json.load(f)
+
 TEST_SAMPLE_ID = TEST_SAMPLE["id"]
 
 
@@ -23,6 +26,8 @@ async def get_sample(request):
 
     if sample_id != TEST_SAMPLE_ID:
         return not_found()
+
+    pprint(TEST_SAMPLE)
 
     return json_response(TEST_SAMPLE, status=200)
 
@@ -36,20 +41,19 @@ async def finalize(request):
 
     response_json = await request.json()
 
-    TEST_SAMPLE["quality"] = response_json["quality"]
-    TEST_SAMPLE["ready"] = True
-
-    return json_response(TEST_SAMPLE)
+    return json_response(
+        {**TEST_SAMPLE, "quality": response_json["quality"], "ready": True}
+    )
 
 
 @mock_routes.delete("/samples/{sample_id}")
 async def delete(request):
     sample_id = request.match_info["sample_id"]
 
-    if sample_id != TEST_SAMPLE_ID:
+    if sample_id not in (TEST_SAMPLE_ID, "finalized"):
         return not_found()
 
-    if "ready" in TEST_SAMPLE and TEST_SAMPLE["ready"] is True:
+    if sample_id == "finalized":
         return json_response(
             {"message": "Already Finalized"},
             status=400,
@@ -65,10 +69,9 @@ async def upload_artifact_files(request):
     if sample_id != TEST_SAMPLE_ID:
         return not_found()
 
-    name = request.query.get("name")
-    type = request.query.get("type")
-
-    file = await read_file_from_request(request, name, type)
+    file = await read_file_from_request(
+        request, request.query.get("name"), request.query.get("type")
+    )
 
     return json_response(file, status=201)
 

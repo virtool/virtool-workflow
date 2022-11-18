@@ -5,7 +5,7 @@ from pathlib import Path
 from pyfixtures import fixture
 from virtool_workflow.analysis.fastqc import fastqc
 from virtool_workflow.analysis.skewer import skewer
-from virtool_workflow.data_model.samples import Sample
+from virtool_workflow.data_model.samples import WFSample
 
 import_module(__package__ + ".trimming")
 
@@ -20,7 +20,7 @@ class Reads:
     :param path: The path to the directory containing the trimmed read files.
     """
 
-    sample: Sample
+    sample: WFSample
     quality: dict
     path: Path
 
@@ -38,7 +38,7 @@ async def reads(
     proc: int,
     run_in_executor,
     run_subprocess,
-    sample: Sample,
+    sample: WFSample,
     trimming_parameters: dict,
     work_path: Path,
 ):
