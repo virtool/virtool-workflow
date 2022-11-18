@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 import pytest
 
-from virtool_workflow._runtime import run_workflow
+from virtool_workflow.runtime.run import run_workflow
 from virtool_workflow.runtime.events import Events
 
 

@@ -1,29 +1,51 @@
-"""Find workflows and fixtures from python modules."""
 import sys
+from importlib import import_module
 from importlib.util import spec_from_file_location, module_from_spec
 from logging import getLogger
 from pathlib import Path
 from types import ModuleType
-from typing import Callable
-from typing import List, Union, Tuple, Optional
+from typing import Union, List, Callable
 
+from virtool_workflow import Workflow
 from virtool_workflow.decorators import collect
-from virtool_workflow.workflow import Workflow
 
 logger = getLogger("runtime")
+
+
+def load_workflow_and_fixtures(workflow_path: Path):
+    logger.info("Importing workflow.py")
+    workflow = discover_workflow(workflow_path)
+
+    logger.info("Importing fixtures.py")
+    fixtures_path = Path("./fixtures.py")
+
+    try:
+        import_module_from_file(fixtures_path.name.rstrip(".py"), fixtures_path)
+    except FileNotFoundError:
+        logger.info(f"No fixtures.py found")
+
+    for name in (
+        "virtool_workflow.builtin_fixtures",
+        "virtool_workflow.analysis.fixtures",
+        "virtool_workflow.runtime.providers",
+    ):
+        module = import_module(name)
+        logger.debug(f"Imported {module}")
+
+    return workflow
 
 
 def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     """
     Import a module from a file.
 
-    The parent directory of `path` will also be added to `sys.path`
-    prior to importing. This ensures that modules and packages defined
-    in that directory can be properly imported.
+    The parent directory of `path` will also be added to `sys.path` prior to importing.
+    This ensures that modules and packages defined in that directory can be properly
+    imported.
 
-    :param module_name: The name of the python module.
-    :param path: The :class:`pathlib.Path` of the python file
-    :returns: The loaded python module.
+    :param module_name: The module's name.
+    :param path: The module's path.
+    :returns: The loaded module.
     """
     module_parent = str(path.parent)
     sys.path.append(module_parent)
@@ -66,27 +88,3 @@ def discover_workflow(path: Path) -> Workflow:
         )
     except StopIteration:
         return collect(module)
-
-
-def run_discovery(
-    path: Path, fixture_path: Optional[Path] = None
-) -> Tuple[Workflow, List[Callable]]:
-    """
-    Discover a workflow and fixtures from the given path(s).
-
-    :param path: A Path to the workflow module
-    :param fixture_path: A Path to a module conaining addtional fitures.
-    :return: A :class:`Workflow` instance and a list of fixtures.
-    """
-    logger.info("Discovering workflow")
-
-    fixtures = []
-    if fixture_path and fixture_path.exists():
-        fixtures.extend(discover_fixtures(fixture_path))
-        logger.info(f"Loaded fixture file path={fixture_path}")
-
-    workflow = discover_workflow(path)
-
-    logger.info(f"Workflow discovery complete")
-
-    return workflow, fixtures

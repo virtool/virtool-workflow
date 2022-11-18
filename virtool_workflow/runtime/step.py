@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
-from virtool_workflow.utils import coerce_to_coroutine_function
+from virtool_workflow.runtime.utils import coerce_to_coroutine_function
 
 
 def get_display_name(function: Callable[..., Any]):
