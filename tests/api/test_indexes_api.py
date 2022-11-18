@@ -1,12 +1,9 @@
-from datetime import datetime
 from pathlib import Path
 
 import pytest
-from syrupy.matchers import path_type
 
 from tests.api.mocks.mock_index_routes import (
     TEST_INDEX_ID,
-    TEST_INDEX,
     TEST_REF_ID,
 )
 from virtool_workflow.api.indexes import IndexProvider

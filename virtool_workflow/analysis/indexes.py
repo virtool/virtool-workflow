@@ -14,7 +14,6 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 async def indexes(
     index_provider: IndexProvider,
     work_path: Path,
-    proc: int,
     run_in_executor: FunctionExecutor,
     run_subprocess: RunSubprocess,
 ) -> List[WFIndex]:

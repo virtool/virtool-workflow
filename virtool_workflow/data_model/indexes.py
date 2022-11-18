@@ -174,7 +174,7 @@ class WFIndex:
 
         otus = [otu for otu in data if otu["_id"] in unique_otu_ids]
 
-        lengths = dict()
+        lengths = {}
 
         async with aiofiles.open(path, "w") as f:
             for otu in otus:

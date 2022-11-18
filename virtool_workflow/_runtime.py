@@ -3,13 +3,13 @@ import logging
 import os
 import signal
 import sys
-from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
 from typing import Any, Dict
 
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_core.logging import configure_logs
+from virtool_core.redis import configure_redis
 
 from virtool_workflow import discovery, execute
 from virtool_workflow.events import Events
@@ -21,9 +21,7 @@ from virtool_workflow.hooks import (
     on_terminated,
     on_error,
 )
-from virtool_core.redis import configure_redis
 from virtool_workflow.redis import get_next_job_with_timeout, wait_for_cancellation
-
 from virtool_workflow.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 

@@ -1,9 +1,9 @@
 import asyncio
-import logging
 from typing import List
 
 from aiohttp import ClientSession
 from pyfixtures import fixture
+
 from virtool_workflow.api.analysis import AnalysisProvider
 from virtool_workflow.api.hmm import HMMsProvider
 from virtool_workflow.api.indexes import IndexProvider
