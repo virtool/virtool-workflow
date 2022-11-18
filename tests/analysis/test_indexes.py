@@ -41,7 +41,7 @@ async def indexes(
     indexes_api: IndexProvider, work_path, run_in_executor, run_subprocess
 ):
     return await indexes_fixture(
-        indexes_api, work_path, 3, run_in_executor, run_subprocess
+        indexes_api, work_path, run_in_executor, run_subprocess
     )
 
 
