@@ -12,9 +12,13 @@ from virtool_workflow.decorators import collect
 logger = getLogger("runtime")
 
 
-def load_workflow_and_fixtures(workflow_path: Path):
+def load_workflow_and_fixtures():
     logger.info("Importing workflow.py")
-    workflow = discover_workflow(workflow_path)
+    try:
+        workflow = discover_workflow(Path("./workflow.py"))
+    except FileNotFoundError:
+        logger.fatal("Could not find workflow.py")
+        sys.exit(1)
 
     logger.info("Importing fixtures.py")
     fixtures_path = Path("./fixtures.py")
