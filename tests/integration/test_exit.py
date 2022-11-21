@@ -1,22 +1,31 @@
 import asyncio
+import os
+import shutil
 import subprocess
 
 import aioredis
+import pytest
 
 
-async def test_exit_because_timeout(db, create_job, exec_workflow, job_id):
+@pytest.fixture
+def terminated_workflow(tmpdir):
+    shutil.copy("tests/files/terminated_workflow.py", "workflow.py")
+    yield
+    os.remove("workflow.py")
+
+
+async def test_exit_because_timeout(db, create_job, exec_workflow, job_id, tmpdir):
     """
     Test that the runner exits if no job ID can be pulled from Redis before the timeout.
 
     This situation does not involve a status update being sent to the server.
     """
+    shutil.copy("tests/files/terminated_workflow.py", tmpdir / "workflow.py")
+
+    # This uses the Poetry environment from the calling shell.
     p = subprocess.run(
         [
-            "poetry",
-            "run",
             "run-workflow",
-            "--workflow-path",
-            "tests/files/terminated_workflow.py",
             "--redis-list-name",
             "jobs_termination",
             "--redis-connection-string",
@@ -26,6 +35,7 @@ async def test_exit_because_timeout(db, create_job, exec_workflow, job_id):
         ],
         capture_output=True,
         encoding="utf-8",
+        cwd=tmpdir,
     )
 
     assert p.returncode == 0
@@ -33,7 +43,11 @@ async def test_exit_because_timeout(db, create_job, exec_workflow, job_id):
     assert "Timed out while waiting for job" in p.stderr
 
 
-async def test_exit_because_sigterm(db, create_job, exec_workflow, job_id, jobs_api):
+async def test_exit_because_sigterm(
+    db, create_job, exec_workflow, job_id, jobs_api, tmpdir
+):
+    shutil.copy("tests/files/terminated_workflow.py", tmpdir / "workflow.py")
+
     job = await create_job({})
 
     redis_list_name = f"jobs_{job['workflow']}"
@@ -45,11 +59,7 @@ async def test_exit_because_sigterm(db, create_job, exec_workflow, job_id, jobs_
 
     p = subprocess.Popen(
         [
-            "poetry",
-            "run",
             "run-workflow",
-            "--workflow-path",
-            "tests/files/terminated_workflow.py",
             "--jobs-api-connection-string",
             jobs_api,
             "--redis-list-name",
@@ -58,7 +68,8 @@ async def test_exit_because_sigterm(db, create_job, exec_workflow, job_id, jobs_
             "redis://localhost:6379",
             "--timeout",
             "5",
-        ]
+        ],
+        cwd=tmpdir,
     )
 
     await asyncio.sleep(10)
@@ -78,7 +89,11 @@ async def test_exit_because_sigterm(db, create_job, exec_workflow, job_id, jobs_
     ]
 
 
-async def test_exit_because_cancelled(db, create_job, exec_workflow, job_id, jobs_api):
+async def test_exit_because_cancelled(
+    db, create_job, exec_workflow, job_id, jobs_api, tmpdir
+):
+    shutil.copy("tests/files/terminated_workflow.py", tmpdir / "workflow.py")
+
     job = await create_job({})
 
     redis_list_name = f"jobs_{job['workflow']}"
@@ -88,11 +103,7 @@ async def test_exit_because_cancelled(db, create_job, exec_workflow, job_id, job
 
     p = subprocess.Popen(
         [
-            "poetry",
-            "run",
             "run-workflow",
-            "--workflow-path",
-            "tests/files/terminated_workflow.py",
             "--jobs-api-connection-string",
             jobs_api,
             "--redis-list-name",
@@ -101,13 +112,13 @@ async def test_exit_because_cancelled(db, create_job, exec_workflow, job_id, job
             "redis://localhost:6379",
             "--timeout",
             "5",
-        ]
+        ],
+        cwd=tmpdir,
     )
 
     await asyncio.sleep(5)
 
     await redis.publish("channel:cancel", job_id)
-
     redis.close()
     await redis.wait_closed()
 

@@ -120,12 +120,11 @@ async def start_runtime(
     sentry_dsn: str,
     timeout: int,
     work_path: Path,
-    workflow_path: Path,
 ):
     configure_logs(dev)
     configure_sentry(sentry_dsn)
 
-    workflow = load_workflow_and_fixtures(workflow_path)
+    workflow = load_workflow_and_fixtures()
 
     config = dict(
         dev=dev,

@@ -41,7 +41,7 @@ from virtool_workflow.runtime.run import start_runtime
     "--work-path",
     default="temp",
     help="The path where temporary files will be stored.",
-    type=click.Path(),
+    type=click.Path(path_type=Path),
 )
 @click.option(
     "--proc",
@@ -54,13 +54,6 @@ from virtool_workflow.runtime.run import start_runtime
     help="The amount of memory to use in GB.",
     type=int,
     default=8,
-)
-@click.option(
-    "--workflow-path",
-    "-f",
-    type=click.Path(exists=True, path_type=Path),
-    default="workflow.py",
-    help="The path to the workflow file.",
 )
 @click.command()
 def run_workflow(**kwargs):
