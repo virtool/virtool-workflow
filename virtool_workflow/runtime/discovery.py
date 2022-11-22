@@ -26,7 +26,7 @@ def load_workflow_and_fixtures():
     try:
         import_module_from_file(fixtures_path.name.rstrip(".py"), fixtures_path)
     except FileNotFoundError:
-        logger.info(f"No fixtures.py found")
+        logger.info("No fixtures.py found")
 
     for name in (
         "virtool_workflow.builtin_fixtures",
