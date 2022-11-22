@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.subprocess import Process
 from contextlib import suppress
 from logging import getLogger
 from subprocess import SubprocessError
@@ -20,7 +21,6 @@ class LineOutputHandler(Protocol):
         Handle input from stdin, or stderr, line by line.
 
         :param line: A line of output from the stream.
-        :type line: str
         """
         raise NotImplementedError()
 
@@ -33,25 +33,17 @@ class RunSubprocess(Protocol):
         stderr_handler: LineOutputHandler = None,
         env: dict = None,
         cwd: str = None,
-    ) -> asyncio.subprocess.Process:
+    ) -> Process:
         """
         Run a shell command in a subprocess.
 
-        :param command: A shell command, as a list of strings including the program name and arguments
-        :type command: List[str]
+        :param command: A shell command
         :param stdout_handler: A function to handle stdout output line by line
-        :type stdout_handler: Optional[LineOutputHandler], optional
         :param stderr_handler: A function to handle stderr output line by line
-        :type stderr_handler: Optional[LineOutputHandler], optional
         :param env: environment variables which should be available to the subprocess
-        :type env: Optional[dict], optional
         :param cwd: The current working directory for the subprocess
-        :type cwd: Optional[str], optional
-
         :raise SubprocessFailed: The subprocess has exited with a non-zero exit code
-
-        :return: An :class:`asyncio.subprocess.Process` instance
-        :rtype: asyncio.subprocess.Process
+        :return: An :class:`.Process` instance
         """
         raise NotImplementedError()
 
@@ -75,13 +67,15 @@ async def watch_pipe(
         await handler(line)
 
 
-async def watch_subprocess(process, stdout_handler, stderr_handler):
+async def watch_subprocess(
+    process: Process, stdout_handler: Callable, stderr_handler: Callable
+):
     """
     Watch both stderr and stdout using :func:`.watch_pipe`.
 
     :param process: the process to watch
-    :param stdout_handler: a handler function to call with each line received from stdout
-    :param stdout_handler: a handler function to call with each line received from stderr
+    :param stdout_handler: a function to call with each stdout line
+    :param stderr_handler: a function to call with each stderr line
 
     """
     coros = [watch_pipe(process.stderr, stderr_handler)]
@@ -102,7 +96,8 @@ async def _run_subprocess(
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
     logger.info(f"Running command in subprocess: {' '.join(command)}")
 
-    # Ensure the asyncio child watcher has a reference to the running loop, prevents `process.wait` from hanging.
+    # Ensure the asyncio child watcher has a reference to the running loop, prevents
+    # `process.wait` from hanging.
     asyncio.get_child_watcher().attach_loop(asyncio.get_running_loop())
 
     stdout = asyncio.subprocess.PIPE if stdout_handler else asyncio.subprocess.DEVNULL
