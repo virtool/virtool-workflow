@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Test
-        run: cd tests && docker-compose up --build --exit-code-from pytest
+        run: cd tests && docker compose up --build --exit-code-from pytest
   build:
     runs-on: ubuntu-22.04
     if: github.event_name == 'pull_request'
