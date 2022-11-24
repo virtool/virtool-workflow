@@ -48,6 +48,9 @@ class WFIndex:
         self.upload = upload
         self._run_subprocess = run_subprocess
 
+        self.id = index.id
+        self.manifest = index.manifest
+
         self._sequence_lengths: Dict[str, int] = {}
         self._sequence_otu_map: Dict[str, str] = {}
 
