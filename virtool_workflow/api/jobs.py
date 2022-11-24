@@ -64,6 +64,17 @@ def acquire_job(http: ClientSession, jobs_api_connection_string: str):
     return _job_provider
 
 
+async def ping(http: ClientSession, jobs_api_connection_string: str, job_id: str):
+    async with http.patch(
+        f"{jobs_api_connection_string}/jobs/{job_id}/ping", json={"acquired": True}
+    ) as response:
+
+        async with raising_errors_by_status_code(
+            response, status_codes_to_exceptions={400: JobAlreadyAcquired}
+        ) as resp_json:
+            return WFJob(**resp_json)
+
+
 @fixture(scope="function")
 async def push_status(
     http,

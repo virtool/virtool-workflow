@@ -5,6 +5,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict
 
+import pkg_resources
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_core.logging import configure_logs
 from virtool_core.redis import configure_redis
@@ -121,6 +122,10 @@ async def start_runtime(
     timeout: int,
     work_path: Path,
 ):
+    version = pkg_resources.get_distribution("virtool-workflow").version
+
+    logger.info(f"Using virtool-workflow {version}")
+
     configure_logs(dev)
     configure_sentry(sentry_dsn)
 
