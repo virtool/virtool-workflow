@@ -50,6 +50,7 @@ class WFIndex:
 
         self.id = index.id
         self.manifest = index.manifest
+        self.reference = index.reference
 
         self._sequence_lengths: Dict[str, int] = {}
         self._sequence_otu_map: Dict[str, str] = {}
