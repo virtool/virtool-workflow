@@ -32,7 +32,7 @@ async def get_analysis(request):
             "index": {"id": "qldihken", "version": 0},
             "job": {"id": "test_job"},
             "ready": False,
-            "reference": {"id": "foo", "name": "Foo"},
+            "reference": {"id": "foo", "name": "Foo", "data_type": "genome"},
             "sample": {"id": "kigvhuql", "name": "Test 1"},
             "subtractions": [{"id": "yhxoynb0", "name": "Arabidopsis Thaliana"}],
             "user": {"id": "abc12345", "handle": "igboyes", "administrator": False},
@@ -116,5 +116,5 @@ TEST_ANALYSIS = {
     "user": {"id": "abc12345", "handle": "igboyes", "administrator": False},
     "subtractions": [{"id": "yhxoynb0", "name": "Arabidopsis Thaliana"}],
     "ready": False,
-    "reference": {"id": "foo", "name": "Foo"},
+    "reference": {"id": "foo", "name": "Foo", "data_type": "genome"},
 }
