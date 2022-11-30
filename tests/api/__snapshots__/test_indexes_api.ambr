@@ -46,7 +46,9 @@
     ]),
     'ready': True,
     'reference': dict({
+      'data_type': <ReferenceDataType.genome: 'genome'>,
       'id': '21n3j5v6',
+      'name': 'Clone of Banana Viruses',
     }),
     'user': dict({
       'administrator': False,
@@ -104,7 +106,9 @@
     ]),
     'ready': False,
     'reference': dict({
+      'data_type': <ReferenceDataType.genome: 'genome'>,
       'id': '21n3j5v6',
+      'name': 'Clone of Banana Viruses',
     }),
     'user': dict({
       'administrator': False,
