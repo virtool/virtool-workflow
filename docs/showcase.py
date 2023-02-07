@@ -2,6 +2,7 @@ from typing import Protocol
 from virtool_workflow import fixture
 from typing import Any
 
+
 class ReturnProtocol(Protocol):
     """A showcase return protocol"""
 
@@ -16,6 +17,7 @@ class ReturnProtocol(Protocol):
         :return: Anything, but probably nothing.
         :raises NotImplementedError: Every time.
         """
+
 
 @fixture
 def regular_fixture(a, b, c) -> int:
