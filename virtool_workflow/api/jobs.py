@@ -65,14 +65,23 @@ def acquire_job(http: ClientSession, jobs_api_connection_string: str):
 
 
 async def ping(http: ClientSession, jobs_api_connection_string: str, job_id: str):
-    async with http.patch(
-        f"{jobs_api_connection_string}/jobs/{job_id}/ping", json={"acquired": True}
-    ) as response:
+    """
+    Send a ping to the jobs API to indicate that the job is still running.
 
-        async with raising_errors_by_status_code(
-            response, status_codes_to_exceptions={400: JobAlreadyAcquired}
-        ) as resp_json:
-            return WFJob(**resp_json)
+    :param http: An :class:`aiohttp.ClientSession` to use to make the request.
+    :param jobs_api_connection_string: The url for the jobs API.
+    :param job_id: The id of the job to ping.
+    :return: The job.
+    """
+    print(http)
+
+    async with http.put(f"{jobs_api_connection_string}/jobs/{job_id}/ping") as resp:
+        print(resp.status)
+        print(await resp.text())
+
+    print("PING")
+
+    logger.info("Sent ping")
 
 
 @fixture(scope="function")
