@@ -1,8 +1,7 @@
-import asyncio
+from functools import wraps
 
 import aiohttp
 from pyfixtures import fixture
-from functools import wraps
 
 
 @fixture

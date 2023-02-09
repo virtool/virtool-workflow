@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-from pprint import pprint
 
 from virtool_workflow import Workflow, hooks
 
