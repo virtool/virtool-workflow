@@ -1,12 +1,17 @@
+from functools import wraps
+
 import aiohttp
 from pyfixtures import fixture
-from functools import wraps
 
 
 @fixture
 async def http():
     """:class:`Aiohttp.ClientSession` instance to be used for workflows."""
-    async with aiohttp.ClientSession(auto_decompress=False) as session:
+    connector = aiohttp.TCPConnector(force_close=True, limit=100)
+
+    async with aiohttp.ClientSession(
+        auto_decompress=False, connector=connector
+    ) as session:
         yield JobApiHttpSession(session)
 
 

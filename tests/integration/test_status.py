@@ -1,4 +1,5 @@
-from asyncio import sleep
+import asyncio
+from datetime import datetime
 
 from virtool_workflow import Workflow, hooks
 
@@ -9,14 +10,15 @@ async def test_status_updates(db, create_job, exec_workflow, job_id):
     wf = Workflow()
 
     @wf.step
-    def first(job):
+    async def first(job):
         """Description of First."""
         assert job.status[-1].state == "preparing"
+        await asyncio.sleep(1)
 
     @wf.step
-    def second(job):
+    async def second(job):
         """Description of Second."""
-        ...
+        await asyncio.sleep(2)
 
     jobs = db.get_collection("jobs")
     steps_finished = 0
@@ -48,7 +50,7 @@ async def test_status_updates(db, create_job, exec_workflow, job_id):
         on_success_called = True
 
         # Wait for status to be received at virtool server
-        await sleep(0.1)
+        await asyncio.sleep(0.1)
 
         job = await jobs.find_one({"_id": job_id})
         status = job["status"][-1]
@@ -56,6 +58,10 @@ async def test_status_updates(db, create_job, exec_workflow, job_id):
         assert status["state"] == "complete"
 
     await exec_workflow(wf)
+
+    job = await jobs.find_one({"_id": job_id})
+
+    assert isinstance(job["ping"]["pinged_at"], datetime)
 
     assert steps_finished == 2
     assert on_success_called is True
@@ -78,7 +84,7 @@ async def test_status_updates_with_error(db, create_job, exec_workflow, job_id):
         nonlocal error_hook_called
 
         # Wait for status to be received at virtool server
-        await sleep(0.1)
+        await asyncio.sleep(0.1)
 
         job = await db.get_collection("jobs").find_one({"_id": job_id})
 

@@ -12,10 +12,7 @@ FROM ghcr.io/virtool/workflow-tools:2.0.1
 COPY --from=pip /root/.local /root/.local
 WORKDIR /workflow
 COPY virtool_workflow ./virtool_workflow
-COPY pyproject.toml .
-COPY poetry.lock .
-COPY README.md .
-RUN ls .
+COPY poetry.lock pyproject.toml README.md ./
 RUN pip install --user .
 
 ENTRYPOINT ["workflow", "run"]

@@ -1,16 +1,19 @@
 import asyncio
 import signal
 import sys
+from asyncio import CancelledError
 from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict
 
 import pkg_resources
+from aiohttp import ClientOSError, ServerDisconnectedError
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from virtool_core.logging import configure_logs
 from virtool_core.redis import configure_redis
 
 from virtool_workflow import execute
+from virtool_workflow.api.jobs import ping
 from virtool_workflow.hooks import (
     on_failure,
     on_cancelled,
@@ -83,6 +86,33 @@ def cleanup_builtin_status_hooks():
     on_terminated.clear()
 
 
+async def ping_periodically(http, job, jobs_api_connection_string, job_id):
+    """
+    Ping the API to keep the job alive.
+
+    """
+    retries = 0
+
+    try:
+        while True:
+            if retries > 5:
+                logger.warning("Failed to ping server")
+                break
+
+            await asyncio.sleep(0.1)
+
+            try:
+                await ping(http, jobs_api_connection_string, job_id)
+            except (ClientOSError, ServerDisconnectedError):
+                await asyncio.sleep(0.3)
+                retries += 1
+                continue
+
+            await asyncio.sleep(5)
+    except CancelledError:
+        logger.info("Stopped pinging server")
+
+
 async def run_workflow(
     config: Dict[str, Any],
     job_id: str,
@@ -96,13 +126,19 @@ async def run_workflow(
         scope["config"] = config
         scope["job_id"] = job_id
 
+        bound_ping = await scope.bind(ping_periodically)
+
         execute_task = asyncio.create_task(execute(workflow, scope, events))
+        ping_task = asyncio.create_task(bound_ping())
 
         try:
             await execute_task
         except asyncio.CancelledError:
             execute_task.cancel()
 
+        ping_task.cancel()
+
+        await ping_task
         await execute_task
 
         cleanup_builtin_status_hooks()

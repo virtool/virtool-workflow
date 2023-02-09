@@ -1,5 +1,23 @@
 version: "3.1"
 services:
+  jobs-api:
+    image: virtool/virtool:13.4.2
+    command: jobsAPI --host=0.0.0.0 --port=9990
+    depends_on:
+      - mongo
+      - openfga
+      - postgres
+      - redis
+    environment:
+      VT_DB_NAME: test
+      VT_DB_CONNECTION_STRING: mongodb://mongo:27017/test
+      VT_DEV: "true"
+      VT_OPENFGA_HOST: openfga:8080
+      VT_OPENFGA_SCHEME: http
+      VT_POSTGRES_CONNECTION_STRING: postgresql+asyncpg://virtool:virtool@postgres/virtool
+      VT_REDIS_CONNECTION_STRING: redis://redis:6379
+    ports:
+      - "9990:9990"
 
   mongo:
     image: bitnami/mongodb:4.4
@@ -8,43 +26,50 @@ services:
     ports:
       - "27017:27017"
 
-  redis:
-    image: redis:6.0
-    ports:
-      - "6379:6379"
-    volumes:
-      - vt_redis_data:/data
-
   postgres:
-    image: postgres:13.1
+    image: postgres:14.5
     ports:
       - "5432:5432"
     restart: always
     environment:
       POSTGRES_USER: virtool
       POSTGRES_PASSWORD: virtool
-    volumes:
-      - vt_postgres_data:/var/lib/postgresql/data
 
-  jobs-api:
-    image: virtool/virtool:12.1.1
-    depends_on:
-      - mongo
-      - redis
-      - postgres
-    command: >
-      --db-connection-string="mongodb://mongo:27017"
-      --db-name="test"
-      --postgres-connection-string="postgresql+asyncpg://virtool:virtool@postgres/virtool"
-      --redis-connection-string="redis://redis:6379"
-      --dev
-      jobsAPI
-      --host=0.0.0.0
-      --port=9990
+  redis:
+    image: redis:6.0
     ports:
-      - "9990:9990"
+      - "6379:6379"
 
-volumes:
-  vt_mongo_data:
-  vt_redis_data:
-  vt_postgres_data:
+  openfga-postgres:
+    image: postgres:14.5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 300ms
+      retries: 12
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: openfga
+
+  openfga-migration:
+    image: openfga/openfga:v0.2.5
+    command: migrate
+    depends_on:
+      openfga-postgres:
+        condition: service_healthy
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://postgres:password@openfga-postgres:5432/openfga
+
+  openfga:
+    image: openfga/openfga:v0.2.5
+    command: run
+    depends_on:
+      openfga-migration:
+        condition: service_started
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://postgres:password@openfga-postgres:5432/openfga
+    ports:
+      - "8080:8080"
+      - "3000:3000"
