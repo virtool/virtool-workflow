@@ -8,25 +8,6 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  dockerhub:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Write VERSION file
-        run: echo ${{ github.event.release.tag_name }} > VERSION
-      - uses: snok/install-poetry@v1
-      - name: Update Version
-        run: poetry version ${{github.event.release.tag_name}}
-      - name: Login
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Push and Push
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: virtool/workflow:${{ github.event.release.tag_name }}
   pypi:
     runs-on: ubuntu-22.04
     steps:
