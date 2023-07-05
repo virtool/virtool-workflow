@@ -1,6 +1,6 @@
 FROM python:3.10-slim as pip
 WORKDIR /install
-RUN apt-get update && apt-get install -y build-essential curl python-dev
+RUN apt-get update && apt-get install -y build-essential curl python-dev-is-python3
 RUN curl -sSL https://install.python-poetry.org | python -
 COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
