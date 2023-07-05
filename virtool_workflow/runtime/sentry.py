@@ -9,7 +9,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 logger = getLogger("runtime")
 
 
-def configure_sentry(dsn: Optional[str], event_level: int = logging.ERROR):
+def configure_sentry(dsn: Optional[str]):
     """
     Initialize Sentry for log aggregation.
     """
@@ -22,7 +22,7 @@ def configure_sentry(dsn: Optional[str], event_level: int = logging.ERROR):
         dsn=dsn,
         integrations=[
             LoggingIntegration(
-                event_level=event_level,
+                event_level=logging.WARNING,
             )
         ],
         release=pkg_resources.get_distribution("virtool-workflow").version,

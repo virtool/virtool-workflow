@@ -118,8 +118,10 @@ async def _push_status(
     state: str,
     progress: float,
     error: Optional[Exception] = None,
-    max_tb: int = 50,
+    max_tb: int = 500,
 ):
+    if error:
+        logger.critical("Reporting error to API", exc_info=error)
 
     payload = {
         "state": state,
