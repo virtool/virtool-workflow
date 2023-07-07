@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime
 
+from virtool_core.models.job import JobState
+
 from virtool_workflow import Workflow, hooks
 
 
@@ -12,7 +14,7 @@ async def test_status_updates(db, create_job, exec_workflow, job_id):
     @wf.step
     async def first(job):
         """Description of First."""
-        assert job.status[-1].state == "preparing"
+        assert job.status[-1].state == JobState.PREPARING
         await asyncio.sleep(1)
 
     @wf.step
