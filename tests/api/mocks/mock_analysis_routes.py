@@ -30,7 +30,7 @@ async def get_analysis(request):
                 }
             ],
             "index": {"id": "qldihken", "version": 0},
-            "job": {"id": "test_job"},
+            "job": None,
             "ready": False,
             "reference": {"id": "foo", "name": "Foo", "data_type": "genome"},
             "sample": {"id": "kigvhuql", "name": "Test 1"},
@@ -97,7 +97,7 @@ TEST_ANALYSIS_ID = "test_analysis"
 TEST_ANALYSIS = {
     "id": TEST_ANALYSIS_ID,
     "created_at": "2017-10-03T21:35:54.813000Z",
-    "job": {"id": "test_job"},
+    "job": None,
     "files": [
         {
             "analysis": "test_analysis",

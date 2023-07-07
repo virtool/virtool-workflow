@@ -20,9 +20,7 @@
     ]),
     'has_files': False,
     'id': 'jiwncaqr',
-    'job': dict({
-      'id': 'wwssuhhy',
-    }),
+    'job': None,
     'manifest': dict({
       'c93ec9a9': 0,
     }),
@@ -80,9 +78,7 @@
     ]),
     'has_files': False,
     'id': 'jiwncaqr',
-    'job': dict({
-      'id': 'wwssuhhy',
-    }),
+    'job': None,
     'manifest': dict({
       'c93ec9a9': 0,
     }),

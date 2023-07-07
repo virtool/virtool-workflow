@@ -165,5 +165,10 @@
     "administrator": false,
     "id": "abc12345",
     "handle": "james"
+  },
+  "workflows": {
+    "aodp": "incompatible",
+    "pathoscope": "complete",
+    "nuvs": "complete"
   }
 }
