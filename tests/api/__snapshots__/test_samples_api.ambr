@@ -16,6 +16,7 @@
     'id': 'hl5v0i0y',
     'is_legacy': False,
     'isolate': '',
+    'job': None,
     'labels': list([
     ]),
     'library_type': <LibraryType.normal: 'normal'>,
@@ -104,6 +105,11 @@
       'handle': 'james',
       'id': 'abc12345',
     }),
+    'workflows': dict({
+      'aodp': <WorkflowState.INCOMPATIBLE: 'incompatible'>,
+      'nuvs': <WorkflowState.COMPLETE: 'complete'>,
+      'pathoscope': <WorkflowState.COMPLETE: 'complete'>,
+    }),
   })
 # ---
 # name: test_get
@@ -124,6 +130,7 @@
     'id': 'hl5v0i0y',
     'is_legacy': False,
     'isolate': '',
+    'job': None,
     'labels': list([
     ]),
     'library_type': <LibraryType.normal: 'normal'>,
@@ -269,6 +276,11 @@
       'administrator': False,
       'handle': 'james',
       'id': 'abc12345',
+    }),
+    'workflows': dict({
+      'aodp': <WorkflowState.INCOMPATIBLE: 'incompatible'>,
+      'nuvs': <WorkflowState.COMPLETE: 'complete'>,
+      'pathoscope': <WorkflowState.COMPLETE: 'complete'>,
     }),
   })
 # ---

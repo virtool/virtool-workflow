@@ -39,7 +39,7 @@ TEST_INDEX = {
     "created_at": "2018-02-01T00:28:49.798000Z",
     "files": [],
     "has_files": False,
-    "job": {"id": "wwssuhhy"},
+    "job": None,
     "manifest": {
         "c93ec9a9": 0,
     },
