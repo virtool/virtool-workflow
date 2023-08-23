@@ -30,8 +30,8 @@ run-workflow = "virtool_workflow.cli:cli_main"
 [tool.poetry.group.dev.dependencies]
 syrupy = "^3.0.5"
 sphinx = "^4.0.2"
+pytest-docker-compose = {git = "https://github.com/tmeckel/pytest-docker-compose", branch = "feat/docker-compose-v2"}
 pytest-regressions = "^2.4.1"
-pytest-docker-compose = "^3.2.1"
 pytest-mock = "^3.10.0"
 pre-commit = "^2.18.1"
 pytest = "^6.2.2"
