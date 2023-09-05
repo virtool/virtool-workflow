@@ -4,8 +4,6 @@
     'all_write': True,
     'artifacts': list([
     ]),
-    'caches': list([
-    ]),
     'created_at': datetime.datetime(2021, 1, 11, 18, 24, 33, 149000, tzinfo=datetime.timezone.utc),
     'format': 'fastq',
     'group': 'none',
@@ -117,8 +115,6 @@
     'all_read': True,
     'all_write': True,
     'artifacts': list([
-    ]),
-    'caches': list([
     ]),
     'created_at': datetime.datetime(2021, 1, 11, 18, 24, 33, 149000, tzinfo=datetime.timezone.utc),
     'format': 'fastq',
