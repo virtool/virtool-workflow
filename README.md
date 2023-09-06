@@ -1,6 +1,6 @@
 # Virtool Workflow
 
-![Tests](https://github.com/virtool/virtool-workflow/workflows/Tests/badge.svg?branch=master)
+![Tests](https://github.com/virtool/virtool-workflow/workflows/ci/badge.svg?branch=main)
 [![PyPI version](https://badge.fury.io/py/virtool-workflow.svg)](https://badge.fury.io/py/virtool-workflow)
 
 A framework for developing bioinformatic workflows in Python.
