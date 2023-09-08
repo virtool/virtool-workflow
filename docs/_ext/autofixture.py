@@ -41,7 +41,7 @@ class FixtureDocumenter(FunctionDocumenter):
     def can_document_member(
         cls, member: Any, membername: str, isattr: bool, parent: Any
     ) -> bool:
-        return isinstance(member, fixtures.Fixture)
+        return isinstance(member, pyfixtures.Fixture)
 
     def format_args(self, **kwargs: Any) -> str:
         args = super(FixtureDocumenter, self).format_args(**kwargs)
