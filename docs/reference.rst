@@ -56,6 +56,7 @@ API Reference
 
 .. automodule:: virtool_workflow.analysis.skewer
     :members:
+
 ``virtool_workflow.config.configuration.fixtures``
 ==================================================
 
@@ -81,7 +82,7 @@ API Reference
     :members:
 
 ``virtool_workflow.data_model.analysis``
-=======================================
+==============================================
 
 .. automodule:: virtool_workflow.data_model.analysis
     :members:
