@@ -32,16 +32,17 @@ class WFSubtraction(Subtraction):
     @property
     def bowtie2_index_path(self) -> Path:
         """
-        The path to Bowtie2 prefix in the the running workflow's work_path
+        The path to Bowtie2 prefix in the running workflow's work_path
 
         For example, ``<work_path>/subtractions/<id>/subtraction`` refers to the Bowtie2
         index files:
-            - ``<work_path>/subtractions/<id>/subtraction.1.bt2``
-            - ``<work_path>/subtractions/<id>/subtraction.2.bt2``
-            - ``<work_path>/subtractions/<id>/subtraction.3.bt2``
-            - ``<work_path>/subtractions/<id>/subtraction.4.bt2``
-            - ``<work_path>/subtractions/<id>/subtraction.rev.1.bt2``
-            - ``<work_path>/subtractions/<id>/subtraction.rev.2.bt2``
+
+        - ``<work_path>/subtractions/<id>/subtraction.1.bt2``
+        - ``<work_path>/subtractions/<id>/subtraction.2.bt2``
+        - ``<work_path>/subtractions/<id>/subtraction.3.bt2``
+        - ``<work_path>/subtractions/<id>/subtraction.4.bt2``
+        - ``<work_path>/subtractions/<id>/subtraction.rev.1.bt2``
+        - ``<work_path>/subtractions/<id>/subtraction.rev.2.bt2``
 
         """
         return self.path / "subtraction"

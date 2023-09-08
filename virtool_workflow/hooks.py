@@ -21,7 +21,7 @@ Triggered before each workflow step is executed.
 
 The :class:`WorkflowStep` object is available via the `current_step` fixture.
 
-.. code_block:: python
+.. code-block:: python
 
     @on_step_start
     async def use_step(current_step):
@@ -34,8 +34,10 @@ Triggered after each workflow step is executed.
 
 The :class:`WorkflowStep` object is available via the `current_step` fixture.
 
-@on_step_finish
-async def handle_step_finish(current_step):
+.. code-block:: python
+
+    @on_step_finish
+    async def handle_step_finish(current_step):
     ...
 """
 
