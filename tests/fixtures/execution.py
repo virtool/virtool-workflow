@@ -7,7 +7,7 @@ from virtool_workflow.runtime.hook import Hook
 
 @pytest.fixture
 def run_subprocess():
-    return virtool_workflow.runtime.run_subprocess.run_subprocess()
+    return virtool_workflow.runtime.subprocess.run_subprocess()
 
 
 @pytest.fixture
