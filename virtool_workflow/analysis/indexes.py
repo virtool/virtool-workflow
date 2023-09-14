@@ -6,7 +6,7 @@ from pyfixtures import fixture
 
 from virtool_workflow.api.indexes import IndexProvider
 from virtool_workflow.data_model.indexes import WFIndex
-from virtool_workflow.runtime.run_subprocess import RunSubprocess
+from virtool_workflow.runtime.subprocess import RunSubprocess
 
 
 @fixture

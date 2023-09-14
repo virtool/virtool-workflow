@@ -13,7 +13,7 @@ from pyfixtures import fixture
 from virtool_core.models.hmm import HMM
 
 from virtool_workflow.api.hmm import HMMsProvider
-from virtool_workflow.runtime.run_subprocess import RunSubprocess
+from virtool_workflow.runtime.subprocess import RunSubprocess
 
 
 class HMMs(UserList):

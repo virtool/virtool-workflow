@@ -1,6 +1,6 @@
 import pytest
 
-import virtool_workflow.runtime.run_subprocess
+import virtool_workflow.runtime.subprocess
 from virtool_workflow import hooks
 from virtool_workflow.runtime.hook import Hook
 
