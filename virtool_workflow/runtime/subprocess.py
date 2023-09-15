@@ -8,7 +8,7 @@ from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
 from pyfixtures import fixture
 from virtool_workflow import hooks
 
-logger = getLogger("subproc")
+logger = getLogger("subprocess")
 
 
 class SubprocessFailed(SubprocessError):
