@@ -73,15 +73,9 @@ async def ping(http: ClientSession, jobs_api_connection_string: str, job_id: str
     :param job_id: The id of the job to ping.
     :return: The job.
     """
-    print(http)
 
-    async with http.put(f"{jobs_api_connection_string}/jobs/{job_id}/ping") as resp:
-        print(resp.status)
-        print(await resp.text())
-
-    print("PING")
-
-    logger.info("Sent ping")
+    async with http.put(f"{jobs_api_connection_string}/jobs/{job_id}/ping"):
+        logger.info("Sent ping")
 
 
 @fixture(scope="function")
