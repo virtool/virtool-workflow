@@ -106,12 +106,12 @@ async def _run_subprocess(
 
         async def _stderr_handler(line):
             await stderr_handler(line)
-            logger.info(f"STDERR:  %s", line.rstrip())
+            logger.info("STDERR:  %s", line.rstrip())
 
     else:
 
         async def _stderr_handler(line):
-            logger.info(f"STDERR:  %s", line.rstrip())
+            logger.info("STDERR:  %s", line.rstrip())
 
     process = await asyncio.create_subprocess_exec(
         *(str(arg) for arg in command),
