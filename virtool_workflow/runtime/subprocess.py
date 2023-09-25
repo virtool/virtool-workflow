@@ -27,12 +27,12 @@ class LineOutputHandler(Protocol):
 
 class RunSubprocess(Protocol):
     async def __call__(
-        self,
-        command: List[str],
-        stdout_handler: LineOutputHandler = None,
-        stderr_handler: LineOutputHandler = None,
-        env: dict = None,
-        cwd: str = None,
+            self,
+            command: List[str],
+            stdout_handler: LineOutputHandler = None,
+            stderr_handler: LineOutputHandler = None,
+            env: dict = None,
+            cwd: str = None,
     ) -> Process:
         """
         Run a shell command in a subprocess.
@@ -49,7 +49,7 @@ class RunSubprocess(Protocol):
 
 
 async def watch_pipe(
-    stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]
+        stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]
 ):
     """
     Watch the stdout or stderr stream and pass lines to the `handler` callback function.
@@ -68,7 +68,7 @@ async def watch_pipe(
 
 
 async def watch_subprocess(
-    process: Process, stdout_handler: Callable, stderr_handler: Callable
+        process: Process, stdout_handler: Callable, stderr_handler: Callable
 ):
     """
     Watch both stderr and stdout using :func:`.watch_pipe`.
@@ -87,14 +87,14 @@ async def watch_subprocess(
 
 
 async def _run_subprocess(
-    command: List[str],
-    stdout_handler: Optional[LineOutputHandler] = None,
-    stderr_handler: Optional[Callable[[str], Coroutine]] = None,
-    env: Optional[dict] = None,
-    cwd: Optional[str] = None,
+        command: List[str],
+        stdout_handler: Optional[LineOutputHandler] = None,
+        stderr_handler: Optional[Callable[[str], Coroutine]] = None,
+        env: Optional[dict] = None,
+        cwd: Optional[str] = None,
 ) -> asyncio.subprocess.Process:
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
-    logger.info(f"Running command in subprocess: {' '.join(command)}")
+    logger.info("Running command in subprocess: %s", ' '.join(command))
 
     # Ensure the asyncio child watcher has a reference to the running loop, prevents
     # `process.wait` from hanging.
@@ -106,12 +106,12 @@ async def _run_subprocess(
 
         async def _stderr_handler(line):
             await stderr_handler(line)
-            logger.info(f"STDERR: {line.rstrip()}")
+            logger.info(f"STDERR:  %s", line.rstrip())
 
     else:
 
         async def _stderr_handler(line):
-            logger.info(f"STDERR: {line.rstrip()}")
+            logger.info(f"STDERR:  %s", line.rstrip())
 
     process = await asyncio.create_subprocess_exec(
         *(str(arg) for arg in command),
