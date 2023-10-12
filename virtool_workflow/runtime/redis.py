@@ -24,7 +24,7 @@ async def get_next_job_with_timeout(
 
     """
     logger.info(
-        f"Waiting for a job", timeout=f"{timeout if timeout else 'infinity'} seconds"
+        "Waiting for a job", timeout=f"{timeout if timeout else 'infinity'} seconds"
     )
 
     return await asyncio.wait_for(get_next_job(list_name, redis), timeout)

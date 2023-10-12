@@ -106,7 +106,7 @@ class SubtractionProvider:
             async with self.http.get(f"{self.api_url}/files/{name}") as response:
                 await read_file_from_response(response, self.path / name)
 
-        log.info(f"Completed subtraction file download")
+        log.info("Completed subtraction file download")
 
         return self.path
 
