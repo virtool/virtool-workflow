@@ -1,11 +1,11 @@
 import asyncio
 from asyncio import CancelledError
-from logging import getLogger
 from typing import Callable
 
 from aioredis import Redis
+from structlog import get_logger
 
-logger = getLogger("redis")
+logger = get_logger("redis")
 
 CANCELLATION_CHANNEL = "channel:cancel"
 
@@ -23,7 +23,10 @@ async def get_next_job_with_timeout(
     :return: the next job ID
 
     """
-    logger.info(f"Waiting for a job for {timeout if timeout else 'infinity'} seconds")
+    logger.info(
+        "Waiting for a job", timeout=f"{timeout if timeout else 'infinity'} seconds"
+    )
+
     return await asyncio.wait_for(get_next_job(list_name, redis), timeout)
 
 
@@ -40,7 +43,7 @@ async def get_next_job(list_name: str, redis: Redis) -> str:
 
     if result is not None:
         job_id = str(result[1], encoding="utf-8")
-        logger.info(f"Pulled job from Redis id={job_id}")
+        logger.info("Pulled job from Redis", id=job_id)
         return job_id
 
 

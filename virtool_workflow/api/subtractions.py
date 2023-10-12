@@ -1,16 +1,15 @@
 import asyncio
-from logging import getLogger
 from numbers import Number
 from pathlib import Path
-from typing import Dict
 
 from aiohttp import ClientSession
+from structlog import get_logger
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import read_file_from_response, upload_file_via_put
 from virtool_workflow.data_model.subtractions import WFSubtraction
 
-logger = getLogger("api")
+logger = get_logger("api")
 
 
 class SubtractionProvider:
@@ -38,7 +37,7 @@ class SubtractionProvider:
     async def get(self) -> WFSubtraction:
         async with self.http.get(self.api_url) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
-                logger.info(f"Fetched subtraction json id='{self.subtraction_id}'")
+                logger.info("Fetched subtraction", id=self.subtraction_id)
                 return WFSubtraction(**subtraction_json, path=self.path)
 
     async def upload(self, path: Path):
@@ -59,21 +58,19 @@ class SubtractionProvider:
         """
         filename = path.name
 
-        logger.info(
-            f"Uploading subtraction file id='{self.subtraction_id}' name='{filename}'"
-        )
+        log = logger.bind(id=self.subtraction_id, filename=filename)
+
+        log.info("Uploading subtraction file")
 
         file = await upload_file_via_put(
             self.http, f"{self.api_url}/files/{path.name}", path
         )
 
-        logger.info(
-            f"Completed subtraction file upload id='{self.subtraction_id}' name='{filename}'"
-        )
+        log.info("Completed subtraction file upload")
 
         return file
 
-    async def finalize(self, gc: Dict[str, Number], count: int):
+    async def finalize(self, gc: dict[str, Number], count: int):
         """
         Finalize the subtraction by setting the gc.
 
@@ -85,7 +82,7 @@ class SubtractionProvider:
             self.api_url, json={"gc": {"n": 0.0, **gc}, "count": count}
         ) as response:
             async with raising_errors_by_status_code(response) as subtraction_json:
-                logger.info(f"Finalized subtraction id='{self.subtraction_id}'")
+                logger.info("Finalized subtraction", id=self.subtraction_id)
                 return WFSubtraction(**subtraction_json, path=self.path)
 
     async def download(self):
@@ -101,13 +98,15 @@ class SubtractionProvider:
             "subtraction.rev.2.bt2",
         ]
 
-        logger.info(f"Downloading subtraction files id='{self.subtraction_id}'")
+        log = logger.bind(id=self.subtraction_id)
+
+        log.info("Downloading subtraction files")
 
         for name in names:
             async with self.http.get(f"{self.api_url}/files/{name}") as response:
                 await read_file_from_response(response, self.path / name)
 
-        logger.info(f"Completed subtraction file download id='{self.subtraction_id}'")
+        log.info("Completed subtraction file download")
 
         return self.path
 

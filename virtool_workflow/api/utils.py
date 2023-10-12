@@ -6,10 +6,10 @@ import aiofiles
 import aiohttp
 import dateutil.parser
 from aiohttp import ServerDisconnectedError, ClientConnectorError
+from structlog import get_logger
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
-from virtool_workflow.runtime.utils import logger
 
 CHUNK_SIZE = 1024 * 1024 * 20
 
@@ -111,7 +111,9 @@ def retry(func):
                 raise
 
             attempts += 1
-            logger.info(f"Encountered {type(err).__name__}. Retrying in 5 seconds.")
+            get_logger("runtime").info(
+                f"Encountered {type(err).__name__}. Retrying in 5 seconds."
+            )
             await asyncio.sleep(5)
 
             return await func(*args, **kwargs)

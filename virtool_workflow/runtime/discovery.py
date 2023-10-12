@@ -1,15 +1,16 @@
 import sys
 from importlib import import_module
 from importlib.util import spec_from_file_location, module_from_spec
-from logging import getLogger
 from pathlib import Path
 from types import ModuleType
-from typing import Union, List, Callable
+from typing import Callable
+
+from structlog import get_logger
 
 from virtool_workflow import Workflow
 from virtool_workflow.decorators import collect
 
-logger = getLogger("runtime")
+logger = get_logger("runtime")
 
 
 def load_workflow_and_fixtures():
@@ -17,7 +18,7 @@ def load_workflow_and_fixtures():
     try:
         workflow = discover_workflow(Path("./workflow.py"))
     except FileNotFoundError:
-        logger.fatal("Could not find workflow.py")
+        logger.critical("Could not find workflow.py")
         sys.exit(1)
 
     logger.info("Importing fixtures.py")
@@ -34,7 +35,7 @@ def load_workflow_and_fixtures():
         "virtool_workflow.runtime.providers",
     ):
         module = import_module(name)
-        logger.debug(f"Imported {module}")
+        logger.debug("Imported module", module=module)
 
     return workflow
 
@@ -61,7 +62,7 @@ def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     return module
 
 
-def discover_fixtures(module: Union[Path, ModuleType]) -> List[Callable]:
+def discover_fixtures(module: Path | ModuleType) -> list[Callable]:
     """
     Find all instances of :class:`Workflow` in a python module.
 

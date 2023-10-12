@@ -39,7 +39,7 @@ async def test_exit_because_timeout(db, create_job, exec_workflow, job_id, tmpdi
     )
 
     assert p.returncode == 0
-    assert "Waiting for a job for 5 seconds" in p.stderr
+    assert "Waiting for a job" in p.stderr
     assert "Timed out while waiting for job" in p.stderr
 
 

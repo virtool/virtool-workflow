@@ -1,14 +1,15 @@
 import asyncio
 from asyncio.subprocess import Process
 from contextlib import suppress
-from logging import getLogger
 from subprocess import SubprocessError
-from typing import Awaitable, Callable, Coroutine, List, Optional, Protocol
+from typing import Awaitable, Callable, Coroutine, Protocol
 
 from pyfixtures import fixture
+from structlog import get_logger
+
 from virtool_workflow import hooks
 
-logger = getLogger("subproc")
+logger = get_logger("subprocess")
 
 
 class SubprocessFailed(SubprocessError):
@@ -28,7 +29,7 @@ class LineOutputHandler(Protocol):
 class RunSubprocess(Protocol):
     async def __call__(
         self,
-        command: List[str],
+        command: list[str],
         stdout_handler: LineOutputHandler = None,
         stderr_handler: LineOutputHandler = None,
         env: dict = None,
@@ -87,14 +88,14 @@ async def watch_subprocess(
 
 
 async def _run_subprocess(
-    command: List[str],
-    stdout_handler: Optional[LineOutputHandler] = None,
-    stderr_handler: Optional[Callable[[str], Coroutine]] = None,
-    env: Optional[dict] = None,
-    cwd: Optional[str] = None,
+    command: list[str],
+    stdout_handler: LineOutputHandler | None = None,
+    stderr_handler: Callable[[str], Coroutine] | None = None,
+    env: dict | None = None,
+    cwd: str | None = None,
 ) -> asyncio.subprocess.Process:
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
-    logger.info(f"Running command in subprocess: {' '.join(command)}")
+    logger.info("Running subprocess", command=" ".join(command))
 
     # Ensure the asyncio child watcher has a reference to the running loop, prevents
     # `process.wait` from hanging.
@@ -106,12 +107,12 @@ async def _run_subprocess(
 
         async def _stderr_handler(line):
             await stderr_handler(line)
-            logger.info(f"STDERR: {line.rstrip()}")
+            logger.info("stderr", line=line.rstrip())
 
     else:
 
         async def _stderr_handler(line):
-            logger.info(f"STDERR: {line.rstrip()}")
+            logger.info("stderr", line=line.rstrip())
 
     process = await asyncio.create_subprocess_exec(
         *(str(arg) for arg in command),

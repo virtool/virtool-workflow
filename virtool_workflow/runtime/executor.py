@@ -1,14 +1,11 @@
 import asyncio
 from asyncio import CancelledError
 from contextlib import asynccontextmanager, contextmanager
-from logging import getLogger
 
 from pyfixtures import FixtureScope, fixture
+from structlog import get_logger
 
 from virtool_workflow import Workflow
-from virtool_workflow.runtime.step import WorkflowStep
-from virtool_workflow.runtime.events import Events
-from virtool_workflow.runtime import states
 from virtool_workflow.hooks import (
     on_cancelled,
     on_error,
@@ -21,8 +18,11 @@ from virtool_workflow.hooks import (
     on_terminated,
     on_workflow_start,
 )
+from virtool_workflow.runtime import states
+from virtool_workflow.runtime.events import Events
+from virtool_workflow.runtime.step import WorkflowStep
 
-logger = getLogger("runtime")
+logger = get_logger("runtime")
 
 
 async def _handle_cancel(scope: FixtureScope, events: Events):
@@ -84,7 +84,7 @@ async def execute(
                 bound_step = await scope.bind(step.function)
 
                 async with run_step_with_hooks(scope, step):
-                    logger.info(f"Running step '{step.display_name}'")
+                    logger.info("Running step", name=step.display_name)
                     await bound_step()
 
     return scope

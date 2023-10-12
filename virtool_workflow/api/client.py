@@ -25,7 +25,9 @@ async def authenticated_http(job_id, key, http):
 class JobApiHttpSession:
     """Wraps :class:`aiohttp.ClientSession` and adds authentication for the jobs API."""
 
-    def __init__(self, client: aiohttp.ClientSession, auth: aiohttp.BasicAuth = None):
+    def __init__(
+        self, client: aiohttp.ClientSession, auth: aiohttp.BasicAuth | None = None
+    ):
         self.client = client
         self.auth = auth
 

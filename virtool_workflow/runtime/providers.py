@@ -1,5 +1,4 @@
 import asyncio
-from typing import List
 
 from aiohttp import ClientSession
 from pyfixtures import fixture
@@ -13,7 +12,9 @@ from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
 
 
 @fixture
-def analysis_provider(job, http, jobs_api_connection_string) -> AnalysisProvider:
+def analysis_provider(
+    job, http: ClientSession, jobs_api_connection_string: str
+) -> AnalysisProvider:
     try:
         return AnalysisProvider(
             job.args["analysis_id"], http, jobs_api_connection_string
@@ -58,7 +59,7 @@ def sample_provider(job, http, jobs_api_connection_string: str) -> SampleProvide
 @fixture
 async def subtraction_providers(
     job, http: ClientSession, jobs_api_connection_string: str, work_path
-) -> List[SubtractionProvider]:
+) -> list[SubtractionProvider]:
     try:
         ids = job.args["subtractions"]
     except KeyError:

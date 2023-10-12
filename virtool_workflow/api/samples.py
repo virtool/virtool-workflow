@@ -1,8 +1,8 @@
-from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from aiohttp import ClientSession
+from structlog import get_logger
 
 from virtool_workflow.analysis.utils import ReadPaths, make_read_paths
 from virtool_workflow.api.errors import (
@@ -14,7 +14,7 @@ from virtool_workflow.api.utils import read_file_from_response, upload_file_via_
 from virtool_workflow.data_model.files import VirtoolFile, VirtoolFileFormat
 from virtool_workflow.data_model.samples import WFSample
 
-logger = getLogger("api")
+logger = get_logger("api")
 
 
 class SampleProvider:
@@ -35,10 +35,10 @@ class SampleProvider:
     async def get(self) -> WFSample:
         async with self.http.get(self.url) as resp:
             async with raising_errors_by_status_code(resp) as resp_json:
-                logger.info(f"Fetched sample document id={self.id}")
+                logger.info("Fetched sample", id=self.id)
                 return WFSample(**resp_json)
 
-    async def finalize(self, quality: Dict[str, Any]) -> WFSample:
+    async def finalize(self, quality: dict[str, Any]) -> WFSample:
         async with self.http.patch(self.url, json={"quality": quality}) as resp:
             async with raising_errors_by_status_code(resp) as resp_json:
                 return WFSample(**resp_json)
