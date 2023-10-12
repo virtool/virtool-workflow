@@ -35,7 +35,7 @@ class SampleProvider:
     async def get(self) -> WFSample:
         async with self.http.get(self.url) as resp:
             async with raising_errors_by_status_code(resp) as resp_json:
-                logger.info("Fetched sample document", id=self.id)
+                logger.info("Fetched sample", id=self.id)
                 return WFSample(**resp_json)
 
     async def finalize(self, quality: dict[str, Any]) -> WFSample:

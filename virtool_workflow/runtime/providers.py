@@ -1,5 +1,4 @@
 import asyncio
-from typing import List
 
 from aiohttp import ClientSession
 from pyfixtures import fixture
@@ -50,11 +49,6 @@ def index_provider(job, http, jobs_api_connection_string) -> IndexProvider:
 
 
 @fixture
-def ml_provider(http, jobs_api_connection_string, work_path):
-    return MLProvider(http, jobs_api_connection_string, work_path
-
-
-@fixture
 def sample_provider(job, http, jobs_api_connection_string: str) -> SampleProvider:
     try:
         return SampleProvider(job.args["sample_id"], http, jobs_api_connection_string)
@@ -65,7 +59,7 @@ def sample_provider(job, http, jobs_api_connection_string: str) -> SampleProvide
 @fixture
 async def subtraction_providers(
     job, http: ClientSession, jobs_api_connection_string: str, work_path
-) -> List[SubtractionProvider]:
+) -> list[SubtractionProvider]:
     try:
         ids = job.args["subtractions"]
     except KeyError:
