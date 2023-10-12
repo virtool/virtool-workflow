@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
-from logging import getLogger
-from typing import Dict, Type, List
+from typing import Type
 
-logger = getLogger("api")
+from structlog import get_logger
+
+logger = get_logger("api")
 
 
 class JobAlreadyAcquired(Exception):
@@ -31,8 +32,8 @@ class AlreadyFinalized(Exception):
 @asynccontextmanager
 async def raising_errors_by_status_code(
     response,
-    accept: List[int] = None,
-    status_codes_to_exceptions: Dict[int, Type[Exception]] = None,
+    accept: list[int] = None,
+    status_codes_to_exceptions: dict[int, Type[Exception]] = None,
 ):
     """
     Raise exceptions based on the result status code.

@@ -1,22 +1,21 @@
 import logging
-from logging import getLogger
-from typing import Optional
 
 import pkg_resources
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
+from structlog import get_logger
 
-logger = getLogger("runtime")
+logger = get_logger("runtime")
 
 
-def configure_sentry(dsn: Optional[str]):
+def configure_sentry(dsn: str | None):
     """
     Initialize Sentry for log aggregation.
     """
     if dsn is None:
         return
 
-    logger.info(f"Initializing Sentry dsn='{dsn[:15]}...'")
+    logger.info("Initializing Sentry", dsn=f"{dsn[:15]}...")
 
     sentry_sdk.init(
         dsn=dsn,

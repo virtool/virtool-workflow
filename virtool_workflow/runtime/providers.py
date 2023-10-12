@@ -13,7 +13,9 @@ from virtool_workflow.errors import IllegalJobArguments, MissingJobArgument
 
 
 @fixture
-def analysis_provider(job, http, jobs_api_connection_string) -> AnalysisProvider:
+def analysis_provider(
+    job, http: ClientSession, jobs_api_connection_string: str
+) -> AnalysisProvider:
     try:
         return AnalysisProvider(
             job.args["analysis_id"], http, jobs_api_connection_string
@@ -45,6 +47,11 @@ def index_provider(job, http, jobs_api_connection_string) -> IndexProvider:
             raise MissingJobArgument("Missing key 'index_id'")
 
         raise
+
+
+@fixture
+def ml_provider(http, jobs_api_connection_string, work_path):
+    return MLProvider(http, jobs_api_connection_string, work_path
 
 
 @fixture

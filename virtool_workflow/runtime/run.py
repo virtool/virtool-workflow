@@ -2,13 +2,13 @@ import asyncio
 import signal
 import sys
 from asyncio import CancelledError
-from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pkg_resources
 from aiohttp import ClientOSError, ServerDisconnectedError
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
+from structlog import get_logger
 from virtool_core.logging import configure_logs
 from virtool_core.redis import configure_redis
 
@@ -22,16 +22,16 @@ from virtool_workflow.hooks import (
     on_terminated,
     on_error,
 )
+from virtool_workflow.runtime.discovery import load_workflow_and_fixtures
+from virtool_workflow.runtime.events import Events
 from virtool_workflow.runtime.redis import (
     get_next_job_with_timeout,
     wait_for_cancellation,
 )
-from virtool_workflow.runtime.discovery import load_workflow_and_fixtures
-from virtool_workflow.runtime.events import Events
 from virtool_workflow.runtime.sentry import configure_sentry
 from virtool_workflow.workflow import Workflow
 
-logger = getLogger("runtime")
+logger = get_logger("runtime")
 
 
 def configure_builtin_status_hooks():
@@ -114,11 +114,11 @@ async def ping_periodically(http, job, jobs_api_connection_string, job_id):
 
 
 async def run_workflow(
-    config: Dict[str, Any],
+    config: dict[str, Any],
     job_id: str,
     workflow: Workflow,
     events: Events,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     # Configure hooks here so that they can be tested when using `run_workflow`.
     configure_builtin_status_hooks()
 
@@ -160,7 +160,7 @@ async def start_runtime(
 ):
     version = pkg_resources.get_distribution("virtool-workflow").version
 
-    logger.info(f"Using virtool-workflow {version}")
+    logger.info("Found virtool-workflow", version=version)
 
     configure_logs(dev)
     configure_sentry(sentry_dsn)

@@ -1,12 +1,12 @@
 from asyncio import gather
-from logging import getLogger
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 from pyfixtures import FixtureScope
+from structlog import get_logger
 
 from virtool_workflow.runtime.utils import coerce_to_coroutine_function
 
-logger = getLogger("hooks")
+logger = get_logger("hooks")
 
 
 class Hook:
@@ -50,7 +50,7 @@ class Hook:
 
         if callback_ is not None:
             logger.debug(
-                f"Registered callback {callback_.__name__}() onto hook {self.name}"
+                "Registered hook callback", callback=callback_.__name__, hook=self.name
             )
         return cb
 
@@ -75,7 +75,7 @@ class Hook:
 
         return _temporary_callback
 
-    async def trigger(self, scope: FixtureScope, suppress=False, **kwargs) -> List[Any]:
+    async def trigger(self, scope: FixtureScope, suppress=False, **kwargs) -> list[Any]:
         """
         Trigger the hook.
 
@@ -88,13 +88,16 @@ class Hook:
         :param scope: the :class:`FixtureScope` to use to bind fixtures
         :param suppress: suppress and log exceptions raised in callbacks
         """
-        logger.debug(f"Triggering {self.name} hook with callbacks: {self.callbacks}")
+        logger.debug(
+            "Triggering hook with callbacks", callbacks=self.callbacks, hook=self.name
+        )
 
         if "scope" not in scope:
             scope["scope"] = scope
 
         async def _bind(callback_: Callable):
-            logger.debug(f"Binding fixtures to callback {callback_}")
+            logger.debug("Binding fixtures to callback", callback=callback_.__name__)
+
             try:
                 return await scope.bind(callback_, **kwargs)
             except KeyError as error:
@@ -111,12 +114,17 @@ class Hook:
     @staticmethod
     async def _trigger(callbacks, *args, suppress_errors=False, **kwargs):
         async def call_callback(callback):
-            logger.debug(f"Calling {callback}.")
+            logger.debug("Calling hook callback", callback=callback.__name__)
+
             if suppress_errors:
                 try:
                     return await callback(*args, **kwargs)
-                except Exception as error:
-                    logger.exception(error)
+                except Exception:
+                    logger.exception(
+                        "Encountered exception in hook callback",
+                        callback=callback.__name__,
+                        hook=callback.hook.name,
+                    )
             else:
                 return await callback(*args, **kwargs)
 

@@ -1,20 +1,19 @@
 """
 A data provider for Virtool analysis based on HTTP communication with the Virtool API.
-
 """
-from logging import getLogger
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Any
 
 import aiofiles
 import aiohttp
+from structlog import get_logger
 from virtool_core.models.analysis import Analysis
 
 from virtool_workflow.api.errors import raising_errors_by_status_code
 from virtool_workflow.api.utils import upload_file_via_put, retry
 from virtool_workflow.data_model.files import VirtoolFileFormat
 
-logger = getLogger("api")
+logger = get_logger("api")
 
 
 class AnalysisProvider:
@@ -92,7 +91,7 @@ class AnalysisProvider:
         return target_path
 
     @retry
-    async def upload_result(self, result: Dict[str, Any]) -> Tuple[Analysis, dict]:
+    async def upload_result(self, result: dict[str, Any]) -> tuple[Analysis, dict]:
         """
         Upload the results dict for the analysis.
 

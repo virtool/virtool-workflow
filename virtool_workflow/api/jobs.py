@@ -1,11 +1,10 @@
 import asyncio
 import functools
 import traceback
-from logging import getLogger
-from typing import Optional
 
 from aiohttp import ClientConnectionError, ClientSession
 from pyfixtures import fixture
+from structlog import get_logger
 from virtool_core.models.job import JobStatus
 
 from virtool_workflow import WorkflowStep
@@ -16,7 +15,7 @@ from virtool_workflow.api.errors import (
 )
 from virtool_workflow.data_model.jobs import WFJob
 
-logger = getLogger("api")
+logger = get_logger("api")
 
 
 async def acquire_job_by_id(
@@ -35,7 +34,6 @@ async def acquire_job_by_id(
     async with http.patch(
         f"{jobs_api_connection_string}/jobs/{job_id}", json={"acquired": True}
     ) as response:
-
         async with raising_errors_by_status_code(
             response, status_codes_to_exceptions={400: JobAlreadyAcquired}
         ) as resp_json:
@@ -45,14 +43,15 @@ async def acquire_job_by_id(
 @fixture
 def acquire_job(http: ClientSession, jobs_api_connection_string: str):
     async def _job_provider(job_id: str, timeout=3):
+        log = logger.bind(id=job_id)
         attempt = 1
 
         while attempt < 4:
-            logger.info(f"Acquiring job: id={job_id} attempt={attempt}")
+            log.info("Acquiring job", attempt=attempt)
 
             try:
                 job = await acquire_job_by_id(http, jobs_api_connection_string, job_id)
-                logger.info(f"Acquired job: id={job_id}")
+                logger.info("Acquired job")
                 return job
             except ClientConnectionError:
                 await asyncio.sleep(timeout)
@@ -83,7 +82,7 @@ async def push_status(
     http,
     job: WFJob,
     jobs_api_connection_string: str,
-    error: Optional[Exception],
+    error: Exception | None,
     progress: float,
     current_step: WorkflowStep,
 ):
@@ -111,11 +110,11 @@ async def _push_status(
     stage: str,
     state: str,
     progress: float,
-    error: Optional[Exception] = None,
+    error: Exception | None = None,
     max_tb: int = 500,
 ):
     if error:
-        logger.critical("Reporting error to API", exc_info=error)
+        logger.critical("Reporting error to API", error=error)
 
     payload = {
         "state": state,
@@ -132,7 +131,7 @@ async def _push_status(
         "progress": int(progress * 100),
     }
 
-    logger.info(f"Reported status: step={step_name} state={state}")
+    logger.info("Reported status", step=step_name, state=state)
 
     async with http.post(
         f"{jobs_api_connection_string}/jobs/{job.id}/status", json=payload
