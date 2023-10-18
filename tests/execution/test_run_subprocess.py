@@ -47,7 +47,7 @@ async def test_command_is_called(tmpdir):
 
 
 async def test_stdout_is_handled(bash):
-    lines = list()
+    lines = []
 
     async def stdout_handler(line):
         lines.append(line)
@@ -58,7 +58,7 @@ async def test_stdout_is_handled(bash):
 
 
 async def test_stderr_is_handled(bash):
-    lines = list()
+    lines = []
 
     async def stderr_handler(line):
         lines.append(line)

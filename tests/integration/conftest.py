@@ -1,5 +1,4 @@
 import asyncio
-from pathlib import Path
 
 import pytest
 
@@ -19,8 +18,3 @@ async def loop(event_loop):
     https://github.com/pytest-dev/pytest-asyncio/issues/154
     """
     return asyncio.get_event_loop()
-
-
-@pytest.fixture()
-def docker_compose_file():
-    Path(__file__).parent / "docker-compose.yml"

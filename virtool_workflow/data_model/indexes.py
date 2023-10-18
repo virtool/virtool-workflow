@@ -3,7 +3,7 @@ import gzip
 import json
 import shutil
 from pathlib import Path
-from typing import Dict, List, Tuple, Callable
+from typing import Callable
 
 import aiofiles
 from virtool_core.models.index import Index
@@ -52,8 +52,8 @@ class WFIndex:
         self.manifest = index.manifest
         self.reference = index.reference
 
-        self._sequence_lengths: Dict[str, int] = {}
-        self._sequence_otu_map: Dict[str, str] = {}
+        self._sequence_lengths: dict[str, int] = {}
+        self._sequence_otu_map: dict[str, str] = {}
 
     @property
     def bowtie_path(self) -> Path:
@@ -155,12 +155,12 @@ class WFIndex:
 
     async def write_isolate_fasta(
         self,
-        otu_ids: List[str],
+        otu_ids: list[str],
         path: Path,
         proc: int = 1,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """
-        Generate a FASTA file for all of the isolates of the OTUs specified by
+        Generate a FASTA file for all the isolates of the OTUs specified by
         ``otu_ids``.
 
         :param otu_ids: the list of OTU IDs for which to generate and index
@@ -190,8 +190,8 @@ class WFIndex:
         return lengths
 
     async def build_isolate_index(
-        self, otu_ids: List[str], path: Path, processes: int
-    ) -> Tuple[Path, Dict[str, int]]:
+        self, otu_ids: list[str], path: Path, processes: int
+    ) -> tuple[Path, dict[str, int]]:
         """
         Generate a FASTA file and Bowtie2 index for all the isolates of the OTUs
         specified by ``otu_ids``.

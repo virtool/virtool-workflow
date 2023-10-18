@@ -2,7 +2,6 @@ import gzip
 import json
 import shutil
 from pathlib import Path
-from typing import List
 
 import aiofiles
 from aiohttp import ClientSession
@@ -33,7 +32,7 @@ class HMMsProvider:
             async with raising_errors_by_status_code(response) as resp_json:
                 return HMM(**resp_json)
 
-    async def hmm_list(self) -> List[HMM]:
+    async def hmm_list(self) -> list[HMM]:
         async with self.http.get(f"{self.url}/files/annotations.json.gz") as response:
             await read_file_from_response(response, self.path / "annotations.json.gz")
 

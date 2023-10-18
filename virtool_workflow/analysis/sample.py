@@ -1,9 +1,10 @@
 from pathlib import Path
 
 from pyfixtures import fixture
+
 from virtool_workflow.analysis.utils import make_read_paths
-from virtool_workflow.data_model.samples import WFSample
 from virtool_workflow.api.samples import SampleProvider
+from virtool_workflow.data_model.samples import WFSample
 
 
 @fixture
