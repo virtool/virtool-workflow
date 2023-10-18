@@ -4,7 +4,6 @@ import shutil
 from asyncio.subprocess import Process
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional
 
 from virtool_core.models.enums import LibraryType
 
@@ -15,12 +14,14 @@ from virtool_workflow.analysis.utils import ReadPaths
 class SkewerResult:
     """Represents the result of running Skewer to trim a paired or unpaired FASTQ dataset."""
 
-    #: The paths to the trimmed reads.
     read_paths: ReadPaths
-    #: The process running Skewer.
+    """The paths to the trimmed reads."""
+
     process: Process
-    #: The command used to run Skewer.
-    command: List[str]
+    """The process running Skewer."""
+
+    command: list[str]
+    """The command used to run Skewer."""
 
     @property
     def left(self) -> Path:
@@ -29,13 +30,11 @@ class SkewerResult:
             - the FASTQ trimming result for an unpaired Illumina dataset
             - the FASTA trimming result for the left reads of a paired Illumina dataset
 
-        :type: :class:`.Path`
-
         """
         return self.read_paths[0]
 
     @property
-    def right(self) -> Optional[Path]:
+    def right(self) -> Path | None:
         """
         The path to the rights reads of a paired Illumina dataset.
 
@@ -59,7 +58,7 @@ def skewer(
     mean_quality: int = 0,
     number_of_processes: int = 1,
     quiet: bool = True,
-    other_options: Iterable[str] = ("-n", "-z"),
+    other_options: tuple[str] = ("-n", "-z"),
     **kwargs
 ):
     """Create a coroutine function that will run skewer with the given parameters."""

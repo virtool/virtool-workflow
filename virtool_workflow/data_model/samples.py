@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from virtool_core.models.samples import Sample
 
@@ -7,11 +6,11 @@ from virtool_core.models.samples import Sample
 class WFSample(Sample):
     """A Virtool Sample."""
 
-    reads_path: Optional[Path] = None
-    read_paths: Optional[Path] = None
+    reads_path: Path | None = None
+    read_paths: Path | None = None
 
     @property
-    def min_length(self) -> Optional[int]:
+    def min_length(self) -> int | None:
         """
         The minimum observed read length in the sample sequencing data.
 
@@ -21,7 +20,7 @@ class WFSample(Sample):
         return self.quality.length[0] if self.quality else None
 
     @property
-    def max_length(self) -> Optional[int]:
+    def max_length(self) -> int | None:
         """
         The maximum observed read length in the sample sequencing data.
 

@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Dict, List, Protocol
+from typing import Protocol
 
 from pyfixtures import fixture
 from virtool_workflow.api.utils import read_file_from_response
@@ -35,15 +35,15 @@ def download_input_file(http, jobs_api_connection_string: str) -> FileDownloader
 
 
 @fixture
-def files_list(job: WFJob) -> List[dict]:
+def files_list(job: WFJob) -> list[dict]:
     """The files dictionary for the current job."""
     return job.args["files"]
 
 
 @fixture
 async def input_files(
-    files_list: List[dict], download_input_file: FileDownloader, work_path: Path
-) -> Dict[str, Path]:
+    files_list: list[dict], download_input_file: FileDownloader, work_path: Path
+) -> dict[str, Path]:
     """
     The downloaded input files for the current workflow run.
 

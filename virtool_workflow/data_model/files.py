@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import datetime
 from typing import Literal
 
 VirtoolFileFormat = Literal[
@@ -21,4 +21,4 @@ class VirtoolFile:
     size: int
     format: VirtoolFileFormat
     name_on_disk: str = None
-    uploaded_at: date = None
+    uploaded_at: datetime = None

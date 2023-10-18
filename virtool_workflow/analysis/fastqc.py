@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 from pyfixtures import fixture
+
 from virtool_workflow.analysis.utils import ReadPaths
 
 

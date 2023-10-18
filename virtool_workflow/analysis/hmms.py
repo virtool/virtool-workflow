@@ -7,7 +7,6 @@ from collections import UserList
 from functools import cached_property
 from pathlib import Path
 from shutil import which
-from typing import Dict, Iterable
 
 from pyfixtures import fixture
 from virtool_core.models.hmm import HMM
@@ -25,13 +24,13 @@ class HMMs(UserList):
 
     """
 
-    def __init__(self, hmms: Iterable[HMM], path: Path):
+    def __init__(self, hmms: list[HMM], path: Path):
         #: The path to the ``profiles.hmm`` file in the ``work_path`` of the running workflow.
         self.path: Path = path
         super(HMMs, self).__init__(hmms)
 
     @cached_property
-    def cluster_annotation_map(self) -> Dict[int, str]:
+    def cluster_annotation_map(self) -> dict[int, str]:
         """
         A :class:`dict` that maps cluster IDs used to identify HMMs in `HMMER <http://hmmer.org/>`_ to annotation IDs
         used in Virtool.

@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import Tuple, Callable, Union
+from typing import Callable
 
-ReadPaths = Union[Tuple[Path], Tuple[Path, Path]]
+ReadPaths = tuple[Path] | tuple[Path, Path]
 
 
 def _make_paired_paths(

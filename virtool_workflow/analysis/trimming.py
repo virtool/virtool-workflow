@@ -1,13 +1,12 @@
 """Calculate trimming parameters which are passed the Skewer read trimming tool."""
 import hashlib
 import json
-from typing import Dict, Union
+
 from pyfixtures import fixture
 from virtool_core.models.enums import LibraryType
 
 from virtool_workflow.analysis.sample import WFSample
 from virtool_workflow.analysis.skewer import calculate_trimming_min_length
-
 
 TRIM_PARAMETERS = {
     "end_quality": "20",
@@ -28,7 +27,7 @@ def trimming_min_length(sample: WFSample):
 @fixture
 def trimming_parameters(
     sample: WFSample, trimming_min_length: int
-) -> Dict[str, Union[str, int]]:
+) -> dict[str, str | int]:
     """
     Calculates trimming parameters based on the library type, and minimum allowed trim length.
 
