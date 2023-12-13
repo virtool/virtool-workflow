@@ -54,8 +54,6 @@ jobs:
         run: |
             poetry check
             poetry build
-      - name: Docker Build
-        run: docker build .
   release:
     runs-on: ubuntu-22.04
     if: github.event_name == 'push'
