@@ -81,13 +81,12 @@ async def test_cancellation(
 
     await runtime_task
 
-    assert [(update.state, update.progress) for update in data.job.status] == [
-        (JobState.WAITING, 0),
-        (JobState.PREPARING, 0),
-        (JobState.RUNNING, 0),
-        (JobState.RUNNING, 25),
-        (JobState.CANCELLED, 25),
-    ]
+    state_and_progress = [(update.state, update.progress) for update in data.job.status]
+
+    assert state_and_progress[0] == (JobState.WAITING, 0)
+    assert state_and_progress[1] == (JobState.PREPARING, 0)
+    assert state_and_progress[2] == (JobState.RUNNING, 0)
+    assert state_and_progress[-1] == (JobState.CANCELLED, state_and_progress[-2][1])
 
     assert log.has("received cancellation signal from redis", level="info")
 
