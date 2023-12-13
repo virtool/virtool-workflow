@@ -44,7 +44,7 @@ jobs:
           wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz
           tar -xf hmmer-3.2.1.tar.gz
           cd hmmer-3.2.1
-          ./configure --prefix /build/hmmer
+          ./configure --prefix /opt/hmmer
           make
           make install
       - name: Install Skewer
@@ -53,7 +53,11 @@ jobs:
           tar -xf 0.2.2.tar.gz
           cd skewer-0.2.2
           make
-          mv skewer /build
+          mv skewer/skewer /usr/local/bin
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
       - name: Setup Python
         uses: actions/setup-python@v4
       - name: Install Poetry
