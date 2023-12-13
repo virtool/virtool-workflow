@@ -12,7 +12,7 @@ from virtool_core.models.reference import ReferenceNested
 from virtool_core.utils import decompress_file
 
 from virtool_workflow.api.client import APIClient
-from virtool_workflow.data.files import VirtoolFileFormat
+from virtool_workflow.files import VirtoolFileFormat
 from virtool_workflow.errors import MissingJobArgument
 
 

@@ -11,7 +11,7 @@ from virtool_core.models.reference import ReferenceNested
 from virtool_core.models.subtraction import SubtractionNested
 
 from virtool_workflow.api.client import APIClient
-from virtool_workflow.data.files import VirtoolFileFormat
+from virtool_workflow.files import VirtoolFileFormat
 
 
 class WFAnalysis:
