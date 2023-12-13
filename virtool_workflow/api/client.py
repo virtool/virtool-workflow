@@ -8,7 +8,7 @@ from virtool_workflow.api.utils import (
     raise_exception_by_status_code,
     decode_json_response,
 )
-from virtool_workflow.data.files import VirtoolFileFormat
+from virtool_workflow.files import VirtoolFileFormat
 from virtool_workflow.errors import JobsAPIError
 
 CHUNK_SIZE = 1024 * 1024 * 2

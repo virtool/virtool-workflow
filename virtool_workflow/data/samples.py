@@ -11,7 +11,7 @@ from virtool_core.models.samples import Sample, Quality
 
 from virtool_workflow.analysis.utils import ReadPaths
 from virtool_workflow.api.client import APIClient
-from virtool_workflow.data.files import VirtoolFileFormat
+from virtool_workflow.files import VirtoolFileFormat
 from virtool_workflow.data.uploads import WFUploads
 from virtool_workflow.errors import JobsAPINotFound
 
