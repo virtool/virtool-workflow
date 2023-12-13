@@ -98,7 +98,7 @@ jobs:
         with:
           node-version: 18
       - name: Install semantic-release
-        run: npm i semantic-release^22.0.12 conventional-changelog-conventionalcommits^7.0.2
+        run: npm i semantic-release@^22.0.12 conventional-changelog-conventionalcommits@^7.0.2
       - name: Release
         env:
           GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
