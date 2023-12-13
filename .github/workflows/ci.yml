@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - "main"
+      - "alpha"
   push:
     branches:
       - "main"
+      - "alpha"
 
 jobs:
   commitlint:
@@ -14,8 +16,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Commitlint
         uses: wagoid/commitlint-github-action@v5
   test:
@@ -29,8 +29,12 @@ jobs:
           unzip bowtie2-2.3.2-legacy-linux-x86_64.zip
           cp -rv bowtie2-2.3.2-legacy /opt/bowtie2
           ln -s /opt/bowtie2/bowtie* /usr/local/bin
+      - name: Setup Python
+        uses: actions/setup-python@v4
       - name: Install Poetry
         uses: snok/install-poetry@v1
+        with:
+          python-version: '3.10'
       - name: Install Dependencies
         run: poetry install
       - name: Test
@@ -65,9 +69,9 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
       - name: Install semantic-release
-        run: npm i semantic-release@v18.0.0 conventional-changelog-conventionalcommits@4.6.1
+        run: npm i semantic-release^22.0.12 conventional-changelog-conventionalcommits^7.0.2
       - name: Release
         env:
           GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
