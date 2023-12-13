@@ -47,6 +47,7 @@ jobs:
           ./configure --prefix /opt/hmmer
           make
           make install
+          ln -s /opt/hmmer/binaries/* /usr/local/bin
       - name: Install Skewer
         run: |
           wget https://github.com/relipmoc/skewer/archive/0.2.2.tar.gz
