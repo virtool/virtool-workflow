@@ -54,6 +54,7 @@ jobs:
           cd skewer-0.2.2
           # Fix for `error: static assertion failed: comparison object must be invocable as const`
           sed -i 's/const ELEMENT &elem2)/& const/g' src/matrix.h
+          make
           make install
       - name: Setup Java
         uses: actions/setup-java@v2
