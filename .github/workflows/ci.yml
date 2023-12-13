@@ -38,7 +38,7 @@ jobs:
         run: |
           wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
           unzip fastqc_v0.11.9.zip
-          ln -s /FastQC/fastqc /usr/local/bin
+          ln -s FastQC/fastqc /usr/local/bin
       - name: Install HMMER
         run: |
           wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz
@@ -47,7 +47,7 @@ jobs:
           ./configure --prefix /opt/hmmer
           make
           make install
-          ln -s /opt/hmmer/binaries/* /usr/local/bin
+          ln -s /opt/hmmer/bin/* /usr/local/bin
       - name: Install Skewer
         run: |
           wget https://github.com/relipmoc/skewer/archive/0.2.2.tar.gz
