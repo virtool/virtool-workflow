@@ -397,15 +397,12 @@ def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
 class FastQCRunner(Protocol):
     """A protocol describing callables that can be used to run FastQC."""
 
-    async def __call__(self, paths: ReadPaths) -> dict:
+    async def __call__(self, paths: ReadPaths, output_path: Path) -> dict:
         ...
 
 
 @fixture
-async def fastqc(
-    run_subprocess: RunSubprocess,
-    work_path: Path,
-):
+async def fastqc(run_subprocess: RunSubprocess):
     """
     Provides an asynchronous function that can run FastQC as a subprocess.
 
@@ -441,6 +438,4 @@ async def fastqc(
 
         return _parse_fastqc(temp_path, output_path)
 
-    yield func
-
-    await asyncio.to_thread(shutil.rmtree, temp_path)
+    return func
