@@ -41,6 +41,9 @@ def load_builtin_fixtures():
 
     """
     import_module("virtool_workflow.data")
+    import_module("virtool_workflow.analysis.fastqc")
+    import_module("virtool_workflow.analysis.skewer")
+    import_module("virtool_workflow.runtime.run_subprocess")
 
 
 def load_custom_fixtures():
