@@ -28,17 +28,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Install FastQC
+        run: |
+          wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
+          unzip fastqc_v0.11.9.zip
+          mv FastQC /opt/fastqc
+          chmod ugo+x /opt/fastqc/fastqc
+          ln -s /opt/fastqc/fastqc /usr/local/bin
+          fastqc --version
       - name: Install Bowtie2
         run: | 
           wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2-2.3.2-legacy-linux-x86_64.zip
           unzip bowtie2-2.3.2-legacy-linux-x86_64.zip
           cp -rv bowtie2-2.3.2-legacy /opt/bowtie2
           ln -s /opt/bowtie2/bowtie* /usr/local/bin
-      - name: Install FastQC
-        run: |
-          wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
-          unzip fastqc_v0.11.9.zip
-          ln -s FastQC/fastqc /usr/local/bin
       - name: Install HMMER
         run: |
           wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz
