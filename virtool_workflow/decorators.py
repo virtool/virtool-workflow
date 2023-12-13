@@ -5,39 +5,29 @@ from typing import Callable
 from virtool_workflow.workflow import Workflow
 
 
-def step(f: Callable = None, *, name: str = None):
+def step(func: Callable = None, *, name: str | None = None) -> Callable:
     """
     Mark a function as a workflow step function.
 
-    :param f: the workflow step function
+    :param func: the workflow step function
     :param name: the display name of the workflow step. A name
         will be generated based on the function name if not provided.
     """
-    if f is None:
+    if func is None:
         return lambda _f: step(_f, name=name)
 
-    f.__workflow_marker__ = "step"
-    f.__workflow_step_props__ = dict(name=name)
+    func.__workflow_marker__ = "step"
+    func.__workflow_step_props__ = dict(name=name)
 
-    return f
+    return func
 
 
 def collect(module: ModuleType) -> Workflow:
     """
-    Build a Workflow object from a workflow module.
-
-    .. warning::
-        Since Python 3.7, dictionaries maintain insertion order.
-        A side effect of this is that a module's __dict__ attribute
-        maintains **definition** order, since attributes are added to
-        the dict as they are defined. This is also the case in python 3.6,
-        however it is an implementation detail and not a PEP specification.
-
-        This function may not work as intended in older versions of python.
-
+    Build a :class:`.Workflow` object from a workflow module.
 
     :param module: A workflow module
-    :return Workflow: A workflow object
+    :return: A workflow object
     """
 
     workflow = Workflow()

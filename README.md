@@ -49,31 +49,6 @@ Additional Requirements
 
 From Tim Pope: [A Note About Git Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
 
-### Poetry
-
-Dependencies & virtual environments are managed with [Poetry](https://python-poetry.org/ "Poetry")
-
-To install `poetry`:
-
-```sh
-sudo pip install poetry
-```
-
-To install dependencies, and the `virtool-workflow` package, into a virtual environment:
-
-```sh
-git clone https://github.com/virtool/virtool-workflow
-cd virtool-workflow
-
-poetry install
-```
-
-To run commands in the virtual environment:
-
-```sh
-poetry run <<command>>
-```
-
 ### Tests
 
 [Pytest](https://docs.pytest.org/en/7.1.x/ "Pytest") is used to implement unit

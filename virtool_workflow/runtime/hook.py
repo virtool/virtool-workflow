@@ -1,3 +1,4 @@
+"""The :class:`Hook` class is used to hook into the workflow lifecycle."""
 from __future__ import annotations
 
 from asyncio import gather
@@ -6,7 +7,7 @@ from typing import Any, Callable
 from pyfixtures import FixtureScope
 from structlog import get_logger
 
-from virtool_workflow.runtime.utils import coerce_to_coroutine_function
+from virtool_workflow.utils import coerce_to_coroutine_function
 
 logger = get_logger("hooks")
 
@@ -50,10 +51,6 @@ class Hook:
         else:
             cb = self._callback
 
-        if callback_ is not None:
-            logger.debug(
-                "Registered hook callback", callback=callback_.__name__, hook=self.name
-            )
         return cb
 
     def _callback(self, callback_: Callable):
@@ -90,16 +87,12 @@ class Hook:
         :param scope: the :class:`FixtureScope` to use to bind fixtures
         :param suppress: suppress and log exceptions raised in callbacks
         """
-        logger.debug(
-            "Triggering hook with callbacks", callbacks=self.callbacks, hook=self.name
-        )
+        logger.info("triggering hook", hook=self.name)
 
         if "scope" not in scope:
             scope["scope"] = scope
 
         async def _bind(callback_: Callable):
-            logger.debug("Binding fixtures to callback", callback=callback_.__name__)
-
             try:
                 return await scope.bind(callback_, **kwargs)
             except KeyError as error:
@@ -116,14 +109,12 @@ class Hook:
     @staticmethod
     async def _trigger(callbacks, *args, suppress_errors=False, **kwargs):
         async def call_callback(callback):
-            logger.debug("Calling hook callback", callback=callback.__name__)
-
             if suppress_errors:
                 try:
                     return await callback(*args, **kwargs)
                 except Exception:
                     logger.exception(
-                        "Encountered exception in hook callback",
+                        "encountered exception in hook callback",
                         callback=callback.__name__,
                         hook=callback.hook.name,
                     )

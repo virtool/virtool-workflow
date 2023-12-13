@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Callable
+from typing import Callable, TypeAlias
 
-ReadPaths = tuple[Path] | tuple[Path, Path]
+ReadPaths: TypeAlias = tuple[Path] | tuple[Path, Path]
+"""A tuple of paths to FASTQ files. There may be one or two paths, depending on whether the dataset is paired."""
 
 
 def _make_paired_paths(

@@ -1,109 +1,158 @@
-#############
-API Reference
-#############
+Reference
+#########
 
-``virtool_workflow.analysis.analysis``
-======================================
+``virtool_workflow.analysis``
+*****************************
 
-.. automodule:: virtool_workflow.analysis.analysis
-    :members: analysis
-
-    .. autoclass:: Analysis
-        :members:
-        :inherited-members:
-        :undoc-members:
-
-``virtool_workflow.analysis.fastqc``
-====================================
+``fastqc``
+==========
 
 .. automodule:: virtool_workflow.analysis.fastqc
-    :members:
 
-``virtool_workflow.analysis.hmms``
-==================================
+    .. autofixture:: fastqc
 
-.. automodule:: virtool_workflow.analysis.hmms
-    :members:
-
-``virtool_workflow.analysis.indexes``
-=====================================
-
-.. automodule:: virtool_workflow.analysis.indexes
-    :members:
+    .. autoprotocol:: FastQCRunner
 
 
-``virtool_workflow.analysis.library_types``
-===========================================
-
-.. automodule:: virtool_workflow.analysis.library_types
-    :members:
-
-
-``virtool_workflow.analysis.reads``
-===================================
-
-.. automodule:: virtool_workflow.analysis.reads
-    :members:
-
-``virtool_workflow.analysis.sample``
-====================================
-
-.. automodule:: virtool_workflow.analysis.sample
-    :members:
-
-``virtool_workflow.analysis.skewer``
-====================================
+``skewer``
+==========
 
 .. automodule:: virtool_workflow.analysis.skewer
+
+    .. autofixture:: skewer
+
+    .. autoclass:: SkewerConfiguration
+        :members:
+
+    .. autoclass:: SkewerResult
+        :members:
+
+    .. autoprotocol:: SkewerRunner
+
+
+``trimming``
+============
+
+.. automodule:: virtool_workflow.analysis.trimming
     :members:
 
-``virtool_workflow.config.configuration.fixtures``
-==================================================
 
-.. automodule:: virtool_workflow.config.fixtures
-   :members:
+``virtool_workflow.data``
+*************************
 
-``virtool_workflow.analysis.subtractions``
-==========================================
+``analysis``
 
-.. automodule:: virtool_workflow.analysis.subtractions
+``analyses``
+============
+
+.. automodule:: virtool_workflow.data.analyses
+
+    .. autofixture:: analysis
+
+    .. autoclass:: WFAnalysis
+        :members:
+
+
+``hmms``
+========
+
+.. automodule:: virtool_workflow.data.hmms
+
+    .. autoclass:: WFHMMs
+        :members:
+
+
+``indexes``
+===========
+
+.. automodule:: virtool_workflow.data.indexes
+
+    .. autofixture:: index
+
+    .. autoclass:: WFIndex
+        :members:
+
+    .. autoclass:: WFNewIndex
+        :members:
+
+
+``jobs``
+========
+
+.. automodule:: virtool_workflow.data.jobs
     :members:
 
-``virtool_workflow.decorator_api``
-==================================
 
-.. automodule:: virtool_workflow.decorator_api
+``ml``
+======
+
+.. automodule:: virtool_workflow.data.ml
     :members:
 
-``virtool_workflow.api.analysis``
-=================================
 
-.. automodule:: virtool_workflow.api.analysis
+``samples``
+===========
+
+.. automodule:: virtool_workflow.data.samples
+
+    .. autofixture:: sample
+
+    .. autoclass:: WFSample
+        :members:
+
+
+``subtractions``
+================
+
+.. automodule:: virtool_workflow.data.subtractions
+
+    .. autofixture:: subtractions
+
+    .. autoclass:: WFSubtraction
+        :members:
+
+
+``uploads``
+===========
+
+.. automodule:: virtool_workflow.data.uploads
+
+    .. autofixture:: uploads
+
+    .. autoclass:: WFUploads
+        :members:
+
+
+``virtool_workflow.runtime``
+****************************
+
+``config``
+==========
+
+.. automodule:: virtool_workflow.runtime.config
+
+    .. autofixture:: config
+
+    .. autoclass:: RunConfig
+        :members:
+
+
+``run_subprocess``
+==================
+
+.. automodule:: virtool_workflow.runtime.run_subprocess
+
+    .. autofixture:: run_subprocess
+
+    .. autoprotocol:: RunSubprocess
+
+
+``virtool_workflow.decorators``
+===============================
+
+.. automodule:: virtool_workflow.decorators
     :members:
 
-``virtool_workflow.data_model.analysis``
-==============================================
-
-.. automodule:: virtool_workflow.data_model.analysis
-    :members:
-
-``virtool_workflow.execution.run_subprocess``
-=============================================
-
-.. automodule:: virtool_workflow.execution.run_subprocess
-    :members:
-
-``virtool_workflow.data_model.samples``
-=======================================
-
-.. automodule:: virtool_workflow.data_model.samples
-    :members:
-
-``virtool_workflow.data_model.subtractions``
-============================================
-
-.. automodule:: virtool_workflow.data_model.subtractions
-    :members:
 
 ``virtool_workflow.hooks``
 ==========================
@@ -111,7 +160,31 @@ API Reference
 .. automodule:: virtool_workflow.hooks
     :members:
 
-``virtool_workflow.api.uploads``
-================================
 
-.. autofixture:: virtool_workflow.api.uploads.download_input_file
+``virtool_workflow.errors``
+=============================
+
+.. automodule:: virtool_workflow.errors
+
+    .. autoexception:: JobsAPIError
+        :members:
+
+    .. autoexception:: JobsAPIBadRequest
+        :members:
+
+    .. autoexception:: JobsAPIUnauthorized
+        :members:
+
+    .. autoexception:: JobsAPINotFound
+        :members:
+
+    .. autoexception:: JobsAPIConflict
+        :members:
+
+
+``virtool_workflow.workflow``
+=============================
+
+.. automodule:: virtool_workflow.workflow
+    :members: Workflow, WorkflowStep
+

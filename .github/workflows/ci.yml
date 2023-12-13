@@ -20,15 +20,44 @@ jobs:
         uses: wagoid/commitlint-github-action@v5
   test:
     runs-on: ubuntu-22.04
+    services:
+      redis:
+        image: redis:6.0
+        ports:
+          - 6379:6379
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install bowtie
+      - name: Install FastQC
+        run: |
+          wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
+          unzip fastqc_v0.11.9.zip
+          mv FastQC /opt/fastqc
+          chmod ugo+x /opt/fastqc/fastqc
+          ln -s /opt/fastqc/fastqc /usr/local/bin
+          fastqc --version
+      - name: Install Bowtie2
         run: | 
           wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2-2.3.2-legacy-linux-x86_64.zip
           unzip bowtie2-2.3.2-legacy-linux-x86_64.zip
           cp -rv bowtie2-2.3.2-legacy /opt/bowtie2
           ln -s /opt/bowtie2/bowtie* /usr/local/bin
+      - name: Install HMMER
+        run: |
+          wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz
+          tar -xf hmmer-3.2.1.tar.gz
+          cd hmmer-3.2.1
+          ./configure --prefix /opt/hmmer
+          make
+          make install
+          ln -s /opt/hmmer/bin/* /usr/local/bin
+      - name: Install Skewer
+        run: cp vendor/skewer /usr/local/bin
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
       - name: Setup Python
         uses: actions/setup-python@v4
       - name: Install Poetry
@@ -38,7 +67,7 @@ jobs:
       - name: Install Dependencies
         run: poetry install
       - name: Test
-        run: poetry run pytest
+        run: poetry run pytest --redis-connection-string redis://localhost:6379
   build:
     runs-on: ubuntu-22.04
     steps:
@@ -54,8 +83,6 @@ jobs:
         run: |
             poetry check
             poetry build
-      - name: Docker Build
-        run: docker build .
   release:
     runs-on: ubuntu-22.04
     if: github.event_name == 'push'

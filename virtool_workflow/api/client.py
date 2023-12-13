@@ -1,48 +1,136 @@
-from functools import wraps
+from contextlib import asynccontextmanager
+from pathlib import Path
 
-import aiohttp
-from pyfixtures import fixture
+import aiofiles
+from aiohttp import ClientSession, BasicAuth
 
+from virtool_workflow.api.utils import (
+    raise_exception_by_status_code,
+    decode_json_response,
+)
+from virtool_workflow.data.files import VirtoolFileFormat
+from virtool_workflow.errors import JobsAPIError
 
-@fixture
-async def http():
-    """:class:`Aiohttp.ClientSession` instance to be used for workflows."""
-    connector = aiohttp.TCPConnector(force_close=True, limit=100)
-
-    async with aiohttp.ClientSession(
-        auto_decompress=False, connector=connector
-    ) as session:
-        yield JobApiHttpSession(session)
-
-
-@fixture
-async def authenticated_http(job_id, key, http):
-    """:class:`Aiohttp.ClientSession` instance which includes authentication headers for the jobs API."""
-    http.auth = aiohttp.BasicAuth(login=f"job-{job_id}", password=key)
-    return http
+CHUNK_SIZE = 1024 * 1024 * 2
 
 
-class JobApiHttpSession:
-    """Wraps :class:`aiohttp.ClientSession` and adds authentication for the jobs API."""
+class APIClient:
+    def __init__(self, http: ClientSession, jobs_api_connection_string: str):
+        self.http = http
+        self.jobs_api_connection_string = jobs_api_connection_string
 
-    def __init__(
-        self, client: aiohttp.ClientSession, auth: aiohttp.BasicAuth | None = None
+    async def get_json(self, path: str) -> dict:
+        """Get the JSON response from the provided API ``path``."""
+
+        async with self.http.get(f"{self.jobs_api_connection_string}{path}") as resp:
+            await raise_exception_by_status_code(resp)
+            return await decode_json_response(resp)
+
+    async def get_file(self, path: str, target_path: Path):
+        """
+        Download the file at URL ``path`` to the local filesystem path ``target_path``.
+        """
+        async with self.http.get(f"{self.jobs_api_connection_string}{path}") as resp:
+            if resp.status != 200:
+                raise JobsAPIError(
+                    f"Encountered {resp.status} while downloading '{path}'"
+                )
+            async with aiofiles.open(target_path, "wb") as f:
+                async for chunk in resp.content.iter_chunked(CHUNK_SIZE):
+                    await f.write(chunk)
+
+            return target_path
+
+    async def patch_json(self, path: str, data: dict) -> dict:
+        """
+        Make a patch request against the provided API ``path`` and return the response
+        as a dictionary of decoded JSON.
+
+        :param path: the API path to make the request against
+        :param data: the data to send with the request
+        :return: the response as a dictionary of decoded JSON
+        """
+        async with self.http.patch(
+            f"{self.jobs_api_connection_string}{path}", json=data
+        ) as resp:
+            await raise_exception_by_status_code(resp)
+            return await decode_json_response(resp)
+
+    async def post_file(
+        self,
+        path: str,
+        file_path: Path,
+        file_format: VirtoolFileFormat,
+        params: dict | None = None,
     ):
-        self.client = client
-        self.auth = auth
+        if not params:
+            params = {"name": file_path.name}
 
-        self.delete = self._wrap_with_auth(self.client.delete)
-        self.get = self._wrap_with_auth(self.client.get)
-        self.patch = self._wrap_with_auth(self.client.patch)
-        self.post = self._wrap_with_auth(self.client.post)
-        self.put = self._wrap_with_auth(self.client.put)
+        if file_format is not None:
+            params.update(format=file_format)
 
-    def _wrap_with_auth(self, method):
-        @wraps(method)
-        def _method_with_auth(*args, noauth=False, **kwargs):
-            if "auth" not in kwargs and self.auth is not None and not noauth:
-                kwargs["auth"] = self.auth
+        async with self.http.post(
+            f"{self.jobs_api_connection_string}{path}",
+            data={"file": open(file_path, "rb")},
+            params=params,
+        ) as response:
+            await raise_exception_by_status_code(response)
 
-            return method(*args, **kwargs)
+    async def post_json(self, path: str, data: dict) -> dict:
+        async with self.http.post(
+            f"{self.jobs_api_connection_string}{path}", json=data
+        ) as resp:
+            await raise_exception_by_status_code(resp)
+            return await decode_json_response(resp)
 
-        return _method_with_auth
+    async def put_file(
+        self,
+        path: str,
+        file_path: Path,
+        file_format: VirtoolFileFormat,
+        params: dict | None = None,
+    ):
+        if not params:
+            params = {"name": file_path.name}
+
+        if file_format is not None:
+            params.update(format=file_format)
+
+        async with self.http.put(
+            f"{self.jobs_api_connection_string}{path}",
+            data={"file": open(file_path, "rb")},
+            params=params,
+        ) as response:
+            await raise_exception_by_status_code(response)
+
+    async def put_json(self, path: str, data: dict) -> dict:
+        async with self.http.put(
+            f"{self.jobs_api_connection_string}{path}", json=data
+        ) as resp:
+            await raise_exception_by_status_code(resp)
+            return await decode_json_response(resp)
+
+    async def delete(self, path: str) -> dict | None:
+        """Make a delete request against the provided API ``path``."""
+        async with self.http.delete(f"{self.jobs_api_connection_string}{path}") as resp:
+            await raise_exception_by_status_code(resp)
+
+            try:
+                return await decode_json_response(resp)
+            except ValueError:
+                return None
+
+
+@asynccontextmanager
+async def api_client(
+    jobs_api_connection_string: str,
+    job_id: str,
+    key: str,
+):
+    """
+    An authenticated :class:``APIClient`` to make requests against the jobs API.
+    """
+    async with ClientSession(
+        auth=BasicAuth(login=f"job-{job_id}", password=key)
+    ) as http:
+        yield APIClient(http, jobs_api_connection_string)

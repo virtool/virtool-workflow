@@ -13,6 +13,8 @@
 import os
 import sys
 
+import sphinx_nameko_theme
+
 from virtool_workflow.runtime.hook import Hook
 
 sys.path.insert(0, os.path.abspath("."))
@@ -24,7 +26,7 @@ project = "virtool_workflow"
 author = "Ian Boyes, Blake Smith"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1"
+release = "0.0.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,15 +37,15 @@ release = "0.0.1"
 sys.path.append(os.path.abspath("./_ext"))
 
 extensions = [
+    "sphinx_toolbox.more_autodoc.autoprotocol",
+    "sphinx_toolbox.more_autodoc.typehints",
     "autofixture",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
 ]
 
-intersphinx_mapping = {"python": ("https://docs.python.org/3.9", None)}
-
-html_theme_options = {"page_width": "1200px", "sidebar_width": "20%"}
+intersphinx_mapping = {"python": ("https://docs.python.org/3.10", None)}
 
 html_sidebars = {
     "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
@@ -64,8 +66,10 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_favicon = "./favicon.ico"
-html_static_path = ["_static"]
-html_css_files = ["custom.css"]
+
+
+html_theme = "nameko"
+html_theme_path = [sphinx_nameko_theme.get_html_theme_path()]
 
 
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):

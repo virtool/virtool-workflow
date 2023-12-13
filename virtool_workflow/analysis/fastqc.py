@@ -1,13 +1,281 @@
-import os
+"""Utilities and fixtures for running FastQC."""
+from __future__ import annotations
+
+import asyncio
+import statistics
 import shutil
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol, TextIO, IO
 
 from pyfixtures import fixture
 
+from virtool_workflow import RunSubprocess
 from virtool_workflow.analysis.utils import ReadPaths
 
 
-def handle_base_quality_nan(split_line: list) -> list:
+@dataclass
+class NucleotidePoint:
+    g: float
+    a: float
+    t: float
+    c: float
+
+
+@dataclass
+class QualityPoint:
+    mean: float
+    median: float
+    lower_quartile: float
+    upper_quartile: float
+    tenth_percentile: float
+    ninetieth_percentile: float
+
+
+class BaseQualityParser:
+    """Parse the section of FastQC output containing per-base quality data."""
+
+    pattern = ">>Per base sequence quality"
+
+    def __init__(self):
+        self.data: list[QualityPoint] = []
+
+    def composite(self, parser: BaseQualityParser):
+        p = BaseQualityParser()
+
+        p.data = [
+            QualityPoint(
+                mean=statistics.mean([this.mean, other.mean]),
+                median=statistics.mean([this.median, other.median]),
+                lower_quartile=statistics.mean(
+                    [this.lower_quartile, other.lower_quartile]
+                ),
+                upper_quartile=statistics.mean(
+                    [this.upper_quartile, other.upper_quartile]
+                ),
+                tenth_percentile=statistics.mean(
+                    [this.tenth_percentile, other.tenth_percentile]
+                ),
+                ninetieth_percentile=statistics.mean(
+                    [this.ninetieth_percentile, other.ninetieth_percentile]
+                ),
+            )
+            for this, other in zip(self.data, parser.data)
+        ]
+
+        return p
+
+    def handle(self, f: TextIO):
+        max_index = -1
+
+        while True:
+            line = f.readline().rstrip()
+
+            if line == ">>END_MODULE":
+                break
+
+            if not line or line[0] == "#":
+                continue
+
+            split = line.split()
+
+            # Convert all fields except first to 2-decimal floats.
+            try:
+                values = [float(value) for value in split[1:]]
+            except ValueError as err:
+                if "NaN" not in str(err):
+                    raise
+
+                values = _handle_base_quality_nan(split)
+
+            (
+                mean,
+                median,
+                lower_quartile,
+                upper_quartile,
+                tenth_percentile,
+                ninetieth_percentile,
+            ) = values
+
+            indexes = _calculate_index_range(split[0])
+
+            for i in indexes:
+                self.data.append(
+                    QualityPoint(
+                        mean=mean,
+                        median=median,
+                        lower_quartile=lower_quartile,
+                        upper_quartile=upper_quartile,
+                        tenth_percentile=tenth_percentile,
+                        ninetieth_percentile=ninetieth_percentile,
+                    )
+                )
+
+                if i - max_index != 1:
+                    raise ValueError("Non-contiguous index")
+
+                max_index = i
+
+
+class BasicStatisticsParser:
+    """Parse the section of FastQC output containing basic statistics."""
+
+    pattern = ">>Basic Statistics"
+
+    def __init__(self):
+        self.count = 0
+        self.encoding = None
+        self.gc = None
+        self.length = None
+
+        self._populated = False
+
+    def composite(self, parser: BasicStatisticsParser):
+        p = BasicStatisticsParser()
+
+        p.count = self.count + parser.count
+        p.encoding = self.encoding
+        p.gc = (self.gc + parser.gc) / 2
+        p.length = [
+            min(self.length + parser.length),
+            max(self.length + parser.length),
+        ]
+
+        return p
+
+    def handle(self, f: IO):
+        while True:
+            line = f.readline().rstrip()
+
+            if line.startswith("#"):
+                continue
+
+            if line == ">>END_MODULE":
+                break
+
+            if "Total Sequences" in line:
+                self.count = int(line.split("\t")[1])
+
+            elif "Encoding" in line:
+                self.encoding = line.split("\t")[1]
+
+            elif "Sequence length" in line:
+                length_range = [int(s) for s in line.split("\t")[1].split("-")]
+                self.length = [min(length_range), max(length_range)]
+
+            # GC-content
+            elif "%GC" in line and "#" not in line:
+                self.gc = float(line.split("\t")[1])
+
+
+class NucleotideCompositionParser:
+    """Parse the section of FastQC output containing per-base nucleotide composition."""
+
+    pattern = ">>Per base sequence content"
+
+    def __init__(self):
+        self.data: list[NucleotidePoint] = []
+
+    def composite(self, parser: NucleotideCompositionParser):
+        """Make a composite dataset given another :class:`.NucleotideCompositionParser`."""
+        p = NucleotideCompositionParser()
+
+        p.data = [
+            NucleotidePoint(
+                g=(this.g + other.g) / 2,
+                a=(this.a + other.a) / 2,
+                t=(this.t + other.t) / 2,
+                c=(this.c + other.c) / 2,
+            )
+            for this, other in zip(self.data, parser.data)
+        ]
+
+        return p
+
+    def handle(self, f: TextIO):
+        max_index = -1
+
+        while True:
+            line = f.readline().rstrip()
+
+            if line == ">>END_MODULE":
+                break
+
+            if not line or line[0] == "#":
+                continue
+
+            split = line.split()
+
+            try:
+                g, a, t, c = [float(value) for value in split[1:]]
+            except ValueError as err:
+                if "NaN" not in str(err):
+                    raise
+
+                g, a, t, c = _handle_base_quality_nan(split)
+
+            indexes = _calculate_index_range(split[0])
+
+            for i in indexes:
+                self.data.append(NucleotidePoint(g, a, t, c))
+
+                if i - max_index != 1:
+                    raise ValueError("Non-contiguous index")
+
+                max_index = i
+
+
+class SequenceQualityParser:
+    """Parse the section of FastQC output containing per-sequence quality data."""
+
+    pattern = ">>Per sequence quality scores"
+
+    def __init__(self):
+        self.data = [0] * 50
+
+    def composite(self, parser: SequenceQualityParser):
+        p = SequenceQualityParser()
+        p.data = [sum(both) for both in zip(self.data, parser.data)]
+
+        return p
+
+    def handle(self, f: TextIO):
+        while True:
+            line = f.readline().rstrip()
+
+            if not line or line.startswith("#"):
+                continue
+
+            if line == ">>END_MODULE":
+                break
+
+            line = line.split()
+
+            quality = int(line[0])
+            count = int(float(line[1]))
+
+            self.data[quality] = count
+
+
+@dataclass
+class FastQCSide:
+    base_quality: BaseQualityParser
+    basic_statistics: BasicStatisticsParser
+    nucleotide_composition: NucleotideCompositionParser
+    sequence_quality: SequenceQualityParser
+
+
+def _calculate_index_range(base: str) -> range:
+    pos = [int(x) for x in base.split("-")]
+
+    if len(pos) > 1:
+        return range(pos[0] - 1, pos[1])
+
+    return range(pos[0] - 1, pos[0])
+
+
+def _handle_base_quality_nan(split_line: list) -> list:
     """
     Parse a per-base quality line from FastQC containing NaN values.
 
@@ -19,7 +287,6 @@ def handle_base_quality_nan(split_line: list) -> list:
 
     for value in values:
         try:
-            value = round(int(value.split(".")[0]), 2)
             return [value for _ in values]
         except ValueError:
             pass
@@ -33,180 +300,147 @@ def handle_base_quality_nan(split_line: list) -> list:
     raise ValueError(f"Could not parse base quality values '{joined}'")
 
 
-def parse_fastqc(fastqc_path: Path, sample_path: Path, prefix="fastqc_") -> dict:
+def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
     """
     Parse the FastQC results at `fastqc_path`.
 
-    All FastQC data except the textual data file are removed. The `prefix` will be prepended to the data file name.
+    All FastQC data except the textual data file are removed.
 
     :param fastqc_path: the FastQC output data path
     :param sample_path: the FastQC text output file will be moved here
-    :param prefix: a prefix to prepend to the retained FastQC data file
     :return: a dict containing a representation of the parsed FastQC data
 
     """
+    output_path.mkdir(exist_ok=True, parents=True)
+
+    sides = []
+
     # Get the text data files from the FastQC output
-    for name in os.listdir(fastqc_path):
-        if "reads" in name and "." not in name:
-            suffix = name.split("_")[1]
-            shutil.move(
-                os.path.join(fastqc_path, name, "fastqc_data.txt"),
-                os.path.join(sample_path, f"{prefix}{suffix}.txt"),
+    for path in fastqc_path.iterdir():
+        if not path.is_dir():
+            continue
+
+        for file_path in path.iterdir():
+            if file_path.name != "fastqc_data.txt":
+                continue
+
+            new_path = output_path / f"{path.name}.txt"
+
+            shutil.move(file_path, new_path)
+
+            base_quality = BaseQualityParser()
+            basic_statistics = BasicStatisticsParser()
+            nucleotide_composition = NucleotideCompositionParser()
+            sequence_quality = SequenceQualityParser()
+
+            with open(new_path, "r") as f:
+                while True:
+                    line = f.readline()
+
+                    if not line:
+                        break
+
+                    if basic_statistics.pattern in line:
+                        basic_statistics.handle(f)
+
+                    if base_quality.pattern in line:
+                        base_quality.handle(f)
+
+                    if nucleotide_composition.pattern in line:
+                        nucleotide_composition.handle(f)
+
+                    if SequenceQualityParser.pattern in line:
+                        sequence_quality.handle(f)
+
+            sides.append(
+                FastQCSide(
+                    base_quality=base_quality,
+                    basic_statistics=basic_statistics,
+                    nucleotide_composition=nucleotide_composition,
+                    sequence_quality=sequence_quality,
+                )
             )
 
-    # Dispose of the rest of the data files.
-    shutil.rmtree(fastqc_path)
+    left, right = sides
 
-    fastqc = {"count": 0}
+    basic = left.basic_statistics.composite(right.basic_statistics)
 
-    # Parse data file(s)
-    for suffix in [1, 2]:
-        path = os.path.join(sample_path, f"{prefix}{suffix}.txt")
+    return {
+        "bases": [
+            [
+                round(n, 3)
+                for n in [
+                    point.mean,
+                    point.median,
+                    point.lower_quartile,
+                    point.upper_quartile,
+                    point.tenth_percentile,
+                    point.ninetieth_percentile,
+                ]
+            ]
+            for point in left.base_quality.composite(right.base_quality).data
+        ],
+        "composition": [
+            [round(n, 1) for n in [point.g, point.a, point.t, point.c]]
+            for point in left.nucleotide_composition.composite(
+                right.nucleotide_composition
+            ).data
+        ],
+        "count": basic.count,
+        "length": basic.length,
+        "encoding": left.basic_statistics.encoding,
+        "gc": basic.gc,
+        "sequences": left.sequence_quality.composite(right.sequence_quality).data,
+    }
 
-        try:
-            handle = open(path, "r")
-        except IOError:
-            if suffix == 2:
-                continue
-            else:
-                raise
 
-        flag = None
+class FastQCRunner(Protocol):
+    """A protocol describing callables that can be used to run FastQC."""
 
-        for line in handle:
-            # Turn off flag if the end of a module is encountered
-            if flag is not None and "END_MODULE" in line:
-                flag = None
-
-            # Total sequences
-            elif "Total Sequences" in line:
-                fastqc["count"] += int(line.split("\t")[1])
-
-            # Read encoding (eg. Illumina 1.9)
-            elif "encoding" not in fastqc and "Encoding" in line:
-                fastqc["encoding"] = line.split("\t")[1]
-
-            # Length
-            elif "Sequence length" in line:
-                split_length = [int(s) for s in line.split("\t")[1].split("-")]
-
-                if suffix == 1:
-                    if len(split_length) == 2:
-                        fastqc["length"] = split_length
-                    else:
-                        fastqc["length"] = [split_length[0], split_length[0]]
-                else:
-                    fastqc_min_length, fastqc_max_length = fastqc["length"]
-
-                    if len(split_length) == 2:
-                        fastqc["length"] = [
-                            min(fastqc_min_length, split_length[0]),
-                            max(fastqc_max_length, split_length[1]),
-                        ]
-                    else:
-                        fastqc["length"] = [
-                            min(fastqc_min_length, split_length[0]),
-                            max(fastqc_max_length, split_length[0]),
-                        ]
-
-            # GC-content
-            elif "%GC" in line and "#" not in line:
-                gc = float(line.split("\t")[1])
-
-                if suffix == 1:
-                    fastqc["gc"] = gc
-                else:
-                    fastqc["gc"] = (fastqc["gc"] + gc) / 2
-
-            # The statements below handle the beginning of multi-line FastQC sections. They set the flag
-            # value to the found section and allow it to be further parsed.
-            elif "Per base sequence quality" in line:
-                flag = "bases"
-                if suffix == 1:
-                    fastqc[flag] = [None] * fastqc["length"][1]
-
-            elif "Per sequence quality scores" in line:
-                flag = "sequences"
-                if suffix == 1:
-                    fastqc[flag] = [0] * 50
-
-            elif "Per base sequence content" in line:
-                flag = "composition"
-                if suffix == 1:
-                    fastqc[flag] = [None] * fastqc["length"][1]
-
-            # The statements below handle the parsing of lines when the flag has been set for a multi-line
-            # section. This ends when the 'END_MODULE' line is encountered and the flag is reset to none
-            elif flag in ["composition", "bases"] and "#" not in line:
-                # Split line around whitespace.
-                split = line.rstrip().split()
-
-                # Convert all fields except first to 2-decimal floats.
-                try:
-                    values = [round(int(value.split(".")[0]), 1) for value in split[1:]]
-
-                except ValueError as err:
-                    if "NaN" in str(err):
-                        values = handle_base_quality_nan(split)
-
-                # Convert to position field to a one- or two-member tuple.
-                pos = [int(x) for x in split[0].split("-")]
-
-                if len(pos) > 1:
-                    pos = range(pos[0], pos[1] + 1)
-                else:
-                    pos = [pos[0]]
-
-                if suffix == 1:
-                    for i in pos:
-                        fastqc[flag][i - 1] = values
-                else:
-                    for i in pos:
-                        fastqc[flag][i - 1] = [
-                            (_1 + _2) / 2 for _1, _2 in zip(values, fastqc[flag][i - 1])
-                        ]
-
-            elif flag == "sequences" and "#" not in line:
-                line = line.rstrip().split()
-
-                quality = int(line[0])
-
-                fastqc["sequences"][quality] += int(line[1].split(".")[0])
-
-    return fastqc
+    async def __call__(self, paths: ReadPaths) -> dict:
+        ...
 
 
 @fixture
-def fastqc(work_path: Path, run_subprocess):
+async def fastqc(
+    run_subprocess: RunSubprocess,
+    work_path: Path,
+):
     """
-    Returns a function that can run FastQC given a ``work_path`` and ``run_subprocess`` callable.
+    Provides an asynchronous function that can run FastQC as a subprocess.
 
-    :param work_path: the running workflow's ``work_path``
-    :param run_subprocess: the running workflow's ``run_subprocess`` callable
-    :return: a function that can run FastQC
+    The function takes a one or two paths to FASTQ read files (:class:`.ReadPaths`) in
+    a tuple.
+
+    Example:
+
+    .. code-block:: python
+
+        @step
+        async def step_one(fastqc: FastQCRunner, work_path: Path):
+            fastqc_result = await fastqc((
+                work_path / "reads_1.fq",
+                work_path / "reads_2.fq"
+            ))
 
     """
-    fastqc_path = work_path / "fastqc"
-    output_path = work_path / "fastqc_out"
-    fastqc_path.mkdir()
-    output_path.mkdir()
+    temp_path = Path(await asyncio.to_thread(tempfile.mkdtemp))
 
-    async def run_fastqc(input_paths: ReadPaths):
-        """Run fastqc on the input path and return the parsed result."""
+    async def func(paths: ReadPaths, output_path: Path) -> dict:
         command = [
             "fastqc",
             "-f",
             "fastq",
             "-o",
-            str(fastqc_path),
+            str(temp_path),
             "--extract",
-            *[str(path) for path in input_paths],
+            *[str(path) for path in paths],
         ]
 
         await run_subprocess(command)
 
-        return parse_fastqc(fastqc_path, output_path)
+        return _parse_fastqc(temp_path, output_path)
 
-    run_fastqc.output_path = output_path
+    yield func
 
-    return run_fastqc
+    await asyncio.to_thread(shutil.rmtree, temp_path)
