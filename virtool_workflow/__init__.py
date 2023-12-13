@@ -1,14 +1,13 @@
-"""An SDK for defining Virtool workflows."""
-from pyfixtures import fixture
+"""
+A framework for defining Virtool workflows.
+"""
 from virtool_workflow.decorators import step
-from virtool_workflow.workflow import Workflow
-from virtool_workflow.runtime.executor import execute
-from virtool_workflow.runtime.step import WorkflowStep
+from virtool_workflow.runtime.run_subprocess import RunSubprocess
+from virtool_workflow.workflow import Workflow, WorkflowStep
 
 __all__ = [
+    "step",
+    "RunSubprocess",
     "Workflow",
     "WorkflowStep",
-    "execute",
-    "fixture",
-    "step",
 ]

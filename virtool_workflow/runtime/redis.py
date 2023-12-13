@@ -43,16 +43,17 @@ async def get_next_job(list_name: str, redis: Redis) -> str:
 
     if result is not None:
         job_id = str(result[1], encoding="utf-8")
-        logger.info("Pulled job from Redis", id=job_id)
+        logger.info("pulled job id from redis", id=job_id)
         return job_id
 
 
-async def wait_for_cancellation(redis, job_id: str, func: Callable):
+async def wait_for_cancellation(redis: Redis, job_id: str, func: Callable):
     (channel,) = await redis.subscribe(CANCELLATION_CHANNEL)
 
     try:
         async for cancelled_job_id in channel.iter():
             if cancelled_job_id.decode() == job_id:
                 return func()
+
     except CancelledError:
         ...

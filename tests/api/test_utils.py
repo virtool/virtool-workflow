@@ -4,6 +4,9 @@ from virtool_workflow.api.utils import retry
 
 
 async def test_retry(caplog):
+    """
+    Test that the retry utility retries failing HTTP requests and logs the attempts.
+    """
     caplog.set_level(logging.INFO)
 
     class Retry:
