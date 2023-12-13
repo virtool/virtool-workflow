@@ -16,6 +16,8 @@ async def test_ok(data: Data, scope: FixtureScope):
 
     analysis = await scope.instantiate_by_key("analysis")
 
+    assert analysis.id == data.analysis.id
+
 
 async def test_not_found(data: Data, scope: FixtureScope):
     """Test that JobsAPINotFound is raised if the analysis does not exist."""
@@ -43,7 +45,7 @@ async def test_upload_file(
     with open(path, "wt") as f:
         f.write("hello world")
 
-    analysis_file = await analysis.upload_file(path, "unknown")
+    await analysis.upload_file(path, "unknown")
 
     assert (captured_uploads_path / "blank.txt").read_text() == "hello world"
 

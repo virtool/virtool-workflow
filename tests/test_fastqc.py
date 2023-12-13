@@ -111,8 +111,8 @@ class TestBaseQualityParser:
             "tenth_percentile",
             "ninetieth_percentile",
         ):
-            for i, (left_point, right_point, composite_point) in enumerate(
-                zip(left_parser.data, right_parser.data, composite_parser.data)
+            for left_point, right_point, composite_point in zip(
+                left_parser.data, right_parser.data, composite_parser.data
             ):
                 assert (
                     getattr(composite_point, attr_name)
@@ -327,8 +327,8 @@ class TestNucleotideCompositionParser:
             "t",
             "c",
         ):
-            for i, (left_point, right_point, composite_point) in enumerate(
-                zip(left_parser.data, right_parser.data, composite_parser.data)
+            for left_point, right_point, composite_point in zip(
+                left_parser.data, right_parser.data, composite_parser.data
             ):
                 assert (
                     getattr(composite_point, attr_name)
@@ -454,8 +454,8 @@ class TestSequenceQualityParser:
 
         composite_parser = left_parser.composite(right_parser)
 
-        for i, (left_point, right_point, composite_point) in enumerate(
-            zip(left_parser.data, right_parser.data, composite_parser.data)
+        for left_point, right_point, composite_point in zip(
+            left_parser.data, right_parser.data, composite_parser.data
         ):
             assert left_point + right_point == composite_point
 

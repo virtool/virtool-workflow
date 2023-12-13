@@ -118,7 +118,7 @@ class TestNewSample:
         assert new_sample.name == data.new_sample.name
         assert new_sample.paired == data.new_sample.paired
 
-        paths = list((work_path / "uploads").iterdir())
+        paths = sorted((work_path / "uploads").iterdir())
 
         assert (
             paths
