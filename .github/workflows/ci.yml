@@ -52,8 +52,9 @@ jobs:
           wget https://github.com/relipmoc/skewer/archive/0.2.2.tar.gz
           tar -xf 0.2.2.tar.gz
           cd skewer-0.2.2
-          make
-          mv skewer/skewer /usr/local/bin
+          # Fix for `error: static assertion failed: comparison object must be invocable as const`
+          sed -i 's/const ELEMENT &elem2)/& const/g' src/matrix.h
+          make install
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
