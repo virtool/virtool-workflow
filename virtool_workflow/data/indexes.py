@@ -128,7 +128,12 @@ class WFIndex:
 
 class WFNewIndex:
     def __init__(
-        self, api: APIClient, index_id: str, manifest: dict[str, int | str], path: Path
+        self,
+        api: APIClient,
+        index_id: str,
+        manifest: dict[str, int | str],
+        path: Path,
+        reference: ReferenceNested,
     ):
         self._api = api
 
@@ -140,6 +145,9 @@ class WFNewIndex:
 
         self.path = path
         """The path to the index directory in the workflow's work directory."""
+
+        self.reference = reference
+        """The parent reference."""
 
     async def delete(self):
         await self._api.delete(f"/indexes/{self.id}")
@@ -313,4 +321,5 @@ async def new_index(
         index_id=id_,
         manifest=index_.manifest,
         path=index_work_path,
+        reference=index_.reference,
     )
