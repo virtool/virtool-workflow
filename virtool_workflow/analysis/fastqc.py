@@ -361,6 +361,35 @@ def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
                 )
             )
 
+    if len(sides) == 1:
+        left = sides[0]
+
+        return {
+            "bases": [
+                [
+                    round(n, 3)
+                    for n in [
+                        point.mean,
+                        point.median,
+                        point.lower_quartile,
+                        point.upper_quartile,
+                        point.tenth_percentile,
+                        point.ninetieth_percentile,
+                    ]
+                ]
+                for point in left.base_quality.data
+            ],
+            "composition": [
+                [round(n, 1) for n in [point.g, point.a, point.t, point.c]]
+                for point in left.nucleotide_composition.data
+            ],
+            "count": left.basic_statistics.count,
+            "encoding": left.basic_statistics.encoding,
+            "gc": left.basic_statistics.gc,
+            "length": left.basic_statistics.length,
+            "sequences": left.sequence_quality.data,
+        }
+
     left, right = sides
 
     basic = left.basic_statistics.composite(right.basic_statistics)
