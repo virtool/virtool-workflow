@@ -480,13 +480,14 @@ async def test_fastqc(
 
     output_path = work_path / "fastqc"
 
-    async for func in fastqc(run_subprocess, work_path):
-        out = await func(
-            (
-                work_path / "reads_1.fq.gz",
-                work_path / "reads_2.fq.gz",
-            ),
-            output_path,
-        )
+    func = await fastqc(run_subprocess)
 
-        assert out == snapshot
+    out = await func(
+        (
+            work_path / "reads_1.fq.gz",
+            work_path / "reads_2.fq.gz",
+        ),
+        output_path,
+    )
+
+    assert out == snapshot

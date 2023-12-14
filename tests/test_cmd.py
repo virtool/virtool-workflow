@@ -61,7 +61,8 @@ async def test_cmd(
 
     await asyncio.sleep(5)
 
-    p.terminate()
+    if p.returncode is None:
+        p.terminate()
 
     await p.communicate()
     await g
