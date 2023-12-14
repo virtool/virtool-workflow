@@ -5,6 +5,7 @@ from pathlib import Path
 
 import aiofiles
 from pyfixtures import fixture
+from structlog import get_logger
 from virtool_core.models.analysis import Analysis
 from virtool_core.models.index import Index
 from virtool_core.models.job import Job
@@ -14,6 +15,8 @@ from virtool_core.utils import decompress_file
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.files import VirtoolFileFormat
 from virtool_workflow.errors import MissingJobArgument
+
+logger = get_logger("api")
 
 
 @dataclass
@@ -125,7 +128,12 @@ class WFIndex:
 
 class WFNewIndex:
     def __init__(
-        self, api: APIClient, index_id: str, manifest: dict[str, int | str], path: Path
+        self,
+        api: APIClient,
+        index_id: str,
+        manifest: dict[str, int | str],
+        path: Path,
+        reference: ReferenceNested,
     ):
         self._api = api
 
@@ -137,6 +145,9 @@ class WFNewIndex:
 
         self.path = path
         """The path to the index directory in the workflow's work directory."""
+
+        self.reference = reference
+        """The parent reference."""
 
     async def delete(self):
         await self._api.delete(f"/indexes/{self.id}")
@@ -174,7 +185,7 @@ class WFNewIndex:
         )
 
     @property
-    def json_path(self) -> Path:
+    def otus_json_path(self) -> Path:
         """
         The path to the JSON representation of the reference index in the workflow's
         work directory.
@@ -193,11 +204,19 @@ async def index(
     """The :class:`WFIndex` for the current analysis job."""
     id_ = analysis.index.id
 
+    log = logger.bind(id=id_, resource="index")
+
+    log.info("loading index")
+
     index_json = await _api.get_json(f"/indexes/{id_}")
     index_ = Index(**index_json)
 
+    log.info("got index json")
+
     index_work_path = work_path / "indexes" / index_.id
     await asyncio.to_thread(index_work_path.mkdir, parents=True, exist_ok=True)
+
+    log.info("created index directory")
 
     for name in (
         "otus.json.gz",
@@ -211,6 +230,7 @@ async def index(
         "reference.rev.2.bt2",
     ):
         await _api.get_file(f"/indexes/{id_}/files/{name}", index_work_path / name)
+        log.info("downloaded index file", name=name)
 
     await asyncio.to_thread(
         decompress_file,
@@ -218,6 +238,8 @@ async def index(
         index_work_path / "reference.fa",
         proc,
     )
+
+    log.info("decompressed reference fasta")
 
     json_path = index_work_path / "otus.json"
 
@@ -227,6 +249,8 @@ async def index(
         index_work_path / json_path,
         proc,
     )
+
+    log.info("decompressed reference otus json")
 
     async with aiofiles.open(json_path) as f:
         data = json.loads(await f.read())
@@ -242,6 +266,8 @@ async def index(
                 sequence_otu_map[sequence_id] = otu["_id"]
                 sequence_lengths[sequence_id] = len(sequence["sequence"])
 
+    log.info("parsed and loaded maps from otus json")
+
     return WFIndex(
         id=id_,
         path=index_work_path,
@@ -253,7 +279,9 @@ async def index(
 
 
 @fixture
-async def new_index(_api: APIClient, job: Job, work_path: Path) -> WFNewIndex:
+async def new_index(
+    _api: APIClient, job: Job, proc: int, work_path: Path
+) -> WFNewIndex:
     """
     The :class:`.WFNewIndex` for an index being created by the current job.
     """
@@ -262,19 +290,36 @@ async def new_index(_api: APIClient, job: Job, work_path: Path) -> WFNewIndex:
     except KeyError:
         raise MissingJobArgument("Missing jobs args key 'index_id'")
 
+    log = logger.bind(resource="new_index", id=id_, job_id=job.id)
+    log.info("loading index")
+
     index_json = await _api.get_json(f"/indexes/{id_}")
     index_ = Index(**index_json)
+
+    log.info("got index json")
 
     index_work_path = work_path / "indexes" / index_.id
     await asyncio.to_thread(index_work_path.mkdir, parents=True, exist_ok=True)
 
-    await _api.get_file(
-        f"/indexes/{id_}/files/otus.json.gz", index_work_path / "otus.json.gz"
+    log.info("created index directory")
+
+    compressed_otus_json_path = index_work_path / "otus.json.gz"
+    await _api.get_file(f"/indexes/{id_}/files/otus.json.gz", compressed_otus_json_path)
+    log.info("downloaded otus json")
+
+    await asyncio.to_thread(
+        decompress_file,
+        compressed_otus_json_path,
+        index_work_path / "otus.json",
+        processes=proc,
     )
+
+    log.info("decompressed otus json")
 
     return WFNewIndex(
         api=_api,
         index_id=id_,
         manifest=index_.manifest,
         path=index_work_path,
+        reference=index_.reference,
     )

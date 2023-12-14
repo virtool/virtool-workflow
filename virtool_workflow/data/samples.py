@@ -133,15 +133,23 @@ async def new_sample(
     _api: APIClient, job: Job, uploads: WFUploads, work_path: Path
 ) -> WFNewSample:
     """The sample associated with the current job."""
+
     id_ = job.args["sample_id"]
+
+    log = logger.bind(resource="sample", id=id_)
+    log.info("loading sample for sample creation")
 
     base_url_path = f"/samples/{id_}"
 
     sample_dict = await _api.get_json(base_url_path)
     sample = Sample(**sample_dict)
 
+    log.info("got sample json")
+
     uploads_path = work_path / "uploads"
     await asyncio.to_thread(uploads_path.mkdir, exist_ok=True, parents=True)
+
+    log.info("created uploads directory")
 
     files = tuple(
         WFNewSampleUpload(
@@ -154,6 +162,8 @@ async def new_sample(
     )
 
     await asyncio.gather(*[uploads.download(f.id, f.path) for f in files])
+
+    log.info("downloaded sample files")
 
     async def finalize(quality: dict[str, Any]):
         await _api.patch_json(base_url_path, data={"quality": quality})
