@@ -75,7 +75,7 @@
     dict({
       'error': None,
       'progress': 100,
-      'stage': None,
+      'stage': '',
       'state': <JobState.COMPLETE: 'complete'>,
       'step_description': '',
       'step_name': '',
