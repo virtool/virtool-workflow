@@ -59,10 +59,6 @@ async def test_cmd(
         watch_pipe(p.stdout, handler),
     )
 
-    await asyncio.sleep(5)
-
-    if p.returncode is None:
-        p.terminate()
-
+    await p.wait()
     await p.communicate()
     await g
