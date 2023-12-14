@@ -49,7 +49,7 @@ async def push_status(
     payload = {
         "error": error,
         "progress": progress,
-        "stage": _step.function.__name__ if _step is not None else None,
+        "stage": step_name,
         "state": _state.value,
         "step_description": _step.description if _step is not None else "",
         "step_name": step_name,
