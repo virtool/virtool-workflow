@@ -462,7 +462,7 @@ class TestSequenceQualityParser:
         assert composite_parser.data == snapshot
 
 
-async def test_fastqc(
+async def test_fastqc_paired(
     example_path: Path,
     run_subprocess: RunSubprocess,
     snapshot: SnapshotAssertion,
@@ -487,6 +487,29 @@ async def test_fastqc(
             work_path / "reads_1.fq.gz",
             work_path / "reads_2.fq.gz",
         ),
+        output_path,
+    )
+
+    assert out == snapshot
+
+
+async def test_fastqc_unpaired(
+    example_path: Path,
+    run_subprocess: RunSubprocess,
+    snapshot: SnapshotAssertion,
+    work_path: Path,
+):
+    shutil.copyfile(
+        example_path / "sample/reads_1.fq.gz",
+        work_path / "reads_1.fq.gz",
+    )
+
+    output_path = work_path / "fastqc"
+
+    func = await fastqc(run_subprocess)
+
+    out = await func(
+        (work_path / "reads_1.fq.gz",),
         output_path,
     )
 
