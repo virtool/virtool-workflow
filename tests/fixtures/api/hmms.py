@@ -3,7 +3,7 @@ from pathlib import Path
 from aiohttp.web import FileResponse, RouteTableDef, View
 
 from tests.fixtures.api.utils import generate_not_found
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 def create_hmms_routes(data: Data, example_path: Path):

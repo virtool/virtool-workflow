@@ -5,7 +5,7 @@ import pytest
 from pyfixtures import FixtureScope
 from structlog import get_logger
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.api.client import api_client
 from virtool_workflow.runtime.config import RunConfig
 

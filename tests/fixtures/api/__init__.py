@@ -12,7 +12,7 @@ from tests.fixtures.api.ml import create_ml_routes
 from tests.fixtures.api.samples import create_samples_routes
 from tests.fixtures.api.subtractions import create_subtractions_routes
 from tests.fixtures.api.uploads import create_uploads_routes
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 @pytest.fixture

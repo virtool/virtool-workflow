@@ -3,7 +3,7 @@ from contextlib import suppress
 
 import pytest
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import hooks, Workflow
 from virtool_workflow.runtime.config import RunConfig
 from virtool_workflow.runtime.events import Events

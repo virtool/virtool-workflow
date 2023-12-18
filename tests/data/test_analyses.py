@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pyfixtures import FixtureScope
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.analyses import WFAnalysis
 from virtool_workflow.errors import JobsAPINotFound, JobsAPIConflict
 

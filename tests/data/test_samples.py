@@ -5,7 +5,7 @@ from pydantic_factories import ModelFactory
 from pyfixtures import FixtureScope
 from virtool_core.models.samples import Quality
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.samples import WFSample, WFNewSample
 from virtool_workflow.errors import JobsAPINotFound, JobsAPIConflict
 

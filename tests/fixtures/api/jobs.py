@@ -3,7 +3,7 @@ from aiohttp.web import json_response, View, RouteTableDef
 from virtool_core.models.job import JobStatus, JobState
 
 from tests.fixtures.api.utils import custom_dumps, generate_not_found
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 def create_jobs_routes(data: Data):

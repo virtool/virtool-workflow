@@ -8,7 +8,7 @@ from aioredis import Redis
 from structlog.testing import LogCapture
 from virtool_core.models.job import JobStatus, JobState
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import RunSubprocess, Workflow
 from virtool_workflow.errors import SubprocessFailed
 from virtool_workflow.runtime.redis import CANCELLATION_CHANNEL

@@ -5,7 +5,7 @@ from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_response import json_response
 
 from tests.fixtures.api.utils import generate_not_found, custom_dumps
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 def create_ml_routes(data: Data, example_path: Path):

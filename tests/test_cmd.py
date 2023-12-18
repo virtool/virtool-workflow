@@ -3,7 +3,7 @@ import asyncio
 from _pytest._py.path import LocalPath
 from aioredis import Redis
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.runtime.run_subprocess import watch_pipe
 
 
