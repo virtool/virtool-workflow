@@ -8,8 +8,8 @@ from tests.fixtures.api.utils import (
     read_file_from_request,
     generate_not_found,
     custom_dumps,
-    SUBTRACTION_FILENAMES,
 )
+from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 from virtool_workflow.pytest_plugin.data import Data
 
 

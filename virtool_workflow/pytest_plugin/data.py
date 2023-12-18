@@ -19,7 +19,7 @@ from virtool_core.models.subtraction import (
     SubtractionFile,
 )
 
-from tests.fixtures.api.utils import SUBTRACTION_FILENAMES
+from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 
 
 @dataclass
