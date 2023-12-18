@@ -2,7 +2,7 @@ from pyfixtures import FixtureScope
 from syrupy import SnapshotAssertion
 from virtool_core.models.job import Job
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 async def test_ok(data: Data, scope: FixtureScope, snapshot: SnapshotAssertion):

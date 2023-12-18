@@ -8,7 +8,7 @@ from pytest_structlog import StructuredLogCapture
 from structlog.testing import LogCapture
 from virtool_core.models.job import JobStatus, JobState
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import Workflow
 from virtool_workflow.runtime.redis import CANCELLATION_CHANNEL
 from virtool_workflow.runtime.run import start_runtime

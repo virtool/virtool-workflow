@@ -5,7 +5,7 @@ from pyfixtures import FixtureScope
 from syrupy import SnapshotAssertion
 from syrupy import SnapshotSession
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.ml import WFMLModelRelease
 
 test = SnapshotSession

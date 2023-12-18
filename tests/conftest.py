@@ -1,10 +1,10 @@
 pytest_plugins = [
     "tests.fixtures",
     "tests.fixtures.api",
-    "tests.fixtures.data",
     "tests.fixtures.execution",
     "tests.fixtures.redis",
     "tests.fixtures.scope",
+    "virtool_workflow.pytest_plugin",
 ]
 
 

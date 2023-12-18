@@ -10,7 +10,7 @@ from tests.fixtures.api.utils import (
     custom_dumps,
     SUBTRACTION_FILENAMES,
 )
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 def create_subtractions_routes(

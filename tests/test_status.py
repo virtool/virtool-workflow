@@ -5,7 +5,7 @@ from syrupy import SnapshotAssertion
 from syrupy.filters import props
 from virtool_core.models.job import JobState, JobStatus
 
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import Workflow, hooks
 from virtool_workflow.runtime.config import RunConfig
 from virtool_workflow.runtime.events import Events

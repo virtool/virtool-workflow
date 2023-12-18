@@ -4,7 +4,7 @@ from aiohttp.web import RouteTableDef, View, json_response, FileResponse
 from virtool_core.models.index import IndexFile
 
 from tests.fixtures.api.utils import generate_not_found, custom_dumps
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 INDEX_FILE_NAMES = (
     "otus.json.gz",

@@ -8,7 +8,7 @@ from tests.fixtures.api.utils import (
     generate_not_found,
     custom_dumps,
 )
-from tests.fixtures.data import Data
+from virtool_workflow.pytest_plugin.data import Data
 
 
 def create_samples_routes(data: Data, example_path: Path, read_file_from_multipart):
