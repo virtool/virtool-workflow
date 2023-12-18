@@ -5,16 +5,6 @@ from aiohttp.web import json_response
 from orjson import orjson
 from pydantic import BaseModel
 
-SUBTRACTION_FILENAMES = (
-    "subtraction.fa.gz",
-    "subtraction.1.bt2",
-    "subtraction.2.bt2",
-    "subtraction.3.bt2",
-    "subtraction.4.bt2",
-    "subtraction.rev.1.bt2",
-    "subtraction.rev.2.bt2",
-)
-
 
 def custom_dumps(obj: Any) -> str:
     b = orjson.dumps(

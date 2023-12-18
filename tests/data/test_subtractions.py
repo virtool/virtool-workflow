@@ -5,7 +5,7 @@ import pytest
 from pyfixtures import FixtureScope
 from virtool_core.models.job import Job
 
-from tests.fixtures.api.utils import SUBTRACTION_FILENAMES
+from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.subtractions import WFSubtraction, WFNewSubtraction
 from virtool_workflow.errors import JobsAPIConflict
