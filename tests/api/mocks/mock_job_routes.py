@@ -17,7 +17,7 @@ TEST_JOB = {
     },
     "created_at": arrow.utcnow().isoformat(),
     "key": b64encode(b"test_key").decode("utf-8"),
-    "user": {"id": "abc12345", "handle": "igboyes", "administrator": True},
+    "user": {"id": "abc12345", "handle": "igboyes"},
     "rights": {},
     "progress": 60,
     "state": "running",

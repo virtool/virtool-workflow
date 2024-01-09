@@ -161,7 +161,6 @@
   "group_read": true,
   "group_write": true,
   "user": {
-    "administrator": false,
     "id": "abc12345",
     "handle": "james"
   },

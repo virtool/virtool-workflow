@@ -26,15 +26,15 @@ TEST_REF = {
     "process": {"id": "zhio57ug"},
     "otu_count": 42,
     "unbuilt_change_count": 12,
-    "user": {"id": "test", "handle": "test", "administrator": False},
+    "user": {"id": "test", "handle": "test"},
 }
 
 TEST_INDEX = {
     "id": TEST_INDEX_ID,
     "change_count": 1419,
     "contributors": [
-        {"administrator": False, "count": 478, "handle": "jasper", "id": "1kg24j7t"},
-        {"administrator": True, "count": 162, "handle": "mrott", "id": "ihvze2u9"},
+        {"count": 478, "handle": "jasper", "id": "1kg24j7t"},
+        {"count": 162, "handle": "mrott", "id": "ihvze2u9"},
     ],
     "created_at": "2018-02-01T00:28:49.798000Z",
     "files": [],
@@ -46,7 +46,7 @@ TEST_INDEX = {
     "modified_otu_count": 4,
     "ready": False,
     "reference": TEST_REF,
-    "user": {"id": "abc12345", "handle": "igboyes", "administrator": False},
+    "user": {"id": "abc12345", "handle": "igboyes"},
     "otus": [
         {"change_count": 4, "id": "d1efjvxk", "name": "Agaricus bisporus virus 1"},
         {

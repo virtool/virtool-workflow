@@ -19,7 +19,7 @@ TEST_SUBTRACTION = {
     "linked_samples": [],
     "nickname": "Honey Bee",
     "ready": True,
-    "user": {"id": "abc12345", "handle": "james", "administrator": False},
+    "user": {"id": "abc12345", "handle": "james"},
     "job": None,
     "count": 33,
     "gc": {"a": 0.336, "t": 0.335, "g": 0.162, "c": 0.162, "n": 0.006},

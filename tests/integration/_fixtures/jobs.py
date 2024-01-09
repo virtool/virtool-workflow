@@ -15,7 +15,6 @@ async def test_user(db: AsyncIOMotorDatabase):
 
     user = {
         "_id": "test_admin",
-        "administrator": True,
         "handle": False,
     }
 
