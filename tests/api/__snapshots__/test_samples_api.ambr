@@ -99,7 +99,6 @@
       }),
     ]),
     'user': dict({
-      'administrator': False,
       'handle': 'james',
       'id': 'abc12345',
     }),
@@ -269,7 +268,6 @@
       }),
     ]),
     'user': dict({
-      'administrator': False,
       'handle': 'james',
       'id': 'abc12345',
     }),

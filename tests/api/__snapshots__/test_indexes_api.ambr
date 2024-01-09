@@ -3,13 +3,11 @@
     'change_count': 1419,
     'contributors': list([
       dict({
-        'administrator': False,
         'count': 478,
         'handle': 'jasper',
         'id': '1kg24j7t',
       }),
       dict({
-        'administrator': True,
         'count': 162,
         'handle': 'mrott',
         'id': 'ihvze2u9',
@@ -49,7 +47,6 @@
       'name': 'Clone of Banana Viruses',
     }),
     'user': dict({
-      'administrator': False,
       'handle': 'igboyes',
       'id': 'abc12345',
     }),
@@ -61,13 +58,11 @@
     'change_count': 1419,
     'contributors': list([
       dict({
-        'administrator': False,
         'count': 478,
         'handle': 'jasper',
         'id': '1kg24j7t',
       }),
       dict({
-        'administrator': True,
         'count': 162,
         'handle': 'mrott',
         'id': 'ihvze2u9',
@@ -107,7 +102,6 @@
       'name': 'Clone of Banana Viruses',
     }),
     'user': dict({
-      'administrator': False,
       'handle': 'igboyes',
       'id': 'abc12345',
     }),
