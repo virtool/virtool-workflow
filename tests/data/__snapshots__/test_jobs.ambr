@@ -21,15 +21,15 @@
       dict({
         'error': dict({
           'details': list([
-            'VCqTDwYzyKtSiEMpnbXp',
+            'wPEJXHSRyJLUyNpaOEHy',
           ]),
           'traceback': list([
-            'WhbIXmchuyDmybzRLozZ',
+            'qiKUYBwCcMnedWrwdvzg',
           ]),
-          'type': 'ASTUagoKFMbsJQgaCJfJ',
+          'type': 'gFQfUZKwjjPdlCIMoDgu',
         }),
-        'progress': 3132,
-        'stage': 'aOwDKGzVuuSkpRdRKwoO',
+        'progress': 2200,
+        'stage': 'aeJzsIVhpDJpWCldmRoY',
         'state': <JobState.ERROR: 'error'>,
         'step_description': None,
         'step_name': None,
@@ -37,10 +37,9 @@
       }),
     ]),
     'user': dict({
-      'administrator': False,
-      'handle': 'aOtEacjXkNWWrsBOfMPS',
+      'handle': 'RaOtEacjXkNWWrsBOfMP',
       'id': 'psihdpFaJrqQyqzKcYbM',
     }),
-    'workflow': 'bXerFVrWCqqjehJZicZB',
+    'workflow': 'SbXerFVrWCqqjehJZicZ',
   })
 # ---
