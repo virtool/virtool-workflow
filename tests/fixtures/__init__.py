@@ -26,9 +26,15 @@ def static_datetime():
 
 
 @pytest.fixture
-def example_path() -> Path:
+def virtool_workflow_example_path() -> Path:
     """The path to example data files for virtool-workflow."""
     return Path(__file__).parent.parent.parent / "example"
+
+
+@pytest.fixture
+def example_path(virtool_workflow_example_path: Path) -> Path:
+    """The path to example data files for virtool-workflow."""
+    return virtool_workflow_example_path
 
 
 @pytest.fixture

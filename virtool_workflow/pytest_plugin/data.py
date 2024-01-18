@@ -56,7 +56,9 @@ class Data:
 
 
 @pytest.fixture
-def data(example_path: Path, static_datetime: datetime.datetime) -> Data:
+def data(
+    virtool_workflow_example_path: Path, static_datetime: datetime.datetime
+) -> Data:
     class AnalysisFactory(ModelFactory):
         __model__ = Analysis
 
@@ -167,7 +169,9 @@ def data(example_path: Path, static_datetime: datetime.datetime) -> Data:
             download_url=f"/subtractions/{subtraction.id}/files/{filename}",
             id=(i + 1),
             name=filename,
-            size=(example_path / "subtraction" / filename).stat().st_size,
+            size=(virtool_workflow_example_path / "subtraction" / filename)
+            .stat()
+            .st_size,
             subtraction=subtraction.id,
             type="bowtie2",
         )
