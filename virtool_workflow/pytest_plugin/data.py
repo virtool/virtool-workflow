@@ -15,8 +15,8 @@ from virtool_core.models.samples import (
 )
 from virtool_core.models.subtraction import (
     Subtraction,
-    SubtractionNested,
     SubtractionFile,
+    SubtractionNested,
 )
 
 from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
@@ -55,9 +55,9 @@ class Data:
     """An un-finalized subtraction for testing subtraction creation workflows."""
 
 
-@pytest.fixture
+@pytest.fixture()
 def data(
-    virtool_workflow_example_path: Path, static_datetime: datetime.datetime
+    virtool_workflow_example_path: Path, static_datetime: datetime.datetime,
 ) -> Data:
     class AnalysisFactory(ModelFactory):
         __model__ = Analysis

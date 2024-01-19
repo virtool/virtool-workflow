@@ -16,8 +16,7 @@ class Hook:
     """Used to hook into the workflow lifecycle."""
 
     def __init__(self, hook_name: str):
-        """
-        A set of functions to be called as a group upon a particular event.
+        """A set of functions to be called as a group upon a particular event.
 
         The signature of any functions added via :func:`Hook.callback` or
         :func:`Hook.__call__` are validated to match the types provided.
@@ -31,8 +30,7 @@ class Hook:
         self.clear = self.callbacks.clear
 
     def __call__(self, callback_: Callable = None, until=None, once=False):
-        """
-        Add a callback function to this Hook that will be called when the hook is
+        """Add a callback function to this Hook that will be called when the hook is
         triggered.
 
         :param callback_: The callback function to register.
@@ -75,8 +73,7 @@ class Hook:
         return _temporary_callback
 
     async def trigger(self, scope: FixtureScope, suppress=False, **kwargs) -> list[Any]:
-        """
-        Trigger the hook.
+        """Trigger the hook.
 
         Bind fixtures from `scope` to each callback function and invoke them.
 
@@ -122,7 +119,7 @@ class Hook:
                 return await callback(*args, **kwargs)
 
         results = await gather(
-            *[call_callback(callback) for callback in callbacks], return_exceptions=True
+            *[call_callback(callback) for callback in callbacks], return_exceptions=True,
         )
 
         for error in results:

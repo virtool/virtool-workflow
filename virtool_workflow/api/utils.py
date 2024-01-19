@@ -2,27 +2,26 @@ import asyncio
 import functools
 
 from aiohttp import (
-    ServerDisconnectedError,
     ClientConnectorError,
     ClientResponse,
     ContentTypeError,
+    ServerDisconnectedError,
 )
 from structlog import get_logger
 
 from virtool_workflow.errors import (
-    JobsAPIServerError,
-    JobsAPINotFound,
     JobsAPIBadRequest,
-    JobsAPIForbidden,
     JobsAPIConflict,
+    JobsAPIForbidden,
+    JobsAPINotFound,
+    JobsAPIServerError,
 )
 
 logger = get_logger("api")
 
 
 def retry(func):
-    """
-    Retry an API call five times when encountering the following exceptions:
+    """Retry an API call five times when encountering the following exceptions:
       * ``ConnectionRefusedError``.
       * ``ClientConnectorError``.
       * ``ServerDisconnectedError``.
@@ -47,7 +46,7 @@ def retry(func):
 
             attempts += 1
             get_logger("runtime").info(
-                f"Encountered {type(err).__name__}. Retrying in 5 seconds."
+                f"Encountered {type(err).__name__}. Retrying in 5 seconds.",
             )
             await asyncio.sleep(5)
 
@@ -57,8 +56,7 @@ def retry(func):
 
 
 async def decode_json_response(resp: ClientResponse) -> dict | list | None:
-    """
-    Decode a JSON response from a :class:``ClientResponse``.
+    """Decode a JSON response from a :class:``ClientResponse``.
 
     Raise a :class:`ValueError` if the response is not JSON.
 
@@ -72,8 +70,7 @@ async def decode_json_response(resp: ClientResponse) -> dict | list | None:
 
 
 async def raise_exception_by_status_code(resp: ClientResponse):
-    """
-    Raise an exception based on the status code of the response.
+    """Raise an exception based on the status code of the response.
 
     :param resp: the response to check
     :raise JobsAPIBadRequest: the response status code is 400
@@ -108,5 +105,5 @@ async def raise_exception_by_status_code(resp: ClientResponse):
             raise status_exception_map[resp.status](message)
         else:
             raise ValueError(
-                f"Status code {resp.status} not handled for response\n {resp}"
+                f"Status code {resp.status} not handled for response\n {resp}",
             )

@@ -9,8 +9,7 @@ logger = get_logger("runtime")
 
 
 def configure_sentry(dsn: str):
-    """
-    Initialize Sentry for log aggregation.
+    """Initialize Sentry for log aggregation.
     """
     if dsn:
         logger.info("initializing sentry", dsn=f"{dsn[:15]}...")
@@ -20,7 +19,7 @@ def configure_sentry(dsn: str):
             integrations=[
                 LoggingIntegration(
                     event_level=logging.WARNING,
-                )
+                ),
             ],
             release=pkg_resources.get_distribution("virtool-workflow").version,
             traces_sample_rate=0.2,

@@ -13,8 +13,8 @@ from virtool_core.models.reference import ReferenceNested
 from virtool_core.utils import decompress_file
 
 from virtool_workflow.api.client import APIClient
-from virtool_workflow.files import VirtoolFileFormat
 from virtool_workflow.errors import MissingJobArgument
+from virtool_workflow.files import VirtoolFileFormat
 
 logger = get_logger("api")
 
@@ -43,16 +43,14 @@ class WFIndex:
 
     @property
     def bowtie_path(self) -> Path:
-        """
-        The path to the Bowtie2 index prefix for the Virtool index.
+        """The path to the Bowtie2 index prefix for the Virtool index.
 
         """
         return self.path / "reference"
 
     @property
     def fasta_path(self) -> Path:
-        """
-        The path to the complete FASTA file for the reference index in the workflow's
+        """The path to the complete FASTA file for the reference index in the workflow's
         work directory.
 
         """
@@ -60,16 +58,14 @@ class WFIndex:
 
     @property
     def json_path(self) -> Path:
-        """
-        The path to the JSON representation of the reference index in the workflow's
+        """The path to the JSON representation of the reference index in the workflow's
         work directory.
 
         """
         return self.path / "otus.json"
 
     def get_otu_id_by_sequence_id(self, sequence_id: str) -> str:
-        """
-        Get the ID of the parent OTU for the given ``sequence_id``.
+        """Get the ID of the parent OTU for the given ``sequence_id``.
 
         :param sequence_id: the sequence ID
         :return: the matching OTU ID
@@ -81,8 +77,7 @@ class WFIndex:
             raise ValueError("The sequence_id does not exist in the index")
 
     def get_sequence_length(self, sequence_id: str) -> int:
-        """
-        Get the sequence length for the given ``sequence_id``.
+        """Get the sequence length for the given ``sequence_id``.
 
         :param sequence_id: the sequence ID
         :return: the length of the sequence
@@ -98,8 +93,7 @@ class WFIndex:
         otu_ids: list[str],
         path: Path,
     ) -> dict[str, int]:
-        """
-        Generate a FASTA file for all the isolates of the OTUs specified by ``otu_ids``.
+        """Generate a FASTA file for all the isolates of the OTUs specified by ``otu_ids``.
 
         :param otu_ids: the list of OTU IDs for which to generate and index
         :param path: the path to the reference index directory
@@ -157,10 +151,9 @@ class WFNewIndex:
         await self._api.patch_json(f"/indexes/{self.id}", {})
 
     async def upload(
-        self, path: Path, fmt: VirtoolFileFormat = "fasta", name: str | None = None
+        self, path: Path, fmt: VirtoolFileFormat = "fasta", name: str | None = None,
     ):
-        """
-        Upload a file to associate with the index being built.
+        """Upload a file to associate with the index being built.
 
         Allowed file names are:
 
@@ -186,8 +179,7 @@ class WFNewIndex:
 
     @property
     def otus_json_path(self) -> Path:
-        """
-        The path to the JSON representation of the reference index in the workflow's
+        """The path to the JSON representation of the reference index in the workflow's
         work directory.
 
         """
@@ -280,10 +272,9 @@ async def index(
 
 @fixture
 async def new_index(
-    _api: APIClient, job: Job, proc: int, work_path: Path
+    _api: APIClient, job: Job, proc: int, work_path: Path,
 ) -> WFNewIndex:
-    """
-    The :class:`.WFNewIndex` for an index being created by the current job.
+    """The :class:`.WFNewIndex` for an index being created by the current job.
     """
     try:
         id_ = job.args["index_id"]

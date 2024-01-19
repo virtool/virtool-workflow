@@ -52,17 +52,14 @@ class WFAnalysis:
         """The workflow being run to populate the analysis."""
 
     async def delete(self):
-        """
-        Delete the analysis.
+        """Delete the analysis.
 
         This method should be called if the workflow fails before a result is uploaded.
         """
-
         await self._api.delete(f"/analyses/{self.id}")
 
     async def upload_file(self, path: Path, fmt: VirtoolFileFormat = "unknown"):
-        """
-        Upload files in the workflow environment that should be associated with the
+        """Upload files in the workflow environment that should be associated with the
         current analysis.
 
         :param path: the path to the file to upload
@@ -76,8 +73,7 @@ class WFAnalysis:
         )
 
     async def upload_result(self, results: dict[str, Any]):
-        """
-        Upload the results dict for the analysis.
+        """Upload the results dict for the analysis.
 
         :param results: the analysis results
         """
@@ -89,8 +85,7 @@ async def analysis(
     _api: APIClient,
     job: Job,
 ) -> WFAnalysis:
-    """
-    A :class:`.WFAnalysis` object that represents the analysis associated with the running
+    """A :class:`.WFAnalysis` object that represents the analysis associated with the running
     workflow.
     """
     id_ = job.args["analysis_id"]

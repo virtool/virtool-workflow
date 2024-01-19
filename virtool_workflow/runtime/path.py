@@ -1,7 +1,7 @@
 import asyncio
 from contextlib import asynccontextmanager
-from shutil import rmtree
 from pathlib import Path
+from shutil import rmtree
 
 from virtool_workflow.runtime.config import RunConfig
 

@@ -2,21 +2,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Optional, Awaitable, Any
+from typing import Any, Awaitable, Callable, Optional
 
 from virtool_workflow.utils import coerce_to_coroutine_function
 
 
 @dataclass
 class Workflow:
-    """
-    A step-wise, long-running operation.
+    """A step-wise, long-running operation.
     """
 
     steps: list[WorkflowStep] = field(default_factory=list)
 
     def step(
-        self, step: Optional[Callable] = None, *, name: str | None = None
+        self, step: Optional[Callable] = None, *, name: str | None = None,
     ) -> Callable:
         """Decorator for adding a step to the workflow."""
         if step is None:
@@ -33,8 +32,7 @@ class Workflow:
 
 @dataclass(frozen=True)
 class WorkflowStep:
-    """
-    Metadata for a workflow step.
+    """Metadata for a workflow step.
 
     :param name: The presentation name for the step.
     :param description: The description of the step.
@@ -53,8 +51,7 @@ class WorkflowStep:
         display_name: str = None,
         description: str = None,
     ) -> WorkflowStep:
-        """
-        Create a WorkflowStep from a callable.
+        """Create a WorkflowStep from a callable.
 
         :param func: The callable to be used.
         :param display_name: The display name to be used, if None then a display name
@@ -82,8 +79,7 @@ class WorkflowStep:
 
 
 def _get_description_from_docstring(func: Callable[..., Any]) -> str:
-    """
-    Extract the first line of the docstring as a description for a step function.
+    """Extract the first line of the docstring as a description for a step function.
 
     :param func: The step function to get the description for
     :raise ValueError: When `call` does not have a docstring

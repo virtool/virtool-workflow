@@ -2,11 +2,10 @@ from pathlib import Path
 
 import pytest
 from pyfixtures import FixtureScope
-from syrupy import SnapshotAssertion
 from syrupy import SnapshotSession
 
-from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.ml import WFMLModelRelease
+from virtool_workflow.pytest_plugin.data import Data
 
 test = SnapshotSession
 
@@ -21,11 +20,8 @@ class TestML:
         data: Data,
         example_path: Path,
         scope: FixtureScope,
-        snapshot: SnapshotAssertion,
-        work_path: Path,
     ):
-        """
-        Test that the ML fixture instantiates, contains the expected data, and
+        """Test that the ML fixture instantiates, contains the expected data, and
         downloads the sample files to the work path.
         """
         data.job.args["analysis_id"] = data.analysis.id
@@ -39,16 +35,20 @@ class TestML:
         assert ml.name == data.ml.name
 
         assert ml.path.is_dir()
-        assert (ml.path / "model.tar.gz").is_file()
-        assert ml.file_path == ml.path / "model.tar.gz"
-
-        assert (
-            open(ml.file_path, "rb").read()
-            == open(example_path / "ml/model.tar.gz", "rb").read()
-        )
+        assert sorted([p.name for p in ml.path.iterdir()]) == [
+            "mappability_profile.rds",
+            "model.tar.gz",
+            "nucleotide_info.csv",
+            "reference.json.gz",
+            "trained_rf.rds",
+            "trained_xgb.rds",
+            "virus_segments.rds",
+        ]
 
     async def test_none(
-        self, data: Data, scope: FixtureScope, snapshot: SnapshotAssertion
+        self,
+        data: Data,
+        scope: FixtureScope,
     ):
         """Test that the ML fixture returns None when no ML model is specified."""
         data.job.args["analysis_id"] = data.analysis.id

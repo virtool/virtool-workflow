@@ -3,14 +3,13 @@ from pathlib import Path
 import pytest
 from pyfixtures import FixtureScope
 
-from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.analyses import WFAnalysis
-from virtool_workflow.errors import JobsAPINotFound, JobsAPIConflict
+from virtool_workflow.errors import JobsAPIConflict, JobsAPINotFound
+from virtool_workflow.pytest_plugin.data import Data
 
 
 async def test_ok(data: Data, scope: FixtureScope):
-    """
-    Test that the analysis fixture returns an Analysis object with the expected values.
+    """Test that the analysis fixture returns an Analysis object with the expected values.
     """
     data.job.args["analysis_id"] = data.analysis.id
 
@@ -28,10 +27,9 @@ async def test_not_found(data: Data, scope: FixtureScope):
 
 
 async def test_upload_file(
-    captured_uploads_path: Path, data: Data, scope: FixtureScope, work_path: Path
+    captured_uploads_path: Path, data: Data, scope: FixtureScope, work_path: Path,
 ):
-    """
-    Test that the ``Analysis`` object returned by the fixture can be used to upload an
+    """Test that the ``Analysis`` object returned by the fixture can be used to upload an
     analysis file.
     """
     ...
@@ -42,7 +40,7 @@ async def test_upload_file(
 
     path = work_path / "blank.txt"
 
-    with open(path, "wt") as f:
+    with open(path, "w") as f:
         f.write("hello world")
 
     await analysis.upload_file(path, "unknown")
