@@ -17,8 +17,7 @@ from virtool_workflow.runtime.run_subprocess import RunSubprocess
 
 @dataclass
 class WFHMMs:
-    """
-    A class that exposes:
+    """A class that exposes:
 
     1. A :class:`dict` the links `HMMER <http://hmmer.org/>`_ cluster IDs to Virtool
        annotation IDs.
@@ -37,24 +36,21 @@ class WFHMMs:
 
     @cached_property
     def cluster_annotation_map(self) -> dict[int, str]:
-        """
-        A :class:`dict` that maps cluster IDs used to identify HMMs in
+        """A :class:`dict` that maps cluster IDs used to identify HMMs in
         `HMMER <http://hmmer.org/>`_ to annotation IDs used in Virtool.
         """
         return {hmm.cluster: hmm.id for hmm in self.annotations}
 
     @property
     def profiles_path(self):
-        """
-        The path to the ``profiles.hmm`` file.
+        """The path to the ``profiles.hmm`` file.
 
         It can be provided directly to HMMER.
         """
         return self.path / "profiles.hmm"
 
     def get_id_by_cluster(self, cluster: int) -> str:
-        """
-        Get the Virtool HMM annotation ID for a given cluster ID.
+        """Get the Virtool HMM annotation ID for a given cluster ID.
 
         :param cluster: a cluster ID
         :return: the corresponding annotation ID
@@ -69,8 +65,7 @@ async def hmms(
     run_subprocess: RunSubprocess,
     work_path: Path,
 ):
-    """
-    A fixture for accessing HMM data.
+    """A fixture for accessing HMM data.
 
     The ``*.hmm`` file is copied from the data directory and ``hmmpress`` is run to
     create all the HMM files.

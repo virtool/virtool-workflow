@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import asyncio
-import statistics
 import shutil
+import statistics
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol, TextIO, IO
+from typing import IO, Protocol, TextIO
 
 from pyfixtures import fixture
 
@@ -49,16 +49,16 @@ class BaseQualityParser:
                 mean=statistics.mean([this.mean, other.mean]),
                 median=statistics.mean([this.median, other.median]),
                 lower_quartile=statistics.mean(
-                    [this.lower_quartile, other.lower_quartile]
+                    [this.lower_quartile, other.lower_quartile],
                 ),
                 upper_quartile=statistics.mean(
-                    [this.upper_quartile, other.upper_quartile]
+                    [this.upper_quartile, other.upper_quartile],
                 ),
                 tenth_percentile=statistics.mean(
-                    [this.tenth_percentile, other.tenth_percentile]
+                    [this.tenth_percentile, other.tenth_percentile],
                 ),
                 ninetieth_percentile=statistics.mean(
-                    [this.ninetieth_percentile, other.ninetieth_percentile]
+                    [this.ninetieth_percentile, other.ninetieth_percentile],
                 ),
             )
             for this, other in zip(self.data, parser.data)
@@ -109,7 +109,7 @@ class BaseQualityParser:
                         upper_quartile=upper_quartile,
                         tenth_percentile=tenth_percentile,
                         ninetieth_percentile=ninetieth_percentile,
-                    )
+                    ),
                 )
 
                 if i - max_index != 1:
@@ -208,7 +208,7 @@ class NucleotideCompositionParser:
             split = line.split()
 
             try:
-                g, a, t, c = [float(value) for value in split[1:]]
+                g, a, t, c = (float(value) for value in split[1:])
             except ValueError as err:
                 if "NaN" not in str(err):
                     raise
@@ -276,8 +276,7 @@ def _calculate_index_range(base: str) -> range:
 
 
 def _handle_base_quality_nan(split_line: list) -> list:
-    """
-    Parse a per-base quality line from FastQC containing NaN values.
+    """Parse a per-base quality line from FastQC containing NaN values.
 
     :param split_line: the quality line split into a :class:`.List`
     :return: replacement values
@@ -301,8 +300,7 @@ def _handle_base_quality_nan(split_line: list) -> list:
 
 
 def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
-    """
-    Parse the FastQC results at `fastqc_path`.
+    """Parse the FastQC results at `fastqc_path`.
 
     All FastQC data except the textual data file are removed.
 
@@ -333,7 +331,7 @@ def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
             nucleotide_composition = NucleotideCompositionParser()
             sequence_quality = SequenceQualityParser()
 
-            with open(new_path, "r") as f:
+            with open(new_path) as f:
                 while True:
                     line = f.readline()
 
@@ -358,7 +356,7 @@ def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
                     basic_statistics=basic_statistics,
                     nucleotide_composition=nucleotide_composition,
                     sequence_quality=sequence_quality,
-                )
+                ),
             )
 
     if len(sides) == 1:
@@ -412,7 +410,7 @@ def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
         "composition": [
             [round(n, 1) for n in [point.g, point.a, point.t, point.c]]
             for point in left.nucleotide_composition.composite(
-                right.nucleotide_composition
+                right.nucleotide_composition,
             ).data
         ],
         "count": basic.count,
@@ -432,14 +430,13 @@ class FastQCRunner(Protocol):
 
 @fixture
 async def fastqc(run_subprocess: RunSubprocess):
-    """
-    Provides an asynchronous function that can run FastQC as a subprocess.
+    """Provides an asynchronous function that can run FastQC as a subprocess.
 
     The function takes a one or two paths to FASTQ read files (:class:`.ReadPaths`) in
     a tuple.
 
     Example:
-
+    -------
     .. code-block:: python
 
         @step

@@ -15,12 +15,11 @@ logger = get_logger("subprocess")
 
 class LineOutputHandler(Protocol):
     async def __call__(self, line: str):
-        """
-        Handle input from stdin, or stderr, line by line.
+        """Handle input from stdin, or stderr, line by line.
 
         :param line: A line of output from the stream.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class RunSubprocess(Protocol):
@@ -32,8 +31,7 @@ class RunSubprocess(Protocol):
         stderr_handler: LineOutputHandler | None = None,
         stdout_handler: LineOutputHandler | None = None,
     ) -> Process:
-        """
-        Run a shell command in a subprocess.
+        """Run a shell command in a subprocess.
 
         :param command: A shell command
         :param stdout_handler: A function to handle stdout output line by line
@@ -43,14 +41,13 @@ class RunSubprocess(Protocol):
         :raise SubprocessFailed: The subprocess has exited with a non-zero exit code
         :return: An :class:`.Process` instance
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 async def watch_pipe(
-    stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]
+    stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]],
 ):
-    """
-    Watch the stdout or stderr stream and pass lines to the `handler` callback function.
+    """Watch the stdout or stderr stream and pass lines to the `handler` callback function.
 
     :param stream: a stdout or stderr file object
     :param handler: a handler coroutine for output lines
@@ -127,7 +124,7 @@ async def _run_subprocess(
     if process.returncode not in [0, 15, -15]:
         raise SubprocessFailed(
             f"{command[0]} failed with exit code {process.returncode}\n"
-            f"arguments: {command}\n"
+            f"arguments: {command}\n",
         )
 
     log.info(

@@ -18,20 +18,20 @@ from virtool_workflow.api.client import api_client
 from virtool_workflow.hooks import (
     cleanup_builtin_status_hooks,
     on_cancelled,
-    on_success,
-    on_step_start,
-    on_terminated,
     on_error,
     on_failure,
-    on_result,
     on_finish,
-    on_workflow_start,
+    on_result,
     on_step_finish,
+    on_step_start,
+    on_success,
+    on_terminated,
+    on_workflow_start,
 )
 from virtool_workflow.runtime.config import RunConfig
 from virtool_workflow.runtime.discover import (
-    load_custom_fixtures,
     load_builtin_fixtures,
+    load_custom_fixtures,
     load_workflow_from_file,
 )
 from virtool_workflow.runtime.events import Events
@@ -48,8 +48,7 @@ logger = get_logger("runtime")
 
 
 def configure_status_hooks():
-    """
-    Configure built-in job status hooks.
+    """Configure built-in job status hooks.
 
     Push status updates to API when various lifecycle hooks are triggered.
 
@@ -77,8 +76,7 @@ def configure_status_hooks():
 
 
 async def execute(workflow: Workflow, scope: FixtureScope, events: Events):
-    """
-    Execute a workflow.
+    """Execute a workflow.
 
     :param workflow: The workflow to execute
     :param scope: The :class:`FixtureScope` to use for fixture injection
@@ -118,7 +116,7 @@ async def execute(workflow: Workflow, scope: FixtureScope, events: Events):
 
             if not events.terminated.is_set():
                 logger.warning(
-                    "workflow terminated without sigterm. this should not happen."
+                    "workflow terminated without sigterm. this should not happen.",
                 )
 
             await asyncio.gather(
@@ -162,7 +160,7 @@ async def run_workflow(
     job = await acquire_job_by_id(config.jobs_api_connection_string, job_id)
 
     async with api_client(
-        config.jobs_api_connection_string, job.id, job.key
+        config.jobs_api_connection_string, job.id, job.key,
     ) as api, FixtureScope() as scope:
         # These fixtures should not be used directly by the workflow. They are used
         # by other built-in fixtures.
@@ -200,8 +198,7 @@ async def start_runtime(
     work_path: Path,
     workflow_loader: Callable[[], Workflow] = load_workflow_from_file,
 ):
-    """
-    Start the workflow runtime.
+    """Start the workflow runtime.
 
     The runtime loads the workflow and fixtures. It then waits for a job ID to be pushed
     to the configured Redis list.
@@ -261,7 +258,7 @@ async def start_runtime(
             job_id,
             workflow,
             events,
-        )
+        ),
     )
 
     def terminate_workflow(*_):
@@ -278,7 +275,7 @@ async def start_runtime(
 
     async with configure_redis(redis_connection_string) as redis:
         cancellation_task = asyncio.create_task(
-            wait_for_cancellation(redis, job_id, cancel_workflow)
+            wait_for_cancellation(redis, job_id, cancel_workflow),
         )
 
         await run_workflow_task

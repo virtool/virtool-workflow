@@ -1,6 +1,6 @@
 import sys
 from importlib import import_module
-from importlib.util import spec_from_file_location, module_from_spec
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import ModuleType
 
@@ -13,8 +13,7 @@ logger = get_logger("runtime")
 
 
 def discover_workflow(path: Path) -> Workflow:
-    """
-    Find an instance of :class:`.Workflow` in the python module located at the given
+    """Find an instance of :class:`.Workflow` in the python module located at the given
     path.
 
     :param path: The path to a Python module.
@@ -32,8 +31,7 @@ def discover_workflow(path: Path) -> Workflow:
 
 
 def load_builtin_fixtures():
-    """
-    Load built-in fixtures.
+    """Load built-in fixtures.
 
     This function is called before any fixtures defined in a workflow's
     ``fixtures.py`` file. It is used to provide built-in fixtures that are
@@ -59,8 +57,7 @@ def load_custom_fixtures():
 
 
 def load_workflow_from_file() -> Workflow:
-    """
-    Load a workflow from a Python file at ``./workflow.py`` and return a :class:`.Workflow` object.
+    """Load a workflow from a Python file at ``./workflow.py`` and return a :class:`.Workflow` object.
 
     :raises FileNotFoundError: If no workflow.py file is found.
     :return: The workflow.
@@ -75,8 +72,7 @@ def load_workflow_from_file() -> Workflow:
 
 
 def import_module_from_file(module_name: str, path: Path) -> ModuleType:
-    """
-    Import a module from a file.
+    """Import a module from a file.
 
     The parent directory of `path` will also be added to `sys.path` prior to importing.
     This ensures that modules and packages defined in that directory can be properly

@@ -18,14 +18,13 @@ class WFUploads:
 
 @fixture
 async def uploads(_api: APIClient) -> WFUploads:
-    """
-    Provides access to files that have been uploaded to the Virtool instance.
+    """Provides access to files that have been uploaded to the Virtool instance.
 
     Files can be downloaded into the workflow environment be calling
     :meth:`.WFUploads.download`.
 
     Example:
-
+    -------
     .. code-block:: python
 
         @step

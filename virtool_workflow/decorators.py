@@ -6,8 +6,7 @@ from virtool_workflow.workflow import Workflow
 
 
 def step(func: Callable = None, *, name: str | None = None) -> Callable:
-    """
-    Mark a function as a workflow step function.
+    """Mark a function as a workflow step function.
 
     :param func: the workflow step function
     :param name: the display name of the workflow step. A name
@@ -23,13 +22,11 @@ def step(func: Callable = None, *, name: str | None = None) -> Callable:
 
 
 def collect(module: ModuleType) -> Workflow:
-    """
-    Build a :class:`.Workflow` object from a workflow module.
+    """Build a :class:`.Workflow` object from a workflow module.
 
     :param module: A workflow module
     :return: A workflow object
     """
-
     workflow = Workflow()
 
     markers = [

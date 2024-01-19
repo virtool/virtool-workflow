@@ -1,5 +1,5 @@
-"""
-Utilities and a fixture for using `Skewer <https://github.com/relipmoc/skewer>`_ to trim reads.
+"""Utilities and a fixture for using `Skewer <https://github.com/relipmoc/skewer>`_ to
+trim reads.
 """
 import asyncio
 import os
@@ -85,18 +85,16 @@ class SkewerResult:
 
     @property
     def left(self) -> Path:
-        """
-        The path to one of:
-            - the FASTQ trimming result for an unpaired Illumina dataset
-            - the FASTA trimming result for the left reads of a paired Illumina dataset
+        """The path to one of:
+        - the FASTQ trimming result for an unpaired Illumina dataset
+        - the FASTA trimming result for the left reads of a paired Illumina dataset
 
         """
         return self.read_paths[0]
 
     @property
     def right(self) -> Path | None:
-        """
-        The path to the rights reads of a paired Illumina dataset.
+        """The path to the rights reads of a paired Illumina dataset.
 
         ``None`` if the dataset in unpaired.
 
@@ -110,16 +108,14 @@ class SkewerResult:
 
 
 def calculate_skewer_trimming_parameters(
-    sample: WFSample, min_read_length: int
+    sample: WFSample, min_read_length: int,
 ) -> SkewerConfiguration:
-    """
-    Calculates trimming parameters based on the library type, and minimum allowed trim length.
+    """Calculates trimming parameters based on the library type, and minimum allowed trim length.
 
     :param sample: The sample to calculate trimming parameters for.
     :param min_read_length: The minimum length of a read before it is discarded.
     :return: the trimming parameters
     """
-
     config = SkewerConfiguration(
         min_length=min_read_length,
         mode=SkewerMode.PAIRED_END if sample.paired else SkewerMode.SINGLE_END,
@@ -145,15 +141,14 @@ class SkewerRunner(Protocol):
     """A protocol describing callables that can be used to run Skewer."""
 
     async def __call__(
-        self, config: SkewerConfiguration, paths: ReadPaths, output_path: Path
+        self, config: SkewerConfiguration, paths: ReadPaths, output_path: Path,
     ) -> SkewerResult:
         ...
 
 
 @fixture
 def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
-    """
-    Provides an asynchronous function that can run skewer.
+    """Provides an asynchronous function that can run skewer.
 
     The provided function takes a :class:`.SkewerConfiguration` and a tuple of paths to
     the left and right reads to trim. If a single member tuple is provided, the dataset
@@ -163,7 +158,7 @@ def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
     for the workflow run.
 
     Example:
-
+    -------
     .. code-block:: python
 
         @step
@@ -183,7 +178,7 @@ def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
         raise RuntimeError("skewer is not installed.")
 
     async def func(
-        config: SkewerConfiguration, read_paths: ReadPaths, output_path: Path
+        config: SkewerConfiguration, read_paths: ReadPaths, output_path: Path,
     ):
         temp_path = Path(await asyncio.to_thread(mkdtemp, suffix="_virtool_skewer"))
 
@@ -224,7 +219,7 @@ def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
         )
 
         read_paths = await asyncio.to_thread(
-            _rename_trimming_results, temp_path, output_path
+            _rename_trimming_results, temp_path, output_path,
         )
 
         return SkewerResult(command, output_path, process, read_paths)
@@ -233,12 +228,10 @@ def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
 
 
 def _rename_trimming_results(temp_path: Path, output_path: Path) -> ReadPaths:
-    """
-    Rename Skewer output to a simple name used in Virtool.
+    """Rename Skewer output to a simple name used in Virtool.
 
     :param path: The path containing the results from Skewer
     """
-
     shutil.move(
         temp_path / "reads-trimmed.log",
         output_path / "trim.log",

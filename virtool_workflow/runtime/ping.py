@@ -35,8 +35,7 @@ async def _ping_periodically(api: APIClient, job_id: str):
 
 @asynccontextmanager
 async def ping_periodically(api: APIClient, job_id: str):
-    """
-    Ping the API to keep the job alive.
+    """Ping the API to keep the job alive.
 
     While the context manager is open, a task runs that pings the API every 5 seconds.
     When the context manager is closed, the task is cleanly cancelled.

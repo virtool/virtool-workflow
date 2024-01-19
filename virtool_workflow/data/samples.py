@@ -7,13 +7,13 @@ from pyfixtures import fixture
 from structlog import get_logger
 from virtool_core.models.enums import LibraryType
 from virtool_core.models.job import Job
-from virtool_core.models.samples import Sample, Quality
+from virtool_core.models.samples import Quality, Sample
 
 from virtool_workflow.analysis.utils import ReadPaths
 from virtool_workflow.api.client import APIClient
-from virtool_workflow.files import VirtoolFileFormat
 from virtool_workflow.data.uploads import WFUploads
 from virtool_workflow.errors import JobsAPINotFound
+from virtool_workflow.files import VirtoolFileFormat
 
 logger = get_logger("api")
 
@@ -42,8 +42,7 @@ class WFSample:
 
     @property
     def min_length(self) -> int | None:
-        """
-        The minimum observed read length in the sample sequencing data.
+        """The minimum observed read length in the sample sequencing data.
 
         Returns ``None`` if the sample is still being created and no quality data is available.
 
@@ -52,8 +51,7 @@ class WFSample:
 
     @property
     def max_length(self) -> int | None:
-        """
-        The maximum observed read length in the sample sequencing data.
+        """The maximum observed read length in the sample sequencing data.
 
         Returns ``None`` if the sample is still being created and no quality data is available.
 
@@ -85,10 +83,9 @@ class WFNewSample:
 
 @fixture
 async def sample(
-    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path
+    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path,
 ) -> WFSample:
     """The sample associated with the current job."""
-
     id_ = job.args["sample_id"]
 
     base_url_path = f"/samples/{id_}"
@@ -104,7 +101,7 @@ async def sample(
     await asyncio.to_thread(reads_path.mkdir, exist_ok=True, parents=True)
 
     await _api.get_file(
-        f"{base_url_path}/reads/reads_1.fq.gz", reads_path / "reads_1.fq.gz"
+        f"{base_url_path}/reads/reads_1.fq.gz", reads_path / "reads_1.fq.gz",
     )
 
     if sample.paired:
@@ -113,7 +110,7 @@ async def sample(
             reads_path / "reads_2.fq.gz",
         )
         await _api.get_file(
-            f"{base_url_path}/reads/reads_2.fq.gz", reads_path / "reads_2.fq.gz"
+            f"{base_url_path}/reads/reads_2.fq.gz", reads_path / "reads_2.fq.gz",
         )
     else:
         read_paths = (reads_path / "reads_1.fq.gz",)
@@ -130,10 +127,9 @@ async def sample(
 
 @fixture
 async def new_sample(
-    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path
+    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path,
 ) -> WFNewSample:
     """The sample associated with the current job."""
-
     id_ = job.args["sample_id"]
 
     log = logger.bind(resource="sample", id=id_)

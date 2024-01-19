@@ -7,8 +7,8 @@ from pyfixtures import fixture
 from structlog import get_logger
 from virtool_core.models.job import Job
 from virtool_core.models.subtraction import (
-    Subtraction,
     NucleotideComposition,
+    Subtraction,
     SubtractionFile,
 )
 
@@ -22,8 +22,7 @@ logger = get_logger("api")
 
 @dataclass
 class WFSubtraction:
-    """
-    A Virtool subtraction that has been loaded into the workflow environment.
+    """A Virtool subtraction that has been loaded into the workflow environment.
 
     The subtraction files are downloaded to the workflow's local work path so they can
     be used for analysis.
@@ -47,7 +46,7 @@ class WFSubtraction:
     path: Path
     """
     The path to the subtraction directory.
- 
+
     The subtraction directory contains the FASTA and Bowtie2 files for the subtraction.
     """
 
@@ -58,8 +57,7 @@ class WFSubtraction:
 
     @property
     def bowtie2_index_path(self) -> Path:
-        """
-        The path to Bowtie2 prefix in the running workflow's work_path
+        """The path to Bowtie2 prefix in the running workflow's work_path
 
         For example, ``/work/subtractions/<id>/subtraction`` refers to the Bowtie2
         index that comprises the files:
@@ -85,7 +83,7 @@ class WFNewSubtraction:
     A callable that deletes the subtraction from Virtool.
 
     This should be called if the subtraction creation fails before the subtraction is
-    finalized.    
+    finalized.
     """
 
     finalize: Callable[[dict[str, int | float], int], Coroutine[None, None, None]]
@@ -120,10 +118,9 @@ class WFNewSubtraction:
 
 @fixture
 async def subtractions(
-    _api: APIClient, analysis: WFAnalysis, work_path: Path
+    _api: APIClient, analysis: WFAnalysis, work_path: Path,
 ) -> list[WFSubtraction]:
     """The subtractions to be used for the current analysis job."""
-
     subtraction_work_path = work_path / "subtractions"
     await asyncio.to_thread(subtraction_work_path.mkdir)
 
@@ -161,10 +158,9 @@ async def subtractions(
 
 @fixture
 async def new_subtraction(
-    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path
+    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path,
 ) -> WFNewSubtraction:
-    """
-    A new subtraction that will be created during the current job.
+    """A new subtraction that will be created during the current job.
 
     Currently only used for the `create-subtraction` workflow.
     """
@@ -193,8 +189,7 @@ async def new_subtraction(
         await _api.delete(f"/subtractions/{subtraction_.id}")
 
     async def finalize(gc: dict[str, int | float], count: int):
-        """
-        Finalize the subtraction by setting the gc.
+        """Finalize the subtraction by setting the gc.
 
         :param gc: the nucleotide composition of the subtraction
         :param count: the number of sequences in the FASTA file
@@ -205,8 +200,7 @@ async def new_subtraction(
         await _api.patch_json(url_path, {"gc": gc_.dict(), "count": count})
 
     async def upload(path: Path):
-        """
-        Upload a file relating to this subtraction.
+        """Upload a file relating to this subtraction.
 
         Filenames must be one of:
             - subtraction.fa.gz
@@ -227,7 +221,7 @@ async def new_subtraction(
         log.info("Uploading subtraction file")
 
         await _api.put_file(
-            f"/subtractions/{subtraction_.id}/files/{filename}", path, "unknown"
+            f"/subtractions/{subtraction_.id}/files/{filename}", path, "unknown",
         )
 
         log.info("Finished uploading subtraction file")

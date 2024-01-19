@@ -8,10 +8,9 @@ from virtool_workflow.data.samples import WFSample
 
 
 def calculate_trimming_cache_key(
-    sample_id: str, trimming_parameters: dict, program: str = "skewer"
+    sample_id: str, trimming_parameters: dict, program: str = "skewer",
 ):
-    """
-    Compute a unique cache key.
+    """Compute a unique cache key.
 
     **This is not currently used.**
 
@@ -21,7 +20,6 @@ def calculate_trimming_cache_key(
     :return: A unique cache key.
 
     """
-
     raw_key = "reads-" + json.dumps(
         {
             "id": sample_id,
@@ -35,8 +33,7 @@ def calculate_trimming_cache_key(
 
 
 def calculate_trimming_min_length(sample: WFSample) -> int:
-    """
-    Calculate the minimum trimming length that should be used for the passed sample.
+    """Calculate the minimum trimming length that should be used for the passed sample.
 
     This takes into account the library type (:class:`.LibraryType`) and the maximum
     observed read length in the sample.

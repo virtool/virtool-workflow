@@ -1,10 +1,10 @@
 import asyncio
 
-from aiohttp import ClientSession, TCPConnector, ClientConnectionError
+from aiohttp import ClientConnectionError, ClientSession, TCPConnector
 from structlog import get_logger
 from virtool_core.models.job import JobAcquired
 
-from virtool_workflow.errors import JobAlreadyAcquired, JobsAPIServerError, JobsAPIError
+from virtool_workflow.errors import JobAlreadyAcquired, JobsAPIError, JobsAPIServerError
 
 logger = get_logger("api")
 
@@ -13,16 +13,14 @@ async def acquire_job_by_id(
     jobs_api_connection_string: str,
     job_id: str,
 ) -> JobAcquired:
-    """
-    Acquire the job with a given ID via the API.
+    """Acquire the job with a given ID via the API.
 
     :param jobs_api_connection_string: The url for the jobs API.
     :param job_id: The id of the job to acquire
     :return: a job including its API key
     """
-
     async with ClientSession(
-        connector=TCPConnector(force_close=True, limit=100)
+        connector=TCPConnector(force_close=True, limit=100),
     ) as session:
         attempts = 4
 
