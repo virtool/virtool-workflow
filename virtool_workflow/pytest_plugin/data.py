@@ -57,7 +57,8 @@ class Data:
 
 @pytest.fixture()
 def data(
-    virtool_workflow_example_path: Path, static_datetime: datetime.datetime,
+    virtool_workflow_example_path: Path,
+    static_datetime: datetime.datetime,
 ) -> Data:
     class AnalysisFactory(ModelFactory):
         __model__ = Analysis
