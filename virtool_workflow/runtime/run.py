@@ -128,6 +128,8 @@ async def execute(workflow: Workflow, scope: FixtureScope, events: Events):
         scope["_error"] = error
         scope["_state"] = JobState.ERROR
 
+        logger.exception(error)
+
         await asyncio.gather(on_error.trigger(scope), on_failure.trigger(scope))
 
         if isinstance(error, asyncio.CancelledError):
@@ -160,7 +162,9 @@ async def run_workflow(
     job = await acquire_job_by_id(config.jobs_api_connection_string, job_id)
 
     async with api_client(
-        config.jobs_api_connection_string, job.id, job.key,
+        config.jobs_api_connection_string,
+        job.id,
+        job.key,
     ) as api, FixtureScope() as scope:
         # These fixtures should not be used directly by the workflow. They are used
         # by other built-in fixtures.
