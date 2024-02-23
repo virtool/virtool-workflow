@@ -110,7 +110,7 @@ async def _run_subprocess(
             line = line.rstrip()
             try:
                 logger.info("stderr", line=line.decode())
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 logger.info("stderr", line=line)
 
     else:
@@ -119,7 +119,7 @@ async def _run_subprocess(
             line = line.rstrip()
             try:
                 logger.info("stderr", line=line.decode())
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 logger.info("stderr", line=line)
 
     process = await asyncio.create_subprocess_exec(
