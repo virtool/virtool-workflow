@@ -109,10 +109,8 @@ async def _run_subprocess(
             await stderr_handler(line)
             line = line.rstrip()
             try:
-                line_string = line.rstrip().decode()
-                logger.info("stderr", line=line_string)
+                logger.info("stderr", line=line.decode())
             except UnicodeDecodeError as e:
-                logger.exception("decode failed: %s", str(e))
                 logger.info("stderr", line=line)
 
     else:
