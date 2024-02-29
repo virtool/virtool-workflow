@@ -1,4 +1,3 @@
-
 import structlog.testing
 
 from virtool_workflow.runtime.run_subprocess import stderr_logger
