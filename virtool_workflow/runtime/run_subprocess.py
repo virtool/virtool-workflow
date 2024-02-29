@@ -87,6 +87,14 @@ async def watch_subprocess(
     await asyncio.gather(*coros)
 
 
+def stderr_logger(line):
+    line = line.rstrip()
+    try:
+        logger.info("stderr", line=line.decode())
+    except UnicodeDecodeError:
+        logger.info("stderr", line=line)
+
+
 async def _run_subprocess(
     command: list[str],
     stdout_handler: LineOutputHandler | None = None,
@@ -107,20 +115,12 @@ async def _run_subprocess(
 
         async def _stderr_handler(line):
             await stderr_handler(line)
-            line = line.rstrip()
-            try:
-                logger.info("stderr", line=line.decode())
-            except UnicodeDecodeError:
-                logger.info("stderr", line=line)
+            stderr_logger(line)
 
     else:
 
         async def _stderr_handler(line):
-            line = line.rstrip()
-            try:
-                logger.info("stderr", line=line.decode())
-            except UnicodeDecodeError:
-                logger.info("stderr", line=line)
+            stderr_logger(line)
 
     process = await asyncio.create_subprocess_exec(
         *(str(arg) for arg in command),
