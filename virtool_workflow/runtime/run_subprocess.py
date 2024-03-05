@@ -87,6 +87,14 @@ async def watch_subprocess(
     await asyncio.gather(*coros)
 
 
+def stderr_logger(line):
+    line = line.rstrip()
+    try:
+        logger.info("stderr", line=line.decode())
+    except UnicodeDecodeError:
+        logger.info("stderr", line=line)
+
+
 async def _run_subprocess(
     command: list[str],
     stdout_handler: LineOutputHandler | None = None,
@@ -95,8 +103,8 @@ async def _run_subprocess(
     cwd: str | None = None,
 ) -> asyncio.subprocess.Process:
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
-    logger.info("Running subprocess", command=" ".join(command))
 
+    logger.info("Running subprocess", command=" ".join(command))
     # Ensure the asyncio child watcher has a reference to the running loop, prevents
     # `process.wait` from hanging.
     asyncio.get_child_watcher().attach_loop(asyncio.get_running_loop())
@@ -107,12 +115,12 @@ async def _run_subprocess(
 
         async def _stderr_handler(line):
             await stderr_handler(line)
-            logger.info("stderr", line=line.rstrip())
+            stderr_logger(line)
 
     else:
 
         async def _stderr_handler(line):
-            logger.info("stderr", line=line.rstrip())
+            stderr_logger(line)
 
     process = await asyncio.create_subprocess_exec(
         *(str(arg) for arg in command),
