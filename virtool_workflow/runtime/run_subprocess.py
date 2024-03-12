@@ -1,59 +1,54 @@
+"""Code for running and managing subprocesses."""
 import asyncio
 from asyncio.subprocess import Process
-from contextlib import suppress
-from subprocess import SubprocessError
-from typing import Awaitable, Callable, Coroutine, Protocol
+from pathlib import Path
+from typing import Callable, Coroutine, Protocol
 
 from pyfixtures import fixture
 from structlog import get_logger
+from virtool_core.utils import timestamp
 
-from virtool_workflow import hooks
+from virtool_workflow.errors import SubprocessFailed
 
 logger = get_logger("subprocess")
 
 
-class SubprocessFailed(SubprocessError):
-    """Subprocess exited with non-zero status during a workflow."""
-
-
 class LineOutputHandler(Protocol):
-    async def __call__(self, line: str):
-        """
-        Handle input from stdin, or stderr, line by line.
+    async def __call__(self, line: bytes):
+        """Handle input from stdin, or stderr, line by line.
 
         :param line: A line of output from the stream.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class RunSubprocess(Protocol):
     async def __call__(
         self,
         command: list[str],
-        stdout_handler: LineOutputHandler = None,
-        stderr_handler: LineOutputHandler = None,
-        env: dict = None,
-        cwd: str = None,
+        cwd: str | Path | None = None,
+        env: dict | None = None,
+        stderr_handler: LineOutputHandler | None = None,
+        stdout_handler: LineOutputHandler | None = None,
     ) -> Process:
-        """
-        Run a shell command in a subprocess.
+        """Run a shell command in a subprocess.
 
         :param command: A shell command
         :param stdout_handler: A function to handle stdout output line by line
         :param stderr_handler: A function to handle stderr output line by line
         :param env: environment variables which should be available to the subprocess
-        :param cwd: The current working directory for the subprocess
+        :param cwd: The current working directory
         :raise SubprocessFailed: The subprocess has exited with a non-zero exit code
         :return: An :class:`.Process` instance
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 async def watch_pipe(
-    stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]]
+    stream: asyncio.StreamReader,
+    handler: LineOutputHandler,
 ):
-    """
-    Watch the stdout or stderr stream and pass lines to the `handler` callback function.
+    """Watch the stdout or stderr stream and pass lines to the `handler` callback function.
 
     :param stream: a stdout or stderr file object
     :param handler: a handler coroutine for output lines
@@ -68,27 +63,15 @@ async def watch_pipe(
         await handler(line)
 
 
-async def watch_subprocess(
-    process: Process, stdout_handler: Callable, stderr_handler: Callable
-):
+def stderr_logger(line: bytes):
+    """Log a line of stderr output and try to decode it as UTF-8.
+
+    If the line is not decodable, log it as a string.
+
+    :param line: a line of stderr output
     """
-    Watch both stderr and stdout using :func:`.watch_pipe`.
-
-    :param process: the process to watch
-    :param stdout_handler: a function to call with each stdout line
-    :param stderr_handler: a function to call with each stderr line
-
-    """
-    coros = [watch_pipe(process.stderr, stderr_handler)]
-
-    if stdout_handler:
-        coros.append(watch_pipe(process.stdout, stdout_handler))
-
-    await asyncio.gather(*coros)
-
-
-def stderr_logger(line):
     line = line.rstrip()
+
     try:
         logger.info("stderr", line=line.decode())
     except UnicodeDecodeError:
@@ -103,19 +86,16 @@ async def _run_subprocess(
     cwd: str | None = None,
 ) -> asyncio.subprocess.Process:
     """An implementation of :class:`RunSubprocess` using `asyncio.subprocess`."""
-
-    logger.info("Running subprocess", command=" ".join(command))
-    # Ensure the asyncio child watcher has a reference to the running loop, prevents
-    # `process.wait` from hanging.
-    asyncio.get_child_watcher().attach_loop(asyncio.get_running_loop())
+    log = logger.bind()
+    log.info("running subprocess", command=command)
 
     stdout = asyncio.subprocess.PIPE if stdout_handler else asyncio.subprocess.DEVNULL
 
     if stderr_handler:
 
         async def _stderr_handler(line):
-            await stderr_handler(line)
             stderr_logger(line)
+            await stderr_handler(line)
 
     else:
 
@@ -124,34 +104,58 @@ async def _run_subprocess(
 
     process = await asyncio.create_subprocess_exec(
         *(str(arg) for arg in command),
-        stdout=stdout,
-        stderr=asyncio.subprocess.PIPE,
-        env=env,
         cwd=cwd,
+        env=env,
+        limit=1024 * 1024 * 128,
+        stderr=asyncio.subprocess.PIPE,
+        stdout=stdout,
     )
 
-    _watch_subprocess = asyncio.create_task(
-        watch_subprocess(process, stdout_handler, _stderr_handler)
-    )
+    log.info("started subprocess", pid=process.pid, timestamp=timestamp().isoformat())
 
-    @hooks.on_failure
-    def _terminate_process():
-        if process.returncode is None:
-            process.terminate()
-        _watch_subprocess.cancel()
+    aws = [watch_pipe(process.stderr, _stderr_handler)]
 
-    with suppress(asyncio.CancelledError):
-        await _watch_subprocess
+    if stdout_handler:
+        aws.append(watch_pipe(process.stdout, stdout_handler))
 
-    exit_code = await process.wait()
+    watcher_future = asyncio.gather(*aws)
+
+    try:
+        await watcher_future
+    except asyncio.CancelledError:
+        logger.info("terminating subprocess")
+
+        process.terminate()
+
+        # Have to do this in Python 3.10 to avoid Event loop closed error.
+        # https://github.com/python/cpython/issues/88050
+        try:
+            process._transport.close()
+        except AttributeError:
+            pass
+
+        await process.wait()
+        logger.info("subprocess exited", code=process.returncode)
+
+        await watcher_future
+
+        return process
+
+    await process.wait()
 
     # Exit code 15 indicates that the process was terminated. This is expected
     # when the workflow fails for some other reason, hence not an exception
-    if exit_code not in [0, 15, -15]:
+    if process.returncode not in [0, 15, -15]:
         raise SubprocessFailed(
-            f"{command[0]} failed with exit code {exit_code}\n"
-            f"Arguments: {command}\n"
+            f"{command[0]} failed with exit code {process.returncode}\n"
+            f"arguments: {command}\n",
         )
+
+    log.info(
+        "subprocess finished",
+        return_code=process.returncode,
+        timestamp=timestamp().isoformat(),
+    )
 
     return process
 

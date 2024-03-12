@@ -1,5 +1,4 @@
-"""
-Hooks provide a way to do things when events happen during the workflow lifecycle.
+"""Hooks provide a way to do things when events happen during the workflow lifecycle.
 """
 
 from virtool_workflow.runtime.hook import Hook
@@ -11,7 +10,7 @@ Triggered when a workflow has completed and a result is available.
 .. code-block:: python
 
     @on_result
-    async def use_result(workflow: Workflow, results: Dict[str, Any]):
+    async def use_result(results: Dict[str, Any]):
         ...
 """
 
@@ -19,12 +18,10 @@ on_step_start = Hook("on_step_start")
 """
 Triggered before each workflow step is executed.
 
-The :class:`WorkflowStep` object is available via the `current_step` fixture.
-
 .. code-block:: python
 
     @on_step_start
-    async def use_step(current_step):
+    async def use_step():
         ...
 """
 
@@ -32,12 +29,10 @@ on_step_finish = Hook("on_step_end")
 """
 Triggered after each workflow step is executed.
 
-The :class:`WorkflowStep` object is available via the `current_step` fixture.
-
 .. code-block:: python
 
     @on_step_finish
-    async def handle_step_finish(current_step):
+    async def handle_step_finish():
     ...
 """
 
@@ -50,12 +45,10 @@ on_success = Hook("on_success")
 """
 Triggered when a job completes successfully.
 
-Parameters supplied are the `Workflow` instance and the results dict.
-
 .. code-block:: python
 
     @on_success
-    async def perform_on_success(workflow: Workflow, results: Dict[str, Any]):
+    async def perform_on_success():
         ...
 """
 
@@ -66,7 +59,7 @@ Triggered when a job is cancelled.
 .. code-block:: python
 
     @on_cancelled
-    async def handle_cancellation(error: asyncio.CancelledError):
+    async def handle_cancellation():
         ...
 """
 
@@ -74,12 +67,10 @@ on_error = Hook("on_error")
 """
 Triggered when a job encounters an exception while running.
 
-The exception can be found in the ``error`` fixture.
-
 .. code-block:: python
 
     @on_error
-    async def handle_error(error: Exception):
+    async def handle_error():
         ...
 """
 
@@ -104,7 +95,7 @@ an error during workflow execution.
 .. code-block:: python
 
     @on_failure
-    async def handle_failure(error: Exception):
+    async def handle_failure():
         ...
 """
 
@@ -115,7 +106,7 @@ Triggered when a job completes, success or failure.
 .. code-block:: python
 
     @on_finish
-    async def do_something_on_finish(workflow: Workflow):
+    async def do_something_on_finish():
         ...
 """
 
@@ -131,3 +122,20 @@ __all__ = [
     "on_terminated",
     "on_workflow_start",
 ]
+
+
+def cleanup_builtin_status_hooks():
+    """Clear callbacks for built-in status hooks.
+
+    This prevents carryover of hooks between tests. Carryover won't be encountered in
+    production because workflow processes exit after one run.
+
+    TODO: Find a better way to isolate hooks to workflow runs.
+
+    """
+    on_step_start.clear()
+    on_failure.clear()
+    on_cancelled.clear()
+    on_success.clear()
+    on_error.clear()
+    on_terminated.clear()

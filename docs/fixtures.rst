@@ -24,8 +24,8 @@ Fixtures are requested in a by including the fixture name as an argument in the 
             detected = sequence in f.read():
 
 
-Built-in Fixtures
-=================
+Configuration
+=============
 
 Virtool Workflow includes many built-in fixtures for interacting with the workflow environment and accessing Virtool
 application data.
@@ -35,29 +35,23 @@ Configuration
 
 Fixtures for accessing workflow configuration data.
 
-:func:`.job_id`
+:attr:`.config`
 ^^^^^^^^^^^^^^^
 
-The ID of the Virtool job for the running workflow.
+The configuration object for the workflow run.
 
-Returns a :class:`str`.
+Returns a :class:`.RunConfig`.
 
 
-:func:`.work_path`
-^^^^^^^^^^^^^^^^^^
+:func:`.mem`
+^^^^^^^^^^^^
 
-The path to a temporary work directory where all files for the running workflow should be stored.
+The maximum memory (GB) the the workflow can use at once.
 
-Application data automatically loaded by data fixtures like :ref:`samples` or :ref:`subtractions` will be stored in the
-work directory.
+Use this fixture to configure memory limit options on external tools. Virtool Workflow will automatically limit memory
+usage for internal operations like decompression.
 
-Returns a :class:`~pathlib.Path` object.
-
-.. code-block:: python
-
-    @step
-    async def prepare(work_path: Path):
-        work_path.mkdir("output")
+Returns an :class:`int`.
 
 
 :func:`.proc`
@@ -77,15 +71,21 @@ Returns an :class:`int`
         await run_bowtie(num_cpu=proc)
 
 
-:func:`.mem`
-^^^^^^^^^^^^
+:func:`.work_path`
+^^^^^^^^^^^^^^^^^^
 
-The maximum memory (GB) the the workflow can use at once.
+The path to a temporary work directory where all files for the running workflow should be stored.
 
-Use this fixture to configure memory limit options on external tools. Virtool Workflow will automatically limit memory
-usage for internal operations like decompression.
+Application data automatically loaded by data fixtures like :ref:`samples` or :ref:`subtractions` will be stored in the
+work directory.
 
-Returns an :class:`int`.
+Returns a :class:`~pathlib.Path` object.
+
+.. code-block:: python
+
+    @step
+    async def prepare(work_path: Path):
+        work_path.mkdir("output")
 
 
 Utility Fixtures
@@ -94,44 +94,18 @@ Utility Fixtures
 Virtool Workflow is asynchronous first. There are some utility fixtures to make it easier to run external tools and
 heavier analysis work in Python.
 
-:func:`.run_in_executor`
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-A utility for executing Python functions in a separate thread.
-
-This is useful for executing blocking code in a way that prevents it from stopping the running workflow from effectively
-communicating with the server.
-
-.. code-block:: python
-
-    @step
-    async def compress_index(indexes: List[Index], run_in_executor):
-        """
-        Compress the JSON file associated with the first available index
-        using the function compress_json().
-
-        """
-        index_json_path = indexes[0].json_path
-        await run_in_executor(compress_json, index_json_path)
-
-
-:func:`.run_subprocess`
+:attr:`.run_subprocess`
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 A utility for starting external programs as new processes.
-
-.. autofixture:: virtool_workflow.execution.run_subprocess.run_subprocess
 
 Example:
 
 .. code-block:: python
 
     @step
-    async def bowtie_build(run_subprocess, proc: int, work_path: Path):
-        """
-        Build a Bowtie2 index in a subprocess.
-
-        """
+    async def bowtie_build(proc: int, run_subprocess: RunSubprocess, work_path: Path):
+        """Build a Bowtie2 index in a subprocess."""
         fasta_path = work_path / "index.fa"
         index_path = work_path / "index"
 
@@ -159,9 +133,11 @@ corresponding fixture is requested in a workflow step or custom fixture.
 
 The analysis associated with the running workflow.
 
+:fixture
+
 This fixture will be assigned if the workflow is responsible for populating a new analysis.
 
-Returns an :class:`.analysis.analysis.Analysis` object.
+Returns an :class:`.WFAnalysis` object.
 
 
 :func:`.hmms`
@@ -298,7 +274,7 @@ Returns a :class:`.list` of :class:`.Subtraction` objects.
 
 .. code-block:: python
 
-    async def map_subtraction(reads: Reads, subtractions: List[Subtraction]):
+    async def map_subtraction(reads: Reads, subtractions: List[WFSubtraction]):
         """
         Map reads against a subtraction to eliminate non-pathogen information
         from the analysis.
@@ -309,23 +285,6 @@ Returns a :class:`.list` of :class:`.Subtraction` objects.
             index_path=subtractions[0].bowtie2_index_path
             num_cpu=proc
         )
-
-:func:`.download_input_file`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A function for downloading files which were uploaded via the `uploads API <https://www.virtool.ca/docs/developer/api/uploads/>`_.
-
-.. autofixture:: virtool_workflow.api.uploads.download_input_file
-
-
-:func:`.input_files`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The files which have been listed in the Virtool Job's arguments.
-
-The files are downloaded via :func:`download_input_file` when the fixture is requested.
-
-.. autofixture:: virtool_workflow.api.uploads.input_files
 
 
 Writing Fixtures

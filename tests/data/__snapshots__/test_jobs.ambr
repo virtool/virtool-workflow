@@ -1,0 +1,45 @@
+# name: test_ok[pydantic]
+  dict({
+    'acquired': False,
+    'archived': False,
+    'args': dict({
+      'item_id': 1211,
+      'resource_id': 'foo',
+      'test': True,
+    }),
+    'created_at': datetime.datetime(2020, 1, 1, 1, 1, 1),
+    'id': 'GMPXMVbyXHUfymCDaloV',
+    'ping': dict({
+      'pinged_at': datetime.datetime(2020, 1, 1, 1, 1, 1),
+    }),
+    'progress': 6380,
+    'rights': dict({
+    }),
+    'stage': 'iPhGgaTklZTpXCJkWJYU',
+    'state': <JobState.RUNNING: 'running'>,
+    'status': list([
+      dict({
+        'error': dict({
+          'details': list([
+            'VCqTDwYzyKtSiEMpnbXp',
+          ]),
+          'traceback': list([
+            'WhbIXmchuyDmybzRLozZ',
+          ]),
+          'type': 'ASTUagoKFMbsJQgaCJfJ',
+        }),
+        'progress': 3132,
+        'stage': 'aOwDKGzVuuSkpRdRKwoO',
+        'state': <JobState.ERROR: 'error'>,
+        'step_description': None,
+        'step_name': None,
+        'timestamp': datetime.datetime(2020, 1, 1, 1, 1, 1),
+      }),
+    ]),
+    'user': dict({
+      'handle': 'RaOtEacjXkNWWrsBOfMP',
+      'id': 'psihdpFaJrqQyqzKcYbM',
+    }),
+    'workflow': 'SbXerFVrWCqqjehJZicZ',
+  })
+# ---

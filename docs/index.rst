@@ -1,5 +1,5 @@
 Virtool Workflow
-============================================
+================
 
 A framework for developing bioinformatic workflows for Virtool.
 
@@ -20,8 +20,6 @@ Virtool Workflow uses decorators to define steps in the workflow.
 .. toctree::
     :hidden:
 
-    install.rst
-    quickstart.rst
     fixtures.rst
     hooks.rst
     reference.rst

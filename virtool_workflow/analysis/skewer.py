@@ -1,42 +1,100 @@
+"""Utilities and a fixture for using `Skewer <https://github.com/relipmoc/skewer>`_ to
+trim reads.
+"""
 import asyncio
 import os
 import shutil
 from asyncio.subprocess import Process
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
+from tempfile import mkdtemp
+from typing import Protocol
 
+from pyfixtures import fixture
 from virtool_core.models.enums import LibraryType
 
+from virtool_workflow import RunSubprocess
 from virtool_workflow.analysis.utils import ReadPaths
+from virtool_workflow.data.samples import WFSample
+
+
+class SkewerMode(str, Enum):
+    """The mode to run Skewer in."""
+
+    PAIRED_END = "pe"
+    """Run Skewer in paired-end mode."""
+
+    SINGLE_END = "any"
+    """Run Skewer in single-end mode."""
+
+
+@dataclass
+class SkewerConfiguration:
+    """A configuration for running Skewer."""
+
+    min_length: int
+    """The minimum length of a trimmed read."""
+
+    mode: SkewerMode
+    """The mode to run Skewer in."""
+
+    end_quality: int = 20
+    """The minimum quality score for the end of a trimmed read."""
+
+    max_error_rate: float = 0.1
+    """
+    The maximum error rate for a trimmed read. Reads that exceed the rate will be
+    discarded.
+    """
+
+    max_indel_rate: float = 0.03
+    """
+    The maximum indel rate for a trimmed read. Reads that exceed the rate will be
+    discarded.
+    """
+
+    mean_quality: int = 25
+    """The minimum mean quality score for a trimmed read. Reads  """
+
+    number_of_processes: int = 1
+    """The number of processes to use when running Skewer."""
+
+    quiet: bool = True
+    """Whether to run Skewer in quiet mode."""
+
+    other_options: tuple[str] = ("-n", "-z")
+    """Other options to pass to Skewer."""
 
 
 @dataclass
 class SkewerResult:
     """Represents the result of running Skewer to trim a paired or unpaired FASTQ dataset."""
 
-    read_paths: ReadPaths
-    """The paths to the trimmed reads."""
-
-    process: Process
-    """The process running Skewer."""
-
     command: list[str]
     """The command used to run Skewer."""
 
+    output_path: Path
+    """The path to the directory containing the trimmed reads."""
+
+    process: Process
+    """The process that ran Skewer."""
+
+    read_paths: ReadPaths
+    """The paths to the trimmed reads."""
+
     @property
     def left(self) -> Path:
-        """
-        The path to one of:
-            - the FASTQ trimming result for an unpaired Illumina dataset
-            - the FASTA trimming result for the left reads of a paired Illumina dataset
+        """The path to one of:
+        - the FASTQ trimming result for an unpaired Illumina dataset
+        - the FASTA trimming result for the left reads of a paired Illumina dataset
 
         """
         return self.read_paths[0]
 
     @property
     def right(self) -> Path | None:
-        """
-        The path to the rights reads of a paired Illumina dataset.
+        """The path to the rights reads of a paired Illumina dataset.
 
         ``None`` if the dataset in unpaired.
 
@@ -49,113 +107,151 @@ class SkewerResult:
             return None
 
 
-def skewer(
-    min_length: int,
-    mode: str = "pe",
-    max_error_rate: float = 0.1,
-    max_indel_rate: float = 0.03,
-    end_quality: int = 0,
-    mean_quality: int = 0,
-    number_of_processes: int = 1,
-    quiet: bool = True,
-    other_options: tuple[str] = ("-n", "-z"),
-    **kwargs
-):
-    """Create a coroutine function that will run skewer with the given parameters."""
+def calculate_skewer_trimming_parameters(
+    sample: WFSample, min_read_length: int,
+) -> SkewerConfiguration:
+    """Calculates trimming parameters based on the library type, and minimum allowed trim length.
+
+    :param sample: The sample to calculate trimming parameters for.
+    :param min_read_length: The minimum length of a read before it is discarded.
+    :return: the trimming parameters
+    """
+    config = SkewerConfiguration(
+        min_length=min_read_length,
+        mode=SkewerMode.PAIRED_END if sample.paired else SkewerMode.SINGLE_END,
+    )
+
+    if sample.library_type == LibraryType.amplicon:
+        config.end_quality = 0
+        config.mean_quality = 0
+        config.min_length = min_read_length
+
+        return config
+
+    if sample.library_type == LibraryType.srna:
+        config.max_length = 22
+        config.min_length = 20
+
+        return config
+
+    raise ValueError(f"Unknown library type: {sample.library_type}")
+
+
+class SkewerRunner(Protocol):
+    """A protocol describing callables that can be used to run Skewer."""
+
+    async def __call__(
+        self, config: SkewerConfiguration, paths: ReadPaths, output_path: Path,
+    ) -> SkewerResult:
+        ...
+
+
+@fixture
+def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
+    """Provides an asynchronous function that can run skewer.
+
+    The provided function takes a :class:`.SkewerConfiguration` and a tuple of paths to
+    the left and right reads to trim. If a single member tuple is provided, the dataset
+    is assumed to be unpaired.
+
+    The Skewer process will automatically be assigned the number of processes configured
+    for the workflow run.
+
+    Example:
+    -------
+    .. code-block:: python
+
+        @step
+        async def step_one(skewer: SkewerRunner, work_path: Path):
+           config = SkewerConfiguration(
+               mean_quality=30
+           )
+
+           skewer_result = await skewer(config, (
+               work_path / "test_1.fq.gz",
+               work_path / "test_2.fq.gz",
+           ))
+
+
+    """
     if shutil.which("skewer") is None:
         raise RuntimeError("skewer is not installed.")
 
-    command = [
-        "skewer",
-        "-r",
-        str(max_error_rate),
-        "-d",
-        str(max_indel_rate),
-        "-m",
-        str(mode),
-        "-l",
-        str(min_length),
-        "-q",
-        str(end_quality),
-        "-Q",
-        str(mean_quality),
-        "-t",
-        str(number_of_processes),
-        *other_options,
-    ]
+    async def func(
+        config: SkewerConfiguration, read_paths: ReadPaths, output_path: Path,
+    ):
+        temp_path = Path(await asyncio.to_thread(mkdtemp, suffix="_virtool_skewer"))
 
-    if quiet:
-        command.append("--quiet")
+        await asyncio.to_thread(output_path.mkdir, exist_ok=True, parents=True)
 
-    async def run_skewer(read_paths, run_subprocess):
-        nonlocal command
-        command += [str(read_path) for read_path in read_paths]
-        command += ["-o", "reads"]
+        command = [
+            str(a)
+            for a in [
+                "skewer",
+                "-r",
+                config.max_error_rate,
+                "-d",
+                config.max_indel_rate,
+                "-m",
+                config.mode.value,
+                "-l",
+                config.min_length,
+                "-q",
+                config.end_quality,
+                "-Q",
+                config.mean_quality,
+                "-t",
+                proc,
+                # Skewer spams the console with progress updates. Set quiet to avoid.
+                "--quiet",
+                # Compress the trimmed output.
+                "-z",
+                "-o",
+                f"{temp_path}/reads",
+                *read_paths,
+            ]
+        ]
 
-        env = dict(os.environ, LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu")
+        process = await run_subprocess(
+            command,
+            cwd=read_paths[0].parent,
+            env={**os.environ, "LD_LIBRARY_PATH": "/usr/lib/x86_64-linux-gnu"},
+        )
 
-        reads_path = read_paths[0].parent
+        read_paths = await asyncio.to_thread(
+            _rename_trimming_results, temp_path, output_path,
+        )
 
-        process = await run_subprocess(command, env=env, cwd=reads_path)
+        return SkewerResult(command, output_path, process, read_paths)
 
-        read_paths = await asyncio.to_thread(rename_trimming_results, reads_path)
-
-        return SkewerResult(read_paths, process, command)
-
-    return run_skewer
+    return func
 
 
-def rename_trimming_results(path: Path):
-    """
-    Rename Skewer output to a simple name used in Virtool.
+def _rename_trimming_results(temp_path: Path, output_path: Path) -> ReadPaths:
+    """Rename Skewer output to a simple name used in Virtool.
 
     :param path: The path containing the results from Skewer
     """
     shutil.move(
-        path / "reads-trimmed.log",
-        path / "trim.log",
+        temp_path / "reads-trimmed.log",
+        output_path / "trim.log",
     )
 
     try:
         return (
             shutil.move(
-                path / "reads-trimmed.fastq.gz",
-                path / "reads_1.fq.gz",
+                temp_path / "reads-trimmed.fastq.gz",
+                output_path / "reads_1.fq.gz",
             ),
         )
     except FileNotFoundError:
         return (
             shutil.move(
-                path / "reads-trimmed-pair1.fastq.gz",
-                path / "reads_1.fq.gz",
+                temp_path / "reads-trimmed-pair1.fastq.gz",
+                output_path / "reads_1.fq.gz",
             ),
             shutil.move(
-                path / "reads-trimmed-pair2.fastq.gz",
-                path / "reads_2.fq.gz",
+                temp_path / "reads-trimmed-pair2.fastq.gz",
+                output_path / "reads_2.fq.gz",
             ),
         )
-
-
-def calculate_trimming_min_length(
-    library_type: LibraryType, sample_read_length: int
-) -> int:
-    """
-    The minimum length of a read.
-
-    This takes into account the library type (eg. srna)
-    and the maximum observed read length in the sample.
-
-    :param library_type: the sample library type
-    :param sample_read_length: the maximum read length observed in the sample
-    :return: the minimum allowed trimmed read length
-    """
-    if library_type == LibraryType.amplicon:
-        return round(0.95 * sample_read_length)
-
-    if sample_read_length < 80:
-        return 35
-
-    if sample_read_length < 160:
-        return 100
-
-    return 160
