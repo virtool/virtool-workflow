@@ -21,15 +21,15 @@
       dict({
         'error': dict({
           'details': list([
-            'wPEJXHSRyJLUyNpaOEHy',
+            'VCqTDwYzyKtSiEMpnbXp',
           ]),
           'traceback': list([
-            'qiKUYBwCcMnedWrwdvzg',
+            'WhbIXmchuyDmybzRLozZ',
           ]),
-          'type': 'gFQfUZKwjjPdlCIMoDgu',
+          'type': 'ASTUagoKFMbsJQgaCJfJ',
         }),
-        'progress': 2200,
-        'stage': 'aeJzsIVhpDJpWCldmRoY',
+        'progress': 3132,
+        'stage': 'aOwDKGzVuuSkpRdRKwoO',
         'state': <JobState.ERROR: 'error'>,
         'step_description': None,
         'step_name': None,

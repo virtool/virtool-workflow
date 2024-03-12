@@ -32,8 +32,6 @@ async def test_upload_file(
     """Test that the ``Analysis`` object returned by the fixture can be used to upload an
     analysis file.
     """
-    ...
-
     data.job.args["analysis_id"] = data.analysis.id
 
     analysis: WFAnalysis = await scope.instantiate_by_key("analysis")
@@ -51,6 +49,7 @@ async def test_upload_file(
 async def test_delete(data: Data, scope: FixtureScope, work_path: Path):
     """Test that the analysis fixture can be used to delete the analysis it represents."""
     data.job.args["analysis_id"] = data.analysis.id
+    data.analysis.ready = False
 
     analysis: WFAnalysis = await scope.instantiate_by_key("analysis")
 
@@ -76,4 +75,3 @@ async def test_delete_finalized(data: Data, scope: FixtureScope):
 
 async def test_result_upload():
     """Test that the analysis fixture can be used to set the analysis result."""
-    ...
