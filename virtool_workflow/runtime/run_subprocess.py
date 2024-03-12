@@ -2,7 +2,7 @@
 import asyncio
 from asyncio.subprocess import Process
 from pathlib import Path
-from typing import Awaitable, Callable, Coroutine, Protocol
+from typing import Callable, Coroutine, Protocol
 
 from pyfixtures import fixture
 from structlog import get_logger
@@ -14,7 +14,7 @@ logger = get_logger("subprocess")
 
 
 class LineOutputHandler(Protocol):
-    async def __call__(self, line: str):
+    async def __call__(self, line: bytes):
         """Handle input from stdin, or stderr, line by line.
 
         :param line: A line of output from the stream.
@@ -45,7 +45,8 @@ class RunSubprocess(Protocol):
 
 
 async def watch_pipe(
-    stream: asyncio.StreamReader, handler: Callable[[bytes], Awaitable[None]],
+    stream: asyncio.StreamReader,
+    handler: LineOutputHandler,
 ):
     """Watch the stdout or stderr stream and pass lines to the `handler` callback function.
 
@@ -62,27 +63,15 @@ async def watch_pipe(
         await handler(line)
 
 
-async def watch_subprocess(
-    process: Process, stdout_handler: Callable, stderr_handler: Callable
-):
+def stderr_logger(line: bytes):
+    """Log a line of stderr output and try to decode it as UTF-8.
+
+    If the line is not decodable, log it as a string.
+
+    :param line: a line of stderr output
     """
-    Watch both stderr and stdout using :func:`.watch_pipe`.
-
-    :param process: the process to watch
-    :param stdout_handler: a function to call with each stdout line
-    :param stderr_handler: a function to call with each stderr line
-
-    """
-    coros = [watch_pipe(process.stderr, stderr_handler)]
-
-    if stdout_handler:
-        coros.append(watch_pipe(process.stdout, stdout_handler))
-
-    await asyncio.gather(*coros)
-
-
-def stderr_logger(line):
     line = line.rstrip()
+
     try:
         logger.info("stderr", line=line.decode())
     except UnicodeDecodeError:
@@ -102,12 +91,11 @@ async def _run_subprocess(
 
     stdout = asyncio.subprocess.PIPE if stdout_handler else asyncio.subprocess.DEVNULL
 
-    async def _stderr_handler(line):
-        logger.info("stderr", line=line.rstrip())
+    if stderr_handler:
 
-        if stderr_handler:
-            await stderr_handler(line)
+        async def _stderr_handler(line):
             stderr_logger(line)
+            await stderr_handler(line)
 
     else:
 
@@ -139,9 +127,12 @@ async def _run_subprocess(
 
         process.terminate()
 
-        # Have to do this to avoid Event loop closed error.
+        # Have to do this in Python 3.10 to avoid Event loop closed error.
         # https://github.com/python/cpython/issues/88050
-        process._transport.close()
+        try:
+            process._transport.close()
+        except AttributeError:
+            pass
 
         await process.wait()
         logger.info("subprocess exited", code=process.returncode)
