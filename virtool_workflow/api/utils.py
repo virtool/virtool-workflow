@@ -1,93 +1,27 @@
 import asyncio
 import functools
-from pathlib import Path
 
-import aiofiles
-import aiohttp
-import dateutil.parser
-from aiohttp import ServerDisconnectedError, ClientConnectorError
+from aiohttp import (
+    ClientConnectorError,
+    ClientResponse,
+    ContentTypeError,
+    ServerDisconnectedError,
+)
 from structlog import get_logger
 
-from virtool_workflow.api.errors import raising_errors_by_status_code
-from virtool_workflow.data_model.files import VirtoolFileFormat, VirtoolFile
+from virtool_workflow.errors import (
+    JobsAPIBadRequest,
+    JobsAPIConflict,
+    JobsAPIForbidden,
+    JobsAPINotFound,
+    JobsAPIServerError,
+)
 
-CHUNK_SIZE = 1024 * 1024 * 20
-
-
-async def read_file_from_response(response, target_path: Path):
-    async with raising_errors_by_status_code(response):
-        async with aiofiles.open(target_path, "wb") as f:
-            async for chunk in response.content.iter_chunked(CHUNK_SIZE):
-                await f.write(chunk)
-
-    return target_path
-
-
-async def upload_file_via_post(
-    http: aiohttp.ClientSession,
-    url: str,
-    path: Path,
-    format_: VirtoolFileFormat = None,
-    params: dict = None,
-):
-    if not params:
-        params = {"name": path.name}
-
-        if format_ is not None:
-            params.update(format=format_)
-
-    with path.open("rb") as binary:
-        async with http.post(url, data={"file": binary}, params=params) as response:
-            async with raising_errors_by_status_code(response) as response_json:
-                return VirtoolFile(
-                    id=response_json["id"],
-                    name=response_json["name"],
-                    name_on_disk=response_json["name_on_disk"],
-                    size=response_json["size"],
-                    uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"]),
-                    format=response_json["format"]
-                    if "format" in response_json
-                    else "fastq",
-                )
-
-
-async def upload_file_via_put(
-    http: aiohttp.ClientSession,
-    url: str,
-    path: Path,
-    format_: VirtoolFileFormat = None,
-    params: dict = None,
-):
-    if not params:
-        params = {"name": path.name}
-
-        if format_ is not None:
-            params.update(format=format_)
-
-    with path.open("rb") as binary:
-        async with http.put(url, data={"file": binary}, params=params) as response:
-            async with raising_errors_by_status_code(response) as response_json:
-                return VirtoolFile(
-                    id=response_json["id"],
-                    name=response_json["name"],
-                    name_on_disk=(
-                        response_json["name_on_disk"]
-                        if "name_on_disk" in response_json
-                        else response_json["name"]
-                    ),
-                    size=response_json["size"],
-                    uploaded_at=dateutil.parser.isoparse(response_json["uploaded_at"])
-                    if "uploaded_at" in response_json
-                    else None,
-                    format=response_json["format"]
-                    if "format" in response_json
-                    else "fastq",
-                )
+logger = get_logger("api")
 
 
 def retry(func):
-    """
-    Retry an API call five times when encountering the following exceptions:
+    """Retry an API call five times when encountering the following exceptions:
       * ``ConnectionRefusedError``.
       * ``ClientConnectorError``.
       * ``ServerDisconnectedError``.
@@ -112,10 +46,64 @@ def retry(func):
 
             attempts += 1
             get_logger("runtime").info(
-                f"Encountered {type(err).__name__}. Retrying in 5 seconds."
+                f"Encountered {type(err).__name__}. Retrying in 5 seconds.",
             )
             await asyncio.sleep(5)
 
             return await func(*args, **kwargs)
 
     return wrapped
+
+
+async def decode_json_response(resp: ClientResponse) -> dict | list | None:
+    """Decode a JSON response from a :class:``ClientResponse``.
+
+    Raise a :class:`ValueError` if the response is not JSON.
+
+    :param resp: the response to decode
+    :return: the decoded JSON
+    """
+    try:
+        return await resp.json()
+    except ContentTypeError:
+        raise ValueError(f"Response from  {resp.url} was not JSON. {await resp.text()}")
+
+
+async def raise_exception_by_status_code(resp: ClientResponse):
+    """Raise an exception based on the status code of the response.
+
+    :param resp: the response to check
+    :raise JobsAPIBadRequest: the response status code is 400
+    :raise JobsAPIForbidden: the response status code is 403
+    :raise JobsAPINotFound: the response status code is 404
+    :raise JobsAPIConflict: the response status code is 409
+    :raise JobsAPIServerError: the response status code is 500
+    """
+    status_exception_map = {
+        400: JobsAPIBadRequest,
+        403: JobsAPIForbidden,
+        404: JobsAPINotFound,
+        409: JobsAPIConflict,
+        500: JobsAPIServerError,
+    }
+
+    try:
+        resp_json: dict | None = await resp.json()
+    except ContentTypeError:
+        resp_json = None
+
+    if resp.status not in range(200, 299):
+        if resp_json is None:
+            try:
+                message = await resp.text()
+            except UnicodeDecodeError:
+                message = "Could not decode response message"
+        else:
+            message = resp_json["message"] if "message" in resp_json else str(resp_json)
+
+        if resp.status in status_exception_map:
+            raise status_exception_map[resp.status](message)
+        else:
+            raise ValueError(
+                f"Status code {resp.status} not handled for response\n {resp}",
+            )

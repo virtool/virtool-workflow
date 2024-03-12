@@ -1,13 +1,8 @@
 version: "3.1"
+
 services:
-  pytest:
-    build:
-      context: ..
-      dockerfile: tests/Dockerfile
-    command: >
-      --use-running-containers
-      --disable-pytest-warnings 
-      ${TEST_PATH}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    network_mode: "host"
+  redis:
+    image: redis:6.0
+    command: redis-server --requirepass virtool
+    ports:
+      - 9004:6379

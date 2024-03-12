@@ -1,29 +1,42 @@
 import asyncio
+import logging
 import signal
 import sys
 from asyncio import CancelledError
 from pathlib import Path
-from typing import Any
+from typing import Callable
 
 import pkg_resources
-from aiohttp import ClientOSError, ServerDisconnectedError
+import structlog
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from structlog import get_logger
-from virtool_core.logging import configure_logs
+from virtool_core.models.job import JobState
 from virtool_core.redis import configure_redis
 
-from virtool_workflow import execute
-from virtool_workflow.api.jobs import ping
+from virtool_workflow.api.acquire import acquire_job_by_id
+from virtool_workflow.api.client import api_client
 from virtool_workflow.hooks import (
-    on_failure,
+    cleanup_builtin_status_hooks,
     on_cancelled,
-    on_success,
-    on_step_start,
-    on_terminated,
     on_error,
+    on_failure,
+    on_finish,
+    on_result,
+    on_step_finish,
+    on_step_start,
+    on_success,
+    on_terminated,
+    on_workflow_start,
 )
-from virtool_workflow.runtime.discovery import load_workflow_and_fixtures
+from virtool_workflow.runtime.config import RunConfig
+from virtool_workflow.runtime.discover import (
+    load_builtin_fixtures,
+    load_custom_fixtures,
+    load_workflow_from_file,
+)
 from virtool_workflow.runtime.events import Events
+from virtool_workflow.runtime.path import create_work_path
+from virtool_workflow.runtime.ping import ping_periodically
 from virtool_workflow.runtime.redis import (
     get_next_job_with_timeout,
     wait_for_cancellation,
@@ -34,9 +47,8 @@ from virtool_workflow.workflow import Workflow
 logger = get_logger("runtime")
 
 
-def configure_builtin_status_hooks():
-    """
-    Configure built-in job status hooks.
+def configure_status_hooks():
+    """Configure built-in job status hooks.
 
     Push status updates to API when various lifecycle hooks are triggered.
 
@@ -44,106 +56,137 @@ def configure_builtin_status_hooks():
 
     @on_step_start
     async def handle_step_start(push_status):
-        await push_status(state="running")
+        await push_status()
 
     @on_error(once=True)
-    async def handle_error(error, push_status):
-        await push_status(
-            stage="",
-            state="error",
-            error=error,
-            max_tb=50,
-        )
+    async def handle_error(push_status):
+        await push_status()
 
     @on_cancelled(once=True)
     async def handle_cancelled(push_status):
-        await push_status(stage="", state="cancelled")
+        await push_status()
 
-    @on_terminated
+    @on_terminated(once=True)
     async def handle_terminated(push_status):
-        await push_status(stage="", state="terminated")
+        await push_status()
 
     @on_success(once=True)
     async def handle_success(push_status):
-        await push_status(stage="", state="complete")
+        await push_status()
 
 
-def cleanup_builtin_status_hooks():
-    """
-    Clear callbacks for built-in status hooks.
+async def execute(workflow: Workflow, scope: FixtureScope, events: Events):
+    """Execute a workflow.
 
-    This prevents carryover of hooks between tests. Carryover won't be encountered in
-    production because workflow processes exit after one run.
-
-    TODO: Find a better way to isolate hooks to workflow runs.
+    :param workflow: The workflow to execute
+    :param scope: The :class:`FixtureScope` to use for fixture injection
 
     """
-    on_step_start.clear()
-    on_failure.clear()
-    on_cancelled.clear()
-    on_success.clear()
-    on_error.clear()
-    on_terminated.clear()
+    await on_workflow_start.trigger(scope)
 
-
-async def ping_periodically(http, job, jobs_api_connection_string, job_id):
-    """
-    Ping the API to keep the job alive.
-
-    """
-    retries = 0
+    scope["_state"] = JobState.RUNNING
 
     try:
-        while True:
-            if retries > 5:
-                logger.warning("Failed to ping server")
-                break
+        for step in workflow.steps:
+            scope["_step"] = step
 
-            await asyncio.sleep(0.1)
+            bound_step = await scope.bind(step.function)
 
-            try:
-                await ping(http, jobs_api_connection_string, job_id)
-            except (ClientOSError, ServerDisconnectedError):
-                await asyncio.sleep(0.3)
-                retries += 1
-                continue
+            await on_step_start.trigger(scope)
+            logger.info("running workflow step", name=step.display_name)
+            await bound_step()
+            await on_step_finish.trigger(scope)
 
-            await asyncio.sleep(5)
     except CancelledError:
-        logger.info("Stopped pinging server")
+        logger.info("cancellation or termination interrupted workflow execution")
+
+        if events.cancelled.is_set():
+            logger.info("workflow cancelled")
+
+            scope["_state"] = JobState.CANCELLED
+
+            await asyncio.gather(
+                on_cancelled.trigger(scope),
+                on_failure.trigger(scope),
+            )
+        else:
+            logger.info("workflow terminated")
+
+            scope["_state"] = JobState.TERMINATED
+
+            if not events.terminated.is_set():
+                logger.warning(
+                    "workflow terminated without sigterm. this should not happen.",
+                )
+
+            await asyncio.gather(
+                on_terminated.trigger(scope),
+                on_failure.trigger(scope),
+            )
+
+    except Exception as error:
+        scope["_error"] = error
+        scope["_state"] = JobState.ERROR
+
+        logger.exception(error)
+
+        await asyncio.gather(on_error.trigger(scope), on_failure.trigger(scope))
+
+        if isinstance(error, asyncio.CancelledError):
+            raise
+
+    else:
+        scope["_state"] = JobState.COMPLETE
+        scope["_step"] = None
+
+        if "results" in scope:
+            await on_result.trigger(scope)
+
+        await on_success.trigger(scope)
+
+    finally:
+        await on_finish.trigger(scope)
 
 
 async def run_workflow(
-    config: dict[str, Any],
+    config: RunConfig,
     job_id: str,
     workflow: Workflow,
     events: Events,
-) -> dict[str, Any]:
+):
     # Configure hooks here so that they can be tested when using `run_workflow`.
-    configure_builtin_status_hooks()
+    configure_status_hooks()
 
-    async with FixtureScope() as scope:
-        scope["config"] = config
-        scope["job_id"] = job_id
+    load_builtin_fixtures()
 
-        bound_ping = await scope.bind(ping_periodically)
+    job = await acquire_job_by_id(config.jobs_api_connection_string, job_id)
 
-        execute_task = asyncio.create_task(execute(workflow, scope, events))
-        ping_task = asyncio.create_task(bound_ping())
+    async with api_client(
+        config.jobs_api_connection_string,
+        job.id,
+        job.key,
+    ) as api, FixtureScope() as scope:
+        # These fixtures should not be used directly by the workflow. They are used
+        # by other built-in fixtures.
+        scope["_api"] = api
+        scope["_config"] = config
+        scope["_error"] = None
+        scope["_job"] = job
+        scope["_state"] = JobState.WAITING
+        scope["_step"] = None
+        scope["_workflow"] = workflow
 
-        try:
-            await execute_task
-        except asyncio.CancelledError:
-            execute_task.cancel()
+        scope["logger"] = get_logger("workflow")
+        scope["mem"] = config.mem
+        scope["proc"] = config.proc
+        scope["results"] = {}
 
-        ping_task.cancel()
+        async with create_work_path(config) as work_path:
+            scope["work_path"] = work_path
 
-        await ping_task
-        await execute_task
-
-        cleanup_builtin_status_hooks()
-
-        return scope.get("results", {})
+            async with ping_periodically(api, job_id):
+                await execute(workflow, scope, events)
+                cleanup_builtin_status_hooks()
 
 
 @runs_in_new_fixture_context()
@@ -157,23 +200,44 @@ async def start_runtime(
     sentry_dsn: str,
     timeout: int,
     work_path: Path,
+    workflow_loader: Callable[[], Workflow] = load_workflow_from_file,
 ):
-    version = pkg_resources.get_distribution("virtool-workflow").version
+    """Start the workflow runtime.
 
-    logger.info("Found virtool-workflow", version=version)
+    The runtime loads the workflow and fixtures. It then waits for a job ID to be pushed
+    to the configured Redis list.
 
-    configure_logs(dev)
-    configure_sentry(sentry_dsn)
+    When a job ID is received, the runtime acquires the job from the jobs API and
+    """
+    # configure_logs(dev)
 
-    workflow = load_workflow_and_fixtures()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    config = dict(
-        dev=dev,
-        jobs_api_connection_string=jobs_api_connection_string,
-        mem=mem,
-        proc=proc,
-        work_path=work_path,
+    structlog.configure(
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+        processors=[
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.dev.ConsoleRenderer(colors=True, sort_keys=True),
+        ],
     )
+
+    logger.info(
+        "found virtool-workflow",
+        version=pkg_resources.get_distribution("virtool-workflow").version,
+    )
+
+    workflow = workflow_loader()
+
+    load_builtin_fixtures()
+    load_custom_fixtures()
+
+    configure_sentry(sentry_dsn)
 
     async with configure_redis(redis_connection_string, timeout=15) as redis:
         try:
@@ -181,29 +245,44 @@ async def start_runtime(
         except asyncio.TimeoutError:
             # This happens due to Kubernetes scheduling issues or job cancellations. It
             # is not an error.
-            logger.warning("Timed out while waiting for job")
-            sys.exit(0)
+            logger.warning("timed out while waiting for job id")
+            return
 
     events = Events()
 
-    workflow_run = asyncio.create_task(run_workflow(config, job_id, workflow, events))
+    run_workflow_task = asyncio.create_task(
+        run_workflow(
+            RunConfig(
+                dev,
+                jobs_api_connection_string,
+                mem,
+                proc,
+                work_path,
+            ),
+            job_id,
+            workflow,
+            events,
+        ),
+    )
 
     def terminate_workflow(*_):
+        logger.info("received sigterm. terminating workflow.")
         events.terminated.set()
-        workflow_run.cancel()
+        run_workflow_task.cancel()
 
     signal.signal(signal.SIGTERM, terminate_workflow)
 
     def cancel_workflow(*_):
+        logger.info("received cancellation signal from redis")
         events.cancelled.set()
-        workflow_run.cancel()
+        run_workflow_task.cancel()
 
-    async with configure_redis(redis_connection_string, timeout=15) as redis:
+    async with configure_redis(redis_connection_string) as redis:
         cancellation_task = asyncio.create_task(
-            wait_for_cancellation(redis, job_id, cancel_workflow)
+            wait_for_cancellation(redis, job_id, cancel_workflow),
         )
 
-        await workflow_run
+        await run_workflow_task
 
         cancellation_task.cancel()
         await cancellation_task

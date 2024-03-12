@@ -2,69 +2,52 @@
 import hashlib
 import json
 
-from pyfixtures import fixture
 from virtool_core.models.enums import LibraryType
 
-from virtool_workflow.analysis.sample import WFSample
-from virtool_workflow.analysis.skewer import calculate_trimming_min_length
-
-TRIM_PARAMETERS = {
-    "end_quality": "20",
-    "mode": "pe",
-    "max_error_rate": "0.1",
-    "max_indel_rate": "0.03",
-    "max_length": None,
-    "mean_quality": "25",
-    "min_length": "20",
-}
+from virtool_workflow.data.samples import WFSample
 
 
-@fixture
-def trimming_min_length(sample: WFSample):
-    return calculate_trimming_min_length(sample.library_type, sample.max_length)
+def calculate_trimming_cache_key(
+    sample_id: str, trimming_parameters: dict, program: str = "skewer",
+):
+    """Compute a unique cache key.
 
+    **This is not currently used.**
 
-@fixture
-def trimming_parameters(
-    sample: WFSample, trimming_min_length: int
-) -> dict[str, str | int]:
+    :param sample_id: The ID of the sample being trimmed.
+    :param trimming_parameters: The trimming parameters.
+    :param program: The name of the trimming program.
+    :return: A unique cache key.
+
     """
-    Calculates trimming parameters based on the library type, and minimum allowed trim length.
-
-    :param sample: The sample being trimmed.
-    :param trimming_min_length: The minimum length of a read before it is discarded.
-    :return: the trimming parameters
-    """
-    if sample.library_type == LibraryType.amplicon:
-        return {
-            **TRIM_PARAMETERS,
-            "end_quality": 0,
-            "mean_quality": 0,
-            "min_length": trimming_min_length,
-        }
-
-    if sample.library_type == LibraryType.srna:
-        return {
-            **TRIM_PARAMETERS,
-            "min_length": 20,
-            "max_length": 22,
-        }
-
-    return {**TRIM_PARAMETERS, "min_length": trimming_min_length}
-
-
-@fixture
-def trimming_cache_key(sample: WFSample, trimming_parameters: dict):
-    """Compute a unique cache key based on the trimming parameters"""
-    trim_param_json = json.dumps(
+    raw_key = "reads-" + json.dumps(
         {
-            "id": sample.id,
-            "min_length": sample.min_length,
-            **trimming_parameters,
+            "id": sample_id,
+            "parameters": trimming_parameters,
+            "program": program,
         },
         sort_keys=True,
     )
 
-    raw_key = "reads-" + trim_param_json
-
     return hashlib.sha256(raw_key.encode()).hexdigest()
+
+
+def calculate_trimming_min_length(sample: WFSample) -> int:
+    """Calculate the minimum trimming length that should be used for the passed sample.
+
+    This takes into account the library type (:class:`.LibraryType`) and the maximum
+    observed read length in the sample.
+
+    :param sample: the sample
+    :return: the minimum allowed trimmed read length
+    """
+    if sample.library_type == LibraryType.amplicon:
+        return round(0.95 * sample.max_length)
+
+    if sample.max_length < 80:
+        return 35
+
+    if sample.max_length < 160:
+        return 100
+
+    return 160
