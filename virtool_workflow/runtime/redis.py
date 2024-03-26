@@ -2,8 +2,8 @@ import asyncio
 from asyncio import CancelledError
 from typing import Callable
 
-from aioredis import Redis
 from structlog import get_logger
+from virtool_core.redis import Redis
 
 logger = get_logger("redis")
 

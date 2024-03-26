@@ -1,6 +1,6 @@
 import pytest
-from aioredis import Redis
-from virtool_core.redis import configure_redis
+
+from virtool_core.redis import Redis, configure_redis
 
 
 @pytest.fixture

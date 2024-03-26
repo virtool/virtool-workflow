@@ -4,9 +4,10 @@ from pathlib import Path
 
 import pytest
 from _pytest._py.path import LocalPath
-from aioredis import Redis
+
 from structlog.testing import LogCapture
 from virtool_core.models.job import JobStatus, JobState
+from virtool_core.redis import Redis
 
 from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import RunSubprocess, Workflow

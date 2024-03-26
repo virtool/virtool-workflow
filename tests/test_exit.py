@@ -3,9 +3,9 @@ import datetime
 import multiprocessing
 from pathlib import Path
 
-from aioredis import Redis
 from pytest_structlog import StructuredLogCapture
 from structlog.testing import LogCapture
+from virtool_core.redis import Redis
 from virtool_core.models.job import JobStatus, JobState
 
 from virtool_workflow.pytest_plugin.data import Data
