@@ -12,5 +12,5 @@ def pytest_addoption(parser):
     parser.addoption(
         "--redis-connection-string",
         action="store",
-        default="redis://root:virtool@localhost:9004",
+        default="redis://default:virtool@localhost:9003",
     )
