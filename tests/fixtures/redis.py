@@ -1,6 +1,6 @@
 import pytest
 
-from virtool_core.redis import Redis, configure_redis
+from virtool_core.redis import Redis
 
 
 @pytest.fixture
@@ -20,8 +20,8 @@ async def redis(redis_connection_string: str):
     """
     Push a job ID to the Redis list for the workflow.
     """
-    async with configure_redis(redis_connection_string) as redis:
-        yield redis
+    redis = Redis(redis_connection_string)
+    yield redis
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ async def redis_connection_string(request) -> str:
 
     connection_string = f"{base_connection_string}/0"
 
-    async with configure_redis(connection_string) as _redis:
-        await _redis.flushdb()
+    redis = Redis(connection_string)
+    await redis.flushdb()
 
     return connection_string

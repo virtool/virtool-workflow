@@ -11,7 +11,7 @@ CANCELLATION_CHANNEL = "channel:cancel"
 
 
 async def get_next_job_with_timeout(
-    list_name: str, redis: Redis, timeout: int = None
+        list_name: str, redis: Redis, timeout: int = None
 ) -> str:
     """
     Get the next job ID from a Redis list and raise a  :class:``Timeout`` error if one
@@ -48,12 +48,15 @@ async def get_next_job(list_name: str, redis: Redis) -> str:
 
 
 async def wait_for_cancellation(redis: Redis, job_id: str, func: Callable):
-    (channel,) = await redis.subscribe(CANCELLATION_CHANNEL)
+    channel = await redis.subscribe(CANCELLATION_CHANNEL)
 
     try:
-        async for cancelled_job_id in channel.iter():
-            if cancelled_job_id.decode() == job_id:
-                return func()
+        async for message in channel.listen():
+            if message["type"] == "message":
+                cancelled_job_id = message["data"].decode()
+                if cancelled_job_id == job_id:
+                    return func()
+
 
     except CancelledError:
         ...
