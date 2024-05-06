@@ -1,7 +1,7 @@
 Virtool Workflow
 ================
 
-.. _workflow-index:
+.. _index:
 
 A framework for developing bioinformatic workflows for Virtool.
 
