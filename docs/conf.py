@@ -13,8 +13,6 @@
 import os
 import sys
 
-import sphinx_nameko_theme
-
 from virtool_workflow.runtime.hook import Hook
 
 sys.path.insert(0, os.path.abspath("."))
@@ -68,8 +66,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_favicon = "./favicon.ico"
 
 
-html_theme = "nameko"
-html_theme_path = [sphinx_nameko_theme.get_html_theme_path()]
+html_theme = "piccolo_theme"
 
 
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
