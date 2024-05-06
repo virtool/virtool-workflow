@@ -43,7 +43,19 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
-intersphinx_mapping = {"python": ("https://docs.python.org/3.10", None)}
+intersphinx_mapping = {
+    "Workflow": (
+        "https://virtool-test.readthedocs.io/projects/workflow/en/latest/",
+        None,
+    ),
+    "Core": ("https://virtool-test.readthedocs.io/projects/core/en/latest/", None),
+    "Virtool": (
+        "https://virtool-test.readthedocs.io/en/latest/",
+        None,
+    ),
+}
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
+intersphinx_disabled_reftypes = ["*"]
 
 html_sidebars = {
     "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
