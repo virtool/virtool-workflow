@@ -55,7 +55,7 @@ intersphinx_mapping = {
     "core": ("https://virtool-test.readthedocs.io/projects/core/en/latest/", None),
 }
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
-intersphinx_disabled_reftypes = ["*"]
+# intersphinx_disabled_reftypes = ["*"]
 
 html_sidebars = {
     "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
