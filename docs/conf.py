@@ -43,6 +43,29 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
+
+html_sidebars = {
+    "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
+}
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ["_templates"]
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This pattern also affects html_static_path and html_extra_path.
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# -- Options for HTML output -------------------------------------------------
+
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+#
+html_favicon = "./favicon.ico"
+html_theme = "piccolo_theme"
+
+# -- Options for intersphinx extension ---------------------------------------
+
 intersphinx_mapping = {
     "virtool": (
         "https://virtool-test.readthedocs.io/en/latest/",
@@ -57,28 +80,7 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
 # intersphinx_disabled_reftypes = ["*"]
 
-html_sidebars = {
-    "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
-}
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
-
-# -- Options for HTML output -------------------------------------------------
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_favicon = "./favicon.ico"
-
-
-html_theme = "piccolo_theme"
+# -- autofixture config ------------------------------------------------------
 
 
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
