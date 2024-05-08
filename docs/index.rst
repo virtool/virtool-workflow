@@ -1,6 +1,8 @@
 Virtool Workflow
 ================
 
+.. _index:
+
 A framework for developing bioinformatic workflows for Virtool.
 
 Virtool Workflow uses decorators to define steps in the workflow.

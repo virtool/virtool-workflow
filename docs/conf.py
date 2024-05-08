@@ -13,8 +13,6 @@
 import os
 import sys
 
-import sphinx_nameko_theme
-
 from virtool_workflow.runtime.hook import Hook
 
 sys.path.insert(0, os.path.abspath("."))
@@ -45,7 +43,6 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
-intersphinx_mapping = {"python": ("https://docs.python.org/3.10", None)}
 
 html_sidebars = {
     "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
@@ -59,17 +56,31 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
 html_favicon = "./favicon.ico"
+html_theme = "piccolo_theme"
 
+# -- Options for intersphinx extension ---------------------------------------
 
-html_theme = "nameko"
-html_theme_path = [sphinx_nameko_theme.get_html_theme_path()]
+intersphinx_mapping = {
+    "virtool": (
+        "https://virtool-test.readthedocs.io/en/latest/",
+        None,
+    ),
+    "workflow": (
+        "https://virtool-test.readthedocs.io/projects/workflow/en/latest/",
+        None,
+    ),
+    "core": ("https://virtool-test.readthedocs.io/projects/core/en/latest/", None),
+}
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
+# intersphinx_disabled_reftypes = ["*"]
+
+# -- autofixture config ------------------------------------------------------
 
 
 def setup_hook_formatting(app, what, name, obj, options, signature, return_annotation):
