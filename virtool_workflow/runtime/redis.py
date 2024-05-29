@@ -40,7 +40,7 @@ async def get_next_job(list_name: str, redis: Redis) -> str:
     :return: the next job ID
 
     """
-    if job_id := await redis.blpop(list_name) is not None:
+    if (job_id := await redis.blpop(list_name)) is not None:
         logger.info("pulled job id from redis", id=job_id)
         return job_id
 

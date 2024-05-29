@@ -20,7 +20,11 @@ def coerce_to_coroutine_function(func: Callable):
 
 
 def get_virtool_workflow_version() -> str:
-    return metadata.version("virtool-workflow")
+    """Get the version of the installed virtool-workflow package."""
+    try:
+        return metadata.version("virtool-workflow")
+    except metadata.PackageNotFoundError:
+        return "0.0.0"
 
 
 async def make_directory(path: Path):
