@@ -23,10 +23,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Docker Compose
+      - name: Compose Up
         run: docker-compose up -d
       - name: Test
         run: docker compose exec test poetry run pytest
+      - name: Compose Down
+        run: docker-compose down
   build:
     runs-on: ubuntu-22.04
     steps:
@@ -47,11 +49,11 @@ jobs:
       - test
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup NodeJS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install semantic-release
         run: npm i semantic-release@^23.0.0 conventional-changelog-conventionalcommits@^7.0.0
       - name: Release
