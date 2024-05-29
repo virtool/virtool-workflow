@@ -3,13 +3,13 @@ import datetime
 import multiprocessing
 from pathlib import Path
 
-from aioredis import Redis
 from pytest_structlog import StructuredLogCapture
 from structlog.testing import LogCapture
-from virtool_core.models.job import JobStatus, JobState
+from virtool_core.models.job import JobState, JobStatus
+from virtool_core.redis import Redis
 
-from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import Workflow
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.runtime.redis import CANCELLATION_CHANNEL
 from virtool_workflow.runtime.run import start_runtime
 
@@ -24,7 +24,6 @@ async def test_cancellation(
     work_path: Path,
 ):
     """Test that the runner exits with an appropriate status update if the job is cancelled."""
-
     data.job.workflow = "aodp"
     data.job.status = [
         JobStatus(
@@ -72,7 +71,7 @@ async def test_cancellation(
             5,
             work_path,
             workflow_loader=lambda: wf,
-        )
+        ),
     )
 
     await asyncio.sleep(5)
@@ -97,8 +96,7 @@ async def test_timeout(
     redis_connection_string: str,
     work_path: Path,
 ):
-    """
-    Test that the runner exits if no job ID can be pulled from Redis before the timeout.
+    """Test that the runner exits if no job ID can be pulled from Redis before the timeout.
 
     This situation does not involve a status update being sent to the server.
     """
@@ -175,7 +173,7 @@ async def test_sigterm(
                 5,
                 work_path,
                 workflow_loader=lambda: wf,
-            )
+            ),
         )
 
     # We need to use multiprocessing here because the signal handler is set up in the

@@ -70,7 +70,7 @@ somewhat involved, so it's best to run the test suite using `docker`. The
 [virtool/workflow-tools](https://github.com/virtool/workflow-tools) image
 provides a base with all of the external dependencies pre-installed.
 
-[./tests/docker-compose.yml](./tests/docker-compose.yml) will run the test suite
+[./tests/docker-compose.yml](.devcontainer/docker-compose.yml) will run the test suite
 inside a container based on
 [virtool/workflow-tools](https://github.com/virtool/workflow-tools) and mount
 the local docker socket so that `pytest`, running inside the container, can

@@ -4,18 +4,18 @@ from pathlib import Path
 
 import pytest
 from _pytest._py.path import LocalPath
-from aioredis import Redis
 from structlog.testing import LogCapture
-from virtool_core.models.job import JobStatus, JobState
+from virtool_core.models.job import JobState, JobStatus
+from virtool_core.redis import Redis
 
-from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import RunSubprocess, Workflow
 from virtool_workflow.errors import SubprocessFailed
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.runtime.redis import CANCELLATION_CHANNEL
 from virtool_workflow.runtime.run import start_runtime
 
 
-@pytest.fixture
+@pytest.fixture()
 def bash(tmpdir) -> Path:
     sh = """
     echo "hello world"
@@ -39,8 +39,7 @@ async def test_command_is_called(run_subprocess: RunSubprocess, tmpdir):
 
 
 async def test_stdout_is_handled(bash: Path, run_subprocess: RunSubprocess):
-    """
-    Test that a function provided to ``stdout_handler`` is called with each line of
+    """Test that a function provided to ``stdout_handler`` is called with each line of
     stdout.
     """
     lines = []
@@ -54,8 +53,7 @@ async def test_stdout_is_handled(bash: Path, run_subprocess: RunSubprocess):
 
 
 async def test_stderr_is_handled(bash: Path, run_subprocess: RunSubprocess):
-    """
-    Test that a function provided to ``stderr_handler`` is called with each line of
+    """Test that a function provided to ``stderr_handler`` is called with each line of
     stderr.
     """
     lines = []
@@ -70,8 +68,7 @@ async def test_stderr_is_handled(bash: Path, run_subprocess: RunSubprocess):
 
 
 async def test_subprocess_failed(run_subprocess: RunSubprocess):
-    """
-    Test that a ``SubprocessFailed`` error is raised when a command fails and is not
+    """Test that a ``SubprocessFailed`` error is raised when a command fails and is not
     raised when it succeeds.
     """
     with pytest.raises(SubprocessFailed):
@@ -118,13 +115,12 @@ async def test_terminated_by_cancellation(
     @wf.step
     async def second(logger, run_subprocess: RunSubprocess, work_path: Path):
         """Description of the second step."""
-
         sh_path = work_path / "script.sh"
         sh_path.write_text(
             f"""
             sleep 10
-            touch {str(test_txt_path)}
-            """
+            touch {test_txt_path!s}
+            """,
         )
 
         logger.info("work path found", work_path=work_path)
@@ -150,7 +146,7 @@ async def test_terminated_by_cancellation(
             5,
             work_path,
             workflow_loader=lambda: wf,
-        )
+        ),
     )
 
     await asyncio.sleep(4)

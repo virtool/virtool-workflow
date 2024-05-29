@@ -2,6 +2,7 @@ import asyncio
 import tarfile
 from collections.abc import Callable
 from functools import wraps
+from importlib import metadata
 from inspect import iscoroutinefunction
 from pathlib import Path
 
@@ -16,6 +17,10 @@ def coerce_to_coroutine_function(func: Callable):
         return func(*args, **kwargs)
 
     return _func
+
+
+def get_virtool_workflow_version() -> str:
+    return metadata.version("virtool-workflow")
 
 
 async def make_directory(path: Path):

@@ -1,5 +1,5 @@
-import gzip
 import asyncio.subprocess
+import gzip
 import shutil
 from pathlib import Path
 
@@ -8,10 +8,10 @@ from structlog.testing import LogCapture
 
 from virtool_workflow import RunSubprocess
 from virtool_workflow.analysis.skewer import (
-    skewer,
     SkewerConfiguration,
     SkewerMode,
     SkewerResult,
+    skewer,
 )
 
 
@@ -30,11 +30,13 @@ async def test_skewer_single(
     input_path.mkdir()
 
     shutil.copyfile(
-        example_path / "sample" / "reads_1.fq.gz", input_path / "reads_1.fq.gz"
+        example_path / "sample" / "reads_1.fq.gz",
+        input_path / "reads_1.fq.gz",
     )
 
     shutil.copyfile(
-        example_path / "sample" / "reads_2.fq.gz", input_path / "reads_2.fq.gz"
+        example_path / "sample" / "reads_2.fq.gz",
+        input_path / "reads_2.fq.gz",
     )
 
     result: SkewerResult = await func(
@@ -83,11 +85,13 @@ async def test_skewer_paired(
     input_path.mkdir()
 
     shutil.copyfile(
-        example_path / "sample" / "reads_1.fq.gz", input_path / "reads_1.fq.gz"
+        example_path / "sample" / "reads_1.fq.gz",
+        input_path / "reads_1.fq.gz",
     )
 
     shutil.copyfile(
-        example_path / "sample" / "reads_2.fq.gz", input_path / "reads_2.fq.gz"
+        example_path / "sample" / "reads_2.fq.gz",
+        input_path / "reads_2.fq.gz",
     )
 
     result: SkewerResult = await func(
@@ -123,12 +127,14 @@ async def test_skewer_paired(
 
     for suffix in (1, 2):
         with gzip.open(
-            example_path / "sample" / f"trimmed_{suffix}.fq.gz", "rt"
+            example_path / "sample" / f"trimmed_{suffix}.fq.gz",
+            "rt",
         ) as f_example:
             example_fastq = SeqIO.to_dict(SeqIO.parse(f_example, "fastq"))
 
         with gzip.open(
-            work_path / "output" / f"reads_{suffix}.fq.gz", "rt"
+            work_path / "output" / f"reads_{suffix}.fq.gz",
+            "rt",
         ) as f_result:
             for record in SeqIO.parse(f_result, "fastq"):
                 from_example = example_fastq[record.id]
