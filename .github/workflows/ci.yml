@@ -28,10 +28,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Docker Build
-        run: docker build -f -t workflow .
-      - name: Docker Run
-        run: docker run workflow poetry run pytest --redis-connection-string redis://redis:6379
+      - name: Docker Compose
+        run: docker-compose up -d
+      - name: Test
+        run: docker compose exec test poetry run pytest
   build:
     runs-on: ubuntu-22.04
     steps:
