@@ -55,6 +55,7 @@ sphinx-nameko-theme = "^0.0.3"
 pytest-structlog = "^0.6"
 sphinx-toolbox = "^3.5.0"
 ruff = "^0.4.6"
+piccolo-theme = "^0.22.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
