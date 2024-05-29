@@ -6,12 +6,11 @@ from asyncio import CancelledError
 from pathlib import Path
 from typing import Callable
 
-import pkg_resources
 import structlog
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from structlog import get_logger
 from virtool_core.models.job import JobState
-from virtool_core.redis import configure_redis
+from virtool_core.redis import Redis
 
 from virtool_workflow.api.acquire import acquire_job_by_id
 from virtool_workflow.api.client import api_client
@@ -42,6 +41,7 @@ from virtool_workflow.runtime.redis import (
     wait_for_cancellation,
 )
 from virtool_workflow.runtime.sentry import configure_sentry
+from virtool_workflow.utils import get_virtool_workflow_version
 from virtool_workflow.workflow import Workflow
 
 logger = get_logger("runtime")
@@ -229,7 +229,7 @@ async def start_runtime(
 
     logger.info(
         "found virtool-workflow",
-        version=pkg_resources.get_distribution("virtool-workflow").version,
+        version=get_virtool_workflow_version(),
     )
 
     workflow = workflow_loader()
@@ -239,7 +239,7 @@ async def start_runtime(
 
     configure_sentry(sentry_dsn)
 
-    async with configure_redis(redis_connection_string, timeout=15) as redis:
+    async with Redis(redis_connection_string) as redis:
         try:
             job_id = await get_next_job_with_timeout(redis_list_name, redis, timeout)
         except asyncio.TimeoutError:
@@ -277,7 +277,7 @@ async def start_runtime(
         events.cancelled.set()
         run_workflow_task.cancel()
 
-    async with configure_redis(redis_connection_string) as redis:
+    async with Redis(redis_connection_string) as redis:
         cancellation_task = asyncio.create_task(
             wait_for_cancellation(redis, job_id, cancel_workflow),
         )

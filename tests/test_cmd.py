@@ -1,7 +1,7 @@
 import asyncio
 
 from _pytest._py.path import LocalPath
-from aioredis import Redis
+from virtool_core.redis import Redis
 
 from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.runtime.run_subprocess import watch_pipe
@@ -29,7 +29,7 @@ async def test_cmd(
                 },
             ],
             "sample_id": data.new_sample.id,
-        }
+        },
     )
 
     await redis.rpush("job_test", "test_job")

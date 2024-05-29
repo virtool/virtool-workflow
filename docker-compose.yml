@@ -1,0 +1,12 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["tail", "-f", "/dev/null"]
+
+  redis:
+    image: redis:6.0
+    command: redis-server --requirepass virtool
+    ports:
+      - 6379:6379

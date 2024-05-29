@@ -20,68 +20,20 @@ jobs:
         uses: wagoid/commitlint-github-action@v5
   test:
     runs-on: ubuntu-22.04
-    services:
-      redis:
-        image: redis:6.0
-        ports:
-          - 6379:6379
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Install FastQC
-        run: |
-          wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
-          unzip fastqc_v0.11.9.zip
-          mv FastQC /opt/fastqc
-          chmod ugo+x /opt/fastqc/fastqc
-          ln -s /opt/fastqc/fastqc /usr/local/bin
-          fastqc --version
-      - name: Install Bowtie2
-        run: | 
-          wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.2/bowtie2-2.3.2-legacy-linux-x86_64.zip
-          unzip bowtie2-2.3.2-legacy-linux-x86_64.zip
-          cp -rv bowtie2-2.3.2-legacy /opt/bowtie2
-          ln -s /opt/bowtie2/bowtie* /usr/local/bin
-      - name: Install HMMER
-        run: |
-          wget http://eddylab.org/software/hmmer/hmmer-3.2.1.tar.gz
-          tar -xf hmmer-3.2.1.tar.gz
-          cd hmmer-3.2.1
-          ./configure --prefix /opt/hmmer
-          make
-          make install
-          ln -s /opt/hmmer/bin/* /usr/local/bin
-      - name: Install Skewer
-        run: cp vendor/skewer /usr/local/bin
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-      - name: Setup Python
-        uses: actions/setup-python@v4
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
-        run: poetry install
+        uses: actions/checkout@v4
+      - name: Compose Up
+        run: docker-compose up -d
       - name: Test
-        run: poetry run pytest --redis-connection-string redis://localhost:6379
+        run: docker compose exec test poetry run pytest
+      - name: Compose Down
+        run: docker-compose down
   build:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+        uses: actions/checkout@v4
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Poetry Build
@@ -97,13 +49,13 @@ jobs:
       - test
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup NodeJS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install semantic-release
-        run: npm i semantic-release@^22.0.12 conventional-changelog-conventionalcommits@^7.0.2
+        run: npm i semantic-release@^23.0.0 conventional-changelog-conventionalcommits@^7.0.0
       - name: Release
         env:
           GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
