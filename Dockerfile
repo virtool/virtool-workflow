@@ -1,4 +1,4 @@
-FROM python:3.12-bookworm
+FROM python:3.12.3-bookworm
 WORKDIR /test
 COPY --from=ghcr.io/virtool/workflow-tools:2.0.1 /opt/fastqc /opt/fastqc
 COPY --from=ghcr.io/virtool/workflow-tools:2.0.1 /opt/hmmer /opt/hmmer
