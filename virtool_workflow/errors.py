@@ -1,18 +1,11 @@
 from subprocess import SubprocessError
 
 
-class IllegalJobArguments(ValueError):
-    """The `job.args` dict is in an illegal state."""
-
-
 class JobAlreadyAcquired(Exception):
     def __init__(self, job_id: str):
         super(JobAlreadyAcquired, self).__init__(
             f"Job {job_id} is has already been acquired.",
         )
-
-
-class JobAlreadyFinalized(Exception): ...
 
 
 class JobsAPIError(Exception):
@@ -43,9 +36,6 @@ class JobsAPIServerError(JobsAPIError):
 
 class MissingJobArgument(ValueError):
     """The `job.args` dict is missing a required key for some funcionality."""
-
-
-class NotFound(KeyError): ...
 
 
 class SubprocessFailed(SubprocessError):
