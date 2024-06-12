@@ -12,7 +12,7 @@ from structlog import get_logger
 from virtool_workflow.errors import (
     JobsAPIBadRequestError,
     JobsAPIConflictError,
-    JobsAPIForbidden,
+    JobsAPIForbiddenError,
     JobsAPINotFoundError,
     JobsAPIServerError,
 )
@@ -81,7 +81,7 @@ async def raise_exception_by_status_code(resp: ClientResponse):
     """
     status_exception_map = {
         400: JobsAPIBadRequestError,
-        403: JobsAPIForbidden,
+        403: JobsAPIForbiddenError,
         404: JobsAPINotFoundError,
         409: JobsAPIConflictError,
         500: JobsAPIServerError,
