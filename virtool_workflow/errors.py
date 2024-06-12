@@ -5,11 +5,6 @@ class IllegalJobArguments(ValueError):
     """The `job.args` dict is in an illegal state."""
 
 
-
-class InsufficientJobRights(Exception):
-    ...
-
-
 class JobAlreadyAcquired(Exception):
     def __init__(self, job_id: str):
         super(JobAlreadyAcquired, self).__init__(
@@ -17,13 +12,11 @@ class JobAlreadyAcquired(Exception):
         )
 
 
-class JobAlreadyFinalized(Exception):
-    ...
+class JobAlreadyFinalized(Exception): ...
 
 
 class JobsAPIError(Exception):
     """A base exception for errors due to HTTP errors from the jobs API."""
-
 
 
 class JobsAPIBadRequest(JobsAPIError):
@@ -52,9 +45,7 @@ class MissingJobArgument(ValueError):
     """The `job.args` dict is missing a required key for some funcionality."""
 
 
-
-class NotFound(KeyError):
-    ...
+class NotFound(KeyError): ...
 
 
 class SubprocessFailed(SubprocessError):
