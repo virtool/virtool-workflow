@@ -116,7 +116,6 @@ def data(
         "test": True,
     }
     job.ping = JobPing(pinged_at=static_datetime)
-    job.rights = {}
 
     """A finalized sample to be used for testing analyses."""
     sample = SampleFactory.build()

@@ -15,7 +15,7 @@ from virtool_core.models.subtraction import (
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.data.analyses import WFAnalysis
 from virtool_workflow.data.uploads import WFUploads
-from virtool_workflow.errors import MissingJobArgument
+from virtool_workflow.errors import MissingJobArgumentError
 
 logger = get_logger("api")
 
@@ -118,7 +118,9 @@ class WFNewSubtraction:
 
 @fixture
 async def subtractions(
-    _api: APIClient, analysis: WFAnalysis, work_path: Path,
+    _api: APIClient,
+    analysis: WFAnalysis,
+    work_path: Path,
 ) -> list[WFSubtraction]:
     """The subtractions to be used for the current analysis job."""
     subtraction_work_path = work_path / "subtractions"
@@ -158,7 +160,10 @@ async def subtractions(
 
 @fixture
 async def new_subtraction(
-    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path,
+    _api: APIClient,
+    job: Job,
+    uploads: WFUploads,
+    work_path: Path,
 ) -> WFNewSubtraction:
     """A new subtraction that will be created during the current job.
 
@@ -167,12 +172,12 @@ async def new_subtraction(
     try:
         id_ = job.args["subtraction_id"]
     except KeyError:
-        raise MissingJobArgument("subtraction_id")
+        raise MissingJobArgumentError("subtraction_id")
 
     try:
         upload_id = job.args["files"][0]["id"]
     except KeyError:
-        raise MissingJobArgument("files")
+        raise MissingJobArgumentError("files")
 
     subtraction_json = await _api.get_json(f"/subtractions/{id_}")
     subtraction_ = Subtraction(**subtraction_json)
@@ -221,7 +226,9 @@ async def new_subtraction(
         log.info("Uploading subtraction file")
 
         await _api.put_file(
-            f"/subtractions/{subtraction_.id}/files/{filename}", path, "unknown",
+            f"/subtractions/{subtraction_.id}/files/{filename}",
+            path,
+            "unknown",
         )
 
         log.info("Finished uploading subtraction file")

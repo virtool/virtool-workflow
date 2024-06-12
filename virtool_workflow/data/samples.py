@@ -12,7 +12,7 @@ from virtool_core.models.samples import Quality, Sample
 from virtool_workflow.analysis.utils import ReadPaths
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.data.uploads import WFUploads
-from virtool_workflow.errors import JobsAPINotFound
+from virtool_workflow.errors import JobsAPINotFoundError
 from virtool_workflow.files import VirtoolFileFormat
 
 logger = get_logger("api")
@@ -83,7 +83,10 @@ class WFNewSample:
 
 @fixture
 async def sample(
-    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path,
+    _api: APIClient,
+    job: Job,
+    uploads: WFUploads,
+    work_path: Path,
 ) -> WFSample:
     """The sample associated with the current job."""
     id_ = job.args["sample_id"]
@@ -92,8 +95,8 @@ async def sample(
 
     try:
         sample_json = await _api.get_json(base_url_path)
-    except JobsAPINotFound:
-        raise JobsAPINotFound("Sample not found")
+    except JobsAPINotFoundError:
+        raise JobsAPINotFoundError("Sample not found")
 
     sample = Sample(**sample_json)
 
@@ -101,7 +104,8 @@ async def sample(
     await asyncio.to_thread(reads_path.mkdir, exist_ok=True, parents=True)
 
     await _api.get_file(
-        f"{base_url_path}/reads/reads_1.fq.gz", reads_path / "reads_1.fq.gz",
+        f"{base_url_path}/reads/reads_1.fq.gz",
+        reads_path / "reads_1.fq.gz",
     )
 
     if sample.paired:
@@ -110,7 +114,8 @@ async def sample(
             reads_path / "reads_2.fq.gz",
         )
         await _api.get_file(
-            f"{base_url_path}/reads/reads_2.fq.gz", reads_path / "reads_2.fq.gz",
+            f"{base_url_path}/reads/reads_2.fq.gz",
+            reads_path / "reads_2.fq.gz",
         )
     else:
         read_paths = (reads_path / "reads_1.fq.gz",)
@@ -127,7 +132,10 @@ async def sample(
 
 @fixture
 async def new_sample(
-    _api: APIClient, job: Job, uploads: WFUploads, work_path: Path,
+    _api: APIClient,
+    job: Job,
+    uploads: WFUploads,
+    work_path: Path,
 ) -> WFNewSample:
     """The sample associated with the current job."""
     id_ = job.args["sample_id"]

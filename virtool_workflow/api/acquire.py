@@ -4,7 +4,11 @@ from aiohttp import ClientConnectionError, ClientSession, TCPConnector
 from structlog import get_logger
 from virtool_core.models.job import JobAcquired
 
-from virtool_workflow.errors import JobAlreadyAcquired, JobsAPIError, JobsAPIServerError
+from virtool_workflow.errors import (
+    JobAlreadyAcquiredError,
+    JobsAPIError,
+    JobsAPIServerError,
+)
 
 logger = get_logger("api")
 
@@ -39,7 +43,7 @@ async def acquire_job_by_id(
 
                     if resp.status == 400:
                         if "already acquired" in await resp.text():
-                            raise JobAlreadyAcquired(await resp.json())
+                            raise JobAlreadyAcquiredError(await resp.json())
 
                     logger.critical(
                         "unexpected api error during job acquisition",

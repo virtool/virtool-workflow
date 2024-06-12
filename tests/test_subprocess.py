@@ -9,7 +9,7 @@ from virtool_core.models.job import JobState, JobStatus
 from virtool_core.redis import Redis
 
 from virtool_workflow import RunSubprocess, Workflow
-from virtool_workflow.errors import SubprocessFailed
+from virtool_workflow.errors import SubprocessFailedError
 from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.runtime.redis import CANCELLATION_CHANNEL
 from virtool_workflow.runtime.run import start_runtime
@@ -61,7 +61,7 @@ async def test_stderr_is_handled(bash: Path, run_subprocess: RunSubprocess):
     async def stderr_handler(line):
         lines.append(line)
 
-    with pytest.raises(SubprocessFailed):
+    with pytest.raises(SubprocessFailedError):
         await run_subprocess(["bash", "/foo/bar"], stderr_handler=stderr_handler)
 
     assert lines == [b"bash: /foo/bar: No such file or directory\n"]
@@ -71,7 +71,7 @@ async def test_subprocess_failed(run_subprocess: RunSubprocess):
     """Test that a ``SubprocessFailed`` error is raised when a command fails and is not
     raised when it succeeds.
     """
-    with pytest.raises(SubprocessFailed):
+    with pytest.raises(SubprocessFailedError):
         await run_subprocess(["ls", "-doesnotexist"])
 
     await run_subprocess(["ls"])

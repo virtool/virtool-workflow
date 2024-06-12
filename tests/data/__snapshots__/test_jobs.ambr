@@ -13,23 +13,21 @@
       'pinged_at': datetime.datetime(2020, 1, 1, 1, 1, 1),
     }),
     'progress': 6380,
-    'rights': dict({
-    }),
     'stage': 'iPhGgaTklZTpXCJkWJYU',
     'state': <JobState.RUNNING: 'running'>,
     'status': list([
       dict({
         'error': dict({
           'details': list([
-            'VCqTDwYzyKtSiEMpnbXp',
+            'vhVGiBXJqoyUfQBjWTjz',
           ]),
           'traceback': list([
-            'WhbIXmchuyDmybzRLozZ',
+            'ACAdPsEbpDIRnZLXrjSy',
           ]),
-          'type': 'ASTUagoKFMbsJQgaCJfJ',
+          'type': 'OqopAJsorWvViTxsrhYk',
         }),
-        'progress': 3132,
-        'stage': 'aOwDKGzVuuSkpRdRKwoO',
+        'progress': 5931,
+        'stage': 'WyJLLiOEIvGOHLbiwHlJ',
         'state': <JobState.ERROR: 'error'>,
         'step_description': None,
         'step_name': None,

@@ -1,4 +1,5 @@
 """Code for running and managing subprocesses."""
+
 import asyncio
 from asyncio.subprocess import Process
 from pathlib import Path
@@ -8,7 +9,7 @@ from pyfixtures import fixture
 from structlog import get_logger
 from virtool_core.utils import timestamp
 
-from virtool_workflow.errors import SubprocessFailed
+from virtool_workflow.errors import SubprocessFailedError
 
 logger = get_logger("subprocess")
 
@@ -146,7 +147,7 @@ async def _run_subprocess(
     # Exit code 15 indicates that the process was terminated. This is expected
     # when the workflow fails for some other reason, hence not an exception
     if process.returncode not in [0, 15, -15]:
-        raise SubprocessFailed(
+        raise SubprocessFailedError(
             f"{command[0]} failed with exit code {process.returncode}\n"
             f"arguments: {command}\n",
         )

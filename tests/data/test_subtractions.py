@@ -5,13 +5,13 @@ import pytest
 from pyfixtures import FixtureScope
 from virtool_core.models.job import Job
 
-from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
+from virtool_workflow.data.subtractions import WFNewSubtraction, WFSubtraction
+from virtool_workflow.errors import JobsAPIConflictError
 from virtool_workflow.pytest_plugin.data import Data
-from virtool_workflow.data.subtractions import WFSubtraction, WFNewSubtraction
-from virtool_workflow.errors import JobsAPIConflict
+from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 
 
-@pytest.fixture
+@pytest.fixture()
 def _new_subtraction_job(data: Data):
     """A job for creating a new subtraction."""
     data.job.args = {
@@ -25,14 +25,13 @@ def _new_subtraction_job(data: Data):
 
 class TestSubtractions:
     async def test_ok(self, example_path: Path, data: Data, scope: FixtureScope):
-        """
-        Test that the subtractions fixture matches the expected data and writes the
+        """Test that the subtractions fixture matches the expected data and writes the
         subtraction data files to the work path.
         """
         data.job.args["analysis_id"] = data.analysis.id
 
         subtractions: list[WFSubtraction] = await scope.instantiate_by_key(
-            "subtractions"
+            "subtractions",
         )
 
         assert len(subtractions) == 1
@@ -54,13 +53,11 @@ class TestNewSubtraction:
         example_path: Path,
         scope: FixtureScope,
     ):
-        """
-        Test that the new_subtraction fixture matches the expected data and writes the
+        """Test that the new_subtraction fixture matches the expected data and writes the
         subtraction data files to the work path.
         """
-
         new_subtraction: WFNewSubtraction = await scope.instantiate_by_key(
-            "new_subtraction"
+            "new_subtraction",
         )
 
         assert new_subtraction.id == data.new_subtraction.id
@@ -80,7 +77,7 @@ class TestNewSubtraction:
         scope: FixtureScope,
     ):
         new_subtraction: WFNewSubtraction = await scope.instantiate_by_key(
-            "new_subtraction"
+            "new_subtraction",
         )
 
         for filename in SUBTRACTION_FILENAMES:
@@ -101,11 +98,9 @@ class TestNewSubtraction:
         example_path: Path,
         scope: FixtureScope,
     ):
-        """
-        Test that an exception is raised when a subtraction is finalized a second time.
-        """
+        """Test that an exception is raised when a subtraction is finalized a second time."""
         new_subtraction: WFNewSubtraction = await scope.instantiate_by_key(
-            "new_subtraction"
+            "new_subtraction",
         )
 
         for filename in SUBTRACTION_FILENAMES:
@@ -113,18 +108,22 @@ class TestNewSubtraction:
 
         data.new_subtraction.ready = True
 
-        with pytest.raises(JobsAPIConflict) as err:
+        with pytest.raises(JobsAPIConflictError) as err:
             await new_subtraction.finalize(
-                {"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4}, 100
+                {"a": 0.2, "t": 0.2, "c": 0.2, "g": 0.4},
+                100,
             )
 
         assert "Subtraction already finalized" in str(err.value)
 
     async def test_delete(
-        self, _new_subtraction_job: Job, data: Data, scope: FixtureScope
+        self,
+        _new_subtraction_job: Job,
+        data: Data,
+        scope: FixtureScope,
     ):
         new_subtraction: WFNewSubtraction = await scope.instantiate_by_key(
-            "new_subtraction"
+            "new_subtraction",
         )
 
         await new_subtraction.delete()

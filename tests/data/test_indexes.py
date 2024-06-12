@@ -4,9 +4,9 @@ import pytest
 from pyfixtures import FixtureScope
 from syrupy import SnapshotAssertion
 
-from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.data.indexes import WFIndex, WFNewIndex
-from virtool_workflow.errors import JobsAPINotFound, JobsAPIConflict
+from virtool_workflow.errors import JobsAPIConflictError, JobsAPINotFoundError
+from virtool_workflow.pytest_plugin.data import Data
 
 
 class TestIndex:
@@ -18,8 +18,7 @@ class TestIndex:
         snapshot: SnapshotAssertion,
         work_path: Path,
     ):
-        """
-        Test that the index fixture instantiates, contains the expected data, and
+        """Test that the index fixture instantiates, contains the expected data, and
         downloads the index files to the work path.
         """
         data.job.args["analysis_id"] = data.analysis.id
@@ -67,14 +66,12 @@ class TestIndex:
             work_path / "test.fa",
         )
 
-        assert open(work_path / "test.fa", "r").read() == snapshot(name="fasta")
+        assert open(work_path / "test.fa").read() == snapshot(name="fasta")
 
 
 class TestNewIndex:
     async def test_ok(self, data: Data, scope: FixtureScope, work_path: Path):
-        """
-        Test that the ``new_index`` fixture instantiates and contains the expected data.
-        """
+        """Test that the ``new_index`` fixture instantiates and contains the expected data."""
         data.job.args["index_id"] = data.new_index.id
 
         new_index: WFNewIndex = await scope.instantiate_by_key("new_index")
@@ -129,14 +126,17 @@ class TestNewIndex:
         }
 
     async def test_upload_invalid_filename(
-        self, data: Data, example_path: Path, scope: FixtureScope
+        self,
+        data: Data,
+        example_path: Path,
+        scope: FixtureScope,
     ):
         """Test that an invalid filename raises an error."""
         data.job.args["index_id"] = data.new_index.id
 
         new_index: WFNewIndex = await scope.instantiate_by_key("new_index")
 
-        with pytest.raises(JobsAPINotFound) as err:
+        with pytest.raises(JobsAPINotFoundError) as err:
             await new_index.upload(
                 example_path / "hmms/annotations.json.gz",
                 "unknown",
@@ -164,7 +164,7 @@ class TestNewIndex:
                 "unknown",
             )
 
-        with pytest.raises(JobsAPIConflict) as err:
+        with pytest.raises(JobsAPIConflictError) as err:
             await new_index.finalize()
 
         assert (

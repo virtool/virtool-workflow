@@ -4,13 +4,12 @@ import pytest
 from pyfixtures import FixtureScope
 
 from virtool_workflow.data.analyses import WFAnalysis
-from virtool_workflow.errors import JobsAPIConflict, JobsAPINotFound
+from virtool_workflow.errors import JobsAPIConflictError, JobsAPINotFoundError
 from virtool_workflow.pytest_plugin.data import Data
 
 
 async def test_ok(data: Data, scope: FixtureScope):
-    """Test that the analysis fixture returns an Analysis object with the expected values.
-    """
+    """Test that the analysis fixture returns an Analysis object with the expected values."""
     data.job.args["analysis_id"] = data.analysis.id
 
     analysis = await scope.instantiate_by_key("analysis")
@@ -22,12 +21,15 @@ async def test_not_found(data: Data, scope: FixtureScope):
     """Test that JobsAPINotFound is raised if the analysis does not exist."""
     data.job.args["analysis_id"] = "not_found"
 
-    with pytest.raises(JobsAPINotFound) as err:
+    with pytest.raises(JobsAPINotFoundError) as err:
         await scope.instantiate_by_key("analysis")
 
 
 async def test_upload_file(
-    captured_uploads_path: Path, data: Data, scope: FixtureScope, work_path: Path,
+    captured_uploads_path: Path,
+    data: Data,
+    scope: FixtureScope,
+    work_path: Path,
 ):
     """Test that the ``Analysis`` object returned by the fixture can be used to upload an
     analysis file.
@@ -67,7 +69,7 @@ async def test_delete_finalized(data: Data, scope: FixtureScope):
 
     analysis: WFAnalysis = await scope.instantiate_by_key("analysis")
 
-    with pytest.raises(JobsAPIConflict) as err:
+    with pytest.raises(JobsAPIConflictError) as err:
         await analysis.delete()
 
     assert "Analysis is finalized" in str(err)

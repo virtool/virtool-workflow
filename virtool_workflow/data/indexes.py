@@ -13,7 +13,7 @@ from virtool_core.models.reference import ReferenceNested
 from virtool_core.utils import decompress_file
 
 from virtool_workflow.api.client import APIClient
-from virtool_workflow.errors import MissingJobArgument
+from virtool_workflow.errors import MissingJobArgumentError
 from virtool_workflow.files import VirtoolFileFormat
 
 logger = get_logger("api")
@@ -43,9 +43,7 @@ class WFIndex:
 
     @property
     def bowtie_path(self) -> Path:
-        """The path to the Bowtie2 index prefix for the Virtool index.
-
-        """
+        """The path to the Bowtie2 index prefix for the Virtool index."""
         return self.path / "reference"
 
     @property
@@ -151,7 +149,10 @@ class WFNewIndex:
         await self._api.patch_json(f"/indexes/{self.id}", {})
 
     async def upload(
-        self, path: Path, fmt: VirtoolFileFormat = "fasta", name: str | None = None,
+        self,
+        path: Path,
+        fmt: VirtoolFileFormat = "fasta",
+        name: str | None = None,
     ):
         """Upload a file to associate with the index being built.
 
@@ -272,14 +273,16 @@ async def index(
 
 @fixture
 async def new_index(
-    _api: APIClient, job: Job, proc: int, work_path: Path,
+    _api: APIClient,
+    job: Job,
+    proc: int,
+    work_path: Path,
 ) -> WFNewIndex:
-    """The :class:`.WFNewIndex` for an index being created by the current job.
-    """
+    """The :class:`.WFNewIndex` for an index being created by the current job."""
     try:
         id_ = job.args["index_id"]
     except KeyError:
-        raise MissingJobArgument("Missing jobs args key 'index_id'")
+        raise MissingJobArgumentError("Missing jobs args key 'index_id'")
 
     log = logger.bind(resource="new_index", id=id_, job_id=job.id)
     log.info("loading index")
