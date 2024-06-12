@@ -71,8 +71,14 @@ exclude = [
     ".ruff_cache",
     "__pypackages__",
 ]
+target-version = "py312"
 
 [tool.ruff.lint]
+ignore = [
+    "ANN101",
+    "D203",
+    "D213"
+]
 select = ["ALL"]
 
 [build-system]

@@ -1,11 +1,13 @@
 """Create Workflows by decorating module scope functions."""
-from types import ModuleType
-from typing import Callable
 
+from collections.abc import Callable
+from types import ModuleType
+
+from virtool_workflow.errors import WorkflowStepsError
 from virtool_workflow.workflow import Workflow
 
 
-def step(func: Callable = None, *, name: str | None = None) -> Callable:
+def step(func: Callable | None = None, *, name: str | None = None) -> Callable:
     """Mark a function as a workflow step function.
 
     :param func: the workflow step function
@@ -16,7 +18,7 @@ def step(func: Callable = None, *, name: str | None = None) -> Callable:
         return lambda _f: step(_f, name=name)
 
     func.__workflow_marker__ = "step"
-    func.__workflow_step_props__ = dict(name=name)
+    func.__workflow_step_props__ = {"name": name}
 
     return func
 
@@ -39,7 +41,7 @@ def collect(module: ModuleType) -> Workflow:
         if marked.__workflow_marker__ == "step":
             workflow.step(marked, **marked.__workflow_step_props__)
 
-    if len(workflow.steps) == 0:
-        raise ValueError(f"No workflow steps could be found in {module}")
+    if not workflow.steps:
+        raise WorkflowStepsError(str(module))
 
     return workflow

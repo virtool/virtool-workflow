@@ -10,10 +10,10 @@ from aiohttp import (
 from structlog import get_logger
 
 from virtool_workflow.errors import (
-    JobsAPIBadRequest,
-    JobsAPIConflict,
+    JobsAPIBadRequestError,
+    JobsAPIConflictError,
     JobsAPIForbidden,
-    JobsAPINotFound,
+    JobsAPINotFoundError,
     JobsAPIServerError,
 )
 
@@ -80,10 +80,10 @@ async def raise_exception_by_status_code(resp: ClientResponse):
     :raise JobsAPIServerError: the response status code is 500
     """
     status_exception_map = {
-        400: JobsAPIBadRequest,
+        400: JobsAPIBadRequestError,
         403: JobsAPIForbidden,
-        404: JobsAPINotFound,
-        409: JobsAPIConflict,
+        404: JobsAPINotFoundError,
+        409: JobsAPIConflictError,
         500: JobsAPIServerError,
     }
 

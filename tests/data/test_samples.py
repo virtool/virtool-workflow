@@ -5,9 +5,9 @@ from pydantic_factories import ModelFactory
 from pyfixtures import FixtureScope
 from virtool_core.models.samples import Quality
 
+from virtool_workflow.data.samples import WFNewSample, WFSample
+from virtool_workflow.errors import JobsAPIConflictError, JobsAPINotFoundError
 from virtool_workflow.pytest_plugin.data import Data
-from virtool_workflow.data.samples import WFSample, WFNewSample
-from virtool_workflow.errors import JobsAPINotFound, JobsAPIConflict
 
 QUALITY = {
     "bases": [
@@ -38,8 +38,7 @@ QUALITY = {
 
 
 class TestSample:
-    """
-    Tests for the sample fixture that provides sample data for analyses.
+    """Tests for the sample fixture that provides sample data for analyses.
 
     See ``TestNewSample`` for tests of the ``new_sample`` fixture, that is used for
     sample creation workflows.
@@ -54,8 +53,7 @@ class TestSample:
         scope: FixtureScope,
         work_path: Path,
     ):
-        """
-        Test that the sample fixture instantiates, contains the expected data, and
+        """Test that the sample fixture instantiates, contains the expected data, and
         downloads the sample files to the work path.
         """
         data.job.args["sample_id"] = data.sample.id
@@ -73,7 +71,8 @@ class TestSample:
             assert path == work_path / "reads" / file_name
 
             with open(path, "rb") as f1, open(
-                example_path / "sample" / file_name, "rb"
+                example_path / "sample" / file_name,
+                "rb",
             ) as f2:
                 assert f1.read() == f2.read()
 
@@ -82,7 +81,7 @@ class TestSample:
     async def test_not_found(self, data: Data, scope: FixtureScope):
         data.job.args["sample_id"] = "not_found"
 
-        with pytest.raises(JobsAPINotFound) as err:
+        with pytest.raises(JobsAPINotFoundError) as err:
             await scope.instantiate_by_key("sample")
 
         assert "Sample not found" in str(err)
@@ -90,7 +89,11 @@ class TestSample:
 
 class TestNewSample:
     async def test_ok(
-        self, data: Data, example_path: Path, scope: FixtureScope, work_path: Path
+        self,
+        data: Data,
+        example_path: Path,
+        scope: FixtureScope,
+        work_path: Path,
     ):
         data.job.args.update(
             {
@@ -107,7 +110,7 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         data.job.args["sample_id"] = data.new_sample.id
@@ -131,7 +134,8 @@ class TestNewSample:
 
         for file_name in ("reads_1.fq.gz", "reads_2.fq.gz"):
             with open(work_path / "uploads" / file_name, "rb") as f1, open(
-                example_path / "sample" / file_name, "rb"
+                example_path / "sample" / file_name,
+                "rb",
             ) as f2:
                 assert f1.read() == f2.read()
 
@@ -152,7 +156,7 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         new_sample = await scope.instantiate_by_key("new_sample")
@@ -166,8 +170,7 @@ class TestNewSample:
         assert data.new_sample.quality == Quality(**QUALITY)
 
     async def test_already_finalized(self, data: Data, scope: FixtureScope):
-        """
-        Test that the finalize method raises an error if the sample is already
+        """Test that the finalize method raises an error if the sample is already
         finalized.
         """
 
@@ -190,7 +193,7 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         data.new_sample.ready = True
@@ -198,12 +201,11 @@ class TestNewSample:
 
         new_sample = await scope.instantiate_by_key("new_sample")
 
-        with pytest.raises(JobsAPIConflict):
+        with pytest.raises(JobsAPIConflictError):
             await new_sample.finalize(QUALITY)
 
     async def test_delete(self, data: Data, scope: FixtureScope):
         """Test that the delete method deletes the sample."""
-
         data.job.args.update(
             {
                 "files": [
@@ -219,7 +221,7 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         new_sample: WFNewSample = await scope.instantiate_by_key("new_sample")
@@ -230,7 +232,6 @@ class TestNewSample:
 
     async def test_delete_not_found(self, data: Data, scope: FixtureScope):
         """Test that the delete method raises an error if the sample does not exist."""
-
         data.job.args.update(
             {
                 "files": [
@@ -246,14 +247,14 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         new_sample: WFNewSample = await scope.instantiate_by_key("new_sample")
 
         data.new_sample = None
 
-        with pytest.raises(JobsAPINotFound):
+        with pytest.raises(JobsAPINotFoundError):
             await new_sample.delete()
 
     async def test_delete_finalized(self, data: Data, scope: FixtureScope):
@@ -273,20 +274,23 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         new_sample: WFNewSample = await scope.instantiate_by_key("new_sample")
 
         data.new_sample.ready = True
 
-        with pytest.raises(JobsAPIConflict) as err:
+        with pytest.raises(JobsAPIConflictError) as err:
             await new_sample.delete()
 
         assert "Sample already finalized" in str(err)
 
     async def test_upload(
-        self, captured_uploads_path: Path, data: Data, scope: FixtureScope
+        self,
+        captured_uploads_path: Path,
+        data: Data,
+        scope: FixtureScope,
     ):
         """Test that reads can be uploaded to unfinalized samples."""
         data.job.args.update(
@@ -304,7 +308,7 @@ class TestNewSample:
                     },
                 ],
                 "sample_id": data.new_sample.id,
-            }
+            },
         )
 
         new_sample: WFNewSample = await scope.instantiate_by_key("new_sample")

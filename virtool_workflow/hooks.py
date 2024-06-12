@@ -1,5 +1,4 @@
-"""Hooks provide a way to do things when events happen during the workflow lifecycle.
-"""
+"""Hooks do things when events happen during the workflow lifecycle."""
 
 from virtool_workflow.runtime.hook import Hook
 
@@ -124,7 +123,7 @@ __all__ = [
 ]
 
 
-def cleanup_builtin_status_hooks():
+def cleanup_builtin_status_hooks() -> None:
     """Clear callbacks for built-in status hooks.
 
     This prevents carryover of hooks between tests. Carryover won't be encountered in
