@@ -1,12 +1,10 @@
 import asyncio
-import logging
 import signal
 import sys
 from asyncio import CancelledError
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
-import structlog
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from structlog import get_logger
 from virtool_core.models.job import JobState
@@ -41,7 +39,7 @@ from virtool_workflow.runtime.redis import (
     wait_for_cancellation,
 )
 from virtool_workflow.runtime.sentry import configure_sentry
-from virtool_workflow.utils import get_virtool_workflow_version
+from virtool_workflow.utils import configure_logs, get_virtool_workflow_version
 from virtool_workflow.workflow import Workflow
 
 logger = get_logger("runtime")
@@ -161,11 +159,14 @@ async def run_workflow(
 
     job = await acquire_job_by_id(config.jobs_api_connection_string, job_id)
 
-    async with api_client(
-        config.jobs_api_connection_string,
-        job.id,
-        job.key,
-    ) as api, FixtureScope() as scope:
+    async with (
+        api_client(
+            config.jobs_api_connection_string,
+            job.id,
+            job.key,
+        ) as api,
+        FixtureScope() as scope,
+    ):
         # These fixtures should not be used directly by the workflow. They are used
         # by other built-in fixtures.
         scope["_api"] = api
@@ -209,23 +210,7 @@ async def start_runtime(
 
     When a job ID is received, the runtime acquires the job from the jobs API and
     """
-    # configure_logs(dev)
-
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    structlog.configure(
-        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
-        processors=[
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.dev.ConsoleRenderer(colors=True, sort_keys=True),
-        ],
-    )
+    configure_logs(bool(sentry_dsn))
 
     logger.info(
         "found virtool-workflow",
@@ -242,7 +227,7 @@ async def start_runtime(
     async with Redis(redis_connection_string) as redis:
         try:
             job_id = await get_next_job_with_timeout(redis_list_name, redis, timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # This happens due to Kubernetes scheduling issues or job cancellations. It
             # is not an error.
             logger.warning("timed out while waiting for job id")

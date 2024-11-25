@@ -1,10 +1,16 @@
 import asyncio
+import logging
+import sys
 import tarfile
 from collections.abc import Callable
 from functools import wraps
 from importlib import metadata
 from inspect import iscoroutinefunction
 from pathlib import Path
+
+import structlog
+from structlog.processors import LogfmtRenderer
+from structlog_sentry import SentryProcessor
 
 
 def coerce_to_coroutine_function(func: Callable):
@@ -17,6 +23,42 @@ def coerce_to_coroutine_function(func: Callable):
         return func(*args, **kwargs)
 
     return _func
+
+
+def configure_logs(use_sentry: bool):
+    logging.basicConfig(
+        format="%(message)s",
+        stream=sys.stdout,
+        level=logging.INFO,
+    )
+
+    processors = [
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="%Y-%m-%dT%H:%M:%SZ"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+    ]
+
+    if use_sentry:
+        processors.append(
+            SentryProcessor(event_level=logging.WARNING, level=logging.INFO),
+        )
+
+    processors.append(
+        LogfmtRenderer(
+            key_order=["timestamp", "level", "logger", "event"],
+        ),
+    )
+
+    structlog.configure(
+        cache_logger_on_first_use=True,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        processors=processors,
+        wrapper_class=structlog.stdlib.BoundLogger,
+    )
 
 
 def get_virtool_workflow_version() -> str:

@@ -38,7 +38,8 @@ orjson = "^3.9.9"
 pydantic-factories = "^1.17.3"
 pyfixtures = "^1.0.0"
 sentry-sdk = "^2.3.1"
-virtool-core = "^14.0.0"
+virtool-core = "^14.0.4"
+structlog-sentry = "^2.2.1"
 
 [tool.poetry.scripts]
 run-workflow = "virtool_workflow.cli:cli_main"
