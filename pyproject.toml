@@ -34,18 +34,18 @@ packages = [
 ]
 
 [tool.poetry.group.dev.dependencies]
+piccolo-theme = "^0.22.0"
 pytest = "^7.4.2"
 pytest-aiohttp = "^1.0.0"
 pytest-asyncio = "^0.21.0"
 pytest-mock = "^3.10.0"
+pytest-structlog = "^0.6"
+ruff = "^0.4.6"
 sphinx = "^4.0.2"
-syrupy = "^3.0.5"
 sphinx-autobuild = "^2021.3.14"
 sphinx-nameko-theme = "^0.0.3"
-pytest-structlog = "^0.6"
 sphinx-toolbox = "^3.5.0"
-ruff = "^0.4.6"
-piccolo-theme = "^0.22.0"
+syrupy = "^3.0.5"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
