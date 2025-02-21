@@ -13,5 +13,5 @@ RUN poetry install --no-root
 COPY example/ example/
 COPY tests/ tests/
 COPY virtool_workflow/ virtool_workflow/
-RUN poetry install
+RUN poetry install --only-root
 COPY workflow.py .
