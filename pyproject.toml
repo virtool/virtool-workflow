@@ -1,35 +1,39 @@
-[tool.poetry]
+[project]
 name = "virtool-workflow"
-version = "0.0.0"
 description = "A framework for developing bioinformatics workflows for Virtool."
+version = "0.0.0"
 authors = [
-    "Ian Boyes",
-    "Blake Smith",
-    "Ryan Fang",
-    "Matt Curtis",
-    "Aman Monga",
-    "Bryce Davidson",
-    "Christine Wong Chong",
-    "Lilly Roberts",
-    "Markus Swoveland",
-    "Ryan Fang",
+    {name = "Ian Boyes"},
+    {name = "Reece Hoffman"},
+    {name = "Blake Smith"},
+    {name = "Ryan Fang"},
+    {name = "Matt Curtis"},
+    {name = "Aman Monga"},
+    {name = "Bryce Davidson"},
+    {name = "Christine Wong Chong"},
+    {name = "Lilly Roberts"},
+    {name = "Markus Swoveland"},
+    {name = "Ryan Fang"},
 ]
+dynamic = ["dependencies"]
 license = "MIT"
 maintainers = [
-    "Ian Boyes",
-    "Reece Hoffman"
+    {name = "Ian Boyes"},
+    {name = "Reece Hoffman"},
 ]
 readme = "README.md"
 repository = "https://github.com/virtool/virtool-workflow"
-classifiers = [
-    "Programming Language :: Python :: 3.12",
-]
+requires-python = "3.12.3"
+
+[projects.scripts]
+run-workflow = "virtool_workflow.cli:cli_main"
+
+[tool.poetry]
 packages = [
     { include = "virtool_workflow" },
 ]
 
 [tool.poetry.dependencies]
-python = "~3.12"
 aiofiles = "^0.7.0"
 aiohttp = "^3.8.1"
 biopython = "^1.81"
@@ -41,22 +45,19 @@ sentry-sdk = "^2.3.1"
 virtool-core = "^14.0.4"
 structlog-sentry = "^2.2.1"
 
-[tool.poetry.scripts]
-run-workflow = "virtool_workflow.cli:cli_main"
-
 [tool.poetry.group.dev.dependencies]
+piccolo-theme = "^0.22.0"
 pytest = "^7.4.2"
 pytest-aiohttp = "^1.0.0"
 pytest-asyncio = "^0.21.0"
 pytest-mock = "^3.10.0"
+pytest-structlog = "^0.6"
+ruff = "^0.4.6"
 sphinx = "^4.0.2"
-syrupy = "^3.0.5"
 sphinx-autobuild = "^2021.3.14"
 sphinx-nameko-theme = "^0.0.3"
-pytest-structlog = "^0.6"
 sphinx-toolbox = "^3.5.0"
-ruff = "^0.4.6"
-piccolo-theme = "^0.22.0"
+syrupy = "^3.0.5"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -72,7 +73,6 @@ exclude = [
     ".ruff_cache",
     "__pypackages__",
 ]
-target-version = "py312"
 
 [tool.ruff.lint]
 ignore = [
