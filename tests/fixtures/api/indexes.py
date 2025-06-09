@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from aiohttp.web import RouteTableDef, View, json_response, FileResponse
-from virtool_core.models.index import IndexFile
+from aiohttp.web import FileResponse, RouteTableDef, View, json_response
+from virtool.indexes.models import IndexFile
 
-from tests.fixtures.api.utils import generate_not_found, custom_dumps
+from tests.fixtures.api.utils import custom_dumps, generate_not_found
 from virtool_workflow.pytest_plugin.data import Data
 
 INDEX_FILE_NAMES = (
@@ -20,7 +20,9 @@ INDEX_FILE_NAMES = (
 
 
 def create_indexes_routes(
-    data: Data, example_path: Path, read_file_from_multipart
+    data: Data,
+    example_path: Path,
+    read_file_from_multipart,
 ) -> RouteTableDef:
     _uploaded_files = []
 
@@ -95,7 +97,8 @@ def create_indexes_routes(
                 )
 
             index_file = await read_file_from_multipart(
-                filename, await self.request.multipart()
+                filename,
+                await self.request.multipart(),
             )
 
             _uploaded_files.append(index_file["name"])

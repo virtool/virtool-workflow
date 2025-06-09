@@ -1,13 +1,14 @@
 import asyncio
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Coroutine
+from typing import Any
 
 from pyfixtures import fixture
 from structlog import get_logger
-from virtool_core.models.enums import LibraryType
-from virtool_core.models.job import Job
-from virtool_core.models.samples import Quality, Sample
+from virtool.jobs.models import Job
+from virtool.models.enums import LibraryType
+from virtool.samples.models import Quality, Sample
 
 from virtool_workflow.analysis.utils import ReadPaths
 from virtool_workflow.api.client import APIClient

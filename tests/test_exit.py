@@ -5,8 +5,8 @@ from pathlib import Path
 
 from pytest_structlog import StructuredLogCapture
 from structlog.testing import LogCapture
-from virtool_core.models.job import JobState, JobStatus
-from virtool_core.redis import Redis
+from virtool.jobs.models import JobState, JobStatus
+from virtool.redis import Redis
 
 from virtool_workflow import Workflow
 from virtool_workflow.pytest_plugin.data import Data

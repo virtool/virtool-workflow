@@ -1,6 +1,6 @@
 from pyfixtures import FixtureScope
 from syrupy import SnapshotAssertion
-from virtool_core.models.job import Job
+from virtool.jobs.models import Job
 
 from virtool_workflow.pytest_plugin.data import Data
 

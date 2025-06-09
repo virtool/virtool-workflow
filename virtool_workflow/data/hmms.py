@@ -1,4 +1,5 @@
 """A class and fixture for accessing Virtool HMM data for use in analysis workflows."""
+
 import asyncio
 import json
 from dataclasses import dataclass
@@ -8,8 +9,8 @@ from shutil import which
 
 import aiofiles
 from pyfixtures import fixture
-from virtool_core.models.hmm import HMM
-from virtool_core.utils import decompress_file
+from virtool.hmm.models import HMM
+from virtool.utils import decompress_file
 
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.runtime.run_subprocess import RunSubprocess

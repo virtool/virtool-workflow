@@ -1,12 +1,12 @@
 import asyncio
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Coroutine
 
 from pyfixtures import fixture
 from structlog import get_logger
-from virtool_core.models.job import Job
-from virtool_core.models.subtraction import (
+from virtool.jobs.models import Job
+from virtool.subtractions.models import (
     NucleotideComposition,
     Subtraction,
     SubtractionFile,

@@ -23,7 +23,7 @@ maintainers = [
 ]
 readme = "README.md"
 repository = "https://github.com/virtool/virtool-workflow"
-requires-python = "3.12.3"
+requires-python = ">=3.12.3,<3.13.0"
 
 [projects.scripts]
 run-workflow = "virtool_workflow.cli:cli_main"
@@ -42,13 +42,12 @@ orjson = "^3.9.9"
 pydantic-factories = "^1.17.3"
 pyfixtures = "^1.0.0"
 sentry-sdk = "^2.3.1"
-virtool-core = "^14.0.4"
 structlog-sentry = "^2.2.1"
+virtool = { git = "https://github.com/virtool/virtool.git", rev="080c395d7382a6386bfb3c4118fc758ee5ee8659" }
 
 [tool.poetry.group.dev.dependencies]
-piccolo-theme = "^0.22.0"
+piccolo-theme = "^0.24.0"
 pytest = "^7.4.2"
-pytest-aiohttp = "^1.0.0"
 pytest-asyncio = "^0.21.0"
 pytest-mock = "^3.10.0"
 pytest-structlog = "^0.6"
@@ -58,6 +57,7 @@ sphinx-autobuild = "^2021.3.14"
 sphinx-nameko-theme = "^0.0.3"
 sphinx-toolbox = "^3.5.0"
 syrupy = "^3.0.5"
+pytest-aiohttp = "^1.1.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

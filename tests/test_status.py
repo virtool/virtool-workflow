@@ -3,10 +3,10 @@ from datetime import datetime
 
 from syrupy import SnapshotAssertion
 from syrupy.filters import props
-from virtool_core.models.job import JobState, JobStatus
+from virtool.jobs.models import JobState, JobStatus
 
-from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import Workflow, hooks
+from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow.runtime.config import RunConfig
 from virtool_workflow.runtime.events import Events
 from virtool_workflow.runtime.run import run_workflow
@@ -21,7 +21,7 @@ async def test_ok(data: Data, run_config: RunConfig, snapshot: SnapshotAssertion
             progress=0,
             state=JobState.PREPARING,
             timestamp=datetime.now(),
-        )
+        ),
     ]
 
     @wf.step
@@ -59,7 +59,8 @@ async def test_ok(data: Data, run_config: RunConfig, snapshot: SnapshotAssertion
     assert on_success_called is True
 
     assert [s.dict() for s in data.job.status] == snapshot(
-        name="status", exclude=props("timestamp")
+        name="status",
+        exclude=props("timestamp"),
     )
 
 
@@ -70,7 +71,7 @@ async def test_error(data: Data, run_config: RunConfig, snapshot: SnapshotAssert
             progress=0,
             state=JobState.PREPARING,
             timestamp=datetime.now(),
-        )
+        ),
     ]
 
     wf = Workflow()
@@ -115,5 +116,6 @@ async def test_error(data: Data, run_config: RunConfig, snapshot: SnapshotAssert
     assert failure_hook_called is True
 
     assert [s.dict() for s in data.job.status] == snapshot(
-        name="status", exclude=props("timestamp", "traceback")
+        name="status",
+        exclude=props("timestamp", "traceback"),
     )

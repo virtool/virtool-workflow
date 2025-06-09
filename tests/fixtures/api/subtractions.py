@@ -1,28 +1,29 @@
 from pathlib import Path
 
-from aiohttp.web import RouteTableDef, json_response, View, Response
+from aiohttp.web import Response, RouteTableDef, View, json_response
 from aiohttp.web_fileresponse import FileResponse
-from virtool_core.models.subtraction import NucleotideComposition
+from virtool.subtractions.models import NucleotideComposition
 
 from tests.fixtures.api.utils import (
-    read_file_from_request,
-    generate_not_found,
     custom_dumps,
+    generate_not_found,
+    read_file_from_request,
 )
-from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 from virtool_workflow.pytest_plugin.data import Data
+from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 
 
 def create_subtractions_routes(
-    data: Data, example_path: Path, read_file_from_multipart
+    data: Data,
+    example_path: Path,
+    read_file_from_multipart,
 ):
     routes = RouteTableDef()
 
     @routes.view("/subtractions/{subtraction_id}")
     class SubtractionView(View):
         async def get(self):
-            """
-            Return the JSON representation of a subtraction that can be used for testing
+            """Return the JSON representation of a subtraction that can be used for testing
             analysis fixtures.
             """
             subtraction_id = self.request.match_info["subtraction_id"]
@@ -39,8 +40,7 @@ def create_subtractions_routes(
             return json_response(subtraction.dict(), status=200, dumps=custom_dumps)
 
         async def patch(self):
-            """
-            Finalize a subtraction with its ``gc`` and ``count`` field with the passed
+            """Finalize a subtraction with its ``gc`` and ``count`` field with the passed
             data. Set ``ready`` to ``true``.
             """
             subtraction_id = self.request.match_info["subtraction_id"]
@@ -58,12 +58,14 @@ def create_subtractions_routes(
 
             data.new_subtraction.count = request_json["count"]
             data.new_subtraction.gc = NucleotideComposition(
-                **{"n": 0.0, **request_json["gc"]}
+                **{"n": 0.0, **request_json["gc"]},
             )
             data.new_subtraction.ready = True
 
             return json_response(
-                data.new_subtraction.dict(), status=200, dumps=custom_dumps
+                data.new_subtraction.dict(),
+                status=200,
+                dumps=custom_dumps,
             )
 
         async def delete(self):

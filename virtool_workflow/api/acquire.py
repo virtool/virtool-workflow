@@ -2,7 +2,7 @@ import asyncio
 
 from aiohttp import ClientConnectionError, ClientSession, TCPConnector
 from structlog import get_logger
-from virtool_core.models.job import JobAcquired
+from virtool.jobs.models import JobAcquired
 
 from virtool_workflow.errors import (
     JobAlreadyAcquiredError,
