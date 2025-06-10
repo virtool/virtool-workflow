@@ -6,11 +6,11 @@ from pathlib import Path
 import aiofiles
 from pyfixtures import fixture
 from structlog import get_logger
-from virtool_core.models.analysis import Analysis
-from virtool_core.models.index import Index
-from virtool_core.models.job import Job
-from virtool_core.models.reference import ReferenceNested
-from virtool_core.utils import decompress_file
+from virtool.analyses.models import Analysis
+from virtool.indexes.models import Index
+from virtool.jobs.models import Job
+from virtool.references.models import ReferenceNested
+from virtool.utils import decompress_file
 
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.errors import MissingJobArgumentError

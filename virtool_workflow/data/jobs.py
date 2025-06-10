@@ -2,7 +2,7 @@ import traceback
 
 from pyfixtures import fixture
 from structlog import get_logger
-from virtool_core.models.job import Job, JobAcquired, JobState
+from virtool.jobs.models import JobAcquired, Job, JobState
 
 from virtool_workflow import Workflow, WorkflowStep
 from virtool_workflow.api.client import APIClient

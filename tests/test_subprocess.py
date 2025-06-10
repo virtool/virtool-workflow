@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from _pytest._py.path import LocalPath
 from structlog.testing import LogCapture
-from virtool_core.models.job import JobState, JobStatus
-from virtool_core.redis import Redis
+from virtool.jobs.models import JobStatus, JobState
+from virtool.redis import Redis
 
 from virtool_workflow import RunSubprocess, Workflow
 from virtool_workflow.errors import SubprocessFailedError

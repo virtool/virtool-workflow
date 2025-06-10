@@ -7,8 +7,8 @@ from pathlib import Path
 
 from pyfixtures import FixtureScope, runs_in_new_fixture_context
 from structlog import get_logger
-from virtool_core.models.job import JobState
-from virtool_core.redis import Redis
+from virtool.jobs.models import JobState
+from virtool.redis import Redis
 
 from virtool_workflow.api.acquire import acquire_job_by_id
 from virtool_workflow.api.client import api_client

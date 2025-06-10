@@ -1,9 +1,9 @@
 import asyncio
 from asyncio import CancelledError
-from typing import Callable
+from collections.abc import Callable
 
 from structlog import get_logger
-from virtool_core.redis import Redis
+from virtool.redis import Redis
 
 logger = get_logger("redis")
 
@@ -15,14 +15,15 @@ async def get_next_job_with_timeout(
     redis: Redis,
     timeout: int | None = None,
 ) -> str:
-    """Get the next job ID from a Redis list and raise a  :class:``Timeout`` error if one
-    is not found in ``timeout`` seconds.
+    """Get the next job ID from a Redis list.
+
+    Raise a  :class:``Timeout`` error if an ID is not found in ``timeout``
+    seconds.
 
     :param list_name: the name of the list to pop from
     :param redis: the Redis client
     :param timeout: seconds to wait before raising :class:``Timeout``
     :return: the next job ID
-
     """
     logger.info(
         "Waiting for a job",

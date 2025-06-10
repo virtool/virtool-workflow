@@ -1,14 +1,17 @@
 """Calculate trimming parameters which are passed the Skewer read trimming tool."""
+
 import hashlib
 import json
 
-from virtool_core.models.enums import LibraryType
+from virtool.models.enums import LibraryType
 
 from virtool_workflow.data.samples import WFSample
 
 
 def calculate_trimming_cache_key(
-    sample_id: str, trimming_parameters: dict, program: str = "skewer",
+    sample_id: str,
+    trimming_parameters: dict,
+    program: str = "skewer",
 ):
     """Compute a unique cache key.
 

@@ -4,20 +4,14 @@ from pathlib import Path
 
 import pytest
 from pydantic_factories import ModelFactory, Use
-from virtool_core.models.analysis import Analysis
-from virtool_core.models.index import Index, IndexNested
-from virtool_core.models.job import JobAcquired, JobMinimal, JobPing
-from virtool_core.models.ml import MLModelRelease
-from virtool_core.models.reference import Reference
-from virtool_core.models.samples import (
-    Sample,
-    SampleNested,
-)
-from virtool_core.models.subtraction import (
-    Subtraction,
-    SubtractionFile,
-    SubtractionNested,
-)
+from virtool.analyses.models import Analysis, AnalysisSample
+from virtool.indexes.models import Index, IndexNested
+from virtool.jobs.models import JobAcquired, JobMinimal, JobPing
+from virtool.ml.models import MLModelRelease
+from virtool.references.models import Reference, ReferenceNested
+from virtool.samples.models import Sample
+from virtool.samples.models_base import SampleNested
+from virtool.subtractions.models import Subtraction, SubtractionFile, SubtractionNested
 
 from virtool_workflow.pytest_plugin.utils import SUBTRACTION_FILENAMES
 
@@ -150,11 +144,11 @@ def data(
     reference.targets = []
 
     index = IndexFactory.build()
-    index.reference = Reference.parse_obj(reference)
+    index.reference = ReferenceNested.parse_obj(reference)
     index.ready = True
 
     new_index: Index = IndexFactory.build()
-    new_index.reference = Reference.parse_obj(reference)
+    new_index.reference = ReferenceNested.parse_obj(reference)
     new_index.files = []
     new_index.ready = False
 
@@ -183,10 +177,10 @@ def data(
     new_subtraction.ready = False
 
     analysis: Analysis = AnalysisFactory.build()
-    analysis.sample = SampleNested.parse_obj(sample)
+    analysis.sample = AnalysisSample.parse_obj(sample)
     analysis.workflow = "pathoscope_bowtie"
     analysis.index = IndexNested.parse_obj(index)
-    analysis.reference = Reference.parse_obj(reference)
+    analysis.reference = ReferenceNested.parse_obj(reference)
     analysis.subtractions = [SubtractionNested.parse_obj(subtraction)]
 
     return Data(

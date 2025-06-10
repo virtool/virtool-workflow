@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from pyfixtures import FixtureScope
-from virtool_core.models.job import Job
+from virtool.jobs.models import Job
 
 from virtool_workflow.data.subtractions import WFNewSubtraction, WFSubtraction
 from virtool_workflow.errors import JobsAPIConflictError

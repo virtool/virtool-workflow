@@ -1,4 +1,5 @@
 """A fixture and dataclass for working with machine learning models in workflows."""
+
 import asyncio
 import shutil
 from dataclasses import dataclass
@@ -6,7 +7,7 @@ from pathlib import Path
 
 from pyfixtures import fixture
 from structlog import get_logger
-from virtool_core.models.ml import MLModelRelease
+from virtool.ml.models import MLModelRelease
 
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.data.analyses import WFAnalysis

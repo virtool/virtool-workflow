@@ -1,6 +1,6 @@
 import arrow
-from aiohttp.web import json_response, View, RouteTableDef
-from virtool_core.models.job import JobStatus, JobState
+from aiohttp.web import RouteTableDef, View, json_response
+from virtool.jobs.models import JobState, JobStatus
 
 from tests.fixtures.api.utils import custom_dumps, generate_not_found
 from virtool_workflow.pytest_plugin.data import Data
@@ -13,19 +13,21 @@ def create_jobs_routes(data: Data):
     class JobView(View):
         async def patch(self):
             """Endpoint for testing job acquisition."""
-
             json = await self.request.json()
 
             if json.get("acquired") is not True:
                 return json_response(
-                    {"id": "bad_request", "message": "Bad request"}, status=400
+                    {"id": "bad_request", "message": "Bad request"},
+                    status=400,
                 )
 
             data.job.acquired = True
             data.job.status.append(
                 JobStatus(
-                    progress=0, state=JobState.PREPARING, timestamp=arrow.utcnow().naive
-                )
+                    progress=0,
+                    state=JobState.PREPARING,
+                    timestamp=arrow.utcnow().naive,
+                ),
             )
 
             return json_response(
@@ -59,8 +61,8 @@ def create_jobs_routes(data: Data):
             status = JobStatus(
                 **{
                     **(await self.request.json()),
-                    **{"timestamp": arrow.utcnow().naive.isoformat()},
-                }
+                    "timestamp": arrow.utcnow().naive.isoformat(),
+                },
             )
 
             data.job.status.append(status)

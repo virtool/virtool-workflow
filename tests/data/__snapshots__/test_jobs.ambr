@@ -1,7 +1,6 @@
 # name: test_ok[pydantic]
   dict({
     'acquired': False,
-    'archived': False,
     'args': dict({
       'item_id': 1211,
       'resource_id': 'foo',
@@ -19,15 +18,15 @@
       dict({
         'error': dict({
           'details': list([
-            'vhVGiBXJqoyUfQBjWTjz',
+            'hVGiBXJqoyUfQBjWTjzA',
           ]),
           'traceback': list([
-            'ACAdPsEbpDIRnZLXrjSy',
+            'CAdPsEbpDIRnZLXrjSyO',
           ]),
-          'type': 'OqopAJsorWvViTxsrhYk',
+          'type': 'qopAJsorWvViTxsrhYks',
         }),
-        'progress': 5931,
-        'stage': 'WyJLLiOEIvGOHLbiwHlJ',
+        'progress': 7819,
+        'stage': 'oeIvGWAWpCToZkEGjNjL',
         'state': <JobState.ERROR: 'error'>,
         'step_description': None,
         'step_name': None,

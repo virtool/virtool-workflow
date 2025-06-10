@@ -1,14 +1,15 @@
 """A fixture and class for representing the analysis associated with a workflow run."""
+
 from pathlib import Path
 from typing import Any
 
 from pyfixtures import fixture
-from virtool_core.models.analysis import Analysis, AnalysisSample
-from virtool_core.models.index import IndexNested
-from virtool_core.models.job import Job
-from virtool_core.models.ml import MLModelRelease
-from virtool_core.models.reference import ReferenceNested
-from virtool_core.models.subtraction import SubtractionNested
+from virtool.analyses.models import Analysis, AnalysisSample
+from virtool.indexes.models import IndexNested
+from virtool.jobs.models import JobNested
+from virtool.ml.models import MLModelRelease
+from virtool.references.models import ReferenceNested
+from virtool.subtractions.models import SubtractionNested
 
 from virtool_workflow.api.client import APIClient
 from virtool_workflow.files import VirtoolFileFormat
@@ -83,7 +84,7 @@ class WFAnalysis:
 @fixture
 async def analysis(
     _api: APIClient,
-    job: Job,
+    job: JobNested,
 ) -> WFAnalysis:
     """A :class:`.WFAnalysis` object that represents the analysis associated with the running
     workflow.

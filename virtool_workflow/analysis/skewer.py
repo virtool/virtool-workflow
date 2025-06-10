@@ -1,6 +1,7 @@
 """Utilities and a fixture for using `Skewer <https://github.com/relipmoc/skewer>`_ to
 trim reads.
 """
+
 import asyncio
 import os
 import shutil
@@ -12,7 +13,7 @@ from tempfile import mkdtemp
 from typing import Protocol
 
 from pyfixtures import fixture
-from virtool_core.models.enums import LibraryType
+from virtool.models.enums import LibraryType
 
 from virtool_workflow import RunSubprocess
 from virtool_workflow.analysis.utils import ReadPaths
@@ -108,7 +109,8 @@ class SkewerResult:
 
 
 def calculate_skewer_trimming_parameters(
-    sample: WFSample, min_read_length: int,
+    sample: WFSample,
+    min_read_length: int,
 ) -> SkewerConfiguration:
     """Calculates trimming parameters based on the library type, and minimum allowed trim length.
 
@@ -141,9 +143,11 @@ class SkewerRunner(Protocol):
     """A protocol describing callables that can be used to run Skewer."""
 
     async def __call__(
-        self, config: SkewerConfiguration, paths: ReadPaths, output_path: Path,
-    ) -> SkewerResult:
-        ...
+        self,
+        config: SkewerConfiguration,
+        paths: ReadPaths,
+        output_path: Path,
+    ) -> SkewerResult: ...
 
 
 @fixture
@@ -178,7 +182,9 @@ def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
         raise RuntimeError("skewer is not installed.")
 
     async def func(
-        config: SkewerConfiguration, read_paths: ReadPaths, output_path: Path,
+        config: SkewerConfiguration,
+        read_paths: ReadPaths,
+        output_path: Path,
     ):
         temp_path = Path(await asyncio.to_thread(mkdtemp, suffix="_virtool_skewer"))
 
@@ -219,7 +225,9 @@ def skewer(proc: int, run_subprocess: RunSubprocess) -> SkewerRunner:
         )
 
         read_paths = await asyncio.to_thread(
-            _rename_trimming_results, temp_path, output_path,
+            _rename_trimming_results,
+            temp_path,
+            output_path,
         )
 
         return SkewerResult(command, output_path, process, read_paths)

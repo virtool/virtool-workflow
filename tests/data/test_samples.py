@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic_factories import ModelFactory
 from pyfixtures import FixtureScope
-from virtool_core.models.samples import Quality
+from virtool.samples.models import Quality
 
 from virtool_workflow.data.samples import WFNewSample, WFSample
 from virtool_workflow.errors import JobsAPIConflictError, JobsAPINotFoundError
@@ -70,10 +70,13 @@ class TestSample:
 
             assert path == work_path / "reads" / file_name
 
-            with open(path, "rb") as f1, open(
-                example_path / "sample" / file_name,
-                "rb",
-            ) as f2:
+            with (
+                open(path, "rb") as f1,
+                open(
+                    example_path / "sample" / file_name,
+                    "rb",
+                ) as f2,
+            ):
                 assert f1.read() == f2.read()
 
             assert path.exists()
@@ -133,10 +136,13 @@ class TestNewSample:
         )
 
         for file_name in ("reads_1.fq.gz", "reads_2.fq.gz"):
-            with open(work_path / "uploads" / file_name, "rb") as f1, open(
-                example_path / "sample" / file_name,
-                "rb",
-            ) as f2:
+            with (
+                open(work_path / "uploads" / file_name, "rb") as f1,
+                open(
+                    example_path / "sample" / file_name,
+                    "rb",
+                ) as f2,
+            ):
                 assert f1.read() == f2.read()
 
     async def test_finalize(self, data: Data, scope: FixtureScope):

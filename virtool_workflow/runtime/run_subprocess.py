@@ -2,12 +2,13 @@
 
 import asyncio
 from asyncio.subprocess import Process
+from collections.abc import Callable, Coroutine
 from pathlib import Path
-from typing import Callable, Coroutine, Protocol
+from typing import Protocol
 
 from pyfixtures import fixture
 from structlog import get_logger
-from virtool_core.utils import timestamp
+from virtool.utils import timestamp
 
 from virtool_workflow.errors import SubprocessFailedError
 

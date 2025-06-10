@@ -1,12 +1,12 @@
 import tempfile
 from pathlib import Path
 
-from aiohttp.web import RouteTableDef, FileResponse, json_response, View
-from virtool_core.models.samples import Quality
+from aiohttp.web import FileResponse, RouteTableDef, View, json_response
+from virtool.samples.models import Quality
 
 from tests.fixtures.api.utils import (
-    generate_not_found,
     custom_dumps,
+    generate_not_found,
 )
 from virtool_workflow.pytest_plugin.data import Data
 
@@ -17,9 +17,7 @@ def create_samples_routes(data: Data, example_path: Path, read_file_from_multipa
     @routes.view("/samples/{sample_id}")
     class SampleView(View):
         async def get(self):
-            """
-            Get the JSON representation of a sample.
-            """
+            """Get the JSON representation of a sample."""
             sample_id = self.request.match_info["sample_id"]
 
             if sample_id not in (data.sample.id, data.new_sample.id):
