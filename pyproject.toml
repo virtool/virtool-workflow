@@ -25,7 +25,7 @@ readme = "README.md"
 repository = "https://github.com/virtool/virtool-workflow"
 requires-python = ">=3.12.3,<3.13.0"
 
-[projects.scripts]
+[project.scripts]
 run-workflow = "virtool_workflow.cli:cli_main"
 
 [tool.poetry]
