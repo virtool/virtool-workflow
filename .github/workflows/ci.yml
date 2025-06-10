@@ -12,14 +12,14 @@ on:
 
 jobs:
   commitlint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Commitlint
         uses: wagoid/commitlint-github-action@v5
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,14 +30,12 @@ jobs:
       - name: Compose Down
         run: docker compose down
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
-        with:
-          python-version: 3.12.3
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Poetry Build
@@ -45,12 +43,14 @@ jobs:
             poetry check
             poetry build
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     needs:
       - commitlint
       - build
       - test
+    outputs:
+      git-tag: ${{ steps.semantic.outputs.git-tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,8 +59,31 @@ jobs:
         with:
           node-version: 22
       - name: Install semantic-release
-        run: npm i semantic-release@^23.0.0 conventional-changelog-conventionalcommits@^7.0.0
-      - name: Release
+        run: npm i semantic-release@^23.0.8 @semantic-release/exec@v6.0.3 conventional-changelog-conventionalcommits@^7.0.0
+      - name: Run semantic-release
+        id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+  pypi:
+    runs-on: ubuntu-24.04
+    if: github.repository_owner == 'Virtool' && github.event_name == 'push' && needs.release.outputs.git-tag != ''
+    needs:
+      - release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.git-tag }}
+      - name: Setup Python
+        uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Update Version
+        run: poetry version ${{ steps.release.outputs.git-tag }} && poetry lock
+      - name: Build
+        run: poetry build
+      - name: Publish
+        run: poetry publish -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }}
