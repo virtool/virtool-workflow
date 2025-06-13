@@ -82,7 +82,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Update Version
-        run: poetry version ${{ steps.release.outputs.git-tag }} && poetry lock
+        run: poetry version ${{ needs.release.outputs.git-tag }} && poetry lock
       - name: Build
         run: poetry build
       - name: Publish
