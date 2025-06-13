@@ -9,7 +9,7 @@ from virtool_workflow.utils import get_virtool_workflow_version
 logger = get_logger("runtime")
 
 
-def configure_sentry(dsn: str):
+def configure_sentry(dsn: str | None) -> None:
     """Initialize Sentry for log aggregation."""
     if dsn:
         logger.info("initializing sentry", dsn=f"{dsn[:15]}...")

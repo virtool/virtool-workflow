@@ -184,11 +184,11 @@ async def run_workflow(
 
         # Set Sentry context with workflow metadata
         try:
-            with open("VERSION", "r") as f:
+            with open("VERSION") as f:
                 workflow_version = f.read().strip()
         except FileNotFoundError:
             workflow_version = "UNKNOWN"
-        
+
         set_workflow_context(job.workflow, job.id, workflow_version)
 
         async with create_work_path(config) as work_path:
