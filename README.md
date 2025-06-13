@@ -39,7 +39,6 @@ docker compose up -d
 
 # Run tests in the test container.
 docker compose exec test poetry run pytest
-
 ```
 
 Run specific tests like:

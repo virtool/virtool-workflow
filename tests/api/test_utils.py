@@ -1,11 +1,10 @@
-import logging
+from pytest_structlog import StructuredLogCapture
 
 from virtool_workflow.api.utils import retry
 
 
-async def test_retry(caplog):
+async def test_retry(log: StructuredLogCapture):
     """Test that the retry utility retries failing HTTP requests and logs the attempts."""
-    caplog.set_level(logging.INFO)
 
     class Retry:
         def __init__(self):
@@ -30,9 +29,4 @@ async def test_retry(caplog):
     assert obj.attempt == 2
     assert obj.args == ("hello",)
     assert obj.kwargs == {"this_is_a_test": True}
-
-    for record in caplog.records:
-        assert record.levelno == logging.INFO
-        assert (
-            record.msg == "Encountered ConnectionRefusedError. Retrying in 5 seconds."
-        )
+    assert log.has("Encountered ConnectionRefusedError. Retrying in 5 seconds.")
