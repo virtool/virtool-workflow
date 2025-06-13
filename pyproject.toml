@@ -43,7 +43,7 @@ pydantic-factories = "^1.17.3"
 pyfixtures = "^1.0.0"
 sentry-sdk = "^2.3.1"
 structlog-sentry = "^2.2.1"
-virtool = { git = "https://github.com/virtool/virtool.git", rev="080c395d7382a6386bfb3c4118fc758ee5ee8659" }
+virtool = "^31.1.3"
 
 [tool.poetry.group.dev.dependencies]
 piccolo-theme = "^0.24.0"
