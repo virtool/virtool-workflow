@@ -82,7 +82,7 @@ async def make_directory(path: Path):
 
 def untar(path: Path, target_path: Path):
     with tarfile.open(path, "r:gz") as tar:
-        tar.extractall(target_path)
+        tar.extractall(target_path, filter="data")
 
 
 def move_all_model_files(source_path: Path, target_path: Path):
