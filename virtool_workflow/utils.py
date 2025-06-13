@@ -32,10 +32,17 @@ def configure_logs(use_sentry: bool):
         level=logging.INFO,
     )
 
+    def normalize_log_level(logger, method_name, event_dict):
+        """Map EXCEPTION level to ERROR since logging module doesn't have EXCEPTION."""
+        if event_dict.get("level") == "EXCEPTION":
+            event_dict["level"] = "ERROR"
+        return event_dict
+
     processors = [
         structlog.stdlib.filter_by_level,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
+        normalize_log_level,
         structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%dT%H:%M:%SZ"),
         structlog.processors.StackInfoRenderer(),
