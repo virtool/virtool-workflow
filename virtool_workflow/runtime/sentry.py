@@ -26,3 +26,20 @@ def configure_sentry(dsn: str):
         )
     else:
         logger.info("sentry disabled because no dsn was provided")
+
+
+def set_workflow_context(
+    workflow_name: str,
+    job_id: str,
+    workflow_version: str | None = None,
+):
+    """Set workflow context for Sentry reporting."""
+    sentry_sdk.set_context(
+        "workflow",
+        {
+            "workflow_name": workflow_name,
+            "workflow_version": workflow_version,
+            "virtool_workflow_version": get_virtool_workflow_version(),
+            "job_id": job_id,
+        },
+    )
