@@ -12,18 +12,19 @@
       'pinged_at': datetime.datetime(2020, 1, 1, 1, 1, 1),
     }),
     'progress': 6380,
+    'retries': 2313,
     'stage': 'iPhGgaTklZTpXCJkWJYU',
     'state': <JobState.RUNNING: 'running'>,
     'status': list([
       dict({
         'error': dict({
           'details': list([
-            'hVGiBXJqoyUfQBjWTjzA',
+            'xZSYxzLypuhtZXGzreoO',
           ]),
           'traceback': list([
-            'CAdPsEbpDIRnZLXrjSyO',
+            'TsOOKINsKozOJpXHEaCn',
           ]),
-          'type': 'qopAJsorWvViTxsrhYks',
+          'type': 'IyQHPsHMRsRTJYXABiRW',
         }),
         'progress': 7819,
         'stage': 'oeIvGWAWpCToZkEGjNjL',
