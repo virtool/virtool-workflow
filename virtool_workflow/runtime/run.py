@@ -38,7 +38,7 @@ from virtool_workflow.runtime.redis import (
     get_next_job_with_timeout,
     wait_for_cancellation,
 )
-from virtool_workflow.runtime.sentry import configure_sentry
+from virtool_workflow.runtime.sentry import configure_sentry, set_workflow_context
 from virtool_workflow.utils import configure_logs, get_virtool_workflow_version
 from virtool_workflow.workflow import Workflow
 
@@ -181,6 +181,9 @@ async def run_workflow(
         scope["mem"] = config.mem
         scope["proc"] = config.proc
         scope["results"] = {}
+
+        # Set Sentry context with workflow metadata
+        set_workflow_context(job.workflow, job.id)
 
         async with create_work_path(config) as work_path:
             scope["work_path"] = work_path
