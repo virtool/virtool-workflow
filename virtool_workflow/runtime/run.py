@@ -183,13 +183,7 @@ async def run_workflow(
         scope["results"] = {}
 
         # Set Sentry context with workflow metadata
-        try:
-            with open("VERSION") as f:
-                workflow_version = f.read().strip()
-        except FileNotFoundError:
-            workflow_version = "UNKNOWN"
-
-        set_workflow_context(job.workflow, job.id, workflow_version)
+        set_workflow_context(job.workflow, job.id)
 
         async with create_work_path(config) as work_path:
             scope["work_path"] = work_path

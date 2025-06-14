@@ -31,9 +31,14 @@ def configure_sentry(dsn: str | None) -> None:
 def set_workflow_context(
     workflow_name: str,
     job_id: str,
-    workflow_version: str | None = None,
 ):
     """Set workflow context for Sentry reporting."""
+    try:
+        with open("VERSION") as f:
+            workflow_version = f.read().strip()
+    except FileNotFoundError:
+        workflow_version = "UNKNOWN"
+    
     sentry_sdk.set_context(
         "workflow",
         {
