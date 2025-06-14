@@ -33,18 +33,20 @@ class TestConfigureSentry:
         assert init_args["traces_sample_rate"] == 0.2
 
     def test_configure_sentry_without_dsn(self, mocker: MockerFixture) -> None:
+        """Test that Sentry is not initialized when DSN is not provided."""
         mock_sentry_sdk: MagicMock = mocker.patch(
             "virtool_workflow.runtime.sentry.sentry_sdk",
         )
-        """Test that Sentry is not initialized when DSN is not provided."""
+
         configure_sentry("")
+
         mock_sentry_sdk.init.assert_not_called()
 
     def test_configure_sentry_with_none_dsn(self, mocker: MockerFixture) -> None:
+        """Test that Sentry is not initialized when DSN is None."""
         mock_sentry_sdk: MagicMock = mocker.patch(
             "virtool_workflow.runtime.sentry.sentry_sdk",
         )
-        """Test that Sentry is not initialized when DSN is None."""
         configure_sentry(None)
         mock_sentry_sdk.init.assert_not_called()
 
@@ -53,7 +55,7 @@ class TestSetWorkflowContext:
     """Test the set_workflow_context function."""
 
     @pytest.mark.parametrize(
-        "version_content,expected_version",
+        ("version_content", "expected_version"),
         [
             ("1.2.3\n", "1.2.3"),
             ("  2.1.0-beta  \n", "2.1.0-beta"),
@@ -67,13 +69,13 @@ class TestSetWorkflowContext:
         version_content: str,
         expected_version: str,
     ) -> None:
+        """Test setting workflow context with version from file."""
         mock_sentry_sdk = mocker.patch(
             "virtool_workflow.runtime.sentry.sentry_sdk",
         )
         mock_get_version = mocker.patch(
             "virtool_workflow.runtime.sentry.get_virtool_workflow_version",
         )
-        """Test setting workflow context with version from file."""
         mock_get_version.return_value = "9.1.0"
 
         with patch("builtins.open", mock_open(read_data=version_content)):
@@ -93,13 +95,13 @@ class TestSetWorkflowContext:
         self,
         mocker: MockerFixture,
     ) -> None:
+        """Test setting workflow context when VERSION file doesn't exist."""
         mock_sentry_sdk = mocker.patch(
             "virtool_workflow.runtime.sentry.sentry_sdk",
         )
         mock_get_version = mocker.patch(
             "virtool_workflow.runtime.sentry.get_virtool_workflow_version",
         )
-        """Test setting workflow context when VERSION file doesn't exist."""
         mock_get_version.return_value = "9.1.0"
 
         with patch("builtins.open", side_effect=FileNotFoundError()):

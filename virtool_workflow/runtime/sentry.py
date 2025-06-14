@@ -38,7 +38,7 @@ def set_workflow_context(
             workflow_version = f.read().strip()
     except FileNotFoundError:
         workflow_version = "UNKNOWN"
-    
+
     sentry_sdk.set_context(
         "workflow",
         {
