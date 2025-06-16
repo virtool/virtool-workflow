@@ -1,7 +1,11 @@
 import time
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import (
+    ClientConnectionError,
+    ClientError,
+    ServerTimeoutError,
+)
 from pytest_structlog import StructuredLogCapture
 
 from virtool_workflow.api.utils import retry
@@ -119,11 +123,13 @@ class TestRetryWithParameters:
         "exception_type",
         [
             ClientError,
+            ClientConnectionError,
+            ConnectionError,
             ConnectionResetError,
-            OSError,
+            ServerTimeoutError,
         ],
     )
-    async def test_handles_various_exceptions(self, exception_type):
+    async def test_handles_various_exceptions(self, exception_type: type[Exception]):
         """Test that decorator handles various connection-related exceptions."""
         call_count = 0
 
