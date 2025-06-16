@@ -2,12 +2,9 @@ import asyncio
 from functools import wraps
 
 from aiohttp import (
-    ClientConnectorError,
     ClientError,
     ClientResponse,
     ContentTypeError,
-    ServerDisconnectedError,
-    ServerTimeoutError,
 )
 from structlog import get_logger
 
@@ -58,14 +55,8 @@ def retry(
                 try:
                     return await f(*args, **kwargs)
                 except (
-                    ClientConnectorError,
                     ClientError,
                     ConnectionError,
-                    ConnectionRefusedError,
-                    ConnectionResetError,
-                    OSError,
-                    ServerDisconnectedError,
-                    ServerTimeoutError,
                 ) as e:
                     last_exception = e
 
