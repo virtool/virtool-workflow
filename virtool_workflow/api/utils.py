@@ -36,9 +36,6 @@ def retry(
 ):
     """Retry the decorated function on connection errors.
 
-    This decorator can be used with or without parameters. When retry_on_connection_error
-    is provided, retry parameters take precedence.
-
     :param func: The function to decorate (when used without parentheses)
     :param max_retries: Maximum number of retry attempts before giving up (default: 5)
     :param base_delay: Base delay in seconds between retries (default: 5.0)
@@ -67,8 +64,8 @@ def retry(
                         )
                         raise
 
-                    # Use exponential backoff if base_delay != 5.0, otherwise use fixed
-                    # delay.
+                    # Use exponential backoff if base_delay != 5.0, otherwise use
+                    # fixed delay.
                     if base_delay == API_RETRY_BASE_DELAY:
                         delay = base_delay
                     else:
