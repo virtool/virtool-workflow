@@ -26,7 +26,7 @@ class APIClient:
             return await decode_json_response(resp)
 
     async def get_file(self, path: str, target_path: Path):
-        """Download the file at URL ``path`` to the local filesystem path ``target_path``."""
+        """Download the file at URL ``path`` to the local ``target_path``."""
         async with self.http.get(f"{self.jobs_api_connection_string}{path}") as resp:
             if resp.status != 200:
                 raise JobsAPIError(
