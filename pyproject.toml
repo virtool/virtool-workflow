@@ -57,7 +57,7 @@ ruff = "^0.11.13"
 sphinx = "^4.0.2"
 sphinx-autobuild = "^2024.10.3"
 sphinx-nameko-theme = "^0.0.3"
-sphinx-toolbox = "^3.5.0"
+sphinx-toolbox = "^4.0.0"
 syrupy = "^3.0.5"
 
 [tool.pytest.ini_options]
