@@ -8,7 +8,7 @@ from aiohttp import MultipartReader
 from virtool_workflow.runtime.config import RunConfig
 
 
-@pytest.fixture()
+@pytest.fixture
 def captured_uploads_path(tmpdir) -> Path:
     """File uploads to the testing API will be written here. Use this path to make
     assertions about the contents of uploaded files.
@@ -19,15 +19,16 @@ def captured_uploads_path(tmpdir) -> Path:
     return path
 
 
-@pytest.fixture()
+@pytest.fixture
 def example_path(virtool_workflow_example_path: Path) -> Path:
     """The path to example data files for virtool-workflow."""
     return virtool_workflow_example_path
 
 
-@pytest.fixture()
+@pytest.fixture
 def read_file_from_multipart(captured_uploads_path: Path):
     """Reads the file from a ``MultiPartReader`` and writes it to ``captured_uploads_path.
+
     Use this in testing API endpoints that accept file uploads.
     """
 
@@ -59,12 +60,12 @@ def read_file_from_multipart(captured_uploads_path: Path):
     return func
 
 
-@pytest.fixture()
+@pytest.fixture
 def redis_url(pytestconfig):
     return pytestconfig.getoption("redis_url")
 
 
-@pytest.fixture()
+@pytest.fixture
 def run_config(jobs_api_connection_string: str, work_path: Path) -> RunConfig:
     return RunConfig(
         dev=False,
@@ -75,7 +76,7 @@ def run_config(jobs_api_connection_string: str, work_path: Path) -> RunConfig:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def work_path(tmpdir) -> Path:
     """A temporary ``work_path`` for testing workflows."""
     path = Path(tmpdir) / "work"

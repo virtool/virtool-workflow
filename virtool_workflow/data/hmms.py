@@ -7,7 +7,6 @@ from functools import cached_property
 from pathlib import Path
 from shutil import which
 
-import aiofiles
 from pyfixtures import fixture
 from virtool.hmm.models import HMM
 from virtool.utils import decompress_file
@@ -84,25 +83,22 @@ async def hmms(
     hmms_path = work_path / "hmms"
     await asyncio.to_thread(hmms_path.mkdir, parents=True, exist_ok=True)
 
+    annotations_path = hmms_path / "annotations.json"
     compressed_annotations_path = hmms_path / "annotations.json.gz"
     await _api.get_file("/hmms/files/annotations.json.gz", compressed_annotations_path)
-
-    annotations_path = hmms_path / "annotations.json"
     await asyncio.to_thread(
         decompress_file,
         compressed_annotations_path,
         annotations_path,
         proc,
     )
+    annotations = await asyncio.to_thread(
+        lambda: [HMM(**hmm) for hmm in json.loads(annotations_path.read_text())],
+    )
 
     profiles_path = hmms_path / "profiles.hmm"
     await _api.get_file("/hmms/files/profiles.hmm", profiles_path)
-
-    async with aiofiles.open(annotations_path) as f:
-        annotations = [HMM(**hmm) for hmm in json.loads(await f.read())]
-
     p = await run_subprocess(["hmmpress", str(profiles_path)])
-
     if p.returncode != 0:
         raise RuntimeError("hmmpress command failed")
 
