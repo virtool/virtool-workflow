@@ -3,15 +3,18 @@ from pathlib import Path
 
 import aiofiles
 from aiohttp import BasicAuth, ClientSession
+from structlog import get_logger
 
 from virtool_workflow.api.utils import (
+    API_CHUNK_SIZE,
     decode_json_response,
     raise_exception_by_status_code,
+    retry,
 )
 from virtool_workflow.errors import JobsAPIError
 from virtool_workflow.files import VirtoolFileFormat
 
-CHUNK_SIZE = 1024 * 1024 * 2
+logger = get_logger("http")
 
 
 class APIClient:
@@ -19,12 +22,14 @@ class APIClient:
         self.http = http
         self.jobs_api_connection_string = jobs_api_connection_string
 
+    @retry
     async def get_json(self, path: str) -> dict:
         """Get the JSON response from the provided API ``path``."""
         async with self.http.get(f"{self.jobs_api_connection_string}{path}") as resp:
             await raise_exception_by_status_code(resp)
             return await decode_json_response(resp)
 
+    @retry
     async def get_file(self, path: str, target_path: Path):
         """Download the file at URL ``path`` to the local ``target_path``."""
         async with self.http.get(f"{self.jobs_api_connection_string}{path}") as resp:
@@ -34,11 +39,12 @@ class APIClient:
                 )
 
             async with aiofiles.open(target_path, "wb") as f:
-                async for chunk in resp.content.iter_chunked(CHUNK_SIZE):
+                async for chunk in resp.content.iter_chunked(API_CHUNK_SIZE):
                     await f.write(chunk)
 
             return target_path
 
+    @retry
     async def patch_json(self, path: str, data: dict) -> dict:
         """Make a patch request against the provided API ``path`` and return the response
         as a dictionary of decoded JSON.
@@ -54,6 +60,7 @@ class APIClient:
             await raise_exception_by_status_code(resp)
             return await decode_json_response(resp)
 
+    @retry
     async def post_file(
         self,
         path: str,
@@ -74,6 +81,7 @@ class APIClient:
         ) as response:
             await raise_exception_by_status_code(response)
 
+    @retry
     async def post_json(self, path: str, data: dict) -> dict:
         async with self.http.post(
             f"{self.jobs_api_connection_string}{path}",
@@ -82,6 +90,7 @@ class APIClient:
             await raise_exception_by_status_code(resp)
             return await decode_json_response(resp)
 
+    @retry
     async def put_file(
         self,
         path: str,
@@ -102,6 +111,7 @@ class APIClient:
         ) as response:
             await raise_exception_by_status_code(response)
 
+    @retry
     async def put_json(self, path: str, data: dict) -> dict:
         async with self.http.put(
             f"{self.jobs_api_connection_string}{path}",
@@ -110,6 +120,7 @@ class APIClient:
             await raise_exception_by_status_code(resp)
             return await decode_json_response(resp)
 
+    @retry
     async def delete(self, path: str) -> dict | None:
         """Make a delete request against the provided API ``path``."""
         async with self.http.delete(f"{self.jobs_api_connection_string}{path}") as resp:
