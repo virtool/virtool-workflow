@@ -1,11 +1,10 @@
 import asyncio
-import functools
+from functools import wraps
 
 from aiohttp import (
-    ClientConnectorError,
+    ClientError,
     ClientResponse,
     ContentTypeError,
-    ServerDisconnectedError,
 )
 from structlog import get_logger
 
@@ -19,40 +18,76 @@ from virtool_workflow.errors import (
 
 logger = get_logger("api")
 
+API_CHUNK_SIZE = 1024 * 1024 * 2
+"""The size of chunks to use when downloading files from the API in bytes."""
 
-def retry(func):
-    """Retry an API call five times when encountering the following exceptions:
-      * ``ConnectionRefusedError``.
-      * ``ClientConnectorError``.
-      * ``ServerDisconnectedError``.
+API_MAX_RETRIES = 5
+"""The maximum number of retries for API requests."""
 
-    These are probably due to transient issues in the cluster network.
+API_RETRY_BASE_DELAY = 5.0
+"""The base delay in seconds between retries for API requests."""
 
+
+def retry(
+    func=None,
+    *,
+    max_retries: int = API_MAX_RETRIES,
+    base_delay: float = API_RETRY_BASE_DELAY,
+):
+    """Retry the decorated function on connection errors.
+
+    :param func: The function to decorate (when used without parentheses)
+    :param max_retries: Maximum number of retry attempts before giving up (default: 5)
+    :param base_delay: Base delay in seconds between retries (default: 5.0)
     """
 
-    @functools.wraps(func)
-    async def wrapped(*args, **kwargs):
-        attempts = 0
+    def decorator(f):
+        @wraps(f)
+        async def wrapper(*args, **kwargs):
+            last_exception = None
 
-        try:
-            return await func(*args, **kwargs)
-        except (
-            ConnectionRefusedError,
-            ClientConnectorError,
-            ServerDisconnectedError,
-        ) as err:
-            if attempts == 5:
-                raise
+            log = logger.bind(func_name=f.__name__, max_retries=max_retries)
 
-            attempts += 1
-            get_logger("runtime").info(
-                f"Encountered {type(err).__name__}. Retrying in 5 seconds.",
-            )
-            await asyncio.sleep(5)
+            for attempt in range(max_retries + 1):
+                try:
+                    return await f(*args, **kwargs)
+                except (
+                    ClientError,
+                    ConnectionError,
+                ) as e:
+                    last_exception = e
 
-            return await func(*args, **kwargs)
+                    if attempt == max_retries:
+                        log.warning(
+                            "max retries reached for function",
+                            exception=str(e),
+                        )
+                        raise
 
-    return wrapped
+                    # Use exponential backoff if base_delay != 5.0, otherwise use
+                    # fixed delay.
+                    if base_delay == API_RETRY_BASE_DELAY:
+                        delay = base_delay
+                    else:
+                        delay = base_delay * (2**attempt)
+
+                    log.info(
+                        "retrying after connection error",
+                        exception=str(e),
+                        retries=attempt,
+                        retrying_in=delay,
+                    )
+
+                    await asyncio.sleep(delay)
+
+            raise last_exception
+
+        return wrapper
+
+    if func is None:
+        return decorator
+
+    return decorator(func)
 
 
 async def decode_json_response(resp: ClientResponse) -> dict | list | None:
@@ -103,7 +138,6 @@ async def raise_exception_by_status_code(resp: ClientResponse):
 
         if resp.status in status_exception_map:
             raise status_exception_map[resp.status](message)
-        else:
-            raise ValueError(
-                f"Status code {resp.status} not handled for response\n {resp}",
-            )
+        raise ValueError(
+            f"Status code {resp.status} not handled for response\n {resp}",
+        )
