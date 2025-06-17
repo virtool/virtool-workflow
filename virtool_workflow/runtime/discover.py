@@ -88,7 +88,7 @@ def import_module_from_file(module_name: str, path: Path) -> ModuleType:
     spec = spec_from_file_location(module_name, path)
     if spec is None:
         raise ImportError(f"could not import {path}")
-    
+
     module = module_from_spec(spec)
     if spec.loader is None:
         raise ImportError(f"could not load {path}")
