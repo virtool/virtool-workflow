@@ -18,14 +18,14 @@ pycares = ">=4.0.0"
 
 [[package]]
 name = "aiofiles"
-version = "0.7.0"
+version = "24.1.0"
 description = "File support for asyncio."
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "aiofiles-0.7.0-py3-none-any.whl", hash = "sha256:c67a6823b5f23fcab0a2595a289cec7d8c863ffcb4322fb8cd6b90400aedfdbc"},
-    {file = "aiofiles-0.7.0.tar.gz", hash = "sha256:a1c4fc9b2ff81568c83e21392a82f344ea9d23da906e4f6a52662764545e19d4"},
+    {file = "aiofiles-24.1.0-py3-none-any.whl", hash = "sha256:b4ec55f4195e3eb5d7abd1bf7e061763e864dd4954231fb8539a0ef8bb8260e5"},
+    {file = "aiofiles-24.1.0.tar.gz", hash = "sha256:22a075c9e5a3810f0c2e48f3008c94d68c65d763b9b03857924c99e57355166c"},
 ]
 
 [[package]]
@@ -3968,4 +3968,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.3,<3.13.0"
-content-hash = "9609cbffb3fadd8bdf7243e829b69f3b0feb5943d6617657807851941d127d5a"
+content-hash = "ba5e3d1c4b051e9fed8fa03232d51b1ff810873985cdae02ca25f9c82c70cd67"
