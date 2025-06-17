@@ -34,7 +34,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-aiofiles = "^0.7.0"
+aiofiles = "^24.1.0"
 aiohttp = "^3.8.1"
 biopython = "^1.81"
 click = "^8.2.1"

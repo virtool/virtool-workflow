@@ -3,7 +3,6 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-import aiofiles
 from pyfixtures import fixture
 from structlog import get_logger
 from virtool.analyses.models import Analysis
@@ -245,8 +244,7 @@ async def index(
 
     log.info("decompressed reference otus json")
 
-    async with aiofiles.open(json_path) as f:
-        data = json.loads(await f.read())
+    data = await asyncio.to_thread(lambda: json.loads(json_path.read_text()))
 
     sequence_lengths = {}
     sequence_otu_map = {}
