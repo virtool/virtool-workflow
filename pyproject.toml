@@ -43,7 +43,7 @@ pydantic-factories = "^1.17.3"
 pyfixtures = "^1.0.0"
 sentry-sdk = "^2.30.0"
 structlog-sentry = "^2.2.1"
-virtool = "^31.8.0"
+virtool = "^31.8.2"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.16.1"
