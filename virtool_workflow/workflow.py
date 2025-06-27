@@ -1,4 +1,5 @@
 """Main definitions for Virtool Workflows."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -9,13 +10,15 @@ from virtool_workflow.utils import coerce_to_coroutine_function
 
 @dataclass
 class Workflow:
-    """A step-wise, long-running operation.
-    """
+    """A step-wise, long-running operation."""
 
     steps: list[WorkflowStep] = field(default_factory=list)
 
     def step(
-        self, step: Optional[Callable] = None, *, name: str | None = None,
+        self,
+        step: Optional[Callable] = None,
+        *,
+        name: str | None = None,
     ) -> Callable:
         """Decorator for adding a step to the workflow."""
         if step is None:

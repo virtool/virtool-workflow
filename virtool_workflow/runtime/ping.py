@@ -1,4 +1,5 @@
 """Ping the API to keep the job alive."""
+
 import asyncio
 from contextlib import asynccontextmanager
 

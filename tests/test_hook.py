@@ -46,8 +46,7 @@ async def test_hook_with_fixtures():
 
 
 async def test_failure_behaviour():
-    class SpecificError(Exception):
-        ...
+    class SpecificError(Exception): ...
 
     @example_hook
     def raise_error():

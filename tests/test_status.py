@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 
+from structlog import get_logger
 from syrupy import SnapshotAssertion
 from syrupy.filters import props
 from virtool.jobs.models import JobState, JobStatus
@@ -54,7 +55,7 @@ async def test_ok(data: Data, run_config: RunConfig, snapshot: SnapshotAssertion
 
         assert data.job.status[-1].state == JobState.COMPLETE
 
-    await run_workflow(run_config, data.job.id, wf, Events())
+    await run_workflow(run_config, data.job.id, wf, Events(), get_logger("test"))
 
     assert on_success_called is True
 
@@ -110,6 +111,7 @@ async def test_error(data: Data, run_config: RunConfig, snapshot: SnapshotAssert
         data.job.id,
         wf,
         Events(),
+        get_logger("test"),
     )
 
     assert error_hook_called is True

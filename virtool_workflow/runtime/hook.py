@@ -1,4 +1,5 @@
 """The :class:`Hook` class is used to hook into the workflow lifecycle."""
+
 from __future__ import annotations
 
 from asyncio import gather
@@ -119,7 +120,8 @@ class Hook:
                 return await callback(*args, **kwargs)
 
         results = await gather(
-            *[call_callback(callback) for callback in callbacks], return_exceptions=True,
+            *[call_callback(callback) for callback in callbacks],
+            return_exceptions=True,
         )
 
         for error in results:

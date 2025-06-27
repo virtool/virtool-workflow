@@ -42,8 +42,6 @@ from virtool_workflow.runtime.sentry import configure_sentry, set_workflow_conte
 from virtool_workflow.utils import configure_logs, get_virtool_workflow_version
 from virtool_workflow.workflow import Workflow
 
-logger = get_logger("runtime")
-
 
 def configure_status_hooks():
     """Configure built-in job status hooks.
@@ -73,11 +71,13 @@ def configure_status_hooks():
         await push_status()
 
 
-async def execute(workflow: Workflow, scope: FixtureScope, events: Events):
+async def execute(workflow: Workflow, scope: FixtureScope, events: Events, logger):
     """Execute a workflow.
 
     :param workflow: The workflow to execute
     :param scope: The :class:`FixtureScope` to use for fixture injection
+    :param events: The events object for cancellation/termination
+    :param logger: The configured logger instance
 
     """
     await on_workflow_start.trigger(scope)
@@ -151,6 +151,7 @@ async def run_workflow(
     job_id: str,
     workflow: Workflow,
     events: Events,
+    logger,
 ):
     # Configure hooks here so that they can be tested when using `run_workflow`.
     configure_status_hooks()
@@ -189,7 +190,7 @@ async def run_workflow(
             scope["work_path"] = work_path
 
             async with ping_periodically(api, job_id):
-                await execute(workflow, scope, events)
+                await execute(workflow, scope, events, logger)
                 cleanup_builtin_status_hooks()
 
 
@@ -215,6 +216,7 @@ async def start_runtime(
     """
     configure_logs(bool(sentry_dsn))
 
+    logger = get_logger("runtime")
     logger.info(
         "found virtool-workflow",
         version=get_virtool_workflow_version(),
@@ -250,6 +252,7 @@ async def start_runtime(
             job_id,
             workflow,
             events,
+            logger,
         ),
     )
 

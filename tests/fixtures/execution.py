@@ -8,8 +8,6 @@ from virtool_workflow.runtime.hook import Hook
 import_module("virtool_workflow.data")
 
 
-
-
 @pytest.fixture
 def clear_hooks():
     """Temporarily clear hooks for a test."""
