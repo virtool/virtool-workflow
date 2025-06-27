@@ -215,7 +215,7 @@ async def start_runtime(
     When a job ID is received, the runtime acquires the job from the jobs API and
     """
     configure_logs(bool(sentry_dsn))
-    
+
     logger = get_logger("runtime")
     logger.info(
         "found virtool-workflow",

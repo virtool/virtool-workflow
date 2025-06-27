@@ -1,4 +1,5 @@
 """Utilities and fixtures for running FastQC."""
+
 from __future__ import annotations
 
 import asyncio
@@ -424,8 +425,7 @@ def _parse_fastqc(fastqc_path: Path, output_path: Path) -> dict:
 class FastQCRunner(Protocol):
     """A protocol describing callables that can be used to run FastQC."""
 
-    async def __call__(self, paths: ReadPaths, output_path: Path) -> dict:
-        ...
+    async def __call__(self, paths: ReadPaths, output_path: Path) -> dict: ...
 
 
 @fixture

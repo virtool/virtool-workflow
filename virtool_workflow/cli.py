@@ -1,4 +1,5 @@
 """Command Line Interface to virtool_workflow"""
+
 import asyncio
 from pathlib import Path
 

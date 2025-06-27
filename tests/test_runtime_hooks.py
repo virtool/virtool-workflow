@@ -13,8 +13,7 @@ from virtool_workflow.runtime.run import run_workflow
 
 @pytest.fixture
 def success_workflow():
-    def dummy_step():
-        ...
+    def dummy_step(): ...
 
     workflow = Workflow()
 
