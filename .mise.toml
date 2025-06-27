@@ -1,0 +1,38 @@
+[tools]
+python = "3.12"
+poetry = "latest"
+
+[tasks.test-setup]
+description = "Build test Docker image"
+run = "docker compose build test"
+
+[tasks.test]
+description = "Run tests in Docker (optionally specify file/pattern)"
+depends = ["test-setup"]
+run = "docker compose up -d && docker compose exec test poetry run pytest ${1:-}"
+
+[tasks.test-watch]
+description = "Run tests in watch mode"
+depends = ["test-setup"]
+run = "./scripts/test-docker.sh --watch"
+
+[tasks.test-shell]
+description = "Interactive shell in test container"
+depends = ["test-setup"]
+run = "docker compose up -d && docker compose exec test bash"
+
+[tasks.test-clean]
+description = "Clean up test Docker resources"
+run = "docker compose down && docker compose rm -f"
+
+[tasks.lint]
+description = "Run linting"
+run = "poetry run ruff check"
+
+[tasks.typecheck]
+description = "Run type checking"
+run = "poetry run mypy virtool_workflow"
+
+[tasks.format]
+description = "Format code"
+run = "poetry run ruff format"
