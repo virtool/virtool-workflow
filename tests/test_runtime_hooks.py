@@ -2,6 +2,7 @@ import asyncio
 from contextlib import suppress
 
 import pytest
+from structlog import get_logger
 
 from virtool_workflow.pytest_plugin.data import Data
 from virtool_workflow import hooks, Workflow
@@ -53,7 +54,7 @@ async def test_success(clear_hooks, data: Data, run_config: RunConfig):
         nonlocal finish_called
         finish_called = True
 
-    await run_workflow(run_config, data.job.id, wf, Events())
+    await run_workflow(run_config, data.job.id, wf, Events(), get_logger("test"))
 
     assert success_called
     assert not error_called
@@ -87,7 +88,7 @@ async def test_error(clear_hooks, data: Data, run_config: RunConfig):
         raise ValueError("test error")
 
     with suppress(Exception):
-        await run_workflow(run_config, data.job.id, wf, Events())
+        await run_workflow(run_config, data.job.id, wf, Events(), get_logger("test"))
 
     assert failure_called
     assert finish_called
