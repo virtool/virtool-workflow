@@ -41,7 +41,7 @@ click = "^8.2.1"
 orjson = "^3.9.9"
 pydantic-factories = "^1.17.3"
 pyfixtures = "^1.0.0"
-sentry-sdk = "^2.32.0"
+sentry-sdk = "^2.33.2"
 structlog-sentry = "^2.2.1"
 virtool = "^31.9.0"
 
