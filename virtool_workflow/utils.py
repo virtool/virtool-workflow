@@ -25,6 +25,18 @@ def coerce_to_coroutine_function(func: Callable):
     return _func
 
 
+def normalize_log_level(
+    _logger: object,
+    method_name: str,
+    event_dict: dict[str, object],
+) -> dict[str, object]:
+    """Map exception method calls to error level since logging module doesn't have EXCEPTION level."""
+    if event_dict.get("level") == "exception":
+        event_dict["level"] = "error"
+    
+    return event_dict
+
+
 def configure_logs(use_sentry: bool):
     logging.basicConfig(
         format="%(message)s",
@@ -32,29 +44,11 @@ def configure_logs(use_sentry: bool):
         level=logging.INFO,
     )
 
-    def add_log_level_with_exception_fix(
-        _logger: object, method_name: str, event_dict: dict[str, object]
-    ) -> dict[str, object]:
-        """Add log level to event dict, mapping 'exception' method to 'error' level."""
-        if method_name == "exception":
-            event_dict["level"] = "error"
-        else:
-            event_dict["level"] = method_name
-        return event_dict
-
-    def normalize_log_level(
-        _logger: object, _method_name: str, event_dict: dict[str, object]
-    ) -> dict[str, object]:
-        """Map EXCEPTION level to ERROR since logging module doesn't have EXCEPTION."""
-        if event_dict.get("level") == "EXCEPTION":
-            event_dict["level"] = "ERROR"
-        return event_dict
-
     processors = [
         structlog.stdlib.filter_by_level,
-        structlog.stdlib.add_logger_name,
-        add_log_level_with_exception_fix,
+        structlog.stdlib.add_log_level,
         normalize_log_level,
+        structlog.stdlib.add_logger_name,
         structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%dT%H:%M:%SZ"),
         structlog.processors.StackInfoRenderer(),
