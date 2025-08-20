@@ -27,13 +27,16 @@ def coerce_to_coroutine_function(func: Callable):
 
 def normalize_log_level(
     _logger: object,
-    method_name: str,
+    _method_name: str,
     event_dict: dict[str, object],
 ) -> dict[str, object]:
-    """Map exception method calls to error level since logging module doesn't have EXCEPTION level."""
+    """Map exception method calls to error level.
+
+    The logging module doesn't have EXCEPTION level.
+    """
     if event_dict.get("level") == "exception":
         event_dict["level"] = "error"
-    
+
     return event_dict
 
 
